@@ -7,7 +7,6 @@ import {TimelineGroupLabel} from '../../components/timeline/TimelineGroupLabel';
 import {useRobartState} from '../../state/useRobartState';
 import {useUIState} from '../../state/useUIState';
 import {RobotManagerModal} from '../robotManager/RobotManagerModal';
-import {TimelineEditModeButtons} from './TimelineEditModeButtons';
 import {TimelineSimulationButtons} from './TimelineSimulationButtons';
 import React, {useEffect} from 'react';
 import {AddTimelineGroupLabel, RemoveTimelineGroupLabel} from './addTimelineGroupLabel';
@@ -22,7 +21,6 @@ export const Timeline = () => {
 	return (
 		<div className="flex h-full w-full flex-col gap-2 rounded bg-blue-100">
 			<div className="flex">
-				<TimelineEditModeButtons />
 				<div className="flex flex-grow" />
 				<div className="flex gap-3 pt-2 pr-3">
 					<TimelineSimulationButtons />

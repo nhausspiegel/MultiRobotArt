@@ -70,10 +70,8 @@ export type TimelineGroupState = {
 	duration: number;
 };
 
-export type TimelineModes = 'ADD' | 'ERASE' | 'MOVE';
 export type TimelineState = {
 	groups: Record<string, TimelineGroupState>;
-	mode: TimelineModes;
 	scale: number;
 };
 
@@ -124,7 +122,6 @@ export type TimelineActions = {
 	addRobotToGroup: (groupId: string, robotId: string) => void;
 	removeRobotFromGroup: (groupId: string, robotId: string) => void;
 	updateBlockInTimeline: (groupId: string, itemId: string, startTime: number) => void;
-	setTimelineMode: (mode: TimelineModes) => void;
 	removeGroups: (groupsToRemove: string[]) => void;
 };
 
@@ -194,7 +191,6 @@ const defaultRobartState: MRAState = {
 	projectName: 'New Robart Project',
 	timelineState: {
 		scale: 1,
-		mode: 'ADD',
 		groups: {
 			groupAllCFs: {
 				id: 'groupAllCFs',
@@ -537,9 +533,6 @@ export const useRobartState = create<MRAState & MRAActions>()(
 						delete newRobots[id];
 
 						set({robots: newRobots});
-					},
-					setTimelineMode: (mode) => {
-						set({timelineState: {...get().timelineState, mode}});
 					},
 					removeTimelineItem: (groupId, itemId) => {
 						const newItems = {...get().timelineState.groups[groupId].items};

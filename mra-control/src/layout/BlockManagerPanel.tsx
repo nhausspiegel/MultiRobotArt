@@ -47,9 +47,16 @@ export const BlockManagerPanel = () => {
 			</div>
 			<div className="flex flex-wrap gap-2 p-2">
 				{blocks.map((b) => (
-					<div 
+					<div
 						key={b.id}
 						className={`flex ${selectedBlockId === b.id ? 'border-4 border-cyan-500 rounded-lg' : ''}`}
+						draggable
+						onDragStart={(e) => {
+							e.dataTransfer.setData('text/plain', b.id);
+							e.dataTransfer.effectAllowed = 'copy';
+							// The timeline's drop preview reads the selected block (drag data is unreadable until drop)
+							if (selectedBlockId !== b.id) setEditingBlock(b.id);
+						}}
 					>
 						<Button 
 							onClick={() => {
