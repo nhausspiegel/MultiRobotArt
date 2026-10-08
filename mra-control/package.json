@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://robot-art-webapp.github.io/MultiRobotArt/",
+  "homepage": "https://nhausspiegel.github.io/MultiRobotArt/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

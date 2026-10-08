@@ -15,13 +15,9 @@ To run the project, you should just need to do the following:
 
 ## Webapp Deployment
 
-The webapp is currently deployed at https://robot-art-webapp.github.io/MultiRobotArt/ by the github account robot-art-webapp. To deploy, follow the following pipeline (assuming access to the deployment repo):
+The webapp is deployed at https://nhausspiegel.github.io/MultiRobotArt/.
 
-1. Commit and update the `deployment` branch with your local changes.
-2. Tag your updating commit with a version number/date/helpful note.
-3. build for deployment with `npm run deploy`
-4. Open https://github.com/robot-art-webapp/MultiRobotArt/tree/gh-pages and Sync Fork
-5. Verify that the changes have taken effect and no new bugs are introduced.
+Every push to `main` runs `.github/workflows/deploy.yml`, which builds `mra-control` and publishes it to the `gh-pages` branch. To deploy by hand instead, run `npm run deploy` inside `mra-control`.
 
 ## Adding or Modifying a New Trajectory Block
 
