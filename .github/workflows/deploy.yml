@@ -25,7 +25,8 @@ jobs:
           node-version: 22
       # package-lock.json is gitignored, so install fresh instead of npm ci
       - run: npm install --no-audit --no-fund
-      - run: >-
-          npm run deploy --
-          -u "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
-          -r "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+      # gh-pages' -u parser rejects "[bot]", so it reads the committer from git config
+      - run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - run: npm run deploy -- -r "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
