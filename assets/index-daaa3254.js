@@ -74834,7 +74834,6 @@ const defaultRobartState = {
   projectName: "New Robart Project",
   timelineState: {
     scale: 1,
-    mode: "ADD",
     groups: {
       groupAllCFs: {
         id: "groupAllCFs",
@@ -75131,9 +75130,6 @@ const useRobartState = create$2()(
             const newRobots = { ...get().robots };
             delete newRobots[id2];
             set({ robots: newRobots });
-          },
-          setTimelineMode: (mode) => {
-            set({ timelineState: { ...get().timelineState, mode } });
           },
           removeTimelineItem: (groupId2, itemId) => {
             const newItems = { ...get().timelineState.groups[groupId2].items };
@@ -82319,11 +82315,6 @@ var faPause = {
   iconName: "pause",
   icon: [320, 512, [9208], "f04c", "M48 64C21.5 64 0 85.5 0 112V400c0 26.5 21.5 48 48 48H80c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zm192 0c-26.5 0-48 21.5-48 48V400c0 26.5 21.5 48 48 48h32c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H240z"]
 };
-var faArrowsLeftRight = {
-  prefix: "fas",
-  iconName: "arrows-left-right",
-  icon: [512, 512, ["arrows-h"], "f07e", "M406.6 374.6l96-96c12.5-12.5 12.5-32.8 0-45.3l-96-96c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224l-293.5 0 41.4-41.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-96 96c-12.5 12.5-12.5 32.8 0 45.3l96 96c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 288l293.5 0-41.4 41.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0z"]
-};
 var faArrowsRotate = {
   prefix: "fas",
   iconName: "arrows-rotate",
@@ -82354,11 +82345,6 @@ var faUpload = {
   prefix: "fas",
   iconName: "upload",
   icon: [512, 512, [], "f093", "M288 109.3V352c0 17.7-14.3 32-32 32s-32-14.3-32-32V109.3l-73.4 73.4c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l128-128c12.5-12.5 32.8-12.5 45.3 0l128 128c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L288 109.3zM64 352H192c0 35.3 28.7 64 64 64s64-28.7 64-64H448c35.3 0 64 28.7 64 64v32c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V416c0-35.3 28.7-64 64-64zM432 456a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"]
-};
-var faEraser = {
-  prefix: "fas",
-  iconName: "eraser",
-  icon: [512, 512, [], "f12d", "M258.7 57.4L25.4 290.7c-25 25-25 65.5 0 90.5l80 80c12 12 28.3 18.7 45.3 18.7H256h9.4H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H355.9L486.6 285.3c25-25 25-65.5 0-90.5L349.3 57.4c-25-25-65.5-25-90.5 0zM265.4 416H256l-105.4 0-80-80L195.3 211.3 332.7 348.7 265.4 416z"]
 };
 var faPlay = {
   prefix: "fas",
@@ -82443,6 +82429,13 @@ const BlockManagerPanel = () => {
       "div",
       {
         className: `flex ${selectedBlockId === b2.id ? "border-4 border-cyan-500 rounded-lg" : ""}`,
+        draggable: true,
+        onDragStart: (e2) => {
+          e2.dataTransfer.setData("text/plain", b2.id);
+          e2.dataTransfer.effectAllowed = "copy";
+          if (selectedBlockId !== b2.id)
+            setEditingBlock(b2.id);
+        },
         children: /* @__PURE__ */ jsx(
           Button,
           {
@@ -131115,11 +131108,8 @@ const TimelineBlock = ({ item, scale }) => {
   const removeItem = useRobartState((state2) => state2.removeTimelineItem);
   const groups = useRobartState((state2) => state2.timelineState.groups);
   const updateItem = useRobartState((state2) => state2.updateBlockInTimeline);
-  const timelineMode = useRobartState((state2) => state2.timelineState.mode);
   const correspondingBlock = blocks2[item.blockId];
   const bind = useDrag(({ delta: [x2, _2] }) => {
-    if (timelineMode !== "MOVE")
-      return;
     const secondsDelta = convertPixelsToSeconds(x2, scale);
     const newStartTime = item.startTime + secondsDelta;
     if (!blockOverlaps(groups[item.groupId], blocks2, newStartTime, correspondingBlock, item.id)) {
@@ -131135,17 +131125,18 @@ const TimelineBlock = ({ item, scale }) => {
   return /* @__PURE__ */ jsx(
     "div",
     {
-      className: clsx(
-        "absolute top-1/2 flex h-5/6 -translate-y-1/2 items-center justify-center rounded-xl bg-purple-400 touch-none select-none",
-        timelineMode === "MOVE" ? "cursor-move" : "",
-        timelineMode === "ERASE" ? "hover:bg-red-400" : ""
-      ),
+      tabIndex: 0,
+      className: "absolute top-1/2 flex h-5/6 -translate-y-1/2 cursor-move items-center justify-center rounded-xl bg-purple-400 touch-none select-none focus:outline-none focus:ring-2 focus:ring-purple-800",
       style: {
         width: pixelsPerSecond * scale * duration2,
         left: pixelsPerSecond * scale * item.startTime
       },
-      onClick: () => {
-        timelineMode === "ERASE" && removeItem(item.groupId, item.id);
+      onKeyDown: (e2) => {
+        if (e2.key !== "Delete" && e2.key !== "Backspace")
+          return;
+        e2.preventDefault();
+        e2.stopPropagation();
+        removeItem(item.groupId, item.id);
       },
       ...bind(),
       children: /* @__PURE__ */ jsx("span", { className: "block overflow-hidden text-ellipsis whitespace-nowrap", children: correspondingBlock.name })
@@ -131176,19 +131167,10 @@ const TimelineGroupBody = ({ group }) => {
   const addBlockToTimeline = useRobartState((state2) => state2.addBlockToTimeline);
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
   const blocks2 = useRobartState((state2) => state2.blocks);
-  const timelineMode = useRobartState((state2) => state2.timelineState.mode);
   const scale = useRobartState((state2) => state2.timelineState.scale);
   const [hoverX, setHoverX] = reactExports.useState();
   const laneBodyRef = reactExports.useRef(null);
-  const bind = useGesture({
-    onMouseLeave: () => {
-      setHoverX(void 0);
-    },
-    onMouseMove: ({ event: { clientX } }) => {
-      setHoverX(clientX);
-    }
-  });
-  const computeTimelineBlockOffset = (clientX) => {
+  const computeTimelineBlockOffset = (clientX, blockId2) => {
     var _a3, _b2;
     if (clientX === void 0)
       return;
@@ -131196,24 +131178,37 @@ const TimelineGroupBody = ({ group }) => {
       const parentOffsetX = (_a3 = laneBodyRef.current.offsetParent) == null ? void 0 : _a3.offsetLeft;
       const parentScrollOffsetX = (_b2 = laneBodyRef.current.parentElement) == null ? void 0 : _b2.scrollLeft;
       const offsetX = clientX - parentOffsetX;
-      if (selectedBlockId === void 0 || parentScrollOffsetX === void 0)
+      if (blockId2 === void 0 || parentScrollOffsetX === void 0)
         return;
-      if (blocks2[selectedBlockId] === void 0)
+      if (blocks2[blockId2] === void 0)
         return;
-      const startTime2 = (offsetX + parentScrollOffsetX) / (pixelsPerSecond * scale) - blocks2[selectedBlockId].duration / 2;
+      const startTime2 = (offsetX + parentScrollOffsetX) / (pixelsPerSecond * scale) - blocks2[blockId2].duration / 2;
       return startTime2;
     }
   };
-  const handleBodyClick = ({ clientX }) => {
-    if (selectedBlockId === void 0 || timelineMode !== "ADD")
+  const handleDragOver = (e2) => {
+    e2.preventDefault();
+    e2.dataTransfer.dropEffect = "copy";
+    setHoverX(e2.clientX);
+  };
+  const handleDragLeave = (e2) => {
+    var _a3;
+    if (!((_a3 = laneBodyRef.current) == null ? void 0 : _a3.contains(e2.relatedTarget)))
+      setHoverX(void 0);
+  };
+  const handleDrop = (e2) => {
+    e2.preventDefault();
+    setHoverX(void 0);
+    const blockId2 = e2.dataTransfer.getData("text/plain");
+    if (blocks2[blockId2] === void 0)
       return;
-    const startTime2 = computeTimelineBlockOffset(clientX);
-    if (startTime2 !== void 0 && !blockOverlaps(group, blocks2, startTime2, blocks2[selectedBlockId])) {
+    const startTime2 = computeTimelineBlockOffset(e2.clientX, blockId2);
+    if (startTime2 !== void 0 && !blockOverlaps(group, blocks2, startTime2, blocks2[blockId2])) {
       var isTraj = false;
-      if (blocks2[selectedBlockId].javaScript.includes("circle")) {
+      if (blocks2[blockId2].javaScript.includes("circle")) {
         isTraj = true;
       }
-      addBlockToTimeline(group.id, selectedBlockId, startTime2, isTraj);
+      addBlockToTimeline(group.id, blockId2, startTime2, isTraj);
     }
   };
   return /* @__PURE__ */ jsxs(
@@ -131221,18 +131216,19 @@ const TimelineGroupBody = ({ group }) => {
     {
       className: "relative h-16 rounded bg-blue-300",
       ref: laneBodyRef,
-      onClick: handleBodyClick,
-      ...bind(),
+      onDragOver: handleDragOver,
+      onDragLeave: handleDragLeave,
+      onDrop: handleDrop,
       style: { width: `${convertSecondsToPixels(group.duration, scale)}px` },
       children: [
         [...new Array(group.duration * SUBDIVISIONS_PER_SECOND)].map((_2, tickNumber) => /* @__PURE__ */ jsx(TickMark, { tickNumber, scale, subdivisionsPerSecond: SUBDIVISIONS_PER_SECOND }, tickNumber)),
-        Object.values(group.items).map((item, idx) => /* @__PURE__ */ jsx(TimelineBlock, { scale, item }, idx)),
-        timelineMode === "ADD" && /* @__PURE__ */ jsx(
+        Object.values(group.items).map((item) => /* @__PURE__ */ jsx(TimelineBlock, { scale, item }, item.id)),
+        hoverX !== void 0 && /* @__PURE__ */ jsx(
           HoverTimelineBlock,
           {
             scale,
-            startTime: computeTimelineBlockOffset(hoverX),
-            isOverlapping: blockOverlaps(group, blocks2, computeTimelineBlockOffset(hoverX), blocks2[selectedBlockId ?? ""])
+            startTime: computeTimelineBlockOffset(hoverX, selectedBlockId),
+            isOverlapping: blockOverlaps(group, blocks2, computeTimelineBlockOffset(hoverX, selectedBlockId), blocks2[selectedBlockId ?? ""])
           }
         )
       ]
@@ -131435,21 +131431,6 @@ const RobotManagerModal = () => {
     /* @__PURE__ */ jsx(Modal.Footer, {})
   ] });
 };
-const TimelineEditModeButtons = () => {
-  const timelineMode = useRobartState((state2) => state2.timelineState.mode);
-  const setTimelineMode = useRobartState((state2) => state2.setTimelineMode);
-  return /* @__PURE__ */ jsx("div", { className: "flex gap-3 pt-2 pl-3", children: /* @__PURE__ */ jsxs(Button.Group, { children: [
-    /* @__PURE__ */ jsx(Button, { color: timelineMode === "ADD" ? "info" : "gray", onClick: () => {
-      setTimelineMode("ADD");
-    }, children: /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faPlusCircle }) }),
-    /* @__PURE__ */ jsx(Button, { color: timelineMode === "MOVE" ? "info" : "gray", onClick: () => {
-      setTimelineMode("MOVE");
-    }, children: /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faArrowsLeftRight }) }),
-    /* @__PURE__ */ jsx(Button, { color: timelineMode === "ERASE" ? "info" : "gray", onClick: () => {
-      setTimelineMode("ERASE");
-    }, children: /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faEraser }) })
-  ] }) });
-};
 const TimelineSimulationButtons = () => {
   const simulationStatus = useSimulator((state2) => state2.status);
   const play = useSimulator((state2) => state2.play);
@@ -131521,7 +131502,6 @@ const Timeline = () => {
   const toggleRobotManagerModal = useUIState((state2) => state2.toggleRobotManager);
   return /* @__PURE__ */ jsxs("div", { className: "flex h-full w-full flex-col gap-2 rounded bg-blue-100", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex", children: [
-      /* @__PURE__ */ jsx(TimelineEditModeButtons, {}),
       /* @__PURE__ */ jsx("div", { className: "flex flex-grow" }),
       /* @__PURE__ */ jsxs("div", { className: "flex gap-3 pt-2 pr-3", children: [
         /* @__PURE__ */ jsx(TimelineSimulationButtons, {}),
