@@ -131115,7 +131115,7 @@ const TimelineBlock = ({ item, scale }) => {
     if (!blockOverlaps(groups[item.groupId], blocks2, newStartTime, correspondingBlock, item.id)) {
       updateItem(item.groupId, item.id, newStartTime);
     }
-  });
+  }, { pointer: { keys: false } });
   let duration2 = 0;
   if (item === void 0) {
     duration2 = 0.1;
