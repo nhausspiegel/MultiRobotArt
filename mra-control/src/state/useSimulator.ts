@@ -166,9 +166,6 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			const robots = { ...currentRobots };
 
 			const simulator = SIM;
-			const groupState: SimulatorGroupState = {
-				robotIDs: Object.keys(robots),
-			};
 
 
 			const state = useCrazyflieConstraintState.getState();
@@ -179,6 +176,12 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			Object.keys(robots).forEach((robotId) => {
 				if (robots[robotId] == undefined)
 					return;
+
+				// Every robot in a group has the group's lines queued, so each line runs for its own robot only.
+				// Must be named groupState: the eval'd block code references it.
+				const groupState: SimulatorGroupState = {
+					robotIDs: [robotId],
+				};
 
 				if (robots[robotId].timeAlongTrajectory >= 1) {
 					//switch trajectories
