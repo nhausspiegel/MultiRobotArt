@@ -236,8 +236,14 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					if (robots[robotId].trajectoryQueue.length > 0) {
 						const next = robots[robotId].trajectoryQueue.dequeue();
 						runningItemIds[robotId] = next.itemId;
-						[duration, newTraj] = eval(next.line);
-						get().updateTrajectory(robotId, newTraj.get(robotId), duration);
+						// A command that fails (e.g. a modifier block with nothing inside) is skipped instead of stopping the simulation
+						try {
+							[duration, newTraj] = eval(next.line);
+							const trajectory = newTraj.get(robotId);
+							if (trajectory) get().updateTrajectory(robotId, trajectory, duration);
+						} catch (error) {
+							console.warn('Skipped a block command that failed:', next.line, error);
+						}
 					} else {
 						get().updateTrajectory(robotId, new traj.NullTrajectory(), -1);
 					}
@@ -246,8 +252,14 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					let duration = 0;
 					const next = robots[robotId].trajectoryQueue.dequeue();
 					runningItemIds[robotId] = next.itemId;
-					[duration, newTraj] = eval(next.line);
-					get().updateTrajectory(robotId, newTraj.get(robotId), duration);
+					// A command that fails (e.g. a modifier block with nothing inside) is skipped instead of stopping the simulation
+					try {
+						[duration, newTraj] = eval(next.line);
+						const trajectory = newTraj.get(robotId);
+						if (trajectory) get().updateTrajectory(robotId, trajectory, duration);
+					} catch (error) {
+						console.warn('Skipped a block command that failed:', next.line, error);
+					}
 				}
 
 
