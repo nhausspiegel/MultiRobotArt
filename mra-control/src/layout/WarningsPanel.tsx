@@ -29,9 +29,11 @@ export const WarningsPanel = () => {
 	// Selected from the store so the tab updates while open (it used to read warnings once when opened)
 	const constraintWarnings = useRobartState((state) => (state.warnings ?? []).join(''));
 	const overlapWarnings = useRobartState(laneOverlapWarnings);
+	// Notes from loading the project, e.g. robots moved out of extra groups
+	const notices = useRobartState((state) => (state.notices ?? []).join(''));
 	return (
 		<div className="overflow-auto h-full w-full ">
-			<CodeMirror value={overlapWarnings + constraintWarnings} className="h-full w-full" readOnly={true} />
+			<CodeMirror value={notices + overlapWarnings + constraintWarnings} className="h-full w-full" readOnly={true} />
 		</div>
 	);
 };

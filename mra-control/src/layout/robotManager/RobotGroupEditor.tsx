@@ -1,50 +1,36 @@
+import {allDronesGroupId} from '@MRAControl/state/groupMigration';
 import {useRobartState} from '@MRAControl/state/useRobartState';
 import {useRobotManager} from '@MRAControl/state/useRobotManager';
-import {faPlusCircle} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {Badge, Dropdown} from 'flowbite-react';
 import React from 'react';
 
 export const RobotGroupEditor = () => {
 	const groups = useRobartState((state) => state.timelineState.groups);
 	const selectedRobotId = useRobotManager((state) => state.selectedRobotId);
-	const addRobotToGroup = useRobartState((state) => state.addRobotToGroup);
-	const removeRobotFromGroup = useRobartState((state) => state.removeRobotFromGroup);
+	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
 
 	if (selectedRobotId === undefined) return <></>;
 
+	// A robot is in at most one group besides All drones
+	const otherGroups = Object.values(groups).filter((group) => group.id !== allDronesGroupId);
+	const currentGroup = otherGroups.find((group) => selectedRobotId in group.robots);
+
 	return (
-		<div className="flex flex-col gap-2">
-			<div className="flex items-center gap-2">
-				<h3 className="text-lg font-extrabold">Add Group</h3>
-				<Dropdown label={<FontAwesomeIcon icon={faPlusCircle} />} size="sm" arrowIcon={false}>
-					{Object.values(groups)
-						.filter((group) => !(selectedRobotId in group.robots))
-						.map((group) => (
-							<Dropdown.Item
-								key={group.id}
-								onClick={() => {
-									addRobotToGroup(group.id, selectedRobotId);
-								}}
-							>
-								{group.name}
-							</Dropdown.Item>
-						))}
-				</Dropdown>
-			</div>
-			<div className="flex items-center gap-2">
-				{Object.values(groups)
-					.filter((group) => selectedRobotId in group.robots)
-					.map((group) => {
-						return (
-							<Badge color="purple" className="bg-purple-100" onClick={() => {
-								removeRobotFromGroup(group.id, selectedRobotId); 
-							}} key={group.id}>
-								{groups[group.id].name}
-							</Badge>
-						);
-					})}
-			</div>
+		<div className="flex items-center gap-3">
+			<label htmlFor="robot-group" className="text-lg font-extrabold">Group</label>
+			<select
+				id="robot-group"
+				className="rounded border-gray-300"
+				style={{borderLeft: `8px solid ${currentGroup?.color ?? '#9ca3af'}`}}
+				value={currentGroup?.id ?? ''}
+				onChange={(e) => {
+					setRobotGroup(selectedRobotId, e.target.value || undefined);
+				}}
+			>
+				<option value="">No group</option>
+				{otherGroups.map((group) => (
+					<option key={group.id} value={group.id}>{group.name}</option>
+				))}
+			</select>
 		</div>
 	);
 };

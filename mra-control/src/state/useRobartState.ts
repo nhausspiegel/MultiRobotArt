@@ -11,6 +11,7 @@ import {immer} from 'zustand/middleware/immer';
 import {ROBART_VERSION} from '../config/Version';
 import {exportROS, loadProjectFromFile, saveProjectToFile} from '../tools/projectFileConversion';
 import {useSimulator} from './useSimulator';
+import {allDronesGroupId, migrateGroups, nextGroupColor} from './groupMigration';
 import {State} from 'blockly/core/utils/aria';
 
 export type CodeBlock = {
@@ -59,11 +60,15 @@ export type TimelineGroupState = {
 	name: string;
 	items: Record<string, TimelineItem>;
 	/**
-   * List of robot ids assigned to this group
+   * Robots in this group. A robot is in at most one group besides All drones, which holds every robot.
    */
 	robots: Record<string, RobotState>;
 	// Length of time line in milliseconds
 	duration: number;
+	/**
+   * Shown on the lane label and under its robots in the 3D view. Unset for All drones.
+   */
+	color?: string;
 };
 
 export type TimelineState = {
@@ -91,6 +96,10 @@ export type MRAState = {
 	version: number;
 	robots: Record<string, RobotState>;
 	warnings: string[];
+	/**
+   * Notes from loading the project (e.g. robots moved out of extra groups), shown in the Warnings tab.
+   */
+	notices?: string[];
 };
 
 export type TimelineActions = {
@@ -115,8 +124,11 @@ export type TimelineActions = {
 	addBlockToTimeline: (groupId: string, blockId: string, startTime: number, isTrajectory: boolean) => void;
 	removeTimelineItem: (groupId: string, itemId: string) => void;
 
-	addRobotToGroup: (groupId: string, robotId: string) => void;
-	removeRobotFromGroup: (groupId: string, robotId: string) => void;
+	/**
+   * Moves a robot into a group, out of any other group (All drones always keeps it).
+   * @param groupId The group to move it to, or undefined for no group.
+   */
+	setRobotGroup: (robotId: string, groupId: string | undefined) => void;
 	updateBlockInTimeline: (groupId: string, itemId: string, startTime: number) => void;
 	/**
    * Sets the timeline zoom (pixels per second multiplier). Visual only.
@@ -198,52 +210,11 @@ const defaultRobartState: MRAState = {
 	projectName: 'New Robart Project',
 	timelineState: {
 		scale: 1,
+		// Groups are added with "+ New group" as needed
 		groups: {
-			groupAllCFs: {
-				id: 'groupAllCFs',
-				name: 'All CFs',
-				items: {},
-				robots: {},
-				duration: 120,
-			},
-			group1: {
-				id: 'group1',
-				name: 'Group 1',
-				items: {},
-				robots: {},
-				duration: 120,
-			},
-			group2: {
-				id: 'group2',
-				name: 'Group 2',
-				items: {},
-				robots: {},
-				duration: 120,
-			},
-			group3: {
-				id: 'group3',
-				name: 'Group 3',
-				items: {},
-				robots: {},
-				duration: 120,
-			},
-			group4: {
-				id: 'group4',
-				name: 'Group 4',
-				items: {},
-				robots: {},
-				duration: 120,
-			},
-			group5: {
-				id: 'group5',
-				name: 'Group 5',
-				items: {},
-				robots: {},
-				duration: 120,
-			},
-			group6: {
-				id: 'group6',
-				name: 'Group 6',
+			[allDronesGroupId]: {
+				id: allDronesGroupId,
+				name: 'All drones',
 				items: {},
 				robots: {},
 				duration: 120,
@@ -254,6 +225,7 @@ const defaultRobartState: MRAState = {
 	version: ROBART_VERSION,
 	robots: {},
 	warnings: [],
+	notices: [],
 };
 
 type MRAActions = MRAGeneralActions & TimelineActions & BlockActions & RobotActions;
@@ -283,7 +255,8 @@ export const useRobartState = create<MRAState & MRAActions>()(
 				(set, get): MRACompleteState => ({
 					...defaultRobartState,
 					loadProject: (file) => {
-						const newState = loadProjectFromFile(file);
+						// Older project files can have robots in several groups
+						const newState = migrateGroups(loadProjectFromFile(file));
 						set(newState);
 						useSimulator.getState().reset();
 					},
@@ -466,23 +439,12 @@ export const useRobartState = create<MRAState & MRAActions>()(
 						set({editingBlockId: undefined});
 						if (blockId != oldEditingBlockId) set({editingBlockId: blockId});
 					},
-					addRobotToGroup: (groupId, robotId) => {
+					setRobotGroup: (robotId, groupId) => {
 						set((state) => {
-							state.timelineState.groups[groupId].robots[robotId] = state.robots[robotId];
-						});
-					},
-					removeRobotFromGroup: (groupId, robotId) => {
-						set((state) => {
-							const { timelineState } = state;
-							const { groups } = timelineState;
-							
-							// Create a new object without the specified robotId and filter out undefined values
-							const updatedRobots = Object.fromEntries(
-								Object.entries(groups[groupId].robots).filter(([key, value]) => key !== robotId && value !== undefined)
-							);
-						
-							// Update the state with the new robots object
-							groups[groupId].robots = updatedRobots;
+							Object.values(state.timelineState.groups).forEach((group) => {
+								if (group.id !== allDronesGroupId) delete group.robots[robotId];
+							});
+							if (groupId !== undefined) state.timelineState.groups[groupId].robots[robotId] = state.robots[robotId];
 						});
 					},
 					createRobot: () => {
@@ -510,7 +472,7 @@ export const useRobartState = create<MRAState & MRAActions>()(
 								startingPosition,
 							};
 							// Add to group with all CFs
-							state.timelineState.groups.groupAllCFs.robots[id] = state.robots[id];
+							state.timelineState.groups[allDronesGroupId].robots[id] = state.robots[id];
 						});
 						return id;
 					},
@@ -559,7 +521,8 @@ export const useRobartState = create<MRAState & MRAActions>()(
 								name: groupName,
 								items: {},
 								robots: {},
-								duration: 120},
+								duration: 120,
+								color: nextGroupColor(groups)},
 						};
 						set((state) => {
 							state.timelineState.groups = newGroups;
@@ -582,6 +545,12 @@ export const useRobartState = create<MRAState & MRAActions>()(
 				{
 					storage: createJSONStorage(() => sessionStorage),
 					name: 'robartState',
+					// The project kept in the browser may predate one-group-per-robot
+					merge: (persistedState, currentState) => {
+						if (!persistedState) return currentState;
+						const merged = {...currentState, ...(persistedState as Partial<MRAState>)};
+						return {...merged, ...migrateGroups(merged)};
+					},
 				},
 			),
 		),
