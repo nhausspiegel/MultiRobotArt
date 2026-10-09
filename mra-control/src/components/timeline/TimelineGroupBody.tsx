@@ -75,6 +75,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 	};
 
 	const handleDragOver: DragEventHandler = (e) => {
+		if (!e.dataTransfer.types.includes('text/plain')) return; // Not a block, e.g. a robot name tag
 		e.preventDefault(); // Allows dropping
 		e.dataTransfer.dropEffect = 'copy';
 		setHoverX(e.clientX);

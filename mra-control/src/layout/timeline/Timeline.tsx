@@ -5,14 +5,20 @@ import {usePinch} from '@use-gesture/react';
 
 import {IconButton} from '../../components/buttons/IconButton';
 import {convertPixelsToSeconds, convertSecondsToPixels, TimelineGroupBody} from '../../components/timeline/TimelineGroupBody';
-import {TimelineGroupLabel} from '../../components/timeline/TimelineGroupLabel';
+import {TimelineGroupLabel, UngroupedRobots} from '../../components/timeline/TimelineGroupLabel';
 import {useRobartState} from '../../state/useRobartState';
 import {useSimulator} from '../../state/useSimulator';
 import {useUIState} from '../../state/useUIState';
 import {RobotManagerModal} from '../robotManager/RobotManagerModal';
 import {TimelineSimulationButtons} from './TimelineSimulationButtons';
 import React, {useEffect, useLayoutEffect, useRef} from 'react';
-import {AddTimelineGroupLabel, RemoveTimelineGroupLabel} from './addTimelineGroupLabel';
+
+const addNewGroup = () => {
+	const groups = Object.values(useRobartState.getState().timelineState.groups);
+	// One more than the highest "Group N"; counting lanes repeats names after a lane is removed
+	const highest = Math.max(0, ...groups.map((group) => Number(/^group (\d+)$/i.exec(group.name)?.[1] ?? 0)));
+	useRobartState.getState().addGroup(`Group ${highest + 1}`);
+};
 
 
 export const Timeline = () => {
@@ -86,8 +92,9 @@ export const Timeline = () => {
 						{groups.map((group) => (
 							<TimelineGroupLabel group={group} key={group.id} />
 						))}
-						<AddTimelineGroupLabel></AddTimelineGroupLabel>
-						<RemoveTimelineGroupLabel></RemoveTimelineGroupLabel>
+						<button className="h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200" onClick={addNewGroup}>
+							+ New group
+						</button>
 					</div>
 					<div ref={scrollerRef} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto">
 						{groups.map((group) => (
@@ -97,6 +104,7 @@ export const Timeline = () => {
 						<TimelineMarker />
 					</div>
 				</div>
+				<UngroupedRobots />
 			</div>
 		</div>
 	);

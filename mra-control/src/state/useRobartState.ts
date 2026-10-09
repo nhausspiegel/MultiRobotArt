@@ -141,7 +141,6 @@ export type TimelineActions = {
    * @param blockLengths Duration in seconds by block id.
    */
 	setMeasuredDurations: (durations: Record<string, number>, blockLengths: Record<string, number>) => void;
-	removeGroups: (groupsToRemove: string[]) => void;
 };
 
 export type BlockActions = {
@@ -534,12 +533,6 @@ export const useRobartState = create<MRAState & MRAActions>()(
 						set((state) => {
 							state.timelineState.groups = {...groups};
 						});
-					},
-					removeGroups: (groupsToRemove: string[]) =>  {
-					for (let i = 0; i < groupsToRemove.length; i++){
-						get().removeGroup(groupsToRemove[i]);
-				
-					}
 					},
 				}),
 				{

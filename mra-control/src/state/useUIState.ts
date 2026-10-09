@@ -6,7 +6,6 @@ export type UIState = {
 	curveEditorOpen: boolean;
 	openSimulation: boolean;
 	robotManagerModalOpen: boolean;
-	RGModalOpen: boolean;
 };
 
 export type UIActions = {
@@ -14,7 +13,6 @@ export type UIActions = {
 	toggleCurveEditor: () => void;
 	toggleRobotManager: () => void;
 	toggleSimulation: () => void;
-	toggleRGModal: () => void;
 };
 
 export type UIStoreState = UIState & UIActions;
@@ -27,7 +25,6 @@ export const useUIState = create<UIStoreState>()((set, get) => ({
 	curveEditorOpen: false,
 	openSimulation: false,
 	robotManagerModalOpen: false,
-	RGModalOpen: false,
 	toggleSettingsModal: () => {
 		set({settingsModalOpen: !get().settingsModalOpen}); 
 	},
@@ -39,8 +36,5 @@ export const useUIState = create<UIStoreState>()((set, get) => ({
 	},
 	toggleSimulation: () => {
 		set({openSimulation: !get().openSimulation});
-	},
-	toggleRGModal: () => {
-		set({RGModalOpen: !get().RGModalOpen});
 	},
 }));
