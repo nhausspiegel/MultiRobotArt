@@ -16,16 +16,18 @@ export const SimulationControls = () => {
 	const seek = useSimulator((state) => state.seek);
 	const setTimeDilation = useSimulator((state) => state.setTimeDilation);
 	const toggleCoordinates = useSimulator((state) => state.toggleCoordinates);
-	// End of the last timeline item, so the scrubber spans the whole show
-	const endTime = useRobartState((state) => {
+	// Measured when the sim starts; exact
+	const measuredEndTime = useSimulator((state) => state.endTime);
+	// Before the first run: end of the last timeline item, a rough estimate
+	const estimatedEndTime = useRobartState((state) => {
 		const {groups, scale} = state.timelineState;
 		const itemEnds = Object.values(groups).flatMap((group) =>
 			Object.values(group.items).map((item) => (item.startTime + item.duration) * scale),
 		);
 		return Math.max(10, ...itemEnds);
 	});
-	// Blocks can run past their estimated duration; keep the playhead on the bar
-	const maxTime = Math.max(endTime, time);
+	// Keep the playhead on the bar if the sim runs slightly past the measured end (frame timing)
+	const maxTime = Math.max(measuredEndTime > 0 ? measuredEndTime : estimatedEndTime, time);
 
 	return (
 		<div className="absolute inset-x-0 bottom-0 flex items-center gap-3 bg-black/60 px-3 py-2 text-sm text-white">

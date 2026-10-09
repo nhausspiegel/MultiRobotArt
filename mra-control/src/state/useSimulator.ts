@@ -56,6 +56,10 @@ export type SimulatorState = {
 	trajectoryMarkers: Array<{ position: THREE.Vector3; color: THREE.Color; id: string }>;
 	markerFrequency: number;
 	lastStepTime: number;
+	/**
+   * Sim time at which the show finishes, measured when it starts. 0 until measured.
+   */
+	endTime: number;
 };
 
 const defaultSimulatorState: SimulatorState = {
@@ -70,12 +74,21 @@ const defaultSimulatorState: SimulatorState = {
 	trajectoryMarkers: [],
 	markerFrequency: 0.25,
 	lastStepTime: performance.now(),
+	endTime: 0,
 };
 
 const nullTrajectory = new traj.PolynomialTrajectory(-1, []) as traj.Trajectory;
 
 // Timeline items not started yet, sorted by start time (sim seconds). advance() starts them when the sim reaches them.
 const pendingItems: Array<{ time: number; robotIds: string[]; lines: string[] }> = [];
+
+// Upper bound when measuring a show's length, in case something never finishes
+const maxShowLength = 60 * 60;
+
+// Nothing left to start, queue, or fly
+const isFinished = (robots: Record<string, RobotSimState>) =>
+	pendingItems.length === 0 &&
+	Object.values(robots).every((robot) => robot.trajectoryQueue.length === 0 && !(robot.trajectory?.duration > 0));
 
 export type SimulatorActions = {
 	play: () => void;
@@ -91,6 +104,10 @@ export type SimulatorActions = {
    * Jumps the simulation to the given sim time, replaying from the start when going backwards.
    */
 	seek: (time: number) => void;
+	/**
+   * Runs the whole show without rendering to find endTime, then resets to the start.
+   */
+	measureShowLength: () => void;
 	setTimeDilation: (timeDilation: number) => void;
 	toggleCoordinates: () => void;
 	/**
@@ -113,9 +130,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 	immer((set, get) => ({
 		...defaultSimulatorState,
 		play: () => {
-			// Set robots to initial positions...
-			set({ status: 'RUNNING', time: 0, trajectoryMarkers: [], lastStepTime: performance.now() });
-			get().executeSimulation(0);
+			// Also resets robots to their initial positions
+			get().measureShowLength();
+			set({ status: 'RUNNING', lastStepTime: performance.now() });
 		},
 		pause: () => {
 			const warnings: ConstraintWarning[] | undefined = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots));
@@ -147,6 +164,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			const currentTime = performance.now();
 			get().advance((currentTime - get().lastStepTime) / 1000 * get().timeDilation);
 			set({ lastStepTime: currentTime });
+			if (isFinished(get().robots)) get().halt();
 		},
 		advance: (deltaT) => {
 			const newSimTime = get().time + deltaT;
@@ -248,9 +266,10 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		},
 		seek: (targetTime) => {
 			const wasRunning = get().status === 'RUNNING';
-			// The sim only runs forward, so going back means replaying from the start
-			if (get().status === 'STOPPED' || targetTime < get().time) {
-				set({ time: 0, trajectoryMarkers: [] });
+			if (get().status === 'STOPPED') {
+				get().measureShowLength();
+			} else if (targetTime < get().time) {
+				// The sim only runs forward, so going back means replaying from the start
 				get().executeSimulation(0);
 			}
 			// ponytail: replays in 1/fps steps, can lag on long shows; cache snapshots if it does
@@ -258,6 +277,15 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				get().advance(Math.min(1 / fps, targetTime - get().time));
 			}
 			set({ status: wasRunning ? 'RUNNING' : 'PAUSED', lastStepTime: performance.now() });
+		},
+		measureShowLength: () => {
+			get().executeSimulation(0);
+			while (!isFinished(get().robots) && get().time < maxShowLength) {
+				get().advance(1 / fps);
+			}
+			const endTime = get().time;
+			get().executeSimulation(0);
+			set({ endTime });
 		},
 		setTimeDilation: (timeDilation) => {
 			set({ timeDilation });
@@ -411,8 +439,11 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			const blocks = useRobartState.getState().blocks;
 			const robartRobots = useRobartState.getState().robots;
 			if (startTime === 0) {
+				set({ time: 0, trajectoryMarkers: [] });
 				get().setRobots(robartRobots);
 				useRobartState.getState().warnings = [];
+				// Constraint warnings are computed from this; without the reset they repeat across runs and replays
+				useCrazyflieConstraintState.setState({ positionHistory: [] });
 			}
 			pendingItems.length = 0;
 
