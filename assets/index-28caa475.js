@@ -145569,19 +145569,24 @@ const useReachedWarnings = () => {
 };
 const SimulationWarnings = () => {
   const reached = useReachedWarnings();
+  const listRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    var _a3;
+    (_a3 = listRef.current) == null ? void 0 : _a3.scrollTo({ top: listRef.current.scrollHeight });
+  }, [reached.length]);
   if (reached.length === 0)
     return null;
-  return /* @__PURE__ */ jsxs("div", { className: "absolute right-2 top-2 max-h-[calc(100%-1rem)] max-w-xs overflow-y-auto rounded bg-black/60 px-2 py-1 text-xs text-white", children: [
+  return /* @__PURE__ */ jsxs("div", { className: "absolute right-2 top-2 flex max-h-[calc(100%-1rem)] max-w-xs flex-col rounded bg-black/60 px-2 py-1 text-xs text-white", children: [
     /* @__PURE__ */ jsxs("div", { className: "font-bold text-yellow-300", children: [
       /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faTriangleExclamation }),
       " ",
       reached.length
     ] }),
-    reached.slice().reverse().map((warning, i2) => /* @__PURE__ */ jsxs("div", { className: "truncate", children: [
+    /* @__PURE__ */ jsx("div", { ref: listRef, className: "min-h-0 overflow-y-auto", children: reached.map((warning, i2) => /* @__PURE__ */ jsxs("div", { className: "truncate", children: [
       /* @__PURE__ */ jsx("span", { className: "tabular-nums text-gray-300", children: formatTime(warning.time) }),
       " ",
       warning.short
-    ] }, i2))
+    ] }, i2)) })
   ] });
 };
 const SimulationPanel = () => {
