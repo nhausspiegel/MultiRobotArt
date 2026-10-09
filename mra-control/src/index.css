@@ -9,3 +9,17 @@
 svg[display='none'] {
   display: none;
 }
+
+/* Blockly scrollbars: subtle translucent handles instead of grey bars. Prefixed with .injectionDiv to outrank
+   Blockly's own styles, which are added after this file. */
+.injectionDiv .blocklyScrollbarHandle,
+.injectionDiv .blocklyFlyout .blocklyScrollbarHandle {
+  fill: rgba(0, 0, 0, 0.2);
+}
+
+.injectionDiv .blocklyScrollbarBackground:hover + .blocklyScrollbarHandle,
+.injectionDiv .blocklyScrollbarHandle:hover,
+.injectionDiv .blocklyFlyout .blocklyScrollbarBackground:hover + .blocklyScrollbarHandle,
+.injectionDiv .blocklyFlyout .blocklyScrollbarHandle:hover {
+  fill: rgba(0, 0, 0, 0.35);
+}

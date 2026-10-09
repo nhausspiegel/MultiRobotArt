@@ -11,6 +11,16 @@ import {BlockEditorHeader} from './BlockEditorHeader';
 
 const zoomScaleSpeed = 1.2;
 
+// Thinner than the default 15 px; read when the workspace is created. Colors are in index.css.
+Blockly.Scrollbar.scrollbarThickness = 8;
+
+// The toolbox's block palette. By default it follows the workspace's zoom; keep it at normal size instead.
+class FixedScaleFlyout extends Blockly.VerticalFlyout {
+	getFlyoutScale() {
+		return 1;
+	}
+}
+
 export const BlockEditorPanel = () => {
 	const currentBlockId = useRobartState((state) => state.editingBlockId);
 	const saveBlock = useRobartState((state) => state.saveBlock);
@@ -37,6 +47,7 @@ export const BlockEditorPanel = () => {
 			// or every scroll would zoom.
 			zoom: {wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed},
 			move: {wheel: true, drag: true, scrollbars: true},
+			plugins: {flyoutsVerticalToolbox: FixedScaleFlyout},
 		},
 		onWorkspaceChange: (workspaceChanged) => {
 			if (!loadedBlockId.current) return;
