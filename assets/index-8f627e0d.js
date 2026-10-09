@@ -74658,9 +74658,6 @@ const useSimulator = create$2()(
       const trajectoryMarkers = get().trajectoryMarkers.slice();
       const robots = { ...currentRobots };
       const simulator = SIM;
-      const groupState = {
-        robotIDs: Object.keys(robots)
-      };
       const state = useCrazyflieConstraintState.getState();
       const positionHistory = state.positionHistory;
       positionHistory.push({ timestep: newSimTime, robotPositions: [] });
@@ -74668,6 +74665,9 @@ const useSimulator = create$2()(
         var _a3, _b2, _c2;
         if (robots[robotId] == void 0)
           return;
+        const groupState = {
+          robotIDs: [robotId]
+        };
         if (robots[robotId].timeAlongTrajectory >= 1) {
           let newTraj;
           let duration = 0;
