@@ -82014,6 +82014,16 @@ const useSimulator = create$2()(
     }
   }))
 );
+let frameRequest = 0;
+useSimulator.subscribe((state2) => {
+  if (state2.status !== "RUNNING" || frameRequest)
+    return;
+  const loop = () => {
+    useSimulator.getState().step();
+    frameRequest = useSimulator.getState().status === "RUNNING" ? requestAnimationFrame(loop) : 0;
+  };
+  frameRequest = requestAnimationFrame(loop);
+});
 const allDronesGroupId = "groupAllCFs";
 const groupColors = ["#ef4444", "#3b82f6", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"];
 const nextGroupColor = (groups) => {
@@ -145231,15 +145241,11 @@ const Simulation = () => {
   const marker = reactExports.useRef(null);
   const robots2 = useSimulator((state2) => state2.robots);
   const robartRobots = useRobartState((state2) => state2.robots);
-  const step = useSimulator((state2) => state2.step);
   const setRobots = useSimulator((state2) => state2.setRobots);
   const robartState = useRobartState();
   const simulatorState = useSimulator();
   const renderBB = simulatorState.renderBoundingBoxes;
   const trajectoryMarkers2 = useSimulator((state2) => state2.trajectoryMarkers);
-  useFrame(({ clock }) => {
-    step();
-  });
   if (Object.keys(robots2).length !== 0) {
     if (simulatorState.time === 0) {
       Object.values(robots2).forEach((robot) => {
