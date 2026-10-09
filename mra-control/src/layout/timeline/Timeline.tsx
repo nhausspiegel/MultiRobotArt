@@ -92,8 +92,8 @@ export const Timeline = () => {
 
 			<div className="overflow-y-auto">
 				<div className="flex flex-shrink-0 gap-2">
-					{/* pt-4 on both columns: room above the lanes for the playhead's handle, rows stay aligned */}
-					<div className="ml-2 flex h-full flex-col gap-2 pt-4">
+					{/* pt-6 on both columns: room above the lanes for the ruler and the playhead's handle, rows stay aligned */}
+					<div className="ml-2 flex h-full flex-col gap-2 pt-6">
 						{groups.map((group) => (
 							<TimelineGroupLabel group={group} key={group.id} />
 						))}
@@ -101,7 +101,7 @@ export const Timeline = () => {
 							+ New group
 						</button>
 					</div>
-					<div ref={scrollerRef} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-4">
+					<div ref={scrollerRef} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-6">
 						{groups.map((group) => (
 							<TimelineGroupBody group={group} key={group.id} />
 						))}

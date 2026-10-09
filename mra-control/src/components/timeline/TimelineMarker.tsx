@@ -4,7 +4,7 @@ import {useSimulator} from '@MRAControl/state/useSimulator';
 import {useDrag} from '@use-gesture/react';
 import React, {useRef} from 'react';
 
-import {convertPixelsToSeconds, timelineLength, timelineStartPadding, timeToX} from './TimelineGroupBody';
+import {convertPixelsToSeconds, tickBackground, timelineLength, timelineStartPadding, timeToX} from './TimelineGroupBody';
 
 // The playhead: a line through the lanes with a round handle above them, and the strip the handle sits in (a ruler, as
 // in Logic). Clicking the strip jumps the playhead there; dragging it or the handle scrubs the simulation.
@@ -26,8 +26,12 @@ export const TimelineMarker = () => {
 	}, {pointer: {keys: false}});
 
 	return (<>
-		{/* The room above the lanes (the scroll area's top padding), as wide as the lanes */}
-		<div {...bind()} className="absolute left-0 top-0 h-4 cursor-pointer touch-none rounded bg-blue-200" style={{width: timeToX(length, scale)}} />
+		{/* At the top of the room above the lanes (the scroll area's top padding), as wide as the lanes; ticks along its bottom */}
+		<div
+			{...bind()}
+			className="absolute left-0 top-0 h-3 cursor-pointer touch-none rounded-sm bg-blue-50"
+			style={{width: timeToX(length, scale), ...tickBackground(scale, '60%', '30%', 'bottom')}}
+		/>
 		<div
 			ref={markerRef}
 			className="pointer-events-none absolute inset-y-0 z-10 flex -translate-x-1/2 flex-col items-center"

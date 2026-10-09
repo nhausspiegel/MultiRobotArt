@@ -21,6 +21,32 @@ export const pixelsPerSecond = 100;
 const roomAfterLastBlock = 30;
 const minTimelineLength = 120;
 // Length of every lane (s)
+// Seconds between labels and between major ticks, when that many seconds are far enough apart (px)
+const roundSeconds = [1, 2, 5, 10, 15, 30, 60];
+const everyAtLeast = (secondWidth: number, minWidth: number) => roundSeconds.find((seconds) => seconds * secondWidth >= minWidth) ?? 60;
+
+/**
+ * Tick marks as a repeating background, not elements: thousands of tick elements made zooming slow. A major tick every
+ * second, or every few seconds when zoomed out (every second merged into a black band); subdivision ticks in between
+ * when there's room. Heights are how far down (or up, from the bottom) each kind reaches. Each layer is one repeating
+ * gradient placed from time 0 onward (a tiled image would also repeat backwards into the start padding).
+ */
+export const tickBackground = (scale: number, majorHeight: string, minorHeight: string, from: 'top' | 'bottom' = 'top') => {
+	const secondWidth = convertSecondsToPixels(1, scale);
+	const majorWidth = everyAtLeast(secondWidth, 6) * secondWidth;
+	const minorWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
+	const ticks = (spacing: number) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
+	const area = `calc(100% - ${timelineStartPadding}px)`;
+	const layers = [{image: ticks(majorWidth), height: majorHeight}];
+	if (majorWidth === secondWidth && minorWidth >= 6) layers.push({image: ticks(minorWidth), height: minorHeight});
+	return {
+		backgroundImage: layers.map((layer) => layer.image).join(', '),
+		backgroundSize: layers.map((layer) => `${area} ${layer.height}`).join(', '),
+		backgroundPosition: `${timelineStartPadding}px ${from}`,
+		backgroundRepeat: 'no-repeat',
+	};
+};
+
 export const timelineLength = (state: Pick<MRAState, 'timelineState'>) => Math.max(minTimelineLength, lastItemEnd(state) + roomAfterLastBlock);
 export const SUBDIVISIONS_PER_SECOND = 8;
 // Display only: very short items (an LED color change is 0.1 s) would be too thin to see or grab
@@ -137,19 +163,12 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 		}
 	};
 
-	// Tick marks are a repeating background, not elements: thousands of tick elements made zooming slow.
-	// Second ticks always; subdivision ticks and labels only when far enough apart to read. Each layer is one repeating
-	// gradient placed from time 0 onward (a tiled image would also repeat backwards into the start padding).
-	const secondWidth = convertSecondsToPixels(1, scale);
-	const subdivisionWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
-	const ticks = (spacing: number) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
-	const tickArea = `calc(100% - ${timelineStartPadding}px)`;
-	const showSubdivisions = subdivisionWidth >= 6;
-	const labelEvery = [1, 2, 5, 10, 15, 30, 60].find((seconds) => seconds * secondWidth >= 32) ?? 60;
+	// Labels only when far enough apart to read
+	const labelEvery = everyAtLeast(convertSecondsToPixels(1, scale), 32);
 
 	return (
 		<div
-			className={clsx('relative rounded bg-no-repeat', group.collapsed ? 'h-7' : 'h-16', hasDrones ? 'bg-blue-300' : 'bg-gray-300')}
+			className={clsx('relative rounded', group.collapsed ? 'h-7' : 'h-16', hasDrones ? 'bg-blue-300' : 'bg-gray-300')}
 			ref={laneBodyRef}
 			// Found by timeline items dragged between lanes
 			data-lane-id={group.id}
@@ -158,9 +177,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 			onDrop={handleDrop}
 			style={{
 				width: `${timeToX(length, scale)}px`,
-				backgroundImage: showSubdivisions ? `${ticks(secondWidth)}, ${ticks(subdivisionWidth)}` : ticks(secondWidth),
-				backgroundSize: showSubdivisions ? `${tickArea} 25%, ${tickArea} 16.67%` : `${tickArea} 25%`,
-				backgroundPosition: `${timelineStartPadding}px 0`,
+				...tickBackground(scale, '25%', '16.67%'),
 			}}
 		>
 			{/* No second labels on a collapsed lane: no room */}
