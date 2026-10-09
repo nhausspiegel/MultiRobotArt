@@ -465,8 +465,10 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							get().removeTimelineItem(item.groupId, item.id); 
 						});
 
-						// Update the selected item
-						const selectedBlockId = Object.values(newBlocks).at(-1)?.id;
+						// Select the block that takes its place in the list (the next one, else the previous), like a file list
+						const ids = Object.keys(get().blocks);
+						const index = ids.indexOf(id);
+						const selectedBlockId = ids[index + 1] ?? ids[index - 1];
 
 						set({blocks: newBlocks, editingBlockId: selectedBlockId});
 					},

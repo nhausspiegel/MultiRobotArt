@@ -16,7 +16,7 @@ export const BlockEditorHeader = () => {
 	const currentBlock: CodeBlock | undefined = useRobartState((state) => state.blocks[currentBlockId ?? '']);
 	const renameBlock = useRobartState((state) => state.renameBlock);
 
-	if (!currentBlock) return <div className="h-full w-full text-3xl font-bold flex justify-center items-center">No Timeline Block Selected.</div>;
+	if (!currentBlock) return <div className="h-full w-full text-3xl font-bold flex justify-center items-center">No timeline block selected</div>;
 
 	return (
 		<div className="m-2 flex items-center gap-2">

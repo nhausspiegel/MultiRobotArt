@@ -1,7 +1,7 @@
 import {faCopy, faPlus, faTrash, type IconDefinition} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import clsx from 'clsx';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {ConfirmationModal} from '@MRAControl/components/modal/ConfirmationModal';
 import {newBlockName} from './BlockEditorHeader';
 
@@ -37,14 +37,20 @@ export const BlockManagerPanel = () => {
 		.flatMap((group) => Object.values(group.items))
 		.filter((item) => item.blockId === selectedBlockId).length);
 	const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+	const listRef = useRef<HTMLDivElement>(null);
 
 	const addCopy = (block: CodeBlock) => {
 		setEditingBlock(copyBlock(block));
 	};
+	// The deleted block had focus; focus the block selected in its place so Delete/Backspace keeps working
+	const remove = (blockId: string) => {
+		removeBlock(blockId);
+		requestAnimationFrame(() => listRef.current?.querySelector<HTMLElement>('[data-selected="true"]')?.focus());
+	};
 	const deleteSelected = () => {
 		if (selectedBlockId === undefined) return;
 		// Nothing to lose when it's empty and not on the timeline, so no confirmation
-		if (selectedBlock?.javaScript.trim() === '' && selectedBlockUses === 0) removeBlock(selectedBlockId);
+		if (selectedBlock?.javaScript.trim() === '' && selectedBlockUses === 0) remove(selectedBlockId);
 		else setConfirmDeleteOpen(true);
 	};
 
@@ -102,7 +108,7 @@ export const BlockManagerPanel = () => {
 					setConfirmDeleteOpen(false);
 				}}
 				onConfirm={() => {
-					if (selectedBlockId !== undefined) removeBlock(selectedBlockId);
+					if (selectedBlockId !== undefined) remove(selectedBlockId);
 					setConfirmDeleteOpen(false);
 				}}
 			>
@@ -112,7 +118,7 @@ export const BlockManagerPanel = () => {
 				</>}
 			</ConfirmationModal>
 			{/* Scrolls when there are more blocks than fit; the buttons stay above it */}
-			<div className="flex min-h-0 flex-1 flex-wrap content-start gap-1.5 overflow-y-auto p-2">
+			<div ref={listRef} className="flex min-h-0 flex-1 flex-wrap content-start gap-1.5 overflow-y-auto p-2">
 				{blocks.map((b) => {
 					// Empty blocks can't go on the timeline, so they look unfilled
 					const empty = b.javaScript.trim() === '';
@@ -121,6 +127,7 @@ export const BlockManagerPanel = () => {
 							key={b.id}
 							role="button"
 							tabIndex={0}
+							data-selected={selectedBlockId === b.id}
 							className={clsx(
 								'flex max-w-full cursor-grab items-baseline gap-1.5 rounded-xl border px-2.5 py-1.5 text-sm focus:outline-none',
 								empty ? 'border-dashed border-gray-400 bg-white text-gray-400' : 'border-black/15',
