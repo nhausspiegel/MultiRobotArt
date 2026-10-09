@@ -64,8 +64,8 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 			if (blockId === undefined || blocks[blockId] === undefined) return;
 			// The lane's on-screen rect already reflects scrolling
 			const offsetX = clientX - laneBodyRef.current.getBoundingClientRect().left;
-			// Block starts at the pointer (centering long blocks pushed their start before 0); never before 0
-			return Math.max(0, convertPixelsToSeconds(offsetX, scale));
+			// Centered on the pointer, but never starting before 0 (long blocks near the left edge would otherwise be refused)
+			return Math.max(0, convertPixelsToSeconds(offsetX, scale) - blocks[blockId].duration / 2);
 		}
 	};
 
