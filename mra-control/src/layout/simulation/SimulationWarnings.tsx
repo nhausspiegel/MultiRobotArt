@@ -5,7 +5,7 @@ import {faTriangleExclamation} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import React from 'react';
 
-import {formatTime} from './SimulationControls';
+import {formatTime} from '../timeline/SimulationOptions';
 
 // Most recent warnings shown at once; the count covers all of them
 const maxShown = 4;

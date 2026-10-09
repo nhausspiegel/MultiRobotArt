@@ -1,7 +1,6 @@
 import {Canvas} from '@react-three/fiber';
 
 import {Simulation} from './Simulation';
-import {SimulationControls} from './SimulationControls';
 import {SimulationWarnings} from './SimulationWarnings';
 import React from 'react';
 
@@ -15,7 +14,6 @@ export const SimulationPanel = () => {
 				<Simulation />
 			</Canvas>
 			<SimulationWarnings />
-			<SimulationControls />
 		</div>
 	);
 };

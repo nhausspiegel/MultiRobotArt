@@ -8,6 +8,7 @@ import {TimelineGroupLabel} from '../../components/timeline/TimelineGroupLabel';
 import {useRobartState} from '../../state/useRobartState';
 import {nextGroupName} from '../../state/groupMigration';
 import {useSimulator} from '../../state/useSimulator';
+import {SimulationOptions} from './SimulationOptions';
 import {TimelineSimulationButtons} from './TimelineSimulationButtons';
 import React, {useEffect, useLayoutEffect, useRef} from 'react';
 
@@ -75,14 +76,16 @@ export const Timeline = () => {
 		<div className="flex h-full w-full flex-col gap-2 rounded bg-blue-100">
 			<div className="flex">
 				<div className="flex flex-grow" />
-				<div className="flex gap-3 pt-2 pr-3">
+				<div className="flex items-center gap-3 pt-2 pr-3">
+					<SimulationOptions />
 					<TimelineSimulationButtons />
 				</div>
 			</div>
 
 			<div className="overflow-y-auto">
 				<div className="flex flex-shrink-0 gap-2">
-					<div className="ml-2 flex h-full flex-col gap-2">
+					{/* pt-4 on both columns: room above the lanes for the playhead's handle, rows stay aligned */}
+					<div className="ml-2 flex h-full flex-col gap-2 pt-4">
 						{groups.map((group) => (
 							<TimelineGroupLabel group={group} key={group.id} />
 						))}
@@ -90,7 +93,7 @@ export const Timeline = () => {
 							+ New group
 						</button>
 					</div>
-					<div ref={scrollerRef} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto">
+					<div ref={scrollerRef} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-4">
 						{groups.map((group) => (
 							<TimelineGroupBody group={group} key={group.id} />
 						))}
