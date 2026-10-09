@@ -2,6 +2,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
+import clsx from 'clsx';
 import {type DragEventHandler, useRef, useState} from 'react';
 
 import {type TimelineGroupState, useRobartState} from '../../state/useRobartState';
