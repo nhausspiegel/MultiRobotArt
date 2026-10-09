@@ -275,8 +275,6 @@ function* startingPositionGenerator(): Generator<[number, number, number]> {
 	}
 }
 
-export const startingPositionSuggestions = startingPositionGenerator();
-
 export const useRobartState = create<MRAState & MRAActions>()(
 	immer(
 		subscribeWithSelector(
@@ -485,14 +483,27 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					},
 					createRobot: () => {
 						const id = uuid();
-						const numRobots = Object.keys(get().robots).length;
-						
+						const robots = Object.values(get().robots);
+						// First free grid spot and unused name. A shared counter restarted on reload (stacking robots at the
+						// origin) and repeated names after deletes.
+						const isTaken = (position: [number, number, number]) =>
+							robots.some((robot) => robot.startingPosition.every((value, i) => value === position[i]));
+						let startingPosition: [number, number, number] = [0, 0, 0];
+						for (const position of startingPositionGenerator()) {
+							if (!isTaken(position)) {
+								startingPosition = position;
+								break;
+							}
+						}
+						let number = 1;
+						while (robots.some((robot) => robot.name === `CF ${number}`)) number++;
+
 						set((state) => {
 							state.robots[id] = {
 								id,
-								name: `CF ${numRobots + 1}`,
+								name: `CF ${number}`,
 								type: 'crazyflie',
-								startingPosition: startingPositionSuggestions.next().value,
+								startingPosition,
 							};
 							// Add to group with all CFs
 							state.timelineState.groups.groupAllCFs.robots[id] = state.robots[id];

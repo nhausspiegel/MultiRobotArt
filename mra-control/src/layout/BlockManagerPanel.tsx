@@ -3,7 +3,7 @@ import {faCopy, faPlusCircle, faTrash} from '@fortawesome/free-solid-svg-icons';
 import {Button} from 'flowbite-react';
 import React, {useState} from 'react';
 import {ConfirmationModal} from '@MRAControl/components/modal/ConfirmationModal';
-import {names} from './BlockEditorHeader';
+import {newBlockName} from './BlockEditorHeader';
 
 import {useRobartState} from '../state/useRobartState';
 
@@ -27,7 +27,7 @@ export const BlockManagerPanel = () => {
 					icon={faPlusCircle}
 					text="New"
 					onClick={() => {
-						const id = createBlock(names.next().value as string);
+						const id = createBlock(newBlockName());
 						setEditingBlock(id);
 					}}
 				/>

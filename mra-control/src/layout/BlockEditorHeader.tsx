@@ -3,15 +3,14 @@ import {RenamableText} from '@MRAControl/components/utils/RenamableText';
 import {type CodeBlock, useRobartState} from '../state/useRobartState';
 import React from 'react';
 
-function* nameGenerator(): Generator<string> {
+// First unused "New Block N"; a counter restarted on reload and repeated names already in the project
+export const newBlockName = () => {
+	const usedNames = new Set(Object.values(useRobartState.getState().blocks).map((block) => block.name));
 	let i = 1;
-	while (true) {
-		yield `New Block ${i}`;
-		i += 1;
-	}
-}
+	while (usedNames.has(`New Block ${i}`)) i += 1;
+	return `New Block ${i}`;
+};
 
-export const names = nameGenerator();
 export const BlockEditorHeader = () => {
 	const currentBlockId = useRobartState((state) => state.editingBlockId);
 	const currentBlock: CodeBlock | undefined = useRobartState((state) => state.blocks[currentBlockId ?? '']);
@@ -28,7 +27,7 @@ export const BlockEditorHeader = () => {
 					if (newText !== '') {
 						renameBlock(newText);
 					} else {
-						renameBlock(names.next().value as string);
+						renameBlock(newBlockName());
 					}
 				}}
 			/>
