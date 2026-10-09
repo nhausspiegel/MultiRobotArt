@@ -5,7 +5,7 @@ import { useRobartState } from '@MRAControl/state/useRobartState';
 import { useSimulator } from '@MRAControl/state/useSimulator';
 import { CatmullRomLine, GizmoHelper, GizmoViewport, Grid, Line, OrbitControls, Plane, Sphere } from '@react-three/drei';
 import { allDronesGroupId } from '@MRAControl/state/groupMigration';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useThree } from '@react-three/fiber';
 import { useRef } from 'react';
 import React from 'react';
 import type THREE from 'three';
@@ -16,16 +16,12 @@ export const Simulation = () => {
 	const marker = useRef<Group>(null!);
 	const robots = useSimulator((state) => state.robots);
 	const robartRobots = useRobartState((state) => state.robots);
-	const step = useSimulator((state) => state.step);
 	const setRobots = useSimulator((state) => state.setRobots);
 	const robartState = useRobartState();
 	const simulatorState = useSimulator();
 	const renderBB = simulatorState.renderBoundingBoxes;
 
 	const trajectoryMarkers: Array<{ position: Vector3; color: THREE.Color; id: string }> = useSimulator((state) => state.trajectoryMarkers);
-	useFrame(({ clock }) => {
-		step();
-	});
 
 	if (Object.keys(robots).length !== 0) {
 		if (simulatorState.time === 0) {

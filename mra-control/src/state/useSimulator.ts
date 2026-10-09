@@ -605,3 +605,15 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		},
 	})),
 );
+
+// Steps the running simulation every animation frame. Not in the 3D view's frame loop: other tabs unmount that view,
+// which froze the simulation and then jumped it ahead when the view came back.
+let frameRequest = 0;
+useSimulator.subscribe((state) => {
+	if (state.status !== 'RUNNING' || frameRequest) return;
+	const loop = () => {
+		useSimulator.getState().step();
+		frameRequest = useSimulator.getState().status === 'RUNNING' ? requestAnimationFrame(loop) : 0;
+	};
+	frameRequest = requestAnimationFrame(loop);
+});
