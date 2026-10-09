@@ -11,7 +11,7 @@ import {immer} from 'zustand/middleware/immer';
 import {ROBART_VERSION} from '../config/Version';
 import {exportROS, loadProjectFromFile, saveProjectToFile} from '../tools/projectFileConversion';
 import {useSimulator} from './useSimulator';
-import {allDronesGroupId, migrateGroups, newGroup, nextGroupName} from './groupMigration';
+import {allDronesGroupId, migrateGroups, newGroup} from './groupMigration';
 import {State} from 'blockly/core/utils/aria';
 
 export type CodeBlock = {
@@ -190,10 +190,10 @@ export type BlockActions = {
 
 export type RobotActions = {
 	/**
-   * Creates a robot in the given group, or the top-most group (creating Group 1 if there is none).
+   * Creates a robot in the given group, at the first free spot with the first unused name.
    * @returns The new robot's id.
    */
-	createRobot: (groupId?: string) => string;
+	createRobot: (groupId: string) => string;
 	saveRobot: (id: string, robot: Partial<RobotState>) => void;
 	deleteRobot: (id: string) => void;
 };
@@ -217,25 +217,29 @@ export type MRAGeneralActions = {
 	removeGroup: (groupId: string) => void;
 };
 
+// New projects start with one group holding one drone
+const firstDrone: RobotState = {id: uuid(), name: 'CF 1', type: 'crazyflie', startingPosition: [0, 0, 0]};
+const firstGroup: TimelineGroupState = {...newGroup('Group 1', {}), robots: {[firstDrone.id]: firstDrone}};
+
 const defaultRobartState: MRAState = {
 	blocks: {},
 	projectName: 'New Robart Project',
 	timelineState: {
 		scale: 1,
-		// Groups are added with "+ New group" as needed
 		groups: {
 			[allDronesGroupId]: {
 				id: allDronesGroupId,
 				name: 'All drones',
 				items: {},
-				robots: {},
+				robots: {[firstDrone.id]: firstDrone},
 				duration: 120,
 			},
+			[firstGroup.id]: firstGroup,
 		},
 	},
 	editingBlockId: undefined,
 	version: ROBART_VERSION,
-	robots: {},
+	robots: {[firstDrone.id]: firstDrone},
 	warnings: [],
 	notices: [],
 };
@@ -468,9 +472,6 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					},
 					createRobot: (groupId) => {
 						const id = uuid();
-						const targetGroupId = groupId
-							?? Object.values(get().timelineState.groups).find((group) => group.id !== allDronesGroupId)?.id
-							?? get().addGroup(nextGroupName(get().timelineState.groups));
 						const robots = Object.values(get().robots);
 						// First free grid spot and unused name. A shared counter restarted on reload (stacking robots at the
 						// origin) and repeated names after deletes.
@@ -494,7 +495,7 @@ export const useRobartState = create<MRAState & MRAActions>()(
 								startingPosition,
 							};
 							state.timelineState.groups[allDronesGroupId].robots[id] = state.robots[id];
-							state.timelineState.groups[targetGroupId].robots[id] = state.robots[id];
+							state.timelineState.groups[groupId].robots[id] = state.robots[id];
 						});
 						return id;
 					},

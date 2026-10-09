@@ -1,4 +1,3 @@
-import {Button, Modal} from 'flowbite-react';
 import React, {type DragEvent, useState} from 'react';
 
 import {allDronesGroupId} from '../../state/groupMigration';
@@ -23,12 +22,6 @@ const acceptRobotDrop = (onRobot: (robotId: string) => void) => ({
 	},
 });
 
-// The group a robot is in besides All drones, if any
-const useGroupOf = () => {
-	const groups = useRobartState((state) => state.timelineState.groups);
-	return (robotId: string) => Object.values(groups).find((group) => group.id !== allDronesGroupId && robotId in group.robots);
-};
-
 const RobotTag = ({robotId, color}: {robotId: string; color: string}) => {
 	const name = useRobartState((state) => state.robots[robotId]?.name);
 	const setEditingRobotId = useUIState((state) => state.setEditingRobotId);
@@ -51,54 +44,11 @@ const RobotTag = ({robotId, color}: {robotId: string; color: string}) => {
 	);
 };
 
-const GroupMembersModal = ({open, onClose, group}: {open: boolean; onClose: () => void; group: TimelineGroupState}) => {
-	const robots = useRobartState((state) => state.robots);
-	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
-	const createRobot = useRobartState((state) => state.createRobot);
-	const groupOf = useGroupOf();
-
-	return (
-		<Modal show={open} onClose={onClose} size="md">
-			<Modal.Header>Drones in {group.name}</Modal.Header>
-			<Modal.Body>
-				{Object.values(robots).map((robot) => {
-					const currentGroup = groupOf(robot.id);
-					return (
-						<label key={robot.id} className="flex items-center gap-2 py-1">
-							<input
-								type="checkbox"
-								checked={currentGroup?.id === group.id}
-								// Every drone is in a group: it leaves this one only by joining another
-								disabled={currentGroup?.id === group.id}
-								onChange={() => {
-									setRobotGroup(robot.id, group.id);
-								}}
-							/>
-							{robot.name}
-							{currentGroup && currentGroup.id !== group.id && (
-								<span className="text-sm" style={{color: currentGroup.color}}>(in {currentGroup.name})</span>
-							)}
-						</label>
-					);
-				})}
-				<button className="mt-2 font-bold text-blue-900 hover:underline" onClick={() => {
-					createRobot(group.id);
-				}}>
-					+ New drone
-				</button>
-			</Modal.Body>
-			<Modal.Footer>
-				<Button onClick={onClose}>Done</Button>
-			</Modal.Footer>
-		</Modal>
-	);
-};
-
 export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 	const renameGroup = useRobartState((state) => state.renameGroup);
 	const removeGroup = useRobartState((state) => state.removeGroup);
 	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
-	const [membersOpen, setMembersOpen] = useState(false);
+	const createRobot = useRobartState((state) => state.createRobot);
 	const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
 
 	if (group.id === allDronesGroupId) {
@@ -130,8 +80,9 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 						}}
 					/>
 				</div>
+				{/* Adds a drone to this group at the next free spot; click its name tag to edit it */}
 				<button className="rounded border border-gray-400 px-1 text-xs hover:bg-gray-100" onClick={() => {
-					setMembersOpen(true);
+					createRobot(group.id);
 				}}>
 					+ add
 				</button>
@@ -147,9 +98,6 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 					: robotIds.map((robotId) => <RobotTag key={robotId} robotId={robotId} color={color} />)}
 			</div>
 
-			<GroupMembersModal open={membersOpen} onClose={() => {
-				setMembersOpen(false);
-			}} group={group} />
 			<ConfirmationModal
 				// Its drones are deleted with it, so say so
 				header={robotIds.length === 0 ? `Remove ${group.name}?` : `Remove ${group.name} and its ${robotIds.length} drone${robotIds.length === 1 ? '' : 's'}?`}

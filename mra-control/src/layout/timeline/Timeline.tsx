@@ -8,7 +8,6 @@ import {TimelineGroupLabel} from '../../components/timeline/TimelineGroupLabel';
 import {useRobartState} from '../../state/useRobartState';
 import {nextGroupName} from '../../state/groupMigration';
 import {useSimulator} from '../../state/useSimulator';
-import {useUIState} from '../../state/useUIState';
 import {TimelineSimulationButtons} from './TimelineSimulationButtons';
 import React, {useEffect, useLayoutEffect, useRef} from 'react';
 
@@ -16,10 +15,6 @@ const addNewGroup = () => {
 	useRobartState.getState().addGroup(nextGroupName(useRobartState.getState().timelineState.groups));
 };
 
-// Into the top-most group (Group 1 is created if there is none), then opens its window to set its position
-const addNewDrone = () => {
-	useUIState.getState().setEditingRobotId(useRobartState.getState().createRobot());
-};
 
 
 export const Timeline = () => {
@@ -92,9 +87,6 @@ export const Timeline = () => {
 						))}
 						<button className="h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200" onClick={addNewGroup}>
 							+ New group
-						</button>
-						<button className="h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200" onClick={addNewDrone}>
-							+ New drone
 						</button>
 					</div>
 					<div ref={scrollerRef} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto">
