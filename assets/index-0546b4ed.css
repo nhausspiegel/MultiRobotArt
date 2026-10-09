@@ -1253,6 +1253,9 @@ input:checked + .toggle-bg {
 .h-screen {
   height: 100vh;
 }
+.min-h-0 {
+  min-height: 0px;
+}
 .\!w-full {
   width: 100% !important;
 }
@@ -1298,6 +1301,9 @@ input:checked + .toggle-bg {
 .w-5 {
   width: 1.25rem;
 }
+.w-52 {
+  width: 13rem;
+}
 .w-6 {
   width: 1.5rem;
 }
@@ -1322,6 +1328,9 @@ input:checked + .toggle-bg {
 }
 .w-screen {
   width: 100vw;
+}
+.min-w-0 {
+  min-width: 0px;
 }
 .max-w-2xl {
   max-width: 42rem;
@@ -1370,15 +1379,6 @@ input:checked + .toggle-bg {
 }
 .flex-grow {
   flex-grow: 1;
-}
-.flex-grow-0 {
-  flex-grow: 0;
-}
-.basis-4\/5 {
-  flex-basis: 80%;
-}
-.basis-\[10\%\] {
-  flex-basis: 10%;
 }
 .-translate-x-1\/2 {
   --tw-translate-x: -50%;
@@ -1468,6 +1468,9 @@ input:checked + .toggle-bg {
 .flex-wrap {
   flex-wrap: wrap;
 }
+.content-start {
+  align-content: flex-start;
+}
 .items-start {
   align-items: flex-start;
 }
@@ -1491,9 +1494,6 @@ input:checked + .toggle-bg {
 }
 .gap-1 {
   gap: 0.25rem;
-}
-.gap-10 {
-  gap: 2.5rem;
 }
 .gap-2 {
   gap: 0.5rem;
@@ -1587,8 +1587,10 @@ input:checked + .toggle-bg {
 .scroll-smooth {
   scroll-behavior: smooth;
 }
-.overflow-ellipsis {
+.truncate {
+  overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .text-ellipsis {
   text-overflow: ellipsis;
@@ -1726,6 +1728,10 @@ input:checked + .toggle-bg {
   --tw-border-opacity: 1;
   border-color: rgb(209 213 219 / var(--tw-border-opacity));
 }
+.border-gray-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity));
+}
 .border-gray-500 {
   --tw-border-opacity: 1;
   border-color: rgb(107 114 128 / var(--tw-border-opacity));
@@ -1840,6 +1846,10 @@ input:checked + .toggle-bg {
 .bg-gray-200 {
   --tw-bg-opacity: 1;
   background-color: rgb(229 231 235 / var(--tw-bg-opacity));
+}
+.bg-gray-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(209 213 219 / var(--tw-bg-opacity));
 }
 .bg-gray-400 {
   --tw-bg-opacity: 1;
@@ -2144,8 +2154,8 @@ input:checked + .toggle-bg {
 .to-yellow-200 {
   --tw-gradient-to: #FCE96A;
 }
-.bg-repeat-x {
-  background-repeat: repeat-x;
+.bg-no-repeat {
+  background-repeat: no-repeat;
 }
 .fill-blue-600 {
   fill: #1C64F2;
@@ -2204,6 +2214,10 @@ input:checked + .toggle-bg {
 }
 .p-6 {
   padding: 1.5rem;
+}
+.px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
 }
 .px-2 {
   padding-left: 0.5rem;
@@ -2630,6 +2644,10 @@ input:checked + .toggle-bg {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(250 202 21 / var(--tw-ring-opacity));
 }
+.blur {
+  --tw-blur: blur(8px);
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
 .filter {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
@@ -2687,6 +2705,20 @@ input:checked + .toggle-bg {
 
 svg[display='none'] {
   display: none;
+}
+
+/* Blockly scrollbars: subtle translucent handles instead of grey bars. Prefixed with .injectionDiv to outrank
+   Blockly's own styles, which are added after this file. */
+.injectionDiv .blocklyScrollbarHandle,
+.injectionDiv .blocklyFlyout .blocklyScrollbarHandle {
+  fill: rgba(0, 0, 0, 0.2);
+}
+
+.injectionDiv .blocklyScrollbarBackground:hover + .blocklyScrollbarHandle,
+.injectionDiv .blocklyScrollbarHandle:hover,
+.injectionDiv .blocklyFlyout .blocklyScrollbarBackground:hover + .blocklyScrollbarHandle,
+.injectionDiv .blocklyFlyout .blocklyScrollbarHandle:hover {
+  fill: rgba(0, 0, 0, 0.35);
 }
 
 .after\:translate-x-full::after {
@@ -2894,6 +2926,11 @@ svg[display='none'] {
 .hover\:text-gray-900:hover {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity));
+}
+
+.hover\:text-red-600:hover {
+  --tw-text-opacity: 1;
+  color: rgb(224 36 36 / var(--tw-text-opacity));
 }
 
 .hover\:underline:hover {

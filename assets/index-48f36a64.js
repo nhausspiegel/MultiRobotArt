@@ -33687,8 +33687,8 @@ const blockCircleRadians = {
   name: "circle_radians",
   block: {
     init: function() {
-      this.appendDummyInput().appendField(new Blockly.FieldLabelSerializable("Go in circle of radius"), "Circular motion").appendField(new Blockly.FieldNumber(1, 0), "radius_m").appendField("m");
-      this.appendDummyInput().appendField("at speed").appendField(new Blockly.FieldNumber(0.5), "velocity").appendField("m/s");
+      this.appendDummyInput().appendField(new Blockly.FieldLabelSerializable("Go in circle of radius"), "Circular motion").appendField(new Blockly.FieldNumber(1, 0.01), "radius_m").appendField("m");
+      this.appendDummyInput().appendField("at speed").appendField(new Blockly.FieldNumber(0.5, 0.01), "velocity").appendField("m/s");
       this.appendDummyInput().appendField("for").appendField(new Blockly.FieldNumber(6.28), "angle_radians").appendField("radians,");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -40122,11 +40122,14 @@ def circle(groupState, radius, velocity, radians, direction):
     if direction == "ccw":
         clockwise = -1
 
-    fx = lambda t: 0
-    fy = lambda t: radius * (np.cos(t * velocity) - 1)
-    fz = lambda t: clockwise * radius * np.sin(t * velocity)
+    # velocity is the speed along the circle (m/s), as in the simulator, so the turn rate depends on the radius
+    angular_velocity = velocity / radius
 
-    timesteps = np.arange(0, radians / velocity, 1 / Hz)
+    fx = lambda t: 0
+    fy = lambda t: radius * (np.cos(t * angular_velocity) - 1)
+    fz = lambda t: clockwise * radius * np.sin(t * angular_velocity)
+
+    timesteps = np.arange(0, radians / angular_velocity, 1 / Hz)
 
     # start positions bumped up by 1 meter in z
     initialPositions = [
@@ -41017,7 +41020,11 @@ const saveProjectToFile = (projectState, fileName = void 0) => {
   saveToFile(fileName, projectStateJson);
 };
 const loadProjectFromFile = (fileContents) => {
+  var _a3;
   const projectState = JSON.parse(fileContents);
+  if (typeof (projectState == null ? void 0 : projectState.blocks) !== "object" || typeof projectState.robots !== "object" || typeof ((_a3 = projectState.timelineState) == null ? void 0 : _a3.groups) !== "object") {
+    throw new Error("This file is not a Robart project.");
+  }
   return projectState;
 };
 const exportROS = (projectState, fileName) => {
@@ -43897,7 +43904,7 @@ class Box3 {
     _f0.subVectors(_v1$7, _v0$2);
     _f1.subVectors(_v2$4, _v1$7);
     _f2.subVectors(_v0$2, _v2$4);
-    let axes = [
+    let axes2 = [
       0,
       -_f0.z,
       _f0.y,
@@ -43926,16 +43933,16 @@ class Box3 {
       _f2.x,
       0
     ];
-    if (!satForAxes(axes, _v0$2, _v1$7, _v2$4, _extents)) {
+    if (!satForAxes(axes2, _v0$2, _v1$7, _v2$4, _extents)) {
       return false;
     }
-    axes = [1, 0, 0, 0, 1, 0, 0, 0, 1];
-    if (!satForAxes(axes, _v0$2, _v1$7, _v2$4, _extents)) {
+    axes2 = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+    if (!satForAxes(axes2, _v0$2, _v1$7, _v2$4, _extents)) {
       return false;
     }
     _triangleNormal.crossVectors(_f0, _f1);
-    axes = [_triangleNormal.x, _triangleNormal.y, _triangleNormal.z];
-    return satForAxes(axes, _v0$2, _v1$7, _v2$4, _extents);
+    axes2 = [_triangleNormal.x, _triangleNormal.y, _triangleNormal.z];
+    return satForAxes(axes2, _v0$2, _v1$7, _v2$4, _extents);
   }
   clampPoint(point, target2) {
     return target2.copy(point).clamp(this.min, this.max);
@@ -44009,9 +44016,9 @@ const _center = /* @__PURE__ */ new Vector3();
 const _extents = /* @__PURE__ */ new Vector3();
 const _triangleNormal = /* @__PURE__ */ new Vector3();
 const _testAxis = /* @__PURE__ */ new Vector3();
-function satForAxes(axes, v0, v1, v2, extents) {
-  for (let i2 = 0, j2 = axes.length - 3; i2 <= j2; i2 += 3) {
-    _testAxis.fromArray(axes, i2);
+function satForAxes(axes2, v0, v1, v2, extents) {
+  for (let i2 = 0, j2 = axes2.length - 3; i2 <= j2; i2 += 3) {
+    _testAxis.fromArray(axes2, i2);
     const r2 = extents.x * Math.abs(_testAxis.x) + extents.y * Math.abs(_testAxis.y) + extents.z * Math.abs(_testAxis.z);
     const p0 = v0.dot(_testAxis);
     const p1 = v1.dot(_testAxis);
@@ -73812,10 +73819,10 @@ function sandboxedSetInterval(func) {
 function subscribeSet(obj, name2, callback, context2) {
   if (!(obj instanceof Object))
     throw new Error("Invalid subscription object, got " + (typeof obj === "object" ? "null" : typeof obj));
-  const names2 = context2.setSubscriptions.get(obj) || /* @__PURE__ */ new Map();
-  context2.setSubscriptions.set(obj, names2);
-  const callbacks = names2.get(name2) || /* @__PURE__ */ new Set();
-  names2.set(name2, callbacks);
+  const names = context2.setSubscriptions.get(obj) || /* @__PURE__ */ new Map();
+  context2.setSubscriptions.set(obj, names);
+  const callbacks = names.get(name2) || /* @__PURE__ */ new Set();
+  names.set(name2, callbacks);
   callbacks.add(callback);
   let changeCbs;
   const val = obj[name2];
@@ -74074,7 +74081,7 @@ class PolynomialTrajectory extends Trajectory {
   }
 }
 class CircleTrajectory extends Trajectory {
-  constructor(duration2, init_pos, radius, axes = ["Y", "Z"], radians = 2 * Math.PI, clockwise = true, startAngle = 0, endAngle = 360) {
+  constructor(duration2, init_pos, radius, axes2 = ["Y", "Z"], radians = 2 * Math.PI, clockwise = true, startAngle = 0, endAngle = 360) {
     super(duration2);
     __publicField2(this, "radius");
     __publicField2(this, "axes");
@@ -74084,7 +74091,7 @@ class CircleTrajectory extends Trajectory {
     __publicField2(this, "startAngle");
     __publicField2(this, "endAngle");
     this.radius = radius;
-    this.axes = axes;
+    this.axes = axes2;
     this.radians = radians;
     this.clockwise = clockwise;
     this.pos = init_pos;
@@ -74377,12 +74384,12 @@ const moveCircleVel = (groupState2, radius, velocity, degrees, direction) => {
   var duration2 = 0;
   let trajectories = /* @__PURE__ */ new Map();
   groupState2.robotIDs.forEach((robotId2) => {
-    const axes = ["Y", "Z"];
+    const axes2 = ["Y", "Z"];
     const radians = toRadians(degrees);
     const clockwise = true;
     const arclength = Math.abs(radius * radians);
     duration2 = arclength / velocity;
-    const circleTraj = useSimulator.getState().robotCircle(robotId2, radius, axes, radians, clockwise, duration2);
+    const circleTraj = useSimulator.getState().robotCircle(robotId2, radius, axes2, radians, clockwise, duration2);
     trajectories.set(robotId2, circleTraj);
   });
   return [duration2, trajectories];
@@ -74536,22 +74543,27 @@ const useCrazyflieConstraintState = create$2()(
         }
         let warnings = [];
         robotIDs.forEach((id2) => {
-          var _a3, _b2;
+          var _a3, _b2, _c2;
+          let violating = false;
           for (let i2 = 1; i2 < positions.length; i2++) {
             const currentPosition = (_a3 = positions[i2]) == null ? void 0 : _a3.robotPositions[id2];
             const previousPosition = (_b2 = positions[i2 - 1]) == null ? void 0 : _b2.robotPositions[id2];
-            if (currentPosition && previousPosition) {
-              const velocity = currentPosition.distanceTo(previousPosition) / get2().deltaT;
-              if (currentPosition && previousPosition && velocity > get2().maxVelocity) {
-                const robotName = useRobartState.getState().robots[id2].name;
-                warnings.push({
-                  time: positions[i2].timestep,
-                  repr: "robot " + robotName + " has violated a velocity constraint at time " + positions[i2].timestep.toFixed(2) + ". It was travelling at " + velocity.toFixed(2) + " m/s.\n",
-                  violationType: "velocity",
-                  robotId: id2
-                });
-              }
+            const timeBetween = positions[i2].timestep - positions[i2 - 1].timestep;
+            if (!currentPosition || !previousPosition || timeBetween <= 0) {
+              violating = false;
+              continue;
             }
+            const velocity = currentPosition.distanceTo(previousPosition) / timeBetween;
+            if (velocity > get2().maxVelocity && !violating) {
+              const robotName = ((_c2 = useRobartState.getState().robots[id2]) == null ? void 0 : _c2.name) ?? "Deleted robot";
+              warnings.push({
+                time: positions[i2].timestep,
+                repr: "robot " + robotName + " has violated a velocity constraint at time " + positions[i2].timestep.toFixed(2) + ". It was travelling at " + velocity.toFixed(2) + " m/s.\n",
+                violationType: "velocity",
+                robotId: id2
+              });
+            }
+            violating = velocity > get2().maxVelocity;
           }
         });
         return warnings;
@@ -74568,21 +74580,23 @@ const useCrazyflieConstraintState = create$2()(
         if (history2.length > 0) {
           let warnings = [];
           robotIDs.forEach((id2) => {
-            var _a3;
+            var _a3, _b2;
+            let outside = false;
             for (let i2 = 1; i2 < history2.length; i2++) {
               const currentPosition = (_a3 = history2[i2]) == null ? void 0 : _a3.robotPositions[id2];
-              if (currentPosition) {
-                if (!this.workspaceDimensions.containsPoint(currentPosition)) {
-                  const robotName = useRobartState.getState().robots[id2].name;
-                  console.log(history2[i2]);
-                  warnings.push({
-                    time: history2[i2].timestep,
-                    repr: "robot " + robotName + " has violated a workspace constraint at time " + history2[i2].timestep.toFixed(2) + ". It's position was " + currentPosition.x.toFixed(2) + ", " + currentPosition.y.toFixed(2) + ", " + currentPosition.z.toFixed(2) + "\n",
-                    violationType: "velocity",
-                    robotId: id2
-                  });
-                }
+              if (!currentPosition)
+                continue;
+              const isOutside = !this.workspaceDimensions.containsPoint(currentPosition);
+              if (isOutside && !outside) {
+                const robotName = ((_b2 = useRobartState.getState().robots[id2]) == null ? void 0 : _b2.name) ?? "Deleted robot";
+                warnings.push({
+                  time: history2[i2].timestep,
+                  repr: "robot " + robotName + " has violated a workspace constraint at time " + history2[i2].timestep.toFixed(2) + ". Its position was " + currentPosition.x.toFixed(2) + ", " + currentPosition.y.toFixed(2) + ", " + currentPosition.z.toFixed(2) + "\n",
+                  violationType: "workspace",
+                  robotId: id2
+                });
               }
+              outside = isOutside;
             }
           });
           return warnings;
@@ -74611,6 +74625,7 @@ const nullTrajectory = new PolynomialTrajectory(-1, []);
 const pendingItems = [];
 const runningItemIds = {};
 let itemEndTimes = {};
+const blockLengthCache = /* @__PURE__ */ new Map();
 const maxShowLength = 10 * 60;
 const isFinished = (robots2) => pendingItems.length === 0 && Object.values(robots2).every((robot) => {
   var _a3;
@@ -74628,8 +74643,8 @@ const useSimulator = create$2()(
       let reprs = warnings == null ? void 0 : warnings.map((warning) => {
         return warning.repr;
       });
-      const state2 = useRobartState.getState();
-      useRobartState.setState({ ...state2, warnings: reprs });
+      useRobartState.getState();
+      useRobartState.setState({ warnings: reprs ?? [] });
       set({ status: "PAUSED" });
     },
     resume: () => {
@@ -74640,8 +74655,8 @@ const useSimulator = create$2()(
       let reprs = warnings == null ? void 0 : warnings.map((warning) => {
         return warning.repr;
       });
-      const state2 = useRobartState.getState();
-      useRobartState.setState({ ...state2, warnings: reprs });
+      useRobartState.getState();
+      useRobartState.setState({ warnings: reprs ?? [] });
       set({ status: "STOPPED" });
       get().cancelSimulation();
     },
@@ -74760,9 +74775,26 @@ const useSimulator = create$2()(
             durations[item.id] = Math.max(0.1, itemEndTimes[item.id] - item.startTime);
         });
       });
+      const blockLengths = {};
+      Object.values(useRobartState.getState().blocks).forEach((block) => {
+        if (!blockLengthCache.has(block.javaScript))
+          blockLengthCache.set(block.javaScript, get().measureBlockLength(block.javaScript));
+        blockLengths[block.id] = blockLengthCache.get(block.javaScript);
+      });
       get().executeSimulation(0);
       set({ endTime });
-      useRobartState.getState().setMeasuredDurations(durations);
+      useRobartState.getState().setMeasuredDurations(durations, blockLengths);
+    },
+    measureBlockLength: (javaScript) => {
+      set({ time: 0, trajectoryMarkers: [] });
+      get().setRobots({ standIn: { id: "standIn", name: "standIn", type: "crazyflie", startingPosition: [0, 0, 0] } });
+      itemEndTimes = {};
+      pendingItems.length = 0;
+      pendingItems.push({ itemId: "standIn", time: 0, robotIds: ["standIn"], lines: javaScript.split("\n").filter((line) => line.length > 0) });
+      while (!isFinished(get().robots) && get().time < maxShowLength) {
+        get().advance(1 / fps);
+      }
+      return Math.max(0.1, itemEndTimes.standIn ?? 0);
     },
     setTimeDilation: (timeDilation) => {
       set({ timeDilation });
@@ -74851,9 +74883,9 @@ const useSimulator = create$2()(
       const a7 = robot.acc.clone().addScaledVector(acc, -1).addScaledVector(robot.vel, 5).addScaledVector(vel, 5).addScaledVector(robot.pos, 10).addScaledVector(pos, -10).multiplyScalar(2);
       return new PolynomialTrajectory(duration2, [a0, a1, a2, a3, a4, a5, a6, a7]);
     },
-    robotCircle: (robotId2, radius = 1, axes = ["Y", "Z"], radians = 2 * Math.PI, clockwise = false, duration2 = 1) => {
+    robotCircle: (robotId2, radius = 1, axes2 = ["Y", "Z"], radians = 2 * Math.PI, clockwise = false, duration2 = 1) => {
       const robot = get().robots[robotId2];
-      const trajectory = new CircleTrajectory(duration2, robot.pos, radius, axes, radians, clockwise);
+      const trajectory = new CircleTrajectory(duration2, robot.pos, radius, axes2, radians, clockwise);
       return trajectory;
     },
     executeSimulation: (startTime) => {
@@ -74863,7 +74895,7 @@ const useSimulator = create$2()(
       if (startTime === 0) {
         set({ time: 0, trajectoryMarkers: [] });
         get().setRobots(robartRobots);
-        useRobartState.getState().warnings = [];
+        useRobartState.setState({ warnings: [] });
         useCrazyflieConstraintState.setState({ positionHistory: [] });
         itemEndTimes = {};
       }
@@ -74884,70 +74916,105 @@ const useSimulator = create$2()(
     },
     cancelSimulation: () => {
       pendingItems.length = 0;
+    },
+    reset: () => {
+      set({ status: "STOPPED", endTime: 0 });
+      get().executeSimulation(0);
+      get().cancelSimulation();
     }
   }))
 );
+const allDronesGroupId = "groupAllCFs";
+const groupColors = ["#ef4444", "#3b82f6", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"];
+const nextGroupColor = (groups) => {
+  const usedColors = Object.values(groups).map((group) => group.color);
+  return groupColors.find((color) => !usedColors.includes(color)) ?? groupColors[Object.keys(groups).length % groupColors.length];
+};
+const nextGroupName = (groups) => {
+  const highest = Math.max(0, ...Object.values(groups).map((group) => {
+    var _a3;
+    return Number(((_a3 = /^group (\d+)$/i.exec(group.name)) == null ? void 0 : _a3[1]) ?? 0);
+  }));
+  return `Group ${highest + 1}`;
+};
+const newGroup = (name2, groups) => {
+  let baseId = name2.replace(/\W/g, "");
+  if (!/^[A-Za-z_]/.test(baseId))
+    baseId = "group" + baseId;
+  let id2 = baseId;
+  for (let i2 = 2; id2 in groups; i2++)
+    id2 = `${baseId}_${i2}`;
+  return { id: id2, name: name2, items: {}, robots: {}, duration: 120, color: nextGroupColor(groups) };
+};
+const migrateGroups = (state2) => {
+  const notices = [];
+  const allDrones = state2.timelineState.groups[allDronesGroupId] ?? { id: allDronesGroupId, name: "All drones", items: {}, robots: {}, duration: 120 };
+  const groups = {
+    [allDronesGroupId]: { ...allDrones, name: allDrones.name === "All CFs" ? "All drones" : allDrones.name, robots: { ...state2.robots } }
+  };
+  const keptIn = /* @__PURE__ */ new Map();
+  Object.values(state2.timelineState.groups).forEach((group) => {
+    if (group.id === allDronesGroupId)
+      return;
+    const robots2 = {};
+    Object.keys(group.robots).forEach((robotId2) => {
+      const robot = state2.robots[robotId2];
+      if (robot === void 0)
+        return;
+      if (keptIn.has(robotId2)) {
+        notices.push(`${robot.name} was in several groups: kept in ${keptIn.get(robotId2)}, removed from ${group.name}.
+`);
+        return;
+      }
+      keptIn.set(robotId2, group.name);
+      robots2[robotId2] = robot;
+    });
+    if (Object.keys(robots2).length === 0 && Object.keys(group.items).length === 0)
+      return;
+    groups[group.id] = { ...group, robots: robots2 };
+  });
+  Object.values(groups).forEach((group) => {
+    if (group.id !== allDronesGroupId && group.color === void 0)
+      group.color = nextGroupColor(groups);
+  });
+  const ungrouped = Object.values(state2.robots).filter((robot) => !keptIn.has(robot.id));
+  if (ungrouped.length > 0) {
+    let target2 = Object.values(groups).find((group) => group.id !== allDronesGroupId);
+    if (target2 === void 0) {
+      target2 = newGroup(nextGroupName(groups), groups);
+      groups[target2.id] = target2;
+    }
+    ungrouped.forEach((robot) => {
+      target2.robots[robot.id] = robot;
+      notices.push(`${robot.name} had no group: added to ${target2.name}.
+`);
+    });
+  }
+  return { ...state2, timelineState: { ...state2.timelineState, groups }, notices };
+};
+const firstDrone = { id: uuid$2(), name: "CF 1", type: "crazyflie", startingPosition: [0, 0, 0] };
+const firstGroup = { ...newGroup("Group 1", {}), robots: { [firstDrone.id]: firstDrone } };
 const defaultRobartState = {
   blocks: {},
   projectName: "New Robart Project",
   timelineState: {
     scale: 1,
     groups: {
-      groupAllCFs: {
-        id: "groupAllCFs",
-        name: "All CFs",
+      [allDronesGroupId]: {
+        id: allDronesGroupId,
+        name: "All drones",
         items: {},
-        robots: {},
+        robots: { [firstDrone.id]: firstDrone },
         duration: 120
       },
-      group1: {
-        id: "group1",
-        name: "Group 1",
-        items: {},
-        robots: {},
-        duration: 120
-      },
-      group2: {
-        id: "group2",
-        name: "Group 2",
-        items: {},
-        robots: {},
-        duration: 120
-      },
-      group3: {
-        id: "group3",
-        name: "Group 3",
-        items: {},
-        robots: {},
-        duration: 120
-      },
-      group4: {
-        id: "group4",
-        name: "Group 4",
-        items: {},
-        robots: {},
-        duration: 120
-      },
-      group5: {
-        id: "group5",
-        name: "Group 5",
-        items: {},
-        robots: {},
-        duration: 120
-      },
-      group6: {
-        id: "group6",
-        name: "Group 6",
-        items: {},
-        robots: {},
-        duration: 120
-      }
+      [firstGroup.id]: firstGroup
     }
   },
   editingBlockId: void 0,
   version: ROBART_VERSION,
-  robots: {},
-  warnings: []
+  robots: { [firstDrone.id]: firstDrone },
+  warnings: [],
+  notices: []
 };
 function* startingPositionGenerator() {
   let i2 = 0;
@@ -74962,7 +75029,6 @@ function* startingPositionGenerator() {
     i2 += 1;
   }
 }
-const startingPositionSuggestions = startingPositionGenerator();
 const useRobartState = create$2()(
   immer(
     subscribeWithSelector(
@@ -74970,8 +75036,9 @@ const useRobartState = create$2()(
         (set2, get2) => ({
           ...defaultRobartState,
           loadProject: (file) => {
-            const newState = loadProjectFromFile(file);
+            const newState = migrateGroups(loadProjectFromFile(file));
             set2(newState);
+            useSimulator.getState().reset();
           },
           saveProject: (fileName) => {
             const state2 = {
@@ -74998,10 +75065,11 @@ const useRobartState = create$2()(
             exportROS(state2);
           },
           getWarnings: () => {
-            return get2().warnings.join("");
+            return (get2().warnings ?? []).join("");
           },
           resetProject: () => {
             set2(defaultRobartState);
+            useSimulator.getState().reset();
           },
           setProjectName: (name2) => {
             set2({ projectName: name2 });
@@ -75052,6 +75120,13 @@ const useRobartState = create$2()(
             oldItems[newItem.id] = newItem;
             set2((state2) => {
               state2.timelineState.groups[groupId].items = oldItems;
+            });
+          },
+          moveTimelineItem: (fromGroupId, itemId, toGroupId, startTime) => {
+            set2((state2) => {
+              const item = { ...state2.timelineState.groups[fromGroupId].items[itemId], groupId: toGroupId, startTime };
+              delete state2.timelineState.groups[fromGroupId].items[itemId];
+              state2.timelineState.groups[toGroupId].items[itemId] = item;
             });
           },
           setTimelineScale: (scale) => {
@@ -75116,19 +75191,21 @@ const useRobartState = create$2()(
               state2.blocks[blockId].duration = duration2;
             });
           },
-          setMeasuredDurations: (durations) => {
+          setMeasuredDurations: (durations, blockLengths) => {
+            const changed = (measured, current) => measured !== void 0 && Math.abs(measured - current) > 1e-3;
             const items = Object.values(get2().timelineState.groups).flatMap((group) => Object.values(group.items));
-            if (!items.some((item) => durations[item.id] !== void 0 && Math.abs(durations[item.id] - item.duration) > 1e-3))
+            if (!items.some((item) => changed(durations[item.id], item.duration)) && !Object.values(get2().blocks).some((block) => changed(blockLengths[block.id], block.duration)))
               return;
             set2((state2) => {
               Object.values(state2.timelineState.groups).forEach((group) => {
                 Object.values(group.items).forEach((item) => {
-                  if (durations[item.id] === void 0)
-                    return;
-                  item.duration = durations[item.id];
-                  if (state2.blocks[item.blockId])
-                    state2.blocks[item.blockId].duration = durations[item.id];
+                  if (durations[item.id] !== void 0)
+                    item.duration = durations[item.id];
                 });
+              });
+              Object.values(state2.blocks).forEach((block) => {
+                if (blockLengths[block.id] !== void 0)
+                  block.duration = blockLengths[block.id];
               });
             });
           },
@@ -75138,32 +75215,38 @@ const useRobartState = create$2()(
             if (blockId != oldEditingBlockId)
               set2({ editingBlockId: blockId });
           },
-          addRobotToGroup: (groupId, robotId2) => {
+          setRobotGroup: (robotId2, groupId) => {
             set2((state2) => {
+              Object.values(state2.timelineState.groups).forEach((group) => {
+                if (group.id !== allDronesGroupId)
+                  delete group.robots[robotId2];
+              });
               state2.timelineState.groups[groupId].robots[robotId2] = state2.robots[robotId2];
             });
           },
-          removeRobotFromGroup: (groupId, robotId2) => {
-            set2((state2) => {
-              const { timelineState } = state2;
-              const { groups } = timelineState;
-              const updatedRobots = Object.fromEntries(
-                Object.entries(groups[groupId].robots).filter(([key, value]) => key !== robotId2 && value !== void 0)
-              );
-              groups[groupId].robots = updatedRobots;
-            });
-          },
-          createRobot: () => {
+          createRobot: (groupId) => {
             const id2 = uuid$2();
-            const numRobots = Object.keys(get2().robots).length;
+            const robots2 = Object.values(get2().robots);
+            const isTaken = (position) => robots2.some((robot) => robot.startingPosition.every((value, i2) => value === position[i2]));
+            let startingPosition = [0, 0, 0];
+            for (const position of startingPositionGenerator()) {
+              if (!isTaken(position)) {
+                startingPosition = position;
+                break;
+              }
+            }
+            let number2 = 1;
+            while (robots2.some((robot) => robot.name === `CF ${number2}`))
+              number2++;
             set2((state2) => {
               state2.robots[id2] = {
                 id: id2,
-                name: `CF ${numRobots + 1}`,
+                name: `CF ${number2}`,
                 type: "crazyflie",
-                startingPosition: startingPositionSuggestions.next().value
+                startingPosition
               };
-              state2.timelineState.groups.groupAllCFs.robots[id2] = state2.robots[id2];
+              state2.timelineState.groups[allDronesGroupId].robots[id2] = state2.robots[id2];
+              state2.timelineState.groups[groupId].robots[id2] = state2.robots[id2];
             });
             return id2;
           },
@@ -75176,9 +75259,13 @@ const useRobartState = create$2()(
             });
           },
           deleteRobot: (id2) => {
-            const newRobots = { ...get2().robots };
-            delete newRobots[id2];
-            set2({ robots: newRobots });
+            set2((state2) => {
+              delete state2.robots[id2];
+              Object.values(state2.timelineState.groups).forEach((group) => {
+                delete group.robots[id2];
+              });
+            });
+            useSimulator.getState().reset();
           },
           removeTimelineItem: (groupId, itemId) => {
             const newItems = { ...get2().timelineState.groups[groupId].items };
@@ -75188,46 +75275,40 @@ const useRobartState = create$2()(
             });
           },
           renameGroup: (groupId, groupName) => {
-            const groups = get2().timelineState.groups;
-            groups[groupId].name = groupName;
             set2((state2) => {
-              state2.timelineState.groups = groups;
+              state2.timelineState.groups[groupId].name = groupName;
             });
           },
           addGroup: (groupName) => {
-            const groups = get2().timelineState.groups;
-            const groupId = groupName.replace(/\s/g, "");
-            const newGroups = {
-              ...groups,
-              [groupId]: {
-                id: groupId,
-                name: groupName,
-                items: {},
-                robots: {},
-                duration: 120
-              }
-            };
+            const group = newGroup(groupName, get2().timelineState.groups);
             set2((state2) => {
-              state2.timelineState.groups = newGroups;
+              state2.timelineState.groups[group.id] = group;
             });
+            return group.id;
           },
           removeGroup: (groupId) => {
-            const groups = { ...get2().timelineState.groups };
-            console.log("hi");
-            delete groups[groupId];
+            const robotIds = Object.keys(get2().timelineState.groups[groupId].robots);
             set2((state2) => {
-              state2.timelineState.groups = { ...groups };
+              delete state2.timelineState.groups[groupId];
+              robotIds.forEach((robotId2) => {
+                delete state2.robots[robotId2];
+                delete state2.timelineState.groups[allDronesGroupId].robots[robotId2];
+              });
             });
-          },
-          removeGroups: (groupsToRemove) => {
-            for (let i2 = 0; i2 < groupsToRemove.length; i2++) {
-              get2().removeGroup(groupsToRemove[i2]);
-            }
+            if (robotIds.length > 0)
+              useSimulator.getState().reset();
           }
         }),
         {
           storage: createJSONStorage(() => sessionStorage),
-          name: "robartState"
+          name: "robartState",
+          // The project kept in the browser may predate one-group-per-robot
+          merge: (persistedState, currentState) => {
+            if (!persistedState)
+              return currentState;
+            const merged = { ...currentState, ...persistedState };
+            return { ...merged, ...migrateGroups(merged) };
+          }
         }
       )
     )
@@ -75468,6 +75549,7 @@ const RenamableText = ({ text, updateText, className }) => {
   const [inputValue, setInputValue] = reactExports.useState("");
   const [width, setWidth] = reactExports.useState(0);
   const span = reactExports.useRef(null);
+  const finished = reactExports.useRef(false);
   reactExports.useEffect(() => {
     var _a3;
     if (span.current === null)
@@ -75480,6 +75562,7 @@ const RenamableText = ({ text, updateText, className }) => {
     {
       className: clsx(defaultClassName, className),
       onClick: () => {
+        finished.current = false;
         setInputValue(text);
         setShowRenameInput(true);
       },
@@ -75490,6 +75573,7 @@ const RenamableText = ({ text, updateText, className }) => {
     {
       onSubmit: (e2) => {
         e2.preventDefault();
+        finished.current = true;
         updateText(inputValue);
         setShowRenameInput(false);
       },
@@ -75505,6 +75589,15 @@ const RenamableText = ({ text, updateText, className }) => {
               setInputValue(e2.target.value);
             },
             onBlur: () => {
+              if (!finished.current)
+                updateText(inputValue);
+              finished.current = true;
+              setShowRenameInput(false);
+            },
+            onKeyDown: (e2) => {
+              if (e2.key !== "Escape")
+                return;
+              finished.current = true;
               setShowRenameInput(false);
             },
             autoFocus: true
@@ -75515,14 +75608,13 @@ const RenamableText = ({ text, updateText, className }) => {
     }
   );
 };
-function* nameGenerator() {
+const newBlockName = () => {
+  const usedNames = new Set(Object.values(useRobartState.getState().blocks).map((block) => block.name));
   let i2 = 1;
-  while (true) {
-    yield `New Block ${i2}`;
+  while (usedNames.has(`New Block ${i2}`))
     i2 += 1;
-  }
-}
-const names = nameGenerator();
+  return `New Block ${i2}`;
+};
 const BlockEditorHeader = () => {
   const currentBlockId = useRobartState((state2) => state2.editingBlockId);
   const currentBlock = useRobartState((state2) => state2.blocks[currentBlockId ?? ""]);
@@ -75538,41 +75630,81 @@ const BlockEditorHeader = () => {
         if (newText !== "") {
           renameBlock(newText);
         } else {
-          renameBlock(names.next().value);
+          renameBlock(newBlockName());
         }
       }
     }
   ) });
 };
+const zoomScaleSpeed = 1.2;
+Blockly.Scrollbar.scrollbarThickness = 8;
+class FixedScaleFlyout extends Blockly.VerticalFlyout {
+  getFlyoutScale() {
+    return 1;
+  }
+}
 const BlockEditorPanel = () => {
   const currentBlockId = useRobartState((state2) => state2.editingBlockId);
   const saveBlock = useRobartState((state2) => state2.saveBlock);
   const workspaceRef = reactExports.useRef(null);
-  const [localBlockId, setLocalBlockId] = reactExports.useState();
-  const { workspace, xml } = useBlocklyWorkspace({
+  const loadedBlockId = reactExports.useRef();
+  const { workspace } = useBlocklyWorkspace({
     toolboxConfiguration: blocklyToolboxConfiguration,
-    initialXml: "",
+    // Non-empty so react-blockly's one-time initial import runs at once with nothing in it. With '' it waited for its
+    // own debounced xml copy to fill and then imported it on top of the block we had already loaded (domToWorkspace
+    // appends), duplicating the block's contents on every page load.
+    initialXml: '<xml xmlns="https://developers.google.com/blockly/xml"></xml>',
     workspaceConfiguration: {
       grid: {
         spacing: 20,
         length: 3,
         colour: "#ccc",
         snap: true
-      }
+      },
+      // Pinch (ctrl+wheel in Chrome/Firefox) and cmd+scroll zoom; plain scrolling pans. move.wheel is needed,
+      // or every scroll would zoom.
+      zoom: { wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed },
+      move: { wheel: true, drag: true, scrollbars: true },
+      plugins: { flyoutsVerticalToolbox: FixedScaleFlyout }
     },
     onWorkspaceChange: (workspaceChanged) => {
+      if (!loadedBlockId.current)
+        return;
       const python2 = pythonExports.pythonGenerator.workspaceToCode(workspaceChanged);
       const javaScript = javascriptExports.javascriptGenerator.workspaceToCode(workspaceChanged);
-      if (localBlockId && xml)
-        saveBlock(localBlockId, { xml, python: python2, javaScript });
+      const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspaceChanged));
+      saveBlock(loadedBlockId.current, { xml, python: python2, javaScript });
     },
     ref: workspaceRef
   });
   reactExports.useEffect(() => {
+    const element = workspaceRef.current;
+    if (!workspace || !element)
+      return;
+    let previousScale = 1;
+    const onGestureStart = (event) => {
+      event.preventDefault();
+      previousScale = 1;
+    };
+    const onGestureChange = (event) => {
+      event.preventDefault();
+      const { scale, clientX, clientY } = event;
+      const rect = element.getBoundingClientRect();
+      workspace.zoom(clientX - rect.left, clientY - rect.top, Math.log(scale / previousScale) / Math.log(zoomScaleSpeed));
+      previousScale = scale;
+    };
+    element.addEventListener("gesturestart", onGestureStart);
+    element.addEventListener("gesturechange", onGestureChange);
+    return () => {
+      element.removeEventListener("gesturestart", onGestureStart);
+      element.removeEventListener("gesturechange", onGestureChange);
+    };
+  }, [workspace]);
+  reactExports.useEffect(() => {
     window.dispatchEvent(new Event("resize"));
     if (!workspace)
       return;
-    setLocalBlockId(currentBlockId);
+    loadedBlockId.current = currentBlockId;
     if (currentBlockId) {
       workspace.setVisible(true);
       const currentBlock = useRobartState.getState().blocks[currentBlockId];
@@ -75586,7 +75718,7 @@ const BlockEditorPanel = () => {
       workspace.setVisible(false);
       workspace.clear();
     }
-  }, [currentBlockId]);
+  }, [currentBlockId, workspace]);
   return /* @__PURE__ */ jsxs("div", { className: "flex h-full w-full flex-col", children: [
     /* @__PURE__ */ jsx(BlockEditorHeader, {}),
     /* @__PURE__ */ jsx("div", { ref: workspaceRef, className: "w-full flex-grow" })
@@ -81814,7 +81946,7 @@ DropdownComponent.displayName = "Dropdown";
 DropdownItem.displayName = "Dropdown.Item";
 DropdownHeader.displayName = "Dropdown.Header";
 DropdownDivider.displayName = "Dropdown.Divider";
-const Dropdown = Object.assign(DropdownComponent, {
+Object.assign(DropdownComponent, {
   Item: DropdownItem,
   Header: DropdownHeader,
   Divider: DropdownDivider
@@ -82347,9 +82479,10 @@ const IconButton = ({
   color,
   onClick,
   className,
-  type
+  type,
+  disabled: disabled2
 }) => {
-  return /* @__PURE__ */ jsxs(Button, { className, onClick, color, type, children: [
+  return /* @__PURE__ */ jsxs(Button, { className, onClick, color, type, disabled: disabled2, children: [
     /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: icon2 }),
     text !== "" ? /* @__PURE__ */ jsx("span", { className: "ml-2", children: text }) : null
   ] });
@@ -82410,11 +82543,6 @@ var faPlus = {
   iconName: "plus",
   icon: [448, 512, [10133, 61543, "add"], "2b", "M240 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H176V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H384c17.7 0 32-14.3 32-32s-14.3-32-32-32H240V80z"]
 };
-var faRobot = {
-  prefix: "fas",
-  iconName: "robot",
-  icon: [640, 512, [129302], "f544", "M320 0c17.7 0 32 14.3 32 32V96H472c39.8 0 72 32.2 72 72V440c0 39.8-32.2 72-72 72H168c-39.8 0-72-32.2-72-72V168c0-39.8 32.2-72 72-72H288V32c0-17.7 14.3-32 32-32zM208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16H208zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16H304zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16H400zM264 256a40 40 0 1 0 -80 0 40 40 0 1 0 80 0zm152 40a40 40 0 1 0 0-80 40 40 0 1 0 0 80zM48 224H64V416H48c-26.5 0-48-21.5-48-48V272c0-26.5 21.5-48 48-48zm544 0c26.5 0 48 21.5 48 48v96c0 26.5-21.5 48-48 48H576V224h16z"]
-};
 var faCirclePlus = {
   prefix: "fas",
   iconName: "circle-plus",
@@ -82427,6 +82555,16 @@ var faCircleXmark = {
   icon: [512, 512, [61532, "times-circle", "xmark-circle"], "f057", "M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"]
 };
 var faXmarkCircle = faCircleXmark;
+const ConfirmationModal = ({ open: open2, onCancel, onConfirm, header, children }) => {
+  return /* @__PURE__ */ jsxs(Modal, { show: open2, onClose: onCancel, children: [
+    /* @__PURE__ */ jsx(Modal.Header, { children: header }),
+    children && /* @__PURE__ */ jsx(Modal.Body, { children }),
+    /* @__PURE__ */ jsxs(Modal.Footer, { children: [
+      /* @__PURE__ */ jsx(Button, { color: "gray", onClick: onCancel, children: "Cancel" }),
+      /* @__PURE__ */ jsx(Button, { color: "failure", onClick: onConfirm, children: "Confirm" })
+    ] })
+  ] });
+};
 const BlockManagerPanel = () => {
   const blocks2 = useRobartState((state2) => Object.values(state2.blocks));
   const removeBlock = useRobartState((state2) => state2.removeBlock);
@@ -82434,7 +82572,10 @@ const BlockManagerPanel = () => {
   const copyBlock = useRobartState((state2) => state2.copyBlock);
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
   const setEditingBlock = useRobartState((state2) => state2.setEditingBlock);
-  return /* @__PURE__ */ jsxs("div", { children: [
+  const selectedBlock = useRobartState((state2) => state2.blocks[selectedBlockId ?? ""]);
+  const selectedBlockUses = useRobartState((state2) => Object.values(state2.timelineState.groups).flatMap((group) => Object.values(group.items)).filter((item) => item.blockId === selectedBlockId).length);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxs("div", { className: "flex h-full flex-col", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap gap-2 p-2", children: [
       /* @__PURE__ */ jsx(
         IconButton,
@@ -82442,7 +82583,7 @@ const BlockManagerPanel = () => {
           icon: faPlusCircle,
           text: "New",
           onClick: () => {
-            const id2 = createBlock(names.next().value);
+            const id2 = createBlock(newBlockName());
             setEditingBlock(id2);
           }
         }
@@ -82469,12 +82610,34 @@ const BlockManagerPanel = () => {
           onClick: () => {
             if (selectedBlockId === void 0)
               return;
-            removeBlock(selectedBlockId);
+            setConfirmDeleteOpen(true);
           }
         }
       )
     ] }),
-    /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-2 p-2", children: blocks2.map((b2) => /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsxs(
+      ConfirmationModal,
+      {
+        header: "Delete block?",
+        open: confirmDeleteOpen,
+        onCancel: () => {
+          setConfirmDeleteOpen(false);
+        },
+        onConfirm: () => {
+          if (selectedBlockId !== void 0)
+            removeBlock(selectedBlockId);
+          setConfirmDeleteOpen(false);
+        },
+        children: [
+          '"',
+          selectedBlock == null ? void 0 : selectedBlock.name,
+          '" will also be removed from the timeline',
+          selectedBlockUses > 0 ? ` (used ${selectedBlockUses} time${selectedBlockUses === 1 ? "" : "s"})` : "",
+          "."
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsx("div", { className: "flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto p-2", children: blocks2.map((b2) => /* @__PURE__ */ jsx(
       "div",
       {
         className: `flex ${selectedBlockId === b2.id ? "border-4 border-cyan-500 rounded-lg" : ""}`,
@@ -83955,20 +84118,30 @@ const UploadFileModal = ({
   onFileUpload,
   header
 }) => {
+  const [error, setError] = reactExports.useState();
+  const close = () => {
+    setError(void 0);
+    onClose();
+  };
   const onDrop = reactExports.useCallback((acceptedFiles) => {
+    setError(void 0);
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onabort = () => {
-        console.log("file reading was aborted!");
+        setError("Reading the file was cancelled.");
       };
       reader.onerror = () => {
-        console.log("file reading failed!");
+        setError("The file could not be read.");
       };
       reader.onload = () => {
-        onFileUpload(reader.result);
-        onClose();
+        try {
+          onFileUpload(reader.result);
+          onClose();
+        } catch (e2) {
+          setError(e2 instanceof SyntaxError ? "This file is not a Robart project (it could not be parsed)." : e2.message);
+        }
       };
-      reader.readAsBinaryString(file);
+      reader.readAsText(file);
     });
   }, []);
   const { getRootProps, getInputProps, inputRef } = useDropzone({
@@ -83986,48 +84159,36 @@ const UploadFileModal = ({
       "application/json": [".robart"]
     }
   });
-  return /* @__PURE__ */ jsxs(Modal, { show: open2, onClose, children: [
+  return /* @__PURE__ */ jsxs(Modal, { show: open2, onClose: close, children: [
     /* @__PURE__ */ jsx(Modal.Header, { children: header }),
-    /* @__PURE__ */ jsx(Modal.Body, { children: /* @__PURE__ */ jsxs("div", { className: "border-1 flex justify-center border-gray-500 bg-gray-50 p-5 py-14 text-lg shadow-lg", ...getRootProps(), children: [
-      /* @__PURE__ */ jsx("input", { ref: inputRef, ...getInputProps() }),
-      /* @__PURE__ */ jsx("p", { children: "Drag & drop a project file here, or click to select a file" })
-    ] }) }),
-    /* @__PURE__ */ jsx(Modal.Footer, { children: /* @__PURE__ */ jsx(CancelButton, { onClick: onClose }) })
+    /* @__PURE__ */ jsxs(Modal.Body, { children: [
+      /* @__PURE__ */ jsxs("div", { className: "border-1 flex justify-center border-gray-500 bg-gray-50 p-5 py-14 text-lg shadow-lg", ...getRootProps(), children: [
+        /* @__PURE__ */ jsx("input", { ref: inputRef, ...getInputProps() }),
+        /* @__PURE__ */ jsx("p", { children: "Drag & drop a project file here, or click to select a file" })
+      ] }),
+      error && /* @__PURE__ */ jsx("p", { className: "mt-3 text-red-600", children: error })
+    ] }),
+    /* @__PURE__ */ jsx(Modal.Footer, { children: /* @__PURE__ */ jsx(CancelButton, { onClick: close }) })
   ] });
 };
 const useUIState = create$2()((set2, get2) => ({
   settingsModalOpen: false,
   curveEditorOpen: false,
   openSimulation: false,
-  robotManagerModalOpen: false,
-  RGModalOpen: false,
+  editingRobotId: void 0,
   toggleSettingsModal: () => {
     set2({ settingsModalOpen: !get2().settingsModalOpen });
   },
   toggleCurveEditor: () => {
     set2({ curveEditorOpen: !get2().curveEditorOpen });
   },
-  toggleRobotManager: () => {
-    set2({ robotManagerModalOpen: !get2().robotManagerModalOpen });
+  setEditingRobotId: (robotId2) => {
+    set2({ editingRobotId: robotId2 });
   },
   toggleSimulation: () => {
     set2({ openSimulation: !get2().openSimulation });
-  },
-  toggleRGModal: () => {
-    console.log(get2().RGModalOpen);
-    set2({ RGModalOpen: !get2().RGModalOpen });
   }
 }));
-const ConfirmationModal = ({ open: open2, onCancel, onConfirm, header, children }) => {
-  return /* @__PURE__ */ jsxs(Modal, { show: open2, onClose: onCancel, children: [
-    /* @__PURE__ */ jsx(Modal.Header, { children: header }),
-    /* @__PURE__ */ jsx(Modal.Body, { children }),
-    /* @__PURE__ */ jsxs(Modal.Footer, { children: [
-      /* @__PURE__ */ jsx(Button, { color: "gray", onClick: onCancel, children: "Cancel" }),
-      /* @__PURE__ */ jsx(Button, { color: "failure", onClick: onConfirm, children: "Confirm" })
-    ] })
-  ] });
-};
 var constants = { exports: {} };
 var reactReconcilerConstants_production_min = {};
 /**
@@ -106297,6 +106458,10 @@ function Crazyflie({ robotId: robotId2, renderBoundingBox }) {
   const robot = useRobartState((state2) => state2.robots[robotId2]);
   const simRobot = useSimulator((state2) => state2.robots[robotId2]);
   const showCoordinates = useSimulator((state2) => state2.showCoordinates);
+  const groupColor = useRobartState((state2) => {
+    var _a3;
+    return ((_a3 = Object.values(state2.timelineState.groups).find((group2) => group2.id !== allDronesGroupId && robotId2 in group2.robots)) == null ? void 0 : _a3.color) ?? "#9ca3af";
+  });
   const boundingBox = simRobot == null ? void 0 : simRobot.boundingBox;
   const boundingBoxDims = boundingBox == null ? void 0 : boundingBox.getSize(new Vector3());
   const [showText, setShowText] = reactExports.useState(false);
@@ -106327,7 +106492,11 @@ function Crazyflie({ robotId: robotId2, renderBoundingBox }) {
     return /* @__PURE__ */ jsx(Text$1, { fontSize: 1, children: "Loading..." });
   }
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    showText || showCoordinates ? /* @__PURE__ */ jsx(Text$1, { quaternion: camera.quaternion.clone(), position: [0, 0, 1], fontSize: 0.25, children: `${robot.name}, Position: (${simRobot.pos.x.toFixed(1)}, ${simRobot.pos.y.toFixed(1)}, ${simRobot.pos.z.toFixed(1)})` }) : null,
+    showText || showCoordinates ? /* @__PURE__ */ jsx(Text$1, { quaternion: camera.quaternion.clone(), position: [0, 0, 1], fontSize: 0.25, children: `${(robot == null ? void 0 : robot.name) ?? "Deleted robot"}, Position: (${simRobot.pos.x.toFixed(1)}, ${simRobot.pos.y.toFixed(1)}, ${simRobot.pos.z.toFixed(1)})` }) : null,
+    simRobot && /* @__PURE__ */ jsxs("mesh", { position: [0, 0, -simRobot.pos.z + 1e-3], children: [
+      /* @__PURE__ */ jsx("circleGeometry", { args: [0.12, 32] }),
+      /* @__PURE__ */ jsx("meshBasicMaterial", { color: groupColor, transparent: true, opacity: 0.6 })
+    ] }),
     /* @__PURE__ */ jsx("group", { children: /* @__PURE__ */ jsxs("group", { ref: group, children: [
       /* @__PURE__ */ jsx("group", { scale: 0.3, rotation: [Math.PI / 2, -Math.PI / 2, 0], children: /* @__PURE__ */ jsxs(
         "mesh",
@@ -107964,28 +108133,25 @@ const SettingsModal = () => {
   reactExports.useRef(null);
   useSimulator((state2) => state2.robots);
   const [confirmOpen, setConfirmOpen] = reactExports.useState(false);
+  const renderBoundingBoxes = useSimulator((state2) => state2.renderBoundingBoxes);
   const handleBoundingBoxChange = () => {
-    const renderBB = useSimulator.getState().renderBoundingBoxes;
-    useSimulator.setState({ ...useSimulator.getState(), renderBoundingBoxes: !renderBB });
+    useSimulator.setState({ renderBoundingBoxes: !renderBoundingBoxes });
   };
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsxs(Modal, { show: settingsModalOpen, onClose: toggleSettingsModal, children: [
       /* @__PURE__ */ jsx(Modal.Header, { children: "Settings" }),
       /* @__PURE__ */ jsx(Modal.Body, { children: /* @__PURE__ */ jsxs(Tabs.Group, { style: "default", children: [
-        /* @__PURE__ */ jsxs(Tabs.Item, { active: true, title: "Project", children: [
-          "Profile content",
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("div", { className: "mb-2 block", children: /* @__PURE__ */ jsx(Label, { value: "Project Name" }) }),
-            /* @__PURE__ */ jsx(TextInput, { value: projectName, onChange: (e2) => {
-              setProjectName(e2.target.value);
-            } })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsx(Tabs.Item, { title: "Blocks", children: "Block Settings" }),
+        /* @__PURE__ */ jsx(Tabs.Item, { active: true, title: "Project", children: /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("div", { className: "mb-2 block", children: /* @__PURE__ */ jsx(Label, { value: "Project Name" }) }),
+          /* @__PURE__ */ jsx(TextInput, { value: projectName, onChange: (e2) => {
+            setProjectName(e2.target.value);
+          } })
+        ] }) }),
         /* @__PURE__ */ jsxs(Tabs.Item, { title: "Preferences", children: [
           /* @__PURE__ */ jsx(
             Checkbox,
             {
+              checked: !renderBoundingBoxes,
               onChange: handleBoundingBoxChange
             }
           ),
@@ -130609,7 +130775,7 @@ ReactCodeMirror.displayName = "CodeMirror";
 const BlockPythonCodePanel = () => {
   const currentBlockId = useRobartState((state2) => state2.editingBlockId);
   const currentBlock = useRobartState((state2) => state2.blocks[currentBlockId ?? ""]);
-  return /* @__PURE__ */ jsx("div", { className: "h-full w-full", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: currentBlock == null ? void 0 : currentBlock.python, className: "h-full w-full", extensions: [python()], readOnly: true }) });
+  return /* @__PURE__ */ jsx("div", { className: "h-full w-full overflow-auto", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: currentBlock == null ? void 0 : currentBlock.python, className: "h-full w-full", extensions: [python()], readOnly: true }) });
 };
 let init = true;
 const Simulation = () => {
@@ -130628,7 +130794,10 @@ const Simulation = () => {
   if (Object.keys(robots2).length !== 0) {
     if (simulatorState.time === 0) {
       Object.values(robots2).forEach((robot) => {
-        robot.pos.set(...robartState.robots[robot.id].startingPosition);
+        var _a3;
+        const startingPosition = (_a3 = robartState.robots[robot.id]) == null ? void 0 : _a3.startingPosition;
+        if (startingPosition)
+          robot.pos.set(...startingPosition);
       });
     }
   } else {
@@ -130683,7 +130852,7 @@ const SimulationControls = () => {
     const itemEnds = Object.values(state2.timelineState.groups).flatMap(
       (group) => Object.values(group.items).map((item) => item.startTime + item.duration)
     );
-    return Math.max(10, ...itemEnds);
+    return Math.max(0, ...itemEnds);
   });
   const maxTime = Math.max(measuredEndTime > 0 ? measuredEndTime : estimatedEndTime, time2);
   return /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 bottom-0 flex items-center gap-3 bg-black/60 px-3 py-2 text-sm text-white", children: [
@@ -130693,6 +130862,7 @@ const SimulationControls = () => {
         type: "range",
         className: "flex-grow",
         "aria-label": "Simulation time",
+        disabled: maxTime === 0,
         min: 0,
         max: maxTime,
         step: 0.01,
@@ -131159,19 +131329,33 @@ const autoCloseTags = /* @__PURE__ */ EditorView.inputHandler.of((view, from, to
 const BlockJavaScriptCodePanel = () => {
   const currentBlockId = useRobartState((state2) => state2.editingBlockId);
   const currentBlock = useRobartState((state2) => state2.blocks[currentBlockId ?? ""]);
-  return /* @__PURE__ */ jsx("div", { className: "h-full w-full", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: currentBlock == null ? void 0 : currentBlock.javaScript, className: "h-full w-full", extensions: [javascript()], readOnly: true }) });
+  return /* @__PURE__ */ jsx("div", { className: "h-full w-full overflow-auto", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: currentBlock == null ? void 0 : currentBlock.javaScript, className: "h-full w-full", extensions: [javascript()], readOnly: true }) });
+};
+const laneOverlapWarnings = (state2) => {
+  const warnings = [];
+  const groups = Object.values(state2.timelineState.groups);
+  Object.values(state2.robots).forEach((robot) => {
+    const items = groups.filter((group) => robot.id in group.robots).flatMap((group) => Object.values(group.items).map((item) => ({ item, group })));
+    items.forEach((a2, i2) => {
+      items.slice(i2 + 1).forEach((b2) => {
+        if (a2.group.id === b2.group.id)
+          return;
+        const start = Math.max(a2.item.startTime, b2.item.startTime);
+        const end2 = Math.min(a2.item.startTime + a2.item.duration, b2.item.startTime + b2.item.duration);
+        if (start < end2) {
+          warnings.push(`robot ${robot.name} is in lanes ${a2.group.name} and ${b2.group.name}, which both have blocks between ${start.toFixed(2)} s and ${end2.toFixed(2)} s.
+`);
+        }
+      });
+    });
+  });
+  return warnings.join("");
 };
 const WarningsPanel = () => {
-  const [key, setKey] = reactExports.useState(0);
-  const [warnings, setWarnings] = reactExports.useState("");
-  reactExports.useEffect(() => {
-    const newWarnings = useRobartState.getState().getWarnings();
-    setWarnings(newWarnings);
-  }, [key]);
-  reactExports.useEffect(() => {
-    setKey((prevKey) => prevKey + 1);
-  }, []);
-  return /* @__PURE__ */ jsx("div", { className: "overflow-auto h-full w-full ", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: warnings, className: "h-full w-full", readOnly: true }) }, key);
+  const constraintWarnings = useRobartState((state2) => (state2.warnings ?? []).join(""));
+  const overlapWarnings = useRobartState(laneOverlapWarnings);
+  const notices = useRobartState((state2) => (state2.notices ?? []).join(""));
+  return /* @__PURE__ */ jsx("div", { className: "overflow-auto h-full w-full ", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: notices + overlapWarnings + constraintWarnings, className: "h-full w-full", readOnly: true }) });
 };
 const RightPanel = () => {
   const [selectedTab, setSelectedTab] = reactExports.useState("simulation");
@@ -131190,7 +131374,7 @@ const RightPanel = () => {
         setSelectedTab("warnings");
       }, children: "Warnings" })
     ] }) }),
-    /* @__PURE__ */ jsxs("div", { className: "flex-grow h-full", children: [
+    /* @__PURE__ */ jsxs("div", { className: "min-h-0 flex-grow", children: [
       selectedTab == "simulation" && /* @__PURE__ */ jsx(SimulationPanel, {}),
       selectedTab == "python" && /* @__PURE__ */ jsx(BlockPythonCodePanel, {}),
       selectedTab == "javascript" && /* @__PURE__ */ jsx(BlockJavaScriptCodePanel, {}),
@@ -131198,7 +131382,7 @@ const RightPanel = () => {
     ] })
   ] }) });
 };
-const HoverTimelineBlock = ({ scale, startTime, isOverlapping }) => {
+const HoverTimelineBlock = ({ scale, startTime, cannotDrop }) => {
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
   const selectedBlock = useRobartState((state2) => state2.blocks[selectedBlockId ?? ""]);
   if (startTime === void 0 || !selectedBlockId)
@@ -131208,45 +131392,65 @@ const HoverTimelineBlock = ({ scale, startTime, isOverlapping }) => {
     {
       className: clsx(
         "absolute top-1/2 flex h-5/6 -translate-y-1/2 items-center justify-center rounded-xl border border-dashed",
-        isOverlapping ? "border-red-500/50 bg-red-300/50 text-red-500/50" : "border-green-500/50 bg-green-300/50 text-green-500/50"
+        cannotDrop ? "border-red-500/50 bg-red-300/50 text-red-500/50" : "border-green-500/50 bg-green-300/50 text-green-500/50"
       ),
       style: {
         width: pixelsPerSecond * scale * selectedBlock.duration,
-        left: pixelsPerSecond * scale * startTime
+        minWidth: minItemWidth,
+        left: timeToX(startTime, scale)
       },
-      children: isOverlapping ? /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faXmarkCircle }) : /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faPlusCircle })
+      children: cannotDrop ? /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faXmarkCircle }) : /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faPlusCircle })
     }
   );
 };
 const TimelineBlock = ({ item, scale }) => {
-  const blocks2 = useRobartState((state2) => state2.blocks);
+  const blockName = useRobartState((state2) => {
+    var _a3;
+    return (_a3 = state2.blocks[item.blockId]) == null ? void 0 : _a3.name;
+  });
   const removeItem = useRobartState((state2) => state2.removeTimelineItem);
-  const groups = useRobartState((state2) => state2.timelineState.groups);
   const updateItem = useRobartState((state2) => state2.updateBlockInTimeline);
-  const correspondingBlock = blocks2[item.blockId];
-  const bind = useDrag(({ delta: [x2, _2] }) => {
-    const secondsDelta = convertPixelsToSeconds(x2, scale);
-    const newStartTime = item.startTime + secondsDelta;
-    const group = groups[item.groupId];
-    const alreadyOverlapping = blockOverlaps(group, item.startTime, item.duration, item.id);
-    if (alreadyOverlapping || !blockOverlaps(group, newStartTime, item.duration, item.id)) {
-      updateItem(item.groupId, item.id, Math.max(0, newStartTime));
+  const moveItem = useRobartState((state2) => state2.moveTimelineItem);
+  const [drag, setDrag] = reactExports.useState();
+  const bind = useDrag(({ active, tap, movement: [mx, my], xy: [x2, y2] }) => {
+    var _a3;
+    if (tap)
+      return;
+    const { groups } = useRobartState.getState().timelineState;
+    const laneId = document.elementsFromPoint(x2, y2).map((element) => {
+      var _a4;
+      return (_a4 = element.dataset) == null ? void 0 : _a4.laneId;
+    }).find(Boolean) ?? item.groupId;
+    const startTime = Math.max(0, item.startTime + convertPixelsToSeconds(mx, scale));
+    const laneHasDrones = Object.keys(((_a3 = groups[laneId]) == null ? void 0 : _a3.robots) ?? {}).length > 0;
+    const valid = (laneId === item.groupId || laneHasDrones) && !blockOverlaps(laneOccupiedItems(groups, laneId), startTime, item.duration, item.id);
+    if (active) {
+      setDrag({ x: mx, y: my, valid });
+      return;
     }
-  }, { pointer: { keys: false } });
-  let duration2 = 0;
-  if (item === void 0) {
-    duration2 = 0.1;
-  } else {
-    duration2 = item.duration;
-  }
+    setDrag(void 0);
+    if (!valid)
+      return;
+    if (laneId === item.groupId)
+      updateItem(item.groupId, item.id, startTime);
+    else
+      moveItem(item.groupId, item.id, laneId, startTime);
+  }, { pointer: { keys: false }, filterTaps: true });
   return /* @__PURE__ */ jsx(
     "div",
     {
       tabIndex: 0,
-      className: "absolute top-1/2 flex h-5/6 -translate-y-1/2 cursor-move items-center justify-center rounded-xl bg-purple-400 touch-none select-none focus:outline-none focus:ring-2 focus:ring-purple-800",
+      className: clsx(
+        "absolute top-1/2 flex h-5/6 -translate-y-1/2 cursor-move items-center justify-center rounded-xl touch-none select-none focus:outline-none focus:ring-2 focus:ring-purple-800",
+        drag && !drag.valid ? "bg-red-400" : "bg-purple-400"
+      ),
       style: {
-        width: pixelsPerSecond * scale * duration2,
-        left: pixelsPerSecond * scale * item.startTime
+        width: pixelsPerSecond * scale * item.duration,
+        minWidth: minItemWidth,
+        left: timeToX(item.startTime, scale),
+        // Replaces the class's -50% y translate while dragging, so keep it
+        transform: drag ? `translate(${drag.x}px, calc(-50% + ${drag.y}px))` : void 0,
+        zIndex: drag ? 20 : void 0
       },
       onKeyDown: (e2) => {
         if (e2.key !== "Delete" && e2.key !== "Backspace")
@@ -131256,19 +131460,22 @@ const TimelineBlock = ({ item, scale }) => {
         removeItem(item.groupId, item.id);
       },
       ...bind(),
-      children: /* @__PURE__ */ jsx("span", { className: "block overflow-hidden text-ellipsis whitespace-nowrap", children: correspondingBlock.name })
+      children: /* @__PURE__ */ jsx("span", { className: "block overflow-hidden text-ellipsis whitespace-nowrap", children: blockName })
     }
   );
 };
 const pixelsPerSecond = 100;
 const SUBDIVISIONS_PER_SECOND = 8;
+const minItemWidth = 12;
 const convertPixelsToSeconds = (distance, scale) => {
   return distance / (pixelsPerSecond * scale);
 };
 const convertSecondsToPixels = (duration2, scale) => {
   return duration2 * pixelsPerSecond * scale;
 };
-const blockOverlaps = (group, startTime, duration2, id2) => startTime === void 0 || startTime < 0 || Object.values(group.items).some((items) => {
+const timelineStartPadding = 12;
+const timeToX = (seconds, scale) => timelineStartPadding + convertSecondsToPixels(seconds, scale);
+const blockOverlaps = (occupiedItems, startTime, duration2, id2) => startTime === void 0 || startTime < 0 || occupiedItems.some((items) => {
   if (items === void 0) {
     return false;
   }
@@ -131280,31 +131487,42 @@ const blockOverlaps = (group, startTime, duration2, id2) => startTime === void 0
     return false;
   return !(currItemEnd < newBlockStart || newBlockEnd < currItemStart);
 });
+const laneOccupiedItems = (groups, laneId) => {
+  var _a3, _b2;
+  return [
+    ...Object.values(((_a3 = groups[laneId]) == null ? void 0 : _a3.items) ?? {}),
+    ...laneId === allDronesGroupId ? [] : Object.values(((_b2 = groups[allDronesGroupId]) == null ? void 0 : _b2.items) ?? {})
+  ];
+};
 const TimelineGroupBody = ({ group }) => {
-  var _a3;
+  var _a3, _b2;
   const addBlockToTimeline = useRobartState((state2) => state2.addBlockToTimeline);
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
   const blocks2 = useRobartState((state2) => state2.blocks);
   const scale = useRobartState((state2) => state2.timelineState.scale);
+  const groups = useRobartState((state2) => state2.timelineState.groups);
+  const occupiedItems = laneOccupiedItems(groups, group.id);
+  const allDronesItems = group.id === allDronesGroupId ? [] : Object.values(((_a3 = groups[allDronesGroupId]) == null ? void 0 : _a3.items) ?? {});
   const [hoverX, setHoverX] = reactExports.useState();
   const laneBodyRef = reactExports.useRef(null);
+  const hasDrones = Object.keys(group.robots).length > 0;
+  const isEmptyBlock = (blockId) => {
+    var _a4;
+    return ((_a4 = blocks2[blockId ?? ""]) == null ? void 0 : _a4.javaScript.trim()) === "";
+  };
   const computeTimelineBlockOffset = (clientX, blockId) => {
-    var _a4, _b2;
     if (clientX === void 0)
       return;
     if (laneBodyRef.current) {
-      const parentOffsetX = (_a4 = laneBodyRef.current.offsetParent) == null ? void 0 : _a4.offsetLeft;
-      const parentScrollOffsetX = (_b2 = laneBodyRef.current.parentElement) == null ? void 0 : _b2.scrollLeft;
-      const offsetX = clientX - parentOffsetX;
-      if (blockId === void 0 || parentScrollOffsetX === void 0)
+      if (blockId === void 0 || blocks2[blockId] === void 0)
         return;
-      if (blocks2[blockId] === void 0)
-        return;
-      const startTime = (offsetX + parentScrollOffsetX) / (pixelsPerSecond * scale) - blocks2[blockId].duration / 2;
-      return startTime;
+      const offsetX = clientX - laneBodyRef.current.getBoundingClientRect().left - timelineStartPadding;
+      return Math.max(0, convertPixelsToSeconds(offsetX, scale) - blocks2[blockId].duration / 2);
     }
   };
   const handleDragOver = (e2) => {
+    if (!e2.dataTransfer.types.includes("text/plain"))
+      return;
     e2.preventDefault();
     e2.dataTransfer.dropEffect = "copy";
     setHoverX(e2.clientX);
@@ -131320,8 +131538,10 @@ const TimelineGroupBody = ({ group }) => {
     const blockId = e2.dataTransfer.getData("text/plain");
     if (blocks2[blockId] === void 0)
       return;
+    if (isEmptyBlock(blockId) || !hasDrones)
+      return;
     const startTime = computeTimelineBlockOffset(e2.clientX, blockId);
-    if (startTime !== void 0 && !blockOverlaps(group, startTime, blocks2[blockId].duration)) {
+    if (startTime !== void 0 && !blockOverlaps(occupiedItems, startTime, blocks2[blockId].duration)) {
       var isTraj = false;
       if (blocks2[blockId].javaScript.includes("circle")) {
         isTraj = true;
@@ -131331,31 +131551,54 @@ const TimelineGroupBody = ({ group }) => {
   };
   const secondWidth = convertSecondsToPixels(1, scale);
   const subdivisionWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
-  const tick = "linear-gradient(to right, black 2px, transparent 2px)";
+  const ticks = (spacing) => `repeating-linear-gradient(to right, black 0 2px, transparent 2px ${spacing}px)`;
+  const tickArea = `calc(100% - ${timelineStartPadding}px)`;
   const showSubdivisions = subdivisionWidth >= 6;
   const labelEvery = [1, 2, 5, 10, 15, 30, 60].find((seconds) => seconds * secondWidth >= 32) ?? 60;
   return /* @__PURE__ */ jsxs(
     "div",
     {
-      className: "relative h-16 rounded bg-blue-300 bg-repeat-x",
+      className: clsx("relative h-16 rounded bg-no-repeat", hasDrones ? "bg-blue-300" : "bg-gray-300"),
       ref: laneBodyRef,
+      "data-lane-id": group.id,
       onDragOver: handleDragOver,
       onDragLeave: handleDragLeave,
       onDrop: handleDrop,
       style: {
-        width: `${convertSecondsToPixels(group.duration, scale)}px`,
-        backgroundImage: showSubdivisions ? `${tick}, ${tick}` : tick,
-        backgroundSize: showSubdivisions ? `${secondWidth}px 25%, ${subdivisionWidth}px 16.67%` : `${secondWidth}px 25%`
+        width: `${timeToX(group.duration, scale)}px`,
+        backgroundImage: showSubdivisions ? `${ticks(secondWidth)}, ${ticks(subdivisionWidth)}` : ticks(secondWidth),
+        backgroundSize: showSubdivisions ? `${tickArea} 25%, ${tickArea} 16.67%` : `${tickArea} 25%`,
+        backgroundPosition: `${timelineStartPadding}px 0`
       },
       children: [
-        [...new Array(Math.ceil(group.duration / labelEvery))].map((_2, index2) => /* @__PURE__ */ jsx("span", { className: "absolute top-1/4", style: { left: convertSecondsToPixels(index2 * labelEvery, scale) }, children: index2 * labelEvery }, index2)),
+        [...new Array(Math.ceil(group.duration / labelEvery))].map((_2, index2) => (
+          // Centered on their ticks
+          /* @__PURE__ */ jsx("span", { className: "absolute top-1/4 -translate-x-1/2", style: { left: timeToX(index2 * labelEvery, scale) }, children: index2 * labelEvery }, index2)
+        )),
+        allDronesItems.map((item) => {
+          var _a4;
+          return /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: "pointer-events-none absolute top-1/2 flex h-5/6 -translate-y-1/2 items-center justify-center overflow-hidden rounded-xl text-gray-500",
+              style: {
+                width: convertSecondsToPixels(item.duration, scale),
+                minWidth: minItemWidth,
+                left: timeToX(item.startTime, scale),
+                background: "repeating-linear-gradient(45deg, #d1d5db, #d1d5db 6px, #e5e7eb 6px, #e5e7eb 12px)"
+              },
+              children: /* @__PURE__ */ jsx("span", { className: "truncate px-1", children: (_a4 = blocks2[item.blockId]) == null ? void 0 : _a4.name })
+            },
+            `all-drones-${item.id}`
+          );
+        }),
         Object.values(group.items).map((item) => /* @__PURE__ */ jsx(TimelineBlock, { scale, item }, item.id)),
         hoverX !== void 0 && /* @__PURE__ */ jsx(
           HoverTimelineBlock,
           {
             scale,
             startTime: computeTimelineBlockOffset(hoverX, selectedBlockId),
-            isOverlapping: blockOverlaps(group, computeTimelineBlockOffset(hoverX, selectedBlockId), ((_a3 = blocks2[selectedBlockId ?? ""]) == null ? void 0 : _a3.duration) ?? 0)
+            cannotDrop: !hasDrones || isEmptyBlock(selectedBlockId) || blockOverlaps(occupiedItems, computeTimelineBlockOffset(hoverX, selectedBlockId), ((_b2 = blocks2[selectedBlockId ?? ""]) == null ? void 0 : _b2.duration) ?? 0)
           }
         )
       ]
@@ -131364,200 +131607,215 @@ const TimelineGroupBody = ({ group }) => {
 };
 const TimelineMarker = () => {
   const time2 = useSimulator((state2) => state2.time);
+  const stopped = useSimulator((state2) => state2.status === "STOPPED");
   const scale = useRobartState((state2) => state2.timelineState.scale);
+  if (stopped && time2 === 0)
+    return null;
   return /* @__PURE__ */ jsx(
     "div",
     {
-      className: "min-w-1 absolute z-10 h-full w-1 bg-black",
-      style: { left: convertSecondsToPixels(time2, scale) }
+      className: "min-w-1 absolute z-10 h-full w-1 -translate-x-1/2 bg-black",
+      style: { left: timeToX(time2, scale) }
+    }
+  );
+};
+const axes = ["x", "y", "z"];
+const isNumber = (value) => value.trim() !== "" && Number.isFinite(Number(value));
+const StartingPosition = ({ robotId: robotId2 }) => {
+  const startingPosition = useRobartState((state2) => state2.robots[robotId2].startingPosition);
+  const saveRobot = useRobartState((state2) => state2.saveRobot);
+  const [values, setValues] = reactExports.useState(startingPosition.map(String));
+  return /* @__PURE__ */ jsxs("div", { children: [
+    /* @__PURE__ */ jsx("div", { className: "mb-1 font-bold", children: "Starting position" }),
+    /* @__PURE__ */ jsx("div", { className: "flex gap-3", children: axes.map((axis, i2) => /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
+      axis,
+      /* @__PURE__ */ jsx(
+        "input",
+        {
+          className: clsx("w-20 rounded", isNumber(values[i2]) ? "border-gray-300" : "border-2 border-red-500"),
+          inputMode: "decimal",
+          value: values[i2],
+          onChange: (e2) => {
+            const next2 = values.map((value, j2) => j2 === i2 ? e2.target.value : value);
+            setValues(next2);
+            if (next2.every(isNumber))
+              saveRobot(robotId2, { startingPosition: next2.map(Number) });
+          }
+        }
+      )
+    ] }, axis)) })
+  ] });
+};
+const GroupSelect = ({ robotId: robotId2 }) => {
+  const groups = useRobartState((state2) => state2.timelineState.groups);
+  const setRobotGroup = useRobartState((state2) => state2.setRobotGroup);
+  const otherGroups = Object.values(groups).filter((group) => group.id !== allDronesGroupId);
+  const currentGroup = otherGroups.find((group) => robotId2 in group.robots);
+  return /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+    /* @__PURE__ */ jsx("label", { htmlFor: "drone-group", className: "font-bold", children: "Group" }),
+    /* @__PURE__ */ jsx(
+      "select",
+      {
+        id: "drone-group",
+        className: "rounded border-gray-300",
+        style: { borderLeft: `8px solid ${(currentGroup == null ? void 0 : currentGroup.color) ?? "#9ca3af"}` },
+        value: currentGroup == null ? void 0 : currentGroup.id,
+        onChange: (e2) => {
+          setRobotGroup(robotId2, e2.target.value);
+        },
+        children: otherGroups.map((group) => /* @__PURE__ */ jsx("option", { value: group.id, children: group.name }, group.id))
+      }
+    )
+  ] });
+};
+const DroneEditor = () => {
+  const robotId2 = useUIState((state2) => state2.editingRobotId);
+  const setEditingRobotId = useUIState((state2) => state2.setEditingRobotId);
+  const robot = useRobartState((state2) => state2.robots[robotId2 ?? ""]);
+  const saveRobot = useRobartState((state2) => state2.saveRobot);
+  const deleteRobot = useRobartState((state2) => state2.deleteRobot);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = reactExports.useState(false);
+  const close = () => {
+    setEditingRobotId(void 0);
+  };
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx(Modal, { show: robot !== void 0, onClose: close, size: "md", children: robot && /* @__PURE__ */ jsxs(Fragment, { children: [
+      /* @__PURE__ */ jsx(Modal.Header, { children: /* @__PURE__ */ jsx(
+        RenamableText,
+        {
+          text: robot.name,
+          className: "text-xl font-extrabold",
+          updateText: (newText) => {
+            if (newText.trim() !== "")
+              saveRobot(robot.id, { name: newText.trim() });
+          }
+        }
+      ) }),
+      /* @__PURE__ */ jsx(Modal.Body, { children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-4", children: [
+        /* @__PURE__ */ jsx(StartingPosition, { robotId: robot.id }, robot.id),
+        /* @__PURE__ */ jsx(GroupSelect, { robotId: robot.id })
+      ] }) }),
+      /* @__PURE__ */ jsx(Modal.Footer, { children: /* @__PURE__ */ jsxs("div", { className: "flex w-full justify-between", children: [
+        /* @__PURE__ */ jsx(Button, { color: "failure", onClick: () => {
+          setConfirmDeleteOpen(true);
+        }, children: "Delete drone" }),
+        /* @__PURE__ */ jsx(Button, { onClick: close, children: "Done" })
+      ] }) })
+    ] }) }),
+    /* @__PURE__ */ jsx(
+      ConfirmationModal,
+      {
+        header: `Delete ${(robot == null ? void 0 : robot.name) ?? ""}?`,
+        open: confirmDeleteOpen,
+        onCancel: () => {
+          setConfirmDeleteOpen(false);
+        },
+        onConfirm: () => {
+          setConfirmDeleteOpen(false);
+          close();
+          if (robot)
+            deleteRobot(robot.id);
+        }
+      }
+    )
+  ] });
+};
+const robotDragType = "application/x-robart-robot";
+const defaultGroupColor = "#9ca3af";
+const acceptRobotDrop = (onRobot) => ({
+  onDragOver: (e2) => {
+    if (e2.dataTransfer.types.includes(robotDragType))
+      e2.preventDefault();
+  },
+  onDrop: (e2) => {
+    const robotId2 = e2.dataTransfer.getData(robotDragType);
+    if (!robotId2)
+      return;
+    e2.preventDefault();
+    onRobot(robotId2);
+  }
+});
+const RobotTag = ({ robotId: robotId2, color }) => {
+  const name2 = useRobartState((state2) => {
+    var _a3;
+    return (_a3 = state2.robots[robotId2]) == null ? void 0 : _a3.name;
+  });
+  const setEditingRobotId = useUIState((state2) => state2.setEditingRobotId);
+  return /* @__PURE__ */ jsx(
+    "span",
+    {
+      draggable: true,
+      onDragStart: (e2) => {
+        e2.dataTransfer.setData(robotDragType, robotId2);
+        e2.dataTransfer.effectAllowed = "move";
+      },
+      onClick: () => {
+        setEditingRobotId(robotId2);
+      },
+      title: "Drag onto another group to move",
+      className: "cursor-grab whitespace-nowrap rounded-full px-2 text-xs",
+      style: { background: `${color}40` },
+      children: name2
     }
   );
 };
 const TimelineGroupLabel = ({ group }) => {
-  return /* @__PURE__ */ jsx("div", { className: "flex h-16 w-16 items-center justify-center rounded bg-green-400", children: /* @__PURE__ */ jsx("div", { className: "text-center font-bold", children: group.name }) });
-};
-const useRobotManager = create$2()(
-  immer((set2, get2) => ({
-    selectedRobotId: void 0,
-    showRenameInput: false,
-    setSelectedRobotId: (id2) => {
-      set2({ selectedRobotId: id2 });
-    },
-    openRenameInput: () => {
-      set2({ showRenameInput: true });
-    },
-    closeRenameInput: () => {
-      set2({ showRenameInput: false });
-    }
-  }))
-);
-const RobotGroupEditor = () => {
-  const groups = useRobartState((state2) => state2.timelineState.groups);
-  const selectedRobotId = useRobotManager((state2) => state2.selectedRobotId);
-  const addRobotToGroup = useRobartState((state2) => state2.addRobotToGroup);
-  const removeRobotFromGroup = useRobartState((state2) => state2.removeRobotFromGroup);
-  if (selectedRobotId === void 0)
-    return /* @__PURE__ */ jsx(Fragment, {});
-  return /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
-      /* @__PURE__ */ jsx("h3", { className: "text-lg font-extrabold", children: "Add Group" }),
-      /* @__PURE__ */ jsx(Dropdown, { label: /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faPlusCircle }), size: "sm", arrowIcon: false, children: Object.values(groups).filter((group) => !(selectedRobotId in group.robots)).map((group) => /* @__PURE__ */ jsx(
-        Dropdown.Item,
-        {
-          onClick: () => {
-            addRobotToGroup(group.id, selectedRobotId);
-          },
-          children: group.name
-        },
-        group.id
-      )) })
-    ] }),
-    /* @__PURE__ */ jsx("div", { className: "flex items-center gap-2", children: Object.values(groups).filter((group) => selectedRobotId in group.robots).map((group) => {
-      return /* @__PURE__ */ jsx(Badge, { color: "purple", className: "bg-purple-100", onClick: () => {
-        removeRobotFromGroup(group.id, selectedRobotId);
-      }, children: groups[group.id].name }, group.id);
-    }) })
-  ] });
-};
-const StartingPositionEditor = ({ robotId: robotId2 }) => {
-  const selectedRobot = useRobartState((state2) => state2.robots[robotId2]);
-  const updateRobot = useRobartState((state2) => state2.saveRobot);
-  const [startingPosition, setStartingPosition] = reactExports.useState([
-    selectedRobot.startingPosition[0].toString(),
-    selectedRobot.startingPosition[1].toString(),
-    selectedRobot.startingPosition[2].toString()
-  ]);
-  const handleSubmit = (e2) => {
-    e2.preventDefault();
-    const x2 = parseFloat(startingPosition[0]);
-    const y2 = parseFloat(startingPosition[1]);
-    const z2 = parseFloat(startingPosition[2]);
-    if (isNaN(x2) || isNaN(y2) || isNaN(z2))
-      return;
-    updateRobot(robotId2, { startingPosition: [x2, y2, z2] });
-  };
-  return /* @__PURE__ */ jsxs("div", { children: [
-    /* @__PURE__ */ jsx("h3", { className: "ml-3 mt-3 text-lg font-extrabold", children: "Starting Position:" }),
-    /* @__PURE__ */ jsx("div", { className: "flex", children: /* @__PURE__ */ jsxs("form", { onSubmit: handleSubmit, className: "flex flex-col gap-2", children: [
-      /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col items-center", isNaN(parseFloat(startingPosition[0])) ? "border-red-500" : ""), children: [
-        /* @__PURE__ */ jsx(TextInput, { id: "x-coordinate", value: startingPosition[0], onChange: (e2) => {
-          setStartingPosition(([, y2, z2]) => [e2.target.value, y2, z2]);
-        } }),
-        /* @__PURE__ */ jsx(Label, { htmlFor: "x-coordinate", className: isNaN(parseFloat(startingPosition[0])) ? "text-red-500" : "", children: "x" })
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col items-center", isNaN(parseFloat(startingPosition[0])) ? "text-red-500" : ""), children: [
-        /* @__PURE__ */ jsx(TextInput, { id: "y-coordinate", value: startingPosition[1], onChange: (e2) => {
-          setStartingPosition(([x2, , z2]) => [x2, e2.target.value, z2]);
-        } }),
-        /* @__PURE__ */ jsx(Label, { htmlFor: "y-coordinate", className: isNaN(parseFloat(startingPosition[1])) ? "text-red-500" : "", children: "y" })
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col items-center", isNaN(parseFloat(startingPosition[2])) ? "border-red-500" : ""), children: [
-        /* @__PURE__ */ jsx(TextInput, { id: "z-coordinate", value: startingPosition[2], onChange: (e2) => {
-          setStartingPosition(([x2, y2]) => [x2, y2, e2.target.value]);
-        } }),
-        /* @__PURE__ */ jsx(Label, { htmlFor: "z-coordinate", className: isNaN(parseFloat(startingPosition[2])) ? "text-red-500" : "", children: "z" })
-      ] }),
-      /* @__PURE__ */ jsx(IconButton, { className: "w-full", icon: faArrowsRotate, text: "Update Position", onClick: handleSubmit, type: "submit" })
-    ] }) })
-  ] });
-};
-const RobotEditor = () => {
-  const robots2 = useRobartState((state2) => state2.robots);
-  const updateRobot = useRobartState((state2) => state2.saveRobot);
-  const deleteRobot = useRobartState((state2) => state2.deleteRobot);
-  const selectedRobotId = useRobotManager((state2) => state2.selectedRobotId);
-  const setSelectedRobotId = useRobotManager((state2) => state2.setSelectedRobotId);
-  reactExports.useEffect(() => {
-    if (selectedRobotId === void 0 && Object.values(robots2).length !== 0) {
-      setSelectedRobotId(Object.keys(robots2)[0]);
-    }
-  }, [selectedRobotId, robots2]);
-  if (selectedRobotId === void 0)
-    return /* @__PURE__ */ jsx(Fragment, {});
-  const selectedRobot = robots2[selectedRobotId];
-  if (selectedRobot === void 0)
-    return /* @__PURE__ */ jsx(Fragment, {});
-  return /* @__PURE__ */ jsxs("div", { className: "relative flex basis-4/5 flex-col p-4", children: [
-    /* @__PURE__ */ jsx(
-      RenamableText,
-      {
-        text: selectedRobot.name,
-        className: "text-4xl font-extrabold",
-        updateText: (newText) => {
-          if (newText !== "") {
-            updateRobot(selectedRobotId, { name: newText });
-          } else {
-            updateRobot(selectedRobotId, { name: "Unnamed Robot" });
-          }
-        }
-      }
-    ),
-    /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-10", children: [
-      /* @__PURE__ */ jsx(StartingPositionEditor, { robotId: selectedRobotId }),
-      /* @__PURE__ */ jsx(RobotGroupEditor, {})
-    ] }, selectedRobotId),
-    /* @__PURE__ */ jsx(
-      IconButton,
-      {
-        className: "absolute bottom-0",
-        onClick: () => {
-          const currSelectedRobotId = selectedRobotId;
-          setSelectedRobotId(void 0);
-          deleteRobot(currSelectedRobotId);
-        },
-        text: "Delete Robot",
-        icon: faTrash,
-        color: "failure"
-      }
-    )
-  ] });
-};
-const RobotSidebar = () => {
-  const robots2 = useRobartState((state2) => state2.robots);
+  const renameGroup = useRobartState((state2) => state2.renameGroup);
+  const removeGroup = useRobartState((state2) => state2.removeGroup);
+  const setRobotGroup = useRobartState((state2) => state2.setRobotGroup);
   const createRobot = useRobartState((state2) => state2.createRobot);
-  const setSelectedRobotId = useRobotManager((state2) => state2.setSelectedRobotId);
-  const closeRenameInput = useRobotManager((state2) => state2.closeRenameInput);
-  return /* @__PURE__ */ jsxs("div", { className: "flex flex-grow-0 basis-[10%] flex-col items-center gap-2 overflow-y-auto p-4", children: [
-    /* @__PURE__ */ jsx("h2", { className: "text-lg font-extrabold", children: "Robots" }),
-    Object.values(robots2).map((robot) => /* @__PURE__ */ jsx(
-      "button",
-      {
-        className: "flex h-8 w-full cursor-pointer items-center justify-center rounded-lg border-2 border-black px-2 text-center",
-        onClick: () => {
-          closeRenameInput();
-          setSelectedRobotId(robot.id);
-        },
-        children: /* @__PURE__ */ jsx("span", { className: "overflow-hidden overflow-ellipsis whitespace-nowrap", children: robot.name })
-      },
-      robot.id
-    )),
-    /* @__PURE__ */ jsx(
-      IconButton,
-      {
-        icon: faPlusCircle,
-        text: "",
-        onClick: () => {
-          const newRobotId = createRobot();
-          setSelectedRobotId(newRobotId);
-        }
-      }
-    )
-  ] });
-};
-const RobotManager = () => {
-  return /* @__PURE__ */ jsxs("div", { className: "flex h-full", children: [
-    /* @__PURE__ */ jsx(RobotSidebar, {}),
-    /* @__PURE__ */ jsx(RobotEditor, {})
-  ] });
-};
-const RobotManagerModal = () => {
-  const robotManagerModalOpen = useUIState((state2) => state2.robotManagerModalOpen);
-  const toggleRobotManager = useUIState((state2) => state2.toggleRobotManager);
-  return /* @__PURE__ */ jsxs(Modal, { show: robotManagerModalOpen, onClose: toggleRobotManager, className: "!w-full", size: "w-full h-5/6", children: [
-    /* @__PURE__ */ jsx(Modal.Header, { children: "Robot Manager" }),
-    /* @__PURE__ */ jsx(Modal.Body, { className: "h-[80vh]", children: /* @__PURE__ */ jsx(RobotManager, {}) }),
-    /* @__PURE__ */ jsx(Modal.Footer, {})
-  ] });
+  const [confirmRemoveOpen, setConfirmRemoveOpen] = reactExports.useState(false);
+  if (group.id === allDronesGroupId) {
+    return /* @__PURE__ */ jsx("div", { className: "flex h-16 w-52 flex-col justify-center rounded bg-green-400 px-2", children: /* @__PURE__ */ jsx("div", { className: "font-bold", children: group.name }) });
+  }
+  const color = group.color ?? defaultGroupColor;
+  const robotIds = Object.keys(group.robots);
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: "flex h-16 w-52 flex-col justify-center gap-1 rounded bg-white px-2",
+      style: { borderLeft: `8px solid ${color}` },
+      ...acceptRobotDrop((robotId2) => {
+        setRobotGroup(robotId2, group.id);
+      }),
+      children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1", children: [
+          /* @__PURE__ */ jsx("div", { className: "min-w-0 flex-1 truncate", children: /* @__PURE__ */ jsx(
+            RenamableText,
+            {
+              text: group.name,
+              className: "font-bold",
+              updateText: (newText) => {
+                if (newText.trim() !== "")
+                  renameGroup(group.id, newText.trim());
+              }
+            }
+          ) }),
+          /* @__PURE__ */ jsx("button", { className: "rounded border border-gray-400 px-1 text-xs hover:bg-gray-100", onClick: () => {
+            createRobot(group.id);
+          }, children: "+ add" }),
+          /* @__PURE__ */ jsx("button", { "aria-label": `Remove ${group.name}`, title: "Remove group", className: "px-1 text-gray-500 hover:text-red-600", onClick: () => {
+            setConfirmRemoveOpen(true);
+          }, children: "×" })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "flex gap-1 overflow-x-auto", children: robotIds.length === 0 ? /* @__PURE__ */ jsx("span", { className: "text-xs text-gray-400", children: "No drones yet" }) : robotIds.map((robotId2) => /* @__PURE__ */ jsx(RobotTag, { robotId: robotId2, color }, robotId2)) }),
+        /* @__PURE__ */ jsx(
+          ConfirmationModal,
+          {
+            header: robotIds.length === 0 ? `Remove ${group.name}?` : `Remove ${group.name} and its ${robotIds.length} drone${robotIds.length === 1 ? "" : "s"}?`,
+            open: confirmRemoveOpen,
+            onCancel: () => {
+              setConfirmRemoveOpen(false);
+            },
+            onConfirm: () => {
+              removeGroup(group.id);
+              setConfirmRemoveOpen(false);
+            }
+          }
+        )
+      ]
+    }
+  );
 };
 const TimelineSimulationButtons = () => {
   const simulationStatus = useSimulator((state2) => state2.status);
@@ -131565,69 +131823,20 @@ const TimelineSimulationButtons = () => {
   const halt = useSimulator((state2) => state2.halt);
   const pause = useSimulator((state2) => state2.pause);
   const resume = useSimulator((state2) => state2.resume);
+  const hasDrones = useRobartState((state2) => Object.keys(state2.robots).length > 0);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     simulationStatus === "RUNNING" && /* @__PURE__ */ jsx(IconButton, { icon: faPause, onClick: pause, text: "Pause Sim", color: "gray" }),
     simulationStatus === "PAUSED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: resume, text: "Resume Sim", color: "success" }),
-    simulationStatus === "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: play, text: "Run Sim", color: "success" }),
+    simulationStatus === "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: play, text: "Run Sim", color: "success", disabled: !hasDrones }),
     simulationStatus !== "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faSquare, onClick: halt, text: "Stop Sim", color: "failure" })
   ] });
 };
-const RemoveGroupModal = () => {
-  const RGModalOpen = useUIState((state2) => state2.RGModalOpen);
-  const toggleRGModal = useUIState((state2) => state2.toggleRGModal);
-  const groups = useRobartState((state2) => state2.timelineState.groups);
-  const [groupsToRemove, setGroupsToRemove] = reactExports.useState([]);
-  const robartState = useRobartState();
-  const handleCheckboxChange = (event) => {
-    if (event.target.checked) {
-      setGroupsToRemove([...groupsToRemove, event.target.name]);
-    } else {
-      setGroupsToRemove(groupsToRemove.filter((group) => group !== event.target.name));
-    }
-  };
-  return /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs(Modal, { show: RGModalOpen, onClose: () => toggleRGModal(), children: [
-    /* @__PURE__ */ jsx(Modal.Header, { children: "Remove Groups" }),
-    /* @__PURE__ */ jsx(Modal.Body, { children: /* @__PURE__ */ jsx("div", { children: Object.keys(groups).map((groupKey) => /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs("label", { children: [
-      /* @__PURE__ */ jsx("input", { type: "checkbox", name: groupKey, onChange: handleCheckboxChange }),
-      /* @__PURE__ */ jsx("span", { style: { marginLeft: "10px" }, children: groupKey })
-    ] }) }, groupKey)) }) }),
-    /* @__PURE__ */ jsxs(Modal.Footer, { children: [
-      /* @__PURE__ */ jsx(CancelButton, { onClick: toggleRGModal }),
-      /* @__PURE__ */ jsx(IconButton, { color: "warning", text: "Remove", icon: faTrashCan, onClick: () => {
-        console.log(groupsToRemove);
-        robartState.removeGroups(groupsToRemove);
-      } })
-    ] })
-  ] }) });
-};
 const addNewGroup = () => {
-  const groups = useRobartState.getState().timelineState.groups;
-  const numGroups = Object.keys(groups).length;
-  const groupName = "group " + numGroups;
-  useRobartState.getState().addGroup(groupName);
-};
-const AddTimelineGroupLabel = () => {
-  return /* @__PURE__ */ jsx("div", { className: "h-16 w-16", children: /* @__PURE__ */ jsxs(Button, { onClick: addNewGroup, style: { width: "fit-content" }, children: [
-    "Add Group ",
-    /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faPlusCircle })
-  ] }) });
-};
-const RemoveTimelineGroupLabel = () => {
-  const toggleRGModal = useUIState.getState().toggleRGModal;
-  return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx("div", { className: "h-16 w-16", children: /* @__PURE__ */ jsxs(Button, { onClick: () => {
-      toggleRGModal();
-    }, style: { width: "fit-content" }, children: [
-      "Remove Group ",
-      /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faTrashCan })
-    ] }) }),
-    /* @__PURE__ */ jsx(RemoveGroupModal, {})
-  ] });
+  useRobartState.getState().addGroup(nextGroupName(useRobartState.getState().timelineState.groups));
 };
 const Timeline = () => {
   const timelineState = useRobartState((state2) => state2.timelineState);
   const groups = Object.values(timelineState.groups);
-  const toggleRobotManagerModal = useUIState((state2) => state2.toggleRobotManager);
   const setTimelineScale = useRobartState((state2) => state2.setTimelineScale);
   const scrollerRef = reactExports.useRef(null);
   const zoomAnchor = reactExports.useRef();
@@ -131637,7 +131846,7 @@ const Timeline = () => {
       return;
     const x2 = originX - scroller.getBoundingClientRect().left;
     const currentScale = useRobartState.getState().timelineState.scale;
-    zoomAnchor.current = { time: convertPixelsToSeconds(scroller.scrollLeft + x2, currentScale), x: x2 };
+    zoomAnchor.current = { time: convertPixelsToSeconds(scroller.scrollLeft + x2 - timelineStartPadding, currentScale), x: x2 };
     setTimelineScale(scale);
   }, {
     target: scrollerRef,
@@ -131651,7 +131860,7 @@ const Timeline = () => {
     const anchor = zoomAnchor.current;
     if (!scroller || !anchor)
       return;
-    scroller.scrollLeft = convertSecondsToPixels(anchor.time, timelineState.scale) - anchor.x;
+    scroller.scrollLeft = timeToX(anchor.time, timelineState.scale) - anchor.x;
     zoomAnchor.current = void 0;
   }, [timelineState.scale]);
   reactExports.useEffect(() => {
@@ -131677,23 +131886,21 @@ const Timeline = () => {
   return /* @__PURE__ */ jsxs("div", { className: "flex h-full w-full flex-col gap-2 rounded bg-blue-100", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex", children: [
       /* @__PURE__ */ jsx("div", { className: "flex flex-grow" }),
-      /* @__PURE__ */ jsxs("div", { className: "flex gap-3 pt-2 pr-3", children: [
-        /* @__PURE__ */ jsx(TimelineSimulationButtons, {}),
-        /* @__PURE__ */ jsx(IconButton, { icon: faRobot, onClick: toggleRobotManagerModal, text: "Manage Robots" }),
-        /* @__PURE__ */ jsx(RobotManagerModal, {})
-      ] })
+      /* @__PURE__ */ jsx("div", { className: "flex gap-3 pt-2 pr-3", children: /* @__PURE__ */ jsx(TimelineSimulationButtons, {}) })
     ] }),
-    /* @__PURE__ */ jsx("div", { className: "overflow-y-auto", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-shrink-0 gap-2", children: [
-      /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2", children: [
-        groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupLabel, { group }, group.id)),
-        /* @__PURE__ */ jsx(AddTimelineGroupLabel, {}),
-        /* @__PURE__ */ jsx(RemoveTimelineGroupLabel, {})
+    /* @__PURE__ */ jsxs("div", { className: "overflow-y-auto", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex flex-shrink-0 gap-2", children: [
+        /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2", children: [
+          groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupLabel, { group }, group.id)),
+          /* @__PURE__ */ jsx("button", { className: "h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200", onClick: addNewGroup, children: "+ New group" })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { ref: scrollerRef, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto", children: [
+          groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group }, group.id)),
+          /* @__PURE__ */ jsx(TimelineMarker, {})
+        ] })
       ] }),
-      /* @__PURE__ */ jsxs("div", { ref: scrollerRef, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto", children: [
-        groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group }, group.id)),
-        /* @__PURE__ */ jsx(TimelineMarker, {})
-      ] })
-    ] }) })
+      /* @__PURE__ */ jsx(DroneEditor, {})
+    ] })
   ] });
 };
 function App() {
