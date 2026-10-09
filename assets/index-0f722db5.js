@@ -90144,6 +90144,16 @@ class FixedScaleFlyout extends VerticalFlyout {
     return 1;
   }
 }
+const gesturePrototype = Gesture.prototype;
+const updateIsDragging = gesturePrototype.updateIsDragging;
+gesturePrototype.updateIsDragging = function(e2) {
+  const onEmptySpace = !this.targetBlock && !this.startBubble && !this.startComment && !this.startIcon;
+  if (onEmptySpace && this.startWorkspace_ && inMultipleSelectionModeWeakMap.get(this.startWorkspace_)) {
+    this.calledUpdateIsDragging = true;
+    return;
+  }
+  updateIsDragging.call(this, e2);
+};
 for (const name2 of [ShortcutItems.names.PERFORM_ACTION, ShortcutItems.names.FINISH_MOVE]) {
   ShortcutRegistry.registry.removeKeyMapping(String(utils.KeyCodes.SPACE), name2, true);
 }
@@ -90203,6 +90213,7 @@ const BlockEditorPanel = () => {
       multiselectCopyPaste: { crossTab: true, menu: false }
       // Keyboard copy/paste only, no extra menu items
     });
+    const isOn = () => inMultipleSelectionModeWeakMap.get(workspace) === true;
     const controls = multiselect.controls_;
     const enableMultiselect = controls.enableMultiselect.bind(controls);
     controls.enableMultiselect = (...args) => {
@@ -90218,20 +90229,19 @@ const BlockEditorPanel = () => {
       };
       dragSelect.PubSub.subscribers.elementselect = [(event) => {
         const block = blockOf(event);
-        if (!block || controls.dragSelection.has(block.id))
+        if (!isOn() || !block || controls.dragSelection.has(block.id))
           return;
         addedByBox.add(block.id);
         controls.updateDraggables_(block);
       }];
       dragSelect.PubSub.subscribers.elementunselect = [(event) => {
         const block = blockOf(event);
-        if (block && addedByBox.delete(block.id))
+        if (isOn() && block && addedByBox.delete(block.id))
           controls.updateDraggables_(block);
       }];
     };
     const editor = workspace.getInjectionDiv();
     let pointerInside = false;
-    const isOn = () => inMultipleSelectionModeWeakMap.get(workspace) === true;
     const onPointerEnter = (event) => {
       var _a3;
       pointerInside = true;
