@@ -96,13 +96,40 @@ export const BlockEditorPanel = () => {
 			multiselectCopyPaste: {crossTab: true, menu: false}, // Keyboard copy/paste only, no extra menu items
 		});
 
+		// Box select only adds. The plugin toggled every block the box touched, so blocks already selected (the one clicked
+		// before Shift, or ones from an earlier box) were deselected when the box passed over them. This reaches into the
+		// plugin's DragSelect, which it creates each time multi-select turns on, and replaces its two handlers.
+		const controls = multiselect.controls_;
+		const enableMultiselect = controls.enableMultiselect.bind(controls);
+		controls.enableMultiselect = (...args: unknown[]) => {
+			enableMultiselect(...args);
+			const dragSelect = controls.dragSelect_;
+			if (!dragSelect) return;
+			dragSelect.setSettings({multiSelectToggling: false});
+			const addedByBox = new Set<string>();
+			const blockOf = ({item}: {item: Element}) => workspace.getBlockById((item.parentElement as HTMLElement | null)?.dataset.id ?? '');
+			dragSelect.PubSub.subscribers.elementselect = [(event: {item: Element}) => {
+				const block = blockOf(event);
+				if (!block || controls.dragSelection.has(block.id)) return;
+				addedByBox.add(block.id);
+				controls.updateDraggables_(block);
+			}];
+			dragSelect.PubSub.subscribers.elementunselect = [(event: {item: Element}) => {
+				const block = blockOf(event);
+				// Only undoes what this box selected, when it shrinks away from the block
+				if (block && addedByBox.delete(block.id)) controls.updateDraggables_(block);
+			}];
+		};
+
 		// The plugin only hears Shift while the editor has keyboard focus, which it often doesn't (e.g. after clicking
 		// the timeline). Pass Shift on from the whole page while the pointer is over the editor, without taking focus.
 		const editor = workspace.getInjectionDiv();
 		let pointerInside = false;
 		const isOn = () => inMultipleSelectionModeWeakMap.get(workspace) === true;
-		const onPointerEnter = () => {
+		const onPointerEnter = (event: PointerEvent) => {
 			pointerInside = true;
+			// Shift pressed before the pointer came in
+			if (event.shiftKey && !isOn()) multiselect.controls_?.enableMultiselect();
 		};
 		const onPointerLeave = () => {
 			pointerInside = false;
