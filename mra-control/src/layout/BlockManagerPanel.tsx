@@ -1,11 +1,29 @@
-import {IconButton} from '@MRAControl/components/buttons/IconButton';
-import {faCopy, faPlusCircle, faTrash} from '@fortawesome/free-solid-svg-icons';
-import {Button} from 'flowbite-react';
+import {faCopy, faPlus, faTrash, type IconDefinition} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import clsx from 'clsx';
 import React, {useState} from 'react';
 import {ConfirmationModal} from '@MRAControl/components/modal/ConfirmationModal';
 import {newBlockName} from './BlockEditorHeader';
 
-import {useRobartState} from '../state/useRobartState';
+import {blockColor, type CodeBlock, useRobartState} from '../state/useRobartState';
+
+// Cmd/Ctrl+C in the block list: a snapshot, so pasting still works after the block is changed or deleted
+let copiedBlock: CodeBlock | undefined;
+
+const ToolbarButton = ({icon, title, danger, disabled, onClick}: {icon: IconDefinition; title: string; danger?: boolean; disabled?: boolean; onClick: () => void}) => (
+	<button
+		className={clsx(
+			'flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 bg-white text-sm hover:bg-gray-50',
+			'disabled:cursor-default disabled:border-gray-100 disabled:text-gray-300 disabled:hover:bg-white',
+			danger ? 'text-red-600' : 'text-gray-700',
+		)}
+		title={title}
+		disabled={disabled}
+		onClick={onClick}
+	>
+		<FontAwesomeIcon icon={icon} />
+	</button>
+);
 
 export const BlockManagerPanel = () => {
 	const blocks = useRobartState((state) => Object.values(state.blocks));
@@ -20,30 +38,50 @@ export const BlockManagerPanel = () => {
 		.filter((item) => item.blockId === selectedBlockId).length);
 	const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
+	const addCopy = (block: CodeBlock) => {
+		setEditingBlock(copyBlock(block));
+	};
+
 	return (
-		<div className="flex h-full flex-col">
-			<div className="flex flex-wrap gap-2 p-2">
-				<IconButton
-					icon={faPlusCircle}
-					text="New"
+		<div
+			className="flex h-full flex-col"
+			// Copy and paste blocks while something in the list has focus (e.g. after clicking a block)
+			onKeyDown={(e) => {
+				if (!(e.metaKey || e.ctrlKey) || e.altKey || e.shiftKey) return;
+				const key = e.key.toLowerCase();
+				if (key === 'c' && selectedBlock) {
+					copiedBlock = selectedBlock;
+				} else if (key === 'v' && copiedBlock) {
+					addCopy(copiedBlock);
+				} else {
+					return;
+				}
+				e.preventDefault();
+				// Blockly listens on the whole page and would also copy or paste its own selected blocks
+				e.stopPropagation();
+			}}
+		>
+			<div className="flex gap-1 border-b border-gray-100 p-2">
+				<ToolbarButton
+					icon={faPlus}
+					title="New block"
 					onClick={() => {
-						const id = createBlock(newBlockName());
-						setEditingBlock(id);
+						setEditingBlock(createBlock(newBlockName()));
 					}}
 				/>
-				<IconButton
+				<ToolbarButton
 					icon={faCopy}
-					text="Copy"
+					title="Copy block"
+					disabled={!selectedBlock}
 					onClick={() => {
-						if (selectedBlockId === undefined) return;
-						const id = copyBlock(selectedBlockId);
-						setEditingBlock(id);
+						if (selectedBlock) addCopy(selectedBlock);
 					}}
 				/>
-				<IconButton
-					color="failure"
+				<ToolbarButton
 					icon={faTrash}
-					text="Delete"
+					title="Delete block"
+					danger
+					disabled={!selectedBlock}
 					onClick={() => {
 						if (selectedBlockId === undefined) return;
 						// Nothing to lose when it's empty and not on the timeline, so no confirmation
@@ -68,29 +106,38 @@ export const BlockManagerPanel = () => {
 					&quot;{selectedBlock?.name}&quot; will also be removed from the timeline (used {selectedBlockUses} time{selectedBlockUses === 1 ? '' : 's'}).
 				</>}
 			</ConfirmationModal>
-			{/* Scrolls when there are more blocks than fit; New / Copy / Delete stay above it */}
-			<div className="flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto p-2">
-				{blocks.map((b) => (
-					<div
-						key={b.id}
-						className={`flex ${selectedBlockId === b.id ? 'border-4 border-cyan-500 rounded-lg' : ''}`}
-						draggable
-						onDragStart={(e) => {
-							e.dataTransfer.setData('text/plain', b.id);
-							e.dataTransfer.effectAllowed = 'copy';
-							// The timeline's drop preview reads the selected block (drag data is unreadable until drop)
-							if (selectedBlockId !== b.id) setEditingBlock(b.id);
-						}}
-					>
-						<Button 
+			{/* Scrolls when there are more blocks than fit; the buttons stay above it */}
+			<div className="flex min-h-0 flex-1 flex-wrap content-start gap-1.5 overflow-y-auto p-2">
+				{blocks.map((b) => {
+					// Empty blocks can't go on the timeline, so they look unfilled
+					const empty = b.javaScript.trim() === '';
+					return (
+						<div
+							key={b.id}
+							role="button"
+							tabIndex={0}
+							className={clsx(
+								'flex max-w-full cursor-grab items-baseline gap-1.5 rounded-xl border px-2.5 py-1.5 text-sm focus:outline-none',
+								empty ? 'border-dashed border-gray-400 bg-white text-gray-400' : 'border-black/15',
+								selectedBlockId === b.id && 'ring-2 ring-indigo-600 ring-offset-2',
+							)}
+							style={{backgroundColor: empty ? undefined : blockColor(b)}}
+							draggable
+							onDragStart={(e) => {
+								e.dataTransfer.setData('text/plain', b.id);
+								e.dataTransfer.effectAllowed = 'copy';
+								// The timeline's drop preview reads the selected block (drag data is unreadable until drop)
+								if (selectedBlockId !== b.id) setEditingBlock(b.id);
+							}}
 							onClick={() => {
-								setEditingBlock(b.id); 
-							}} 
-							color="success">
-							{b.name}
-						</Button>
-					</div>
-				))}
+								setEditingBlock(b.id);
+							}}
+						>
+							<span className="truncate">{b.name}</span>
+							{!empty && <span className="shrink-0 text-xs tabular-nums text-black/55">{b.duration.toFixed(1)} s</span>}
+						</div>
+					);
+				})}
 			</div>
 		</div>
 	);

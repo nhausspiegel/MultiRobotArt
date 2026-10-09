@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import {type TimelineItem, useRobartState} from '@MRAControl/state/useRobartState';
+import {blockColor, type TimelineItem, useRobartState} from '@MRAControl/state/useRobartState';
 import {useDrag} from '@use-gesture/react';
 import clsx from 'clsx';
 import React, {useState} from 'react';
@@ -8,6 +8,8 @@ import {blockOverlaps, convertPixelsToSeconds, laneOccupiedItems, minItemWidth, 
 
 export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}) => {
 	const blockName = useRobartState((state) => state.blocks[item.blockId]?.name);
+	// The block's color, as in the block list
+	const color = useRobartState((state) => (state.blocks[item.blockId] ? blockColor(state.blocks[item.blockId]) : undefined));
 	const removeItem = useRobartState((state) => state.removeTimelineItem);
 	const updateItem = useRobartState((state) => state.updateBlockInTimeline);
 	const moveItem = useRobartState((state) => state.moveTimelineItem);
@@ -44,10 +46,11 @@ export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}
 			// Focusable so a click selects it; clicking anywhere else deselects
 			tabIndex={0}
 			className={clsx(
-				'absolute top-1/2 flex h-5/6 -translate-y-1/2 cursor-move items-center justify-center rounded-xl touch-none select-none focus:outline-none focus:ring-2 focus:ring-purple-800',
-				drag && !drag.valid ? 'bg-red-400' : 'bg-purple-400',
+				'absolute top-1/2 flex h-5/6 -translate-y-1/2 cursor-move items-center justify-center rounded-xl border border-black/15 touch-none select-none focus:outline-none focus:ring-2 focus:ring-indigo-600',
+				drag && !drag.valid && 'bg-red-400',
 			)}
 			style={{
+				backgroundColor: drag && !drag.valid ? undefined : color,
 				width: pixelsPerSecond * scale * item.duration,
 				minWidth: minItemWidth,
 				left: timeToX(item.startTime, scale),

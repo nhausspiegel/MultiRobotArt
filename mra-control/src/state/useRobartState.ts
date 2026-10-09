@@ -38,8 +38,24 @@ export type CodeBlock = {
    * The user-defined duration of a block (in seconds).
    */
 	duration: number;
+	/**
+   * Shown in the block list and on the timeline. Unset in older projects (blockColor picks one from the id).
+   */
+	color?: string;
 
 	// block exec function
+};
+
+// No blues: blocks sit on blue timeline lanes
+export const blockColors = ['#fbbf24', '#34d399', '#fb7185', '#a78bfa', '#fb923c', '#a3e635', '#f472b6', '#2dd4bf'];
+
+export const blockColor = (block: Pick<CodeBlock, 'id' | 'color'>) =>
+	block.color ?? blockColors[[...block.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % blockColors.length];
+
+// The first color no block has yet, cycling once all are used
+const nextBlockColor = (blocks: Record<string, CodeBlock>) => {
+	const used = Object.values(blocks).map(blockColor);
+	return blockColors.find((color) => !used.includes(color)) ?? blockColors[Object.keys(blocks).length % blockColors.length];
 };
 
 export type TimelineItem = {
@@ -205,11 +221,11 @@ export type BlockActions = {
    */
 	createBlock: (blockName: string) => string;
 	/**
-   * Copies a block, and returns the new ID.
-   * @param blockId the id of the block to copy.
+   * Adds a copy of a block, and returns the new ID.
+   * @param block the block to copy; a snapshot works too (pasting a block that was copied, then changed or deleted).
    * @returns The ID of the newly created block.
    */
-	copyBlock: (blockId: string) => string;
+	copyBlock: (block: CodeBlock) => string;
 	/**
    * Used to modify duration of block for placing on timeline
    * @param blockId the id of the block to set duration of
@@ -467,17 +483,20 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							python: '',
 							javaScript: '',
 							duration: 1,
+							color: nextBlockColor(get().blocks),
 						};
 						set((state) => {
 							state.blocks[block.id] = block;
 						});
 						return block.id;
 					},
-					copyBlock: (blockId) => {
+					copyBlock: (block) => {
 						const newBlock: CodeBlock = {
-							...get().blocks[blockId],
+							...block,
 							id: uuid(),
-							name: `Copy of ${get().blocks[blockId].name}`,
+							name: `Copy of ${block.name}`,
+							// Same color as the original, so copies are easy to spot
+							color: blockColor(block),
 						};
 
 						set((state) => {
