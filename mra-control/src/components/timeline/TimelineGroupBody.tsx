@@ -28,6 +28,12 @@ export const convertSecondsToPixels = (duration: number, scale: number) => {
 	return duration * pixelsPerSecond * scale;
 };
 
+// Time 0 starts this far into each lane, so the "0" label can be centered on its tick without being cut off
+export const timelineStartPadding = 12;
+
+// x of a time within a lane, and within the timeline's scroll area (lanes start at its left edge)
+export const timeToX = (seconds: number, scale: number) => timelineStartPadding + convertSecondsToPixels(seconds, scale);
+
 export const blockOverlaps = (
 	occupiedItems: TimelineItem[],
 	startTime: number | undefined,
@@ -84,7 +90,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 		if (laneBodyRef.current) {
 			if (blockId === undefined || blocks[blockId] === undefined) return;
 			// The lane's on-screen rect already reflects scrolling
-			const offsetX = clientX - laneBodyRef.current.getBoundingClientRect().left;
+			const offsetX = clientX - laneBodyRef.current.getBoundingClientRect().left - timelineStartPadding;
 			// Centered on the pointer, but never starting before 0 (long blocks near the left edge would otherwise be refused)
 			return Math.max(0, convertPixelsToSeconds(offsetX, scale) - blocks[blockId].duration / 2);
 		}
@@ -124,16 +130,18 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 	};
 
 	// Tick marks are a repeating background, not elements: thousands of tick elements made zooming slow.
-	// Second ticks always; subdivision ticks and labels only when far enough apart to read.
+	// Second ticks always; subdivision ticks and labels only when far enough apart to read. Each layer is one repeating
+	// gradient placed from time 0 onward (a tiled image would also repeat backwards into the start padding).
 	const secondWidth = convertSecondsToPixels(1, scale);
 	const subdivisionWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
-	const tick = 'linear-gradient(to right, black 2px, transparent 2px)';
+	const ticks = (spacing: number) => `repeating-linear-gradient(to right, black 0 2px, transparent 2px ${spacing}px)`;
+	const tickArea = `calc(100% - ${timelineStartPadding}px)`;
 	const showSubdivisions = subdivisionWidth >= 6;
 	const labelEvery = [1, 2, 5, 10, 15, 30, 60].find((seconds) => seconds * secondWidth >= 32) ?? 60;
 
 	return (
 		<div
-			className={clsx('relative h-16 rounded bg-repeat-x', hasDrones ? 'bg-blue-300' : 'bg-gray-300')}
+			className={clsx('relative h-16 rounded bg-no-repeat', hasDrones ? 'bg-blue-300' : 'bg-gray-300')}
 			ref={laneBodyRef}
 			// Found by timeline items dragged between lanes
 			data-lane-id={group.id}
@@ -141,19 +149,15 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 			onDragLeave={handleDragLeave}
 			onDrop={handleDrop}
 			style={{
-				width: `${convertSecondsToPixels(group.duration, scale)}px`,
-				backgroundImage: showSubdivisions ? `${tick}, ${tick}` : tick,
-				backgroundSize: showSubdivisions ? `${secondWidth}px 25%, ${subdivisionWidth}px 16.67%` : `${secondWidth}px 25%`,
+				width: `${timeToX(group.duration, scale)}px`,
+				backgroundImage: showSubdivisions ? `${ticks(secondWidth)}, ${ticks(subdivisionWidth)}` : ticks(secondWidth),
+				backgroundSize: showSubdivisions ? `${tickArea} 25%, ${tickArea} 16.67%` : `${tickArea} 25%`,
+				backgroundPosition: `${timelineStartPadding}px 0`,
 			}}
 		>
 			{[...new Array(Math.ceil(group.duration / labelEvery))].map((_, index) => (
-				// Centered on their ticks. 0 can't be (half would hang off the lane's left edge), so it sits just right of its
-				// tick and the playhead, which is 4 px wide at time 0 and drawn on top
-				<span
-					key={index}
-					className={clsx('absolute top-1/4', index > 0 && '-translate-x-1/2')}
-					style={{left: index === 0 ? 6 : convertSecondsToPixels(index * labelEvery, scale)}}
-				>
+				// Centered on their ticks
+				<span key={index} className="absolute top-1/4 -translate-x-1/2" style={{left: timeToX(index * labelEvery, scale)}}>
 					{index * labelEvery}
 				</span>
 			))}
@@ -164,7 +168,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 					style={{
 						width: convertSecondsToPixels(item.duration, scale),
 						minWidth: minItemWidth,
-						left: convertSecondsToPixels(item.startTime, scale),
+						left: timeToX(item.startTime, scale),
 						background: 'repeating-linear-gradient(45deg, #d1d5db, #d1d5db 6px, #e5e7eb 6px, #e5e7eb 12px)',
 					}}
 				>

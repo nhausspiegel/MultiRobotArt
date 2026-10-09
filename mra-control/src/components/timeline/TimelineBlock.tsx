@@ -4,7 +4,7 @@ import {useDrag} from '@use-gesture/react';
 import clsx from 'clsx';
 import React, {useState} from 'react';
 
-import {blockOverlaps, convertPixelsToSeconds, laneOccupiedItems, minItemWidth, pixelsPerSecond} from './TimelineGroupBody';
+import {blockOverlaps, convertPixelsToSeconds, laneOccupiedItems, minItemWidth, pixelsPerSecond, timeToX} from './TimelineGroupBody';
 
 export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}) => {
 	const blockName = useRobartState((state) => state.blocks[item.blockId]?.name);
@@ -50,7 +50,7 @@ export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}
 			style={{
 				width: pixelsPerSecond * scale * item.duration,
 				minWidth: minItemWidth,
-				left: pixelsPerSecond * scale * item.startTime,
+				left: timeToX(item.startTime, scale),
 				// Replaces the class's -50% y translate while dragging, so keep it
 				transform: drag ? `translate(${drag.x}px, calc(-50% + ${drag.y}px))` : undefined,
 				zIndex: drag ? 20 : undefined,

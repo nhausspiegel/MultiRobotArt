@@ -3,7 +3,7 @@ import {TimelineMarker} from '@MRAControl/components/timeline/TimelineMarker';
 import {usePinch} from '@use-gesture/react';
 
 import {DroneEditor} from '../../components/timeline/DroneEditor';
-import {convertPixelsToSeconds, convertSecondsToPixels, TimelineGroupBody} from '../../components/timeline/TimelineGroupBody';
+import {convertPixelsToSeconds, TimelineGroupBody, timelineStartPadding, timeToX} from '../../components/timeline/TimelineGroupBody';
 import {TimelineGroupLabel} from '../../components/timeline/TimelineGroupLabel';
 import {useRobartState} from '../../state/useRobartState';
 import {nextGroupName} from '../../state/groupMigration';
@@ -30,7 +30,7 @@ export const Timeline = () => {
 		if (!scroller) return;
 		const x = originX - scroller.getBoundingClientRect().left;
 		const currentScale = useRobartState.getState().timelineState.scale;
-		zoomAnchor.current = {time: convertPixelsToSeconds(scroller.scrollLeft + x, currentScale), x};
+		zoomAnchor.current = {time: convertPixelsToSeconds(scroller.scrollLeft + x - timelineStartPadding, currentScale), x};
 		setTimelineScale(scale);
 	}, {
 		target: scrollerRef,
@@ -43,7 +43,7 @@ export const Timeline = () => {
 		const scroller = scrollerRef.current;
 		const anchor = zoomAnchor.current;
 		if (!scroller || !anchor) return;
-		scroller.scrollLeft = convertSecondsToPixels(anchor.time, timelineState.scale) - anchor.x;
+		scroller.scrollLeft = timeToX(anchor.time, timelineState.scale) - anchor.x;
 		zoomAnchor.current = undefined;
 	}, [timelineState.scale]);
 

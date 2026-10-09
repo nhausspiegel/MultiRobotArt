@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import React from 'react';
 
 import {useRobartState} from '../../state/useRobartState';
-import {minItemWidth, pixelsPerSecond} from './TimelineGroupBody';
+import {minItemWidth, pixelsPerSecond, timeToX} from './TimelineGroupBody';
 
 export const HoverTimelineBlock = ({scale, startTime, cannotDrop}: {scale: number; startTime: number | undefined; cannotDrop: boolean}) => {
 	const selectedBlockId = useRobartState((state) => state.editingBlockId);
@@ -21,7 +21,7 @@ export const HoverTimelineBlock = ({scale, startTime, cannotDrop}: {scale: numbe
 			style={{
 				width: pixelsPerSecond * scale * selectedBlock.duration,
 				minWidth: minItemWidth,
-				left: pixelsPerSecond * scale * startTime,
+				left: timeToX(startTime, scale),
 			}}
 		>
 			{cannotDrop ? <FontAwesomeIcon icon={faXmarkCircle} /> : <FontAwesomeIcon icon={faPlusCircle} />}
