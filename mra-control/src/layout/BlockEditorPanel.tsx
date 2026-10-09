@@ -3,6 +3,7 @@ import '@MRAControl/config/customBlocks';
 import {useRobartState} from '@MRAControl/state/useRobartState';
 import Blockly from 'blockly';
 import defaultTheme from 'tailwindcss/defaultTheme';
+import {inMultipleSelectionModeWeakMap, Multiselect, MultiselectBlockDragger} from '@mit-app-inventor/blockly-plugin-workspace-multiselect';
 import {javascriptGenerator} from 'blockly/javascript';
 import {pythonGenerator} from 'blockly/python';
 import React, {useEffect, useRef} from 'react';
@@ -57,7 +58,8 @@ export const BlockEditorPanel = () => {
 			// or every scroll would zoom.
 			zoom: {wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed},
 			move: {wheel: true, drag: true, scrollbars: true},
-			plugins: {flyoutsVerticalToolbox: FixedScaleFlyout},
+			// MultiselectBlockDragger moves all selected blocks together (required by the multiselect plugin)
+			plugins: {flyoutsVerticalToolbox: FixedScaleFlyout, blockDragger: MultiselectBlockDragger},
 			theme: blocklyTheme,
 		},
 		onWorkspaceChange: (workspaceChanged) => {
@@ -72,6 +74,47 @@ export const BlockEditorPanel = () => {
 		},
 		ref: workspaceRef,
 	});
+
+	// Multi-select: Shift-click adds/removes blocks, Shift-drag on the background box-selects (workspace-multiselect plugin)
+	useEffect(() => {
+		if (!workspace) return;
+		const multiselect = new Multiselect(workspace);
+		multiselect.init({
+			multiselectIcon: {hideIcon: true}, // Shift does the same; its default icons load from GitHub
+			bumpNeighbours: true, // Keep Blockly's nudging of overlapping blocks (the plugin turns it off by default)
+			multiselectCopyPaste: {crossTab: true, menu: false}, // Keyboard copy/paste only, no extra menu items
+		});
+
+		// The plugin only hears Shift while the editor has keyboard focus, which it usually doesn't (e.g. after clicking
+		// the timeline). Pass Shift on from the whole page while the pointer is over the editor, without taking focus.
+		const editor = workspace.getInjectionDiv();
+		let pointerInside = false;
+		const isOn = () => inMultipleSelectionModeWeakMap.get(workspace) === true;
+		const onPointerEnter = () => {
+			pointerInside = true;
+		};
+		const onPointerLeave = () => {
+			pointerInside = false;
+		};
+		// Only switch when it changes: enabling twice leaks a box-select instance, and disabling when off clears the selection
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (event.key === 'Shift' && pointerInside && !isOn()) multiselect.controls_?.enableMultiselect();
+		};
+		const onKeyUp = (event: KeyboardEvent) => {
+			if (event.key === 'Shift' && isOn()) multiselect.controls_?.disableMultiselect();
+		};
+		editor.addEventListener('pointerenter', onPointerEnter);
+		editor.addEventListener('pointerleave', onPointerLeave);
+		window.addEventListener('keydown', onKeyDown);
+		window.addEventListener('keyup', onKeyUp);
+		return () => {
+			editor.removeEventListener('pointerenter', onPointerEnter);
+			editor.removeEventListener('pointerleave', onPointerLeave);
+			window.removeEventListener('keydown', onKeyDown);
+			window.removeEventListener('keyup', onKeyUp);
+			multiselect.dispose();
+		};
+	}, [workspace]);
 
 	// Safari reports trackpad pinches as gesture events instead of ctrl+wheel, so Blockly's wheel zoom misses them
 	useEffect(() => {
