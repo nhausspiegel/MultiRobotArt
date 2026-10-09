@@ -7,10 +7,10 @@ import {Button} from 'flowbite-react';
 import React from 'react';
 
 const addNewGroup = (() => {
-	const groups = useRobartState.getState().timelineState.groups;
-	const numGroups = Object.keys(groups).length; 
-	const groupName = 'group ' + numGroups;
-	useRobartState.getState().addGroup(groupName);
+	const groups = Object.values(useRobartState.getState().timelineState.groups);
+	// One more than the highest "Group N"; counting lanes repeats names after a lane is removed
+	const highest = Math.max(0, ...groups.map((group) => Number(/^group (\d+)$/i.exec(group.name)?.[1] ?? 0)));
+	useRobartState.getState().addGroup(`Group ${highest + 1}`);
 });
 
 export const AddTimelineGroupLabel = () => {

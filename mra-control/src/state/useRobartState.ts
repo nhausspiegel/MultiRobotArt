@@ -528,7 +528,12 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					},
 					addGroup: (groupName: string) => {
 						const groups = get().timelineState.groups;
-						const groupId = groupName.replace(/\s/g, '');
+						// The id is also the exported Python module name (<id>_node), so letters, digits and _ only, not starting with a digit.
+						// It must be unique, or the new lane replaces an existing one and wipes its blocks and robots.
+						let baseId = groupName.replace(/\W/g, '');
+						if (!/^[A-Za-z_]/.test(baseId)) baseId = 'group' + baseId;
+						let groupId = baseId;
+						for (let i = 2; groupId in groups; i++) groupId = `${baseId}_${i}`;
 						const newGroups = {...groups, 
 							[groupId]: {id: groupId,
 								name: groupName,
