@@ -141,7 +141,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 
 	return (
 		<div
-			className={clsx('relative h-16 rounded bg-no-repeat', hasDrones ? 'bg-blue-300' : 'bg-gray-300')}
+			className={clsx('relative rounded bg-no-repeat', group.collapsed ? 'h-7' : 'h-16', hasDrones ? 'bg-blue-300' : 'bg-gray-300')}
 			ref={laneBodyRef}
 			// Found by timeline items dragged between lanes
 			data-lane-id={group.id}
@@ -155,7 +155,8 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 				backgroundPosition: `${timelineStartPadding}px 0`,
 			}}
 		>
-			{[...new Array(Math.ceil(group.duration / labelEvery))].map((_, index) => (
+			{/* No second labels on a collapsed lane: no room */}
+			{!group.collapsed && [...new Array(Math.ceil(group.duration / labelEvery))].map((_, index) => (
 				// Centered on their ticks
 				<span key={index} className="absolute top-1/4 -translate-x-1/2" style={{left: timeToX(index * labelEvery, scale)}}>
 					{index * labelEvery}

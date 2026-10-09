@@ -1,3 +1,6 @@
+import {faChevronDown, faChevronRight} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import clsx from 'clsx';
 import React, {type DragEvent, useState} from 'react';
 
 import {allDronesGroupId} from '../../state/groupMigration';
@@ -49,18 +52,49 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 	const removeGroup = useRobartState((state) => state.removeGroup);
 	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
 	const createRobot = useRobartState((state) => state.createRobot);
+	const toggleCollapsed = useRobartState((state) => state.toggleGroupCollapsed);
 	const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
+
+	// Collapses the lane to a thin strip; display only
+	const collapseButton = (
+		<button
+			aria-label={group.collapsed ? `Expand ${group.name}` : `Collapse ${group.name}`}
+			className="w-4 shrink-0 text-xs text-gray-600 hover:text-black"
+			onClick={() => {
+				toggleCollapsed(group.id);
+			}}
+		>
+			<FontAwesomeIcon icon={group.collapsed ? faChevronRight : faChevronDown} />
+		</button>
+	);
 
 	if (group.id === allDronesGroupId) {
 		return (
-			<div className="flex h-16 w-52 flex-col justify-center rounded bg-green-400 px-2">
-				<div className="font-bold">{group.name}</div>
+			<div className={clsx('flex w-52 items-center gap-1 rounded bg-green-400 px-2', group.collapsed ? 'h-7' : 'h-16')}>
+				{collapseButton}
+				<div className="truncate font-bold">{group.name}</div>
 			</div>
 		);
 	}
 
 	const color = group.color ?? defaultGroupColor;
 	const robotIds = Object.keys(group.robots);
+
+	if (group.collapsed) {
+		return (
+			<div
+				className="flex h-7 w-52 items-center gap-1 rounded bg-white px-2"
+				style={{borderLeft: `8px solid ${color}`}}
+				{...acceptRobotDrop((robotId) => {
+					setRobotGroup(robotId, group.id);
+				})}
+			>
+				{collapseButton}
+				<div className="truncate font-bold">{group.name}</div>
+			</div>
+		);
+	}
+
 	return (
 		<div
 			className="flex h-16 w-52 flex-col justify-center gap-1 rounded bg-white px-2"
@@ -70,6 +104,7 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 			})}
 		>
 			<div className="flex items-center gap-1">
+				{collapseButton}
 				{/* Click to rename. Only the name changes; the id (used in exported file names) stays. */}
 				<div className="min-w-0 flex-1 truncate">
 					<RenamableText

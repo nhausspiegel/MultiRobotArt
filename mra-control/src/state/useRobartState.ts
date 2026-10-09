@@ -69,6 +69,10 @@ export type TimelineGroupState = {
    * Shown on the lane label and under its robots in the 3D view. Unset for All drones.
    */
 	color?: string;
+	/**
+   * Lane shown as a thin strip to save space. Display only; it still runs.
+   */
+	collapsed?: boolean;
 };
 
 export type TimelineState = {
@@ -137,6 +141,7 @@ export type TimelineActions = {
    * Sets the timeline zoom (pixels per second multiplier). Visual only.
    */
 	setTimelineScale: (scale: number) => void;
+	toggleGroupCollapsed: (groupId: string) => void;
 	/**
    * Stores lengths measured by simulating: how long timeline items take in the show, and how long each block takes
    * on its own (used for the drop preview and the initial length of new timeline items).
@@ -367,6 +372,12 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							const item = {...state.timelineState.groups[fromGroupId].items[itemId], groupId: toGroupId, startTime};
 							delete state.timelineState.groups[fromGroupId].items[itemId];
 							state.timelineState.groups[toGroupId].items[itemId] = item;
+						});
+					},
+					toggleGroupCollapsed: (groupId) => {
+						set((state) => {
+							const group = state.timelineState.groups[groupId];
+							group.collapsed = !group.collapsed;
 						});
 					},
 					setTimelineScale: (scale) => {
