@@ -3,7 +3,7 @@ import {TimelineMarker} from '@MRAControl/components/timeline/TimelineMarker';
 import {usePinch} from '@use-gesture/react';
 
 import {DroneEditor} from '../../components/timeline/DroneEditor';
-import {convertPixelsToSeconds, TimelineGroupBody, timelineStartPadding, timeToX} from '../../components/timeline/TimelineGroupBody';
+import {convertPixelsToSeconds, convertSecondsToPixels, TimelineGroupBody, timelineLength, timelineStartPadding, timeToX} from '../../components/timeline/TimelineGroupBody';
 import {TimelineGroupLabel} from '../../components/timeline/TimelineGroupLabel';
 import {useRobartState} from '../../state/useRobartState';
 import {nextGroupName} from '../../state/groupMigration';
@@ -17,6 +17,8 @@ const addNewGroup = () => {
 };
 
 
+
+const maxScale = 10;
 
 export const Timeline = () => {
 	const timelineState = useRobartState((state) => state.timelineState);
@@ -37,7 +39,12 @@ export const Timeline = () => {
 		target: scrollerRef,
 		eventOptions: {passive: false}, // Lets it stop the browser's page zoom
 		from: () => [useRobartState.getState().timelineState.scale, 0],
-		scaleBounds: {min: 0.1, max: 10},
+		// Zooms out only until the whole timeline fits the view
+		scaleBounds: () => {
+			const fitWidth = (scrollerRef.current?.clientWidth ?? 0) - timelineStartPadding;
+			const fitScale = fitWidth / convertSecondsToPixels(timelineLength(useRobartState.getState()), 1);
+			return {min: Math.min(Math.max(fitScale, 0.01), maxScale), max: maxScale};
+		},
 	});
 	// After the zoomed timeline renders, scroll so the anchor time is back under the fingers
 	useLayoutEffect(() => {

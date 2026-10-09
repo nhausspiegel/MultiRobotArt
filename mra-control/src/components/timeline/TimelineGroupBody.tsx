@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import {type DragEventHandler, useRef, useState} from 'react';
 
 import {allDronesGroupId} from '../../state/groupMigration';
-import {type TimelineGroupState, type TimelineItem, useRobartState} from '../../state/useRobartState';
+import {type MRAState, type TimelineGroupState, type TimelineItem, useRobartState} from '../../state/useRobartState';
 import {lastItemEnd} from '../../layout/timeline/SimulationOptions';
 import {HoverTimelineBlock} from './HoverTimelineBlock';
 import {TimelineBlock} from './TimelineBlock';
@@ -20,6 +20,8 @@ export const pixelsPerSecond = 100;
 // Lanes reach this far past the last block (s), and are at least minTimelineLength long, so there's always room to add more
 const roomAfterLastBlock = 30;
 const minTimelineLength = 120;
+// Length of every lane (s)
+export const timelineLength = (state: Pick<MRAState, 'timelineState'>) => Math.max(minTimelineLength, lastItemEnd(state) + roomAfterLastBlock);
 export const SUBDIVISIONS_PER_SECOND = 8;
 // Display only: very short items (an LED color change is 0.1 s) would be too thin to see or grab
 export const minItemWidth = 12;
@@ -73,7 +75,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 	const blocks = useRobartState((state) => state.blocks);
 	const scale = useRobartState((state) => state.timelineState.scale);
 	// The same for every lane, so they line up
-	const timelineLength = useRobartState((state) => Math.max(minTimelineLength, lastItemEnd(state) + roomAfterLastBlock));
+	const length = useRobartState(timelineLength);
 	const groups = useRobartState((state) => state.timelineState.groups);
 	const occupiedItems = laneOccupiedItems(groups, group.id);
 	// Shown greyed out on group lanes: time these drones are already busy
@@ -155,14 +157,14 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 			onDragLeave={handleDragLeave}
 			onDrop={handleDrop}
 			style={{
-				width: `${timeToX(timelineLength, scale)}px`,
+				width: `${timeToX(length, scale)}px`,
 				backgroundImage: showSubdivisions ? `${ticks(secondWidth)}, ${ticks(subdivisionWidth)}` : ticks(secondWidth),
 				backgroundSize: showSubdivisions ? `${tickArea} 25%, ${tickArea} 16.67%` : `${tickArea} 25%`,
 				backgroundPosition: `${timelineStartPadding}px 0`,
 			}}
 		>
 			{/* No second labels on a collapsed lane: no room */}
-			{!group.collapsed && [...new Array(Math.ceil(timelineLength / labelEvery))].map((_, index) => (
+			{!group.collapsed && [...new Array(Math.ceil(length / labelEvery))].map((_, index) => (
 				// Centered on their ticks
 				<span key={index} className="absolute top-1/4 -translate-x-1/2" style={{left: timeToX(index * labelEvery, scale)}}>
 					{index * labelEvery}
