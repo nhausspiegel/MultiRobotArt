@@ -1432,6 +1432,14 @@ input:checked + .toggle-bg {
 .touch-none {
   touch-action: none;
 }
+.touch-pan-x {
+  --tw-pan-x: pan-x;
+  touch-action: var(--tw-pan-x) var(--tw-pan-y) var(--tw-pinch-zoom);
+}
+.touch-pan-y {
+  --tw-pan-y: pan-y;
+  touch-action: var(--tw-pan-x) var(--tw-pan-y) var(--tw-pinch-zoom);
+}
 .select-none {
   -webkit-user-select: none;
      -moz-user-select: none;

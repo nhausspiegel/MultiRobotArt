@@ -74752,12 +74752,12 @@ const useSimulator = create$2()(
         get().advance(1 / fps);
       }
       const endTime = get().time;
-      const { groups, scale } = useRobartState.getState().timelineState;
+      const { groups } = useRobartState.getState().timelineState;
       const durations = {};
       Object.values(groups).forEach((group) => {
         Object.values(group.items).forEach((item) => {
           if (itemEndTimes[item.id] !== void 0)
-            durations[item.id] = Math.max(0.1, itemEndTimes[item.id] / scale - item.startTime);
+            durations[item.id] = Math.max(0.1, itemEndTimes[item.id] - item.startTime);
         });
       });
       get().executeSimulation(0);
@@ -74870,12 +74870,11 @@ const useSimulator = create$2()(
       pendingItems.length = 0;
       Object.values(timeline.groups).forEach((group) => {
         Object.values(group.items).forEach((timelineItem) => {
-          const itemTime = timelineItem.startTime * timeline.scale;
-          if (itemTime < startTime)
+          if (timelineItem.startTime < startTime)
             return;
           pendingItems.push({
             itemId: timelineItem.id,
-            time: itemTime,
+            time: timelineItem.startTime,
             robotIds: Object.keys(group.robots),
             lines: blocks2[timelineItem.blockId].javaScript.split("\n").filter((line) => line.length > 0)
           });
@@ -75053,6 +75052,11 @@ const useRobartState = create$2()(
             oldItems[newItem.id] = newItem;
             set2((state2) => {
               state2.timelineState.groups[groupId].items = oldItems;
+            });
+          },
+          setTimelineScale: (scale) => {
+            set2((state2) => {
+              state2.timelineState.scale = scale;
             });
           },
           saveBlock: (blockId, block) => {
@@ -94216,6 +94220,12 @@ function useDrag(handler, config2) {
   return useRecognizers({
     drag: handler
   }, config2 || {}, "drag");
+}
+function usePinch(handler, config2) {
+  registerAction(pinchAction);
+  return useRecognizers({
+    pinch: handler
+  }, config2 || {}, "pinch");
 }
 function createUseGesture(actions) {
   actions.forEach(registerAction);
@@ -130670,9 +130680,8 @@ const SimulationControls = () => {
   const toggleCoordinates = useSimulator((state2) => state2.toggleCoordinates);
   const measuredEndTime = useSimulator((state2) => state2.endTime);
   const estimatedEndTime = useRobartState((state2) => {
-    const { groups, scale } = state2.timelineState;
-    const itemEnds = Object.values(groups).flatMap(
-      (group) => Object.values(group.items).map((item) => (item.startTime + item.duration) * scale)
+    const itemEnds = Object.values(state2.timelineState.groups).flatMap(
+      (group) => Object.values(group.items).map((item) => item.startTime + item.duration)
     );
     return Math.max(10, ...itemEnds);
   });
@@ -131352,11 +131361,12 @@ const TimelineGroupBody = ({ group }) => {
 };
 const TimelineMarker = () => {
   const time2 = useSimulator((state2) => state2.time);
+  const scale = useRobartState((state2) => state2.timelineState.scale);
   return /* @__PURE__ */ jsx(
     "div",
     {
       className: "min-w-1 absolute z-10 h-full w-1 bg-black",
-      style: { left: pixelsPerSecond * time2 }
+      style: { left: convertSecondsToPixels(time2, scale) }
     }
   );
 };
@@ -131615,6 +131625,32 @@ const Timeline = () => {
   const timelineState = useRobartState((state2) => state2.timelineState);
   const groups = Object.values(timelineState.groups);
   const toggleRobotManagerModal = useUIState((state2) => state2.toggleRobotManager);
+  const setTimelineScale = useRobartState((state2) => state2.setTimelineScale);
+  const scrollerRef = reactExports.useRef(null);
+  const zoomAnchor = reactExports.useRef();
+  usePinch(({ offset: [scale], origin: [originX] }) => {
+    const scroller = scrollerRef.current;
+    if (!scroller)
+      return;
+    const x2 = originX - scroller.getBoundingClientRect().left;
+    const currentScale = useRobartState.getState().timelineState.scale;
+    zoomAnchor.current = { time: convertPixelsToSeconds(scroller.scrollLeft + x2, currentScale), x: x2 };
+    setTimelineScale(scale);
+  }, {
+    target: scrollerRef,
+    eventOptions: { passive: false },
+    // Lets it stop the browser's page zoom
+    from: () => [useRobartState.getState().timelineState.scale, 0],
+    scaleBounds: { min: 0.1, max: 10 }
+  });
+  reactExports.useLayoutEffect(() => {
+    const scroller = scrollerRef.current;
+    const anchor = zoomAnchor.current;
+    if (!scroller || !anchor)
+      return;
+    scroller.scrollLeft = convertSecondsToPixels(anchor.time, timelineState.scale) - anchor.x;
+    zoomAnchor.current = void 0;
+  }, [timelineState.scale]);
   reactExports.useEffect(() => {
     let timer2;
     const remeasure = () => {
@@ -131650,7 +131686,7 @@ const Timeline = () => {
         /* @__PURE__ */ jsx(AddTimelineGroupLabel, {}),
         /* @__PURE__ */ jsx(RemoveTimelineGroupLabel, {})
       ] }),
-      /* @__PURE__ */ jsxs("div", { className: "relative flex h-full w-full flex-col gap-2 overflow-x-auto", children: [
+      /* @__PURE__ */ jsxs("div", { ref: scrollerRef, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto", children: [
         groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group }, group.id)),
         /* @__PURE__ */ jsx(TimelineMarker, {})
       ] })
