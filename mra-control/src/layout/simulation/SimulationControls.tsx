@@ -20,9 +20,8 @@ export const SimulationControls = () => {
 	const measuredEndTime = useSimulator((state) => state.endTime);
 	// Before the first run: end of the last timeline item, a rough estimate
 	const estimatedEndTime = useRobartState((state) => {
-		const {groups, scale} = state.timelineState;
-		const itemEnds = Object.values(groups).flatMap((group) =>
-			Object.values(group.items).map((item) => (item.startTime + item.duration) * scale),
+		const itemEnds = Object.values(state.timelineState.groups).flatMap((group) =>
+			Object.values(group.items).map((item) => item.startTime + item.duration),
 		);
 		return Math.max(10, ...itemEnds);
 	});

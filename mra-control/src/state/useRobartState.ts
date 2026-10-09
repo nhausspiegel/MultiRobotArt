@@ -119,6 +119,10 @@ export type TimelineActions = {
 	removeRobotFromGroup: (groupId: string, robotId: string) => void;
 	updateBlockInTimeline: (groupId: string, itemId: string, startTime: number) => void;
 	/**
+   * Sets the timeline zoom (pixels per second multiplier). Visual only.
+   */
+	setTimelineScale: (scale: number) => void;
+	/**
    * Stores how long timeline items really take, measured by simulating the show.
    * Also stores it on each item's block, for the drop preview of new copies.
    * @param durations Duration in seconds by timeline item id.
@@ -366,6 +370,11 @@ export const useRobartState = create<MRAState & MRAActions>()(
 
 						set((state) => {
 							state.timelineState.groups[groupId].items = oldItems;
+						});
+					},
+					setTimelineScale: (scale) => {
+						set((state) => {
+							state.timelineState.scale = scale;
 						});
 					},
 					saveBlock: (blockId: string, block: Partial<CodeBlock>) => {

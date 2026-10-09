@@ -296,11 +296,11 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			const endTime = get().time;
 
 			// Timeline items are drawn this long. Items on lanes without robots never run and keep their old length.
-			const { groups, scale } = useRobartState.getState().timelineState;
+			const { groups } = useRobartState.getState().timelineState;
 			const durations: Record<string, number> = {};
 			Object.values(groups).forEach((group) => {
 				Object.values(group.items).forEach((item) => {
-					if (itemEndTimes[item.id] !== undefined) durations[item.id] = Math.max(0.1, itemEndTimes[item.id] / scale - item.startTime);
+					if (itemEndTimes[item.id] !== undefined) durations[item.id] = Math.max(0.1, itemEndTimes[item.id] - item.startTime);
 				});
 			});
 
@@ -478,12 +478,11 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				// END: The need of said local variables
 
 				Object.values(group.items).forEach(timelineItem => {
-					const itemTime = timelineItem.startTime * timeline.scale;
-					if (itemTime < startTime) return;
+					if (timelineItem.startTime < startTime) return;
 
 					pendingItems.push({
 						itemId: timelineItem.id,
-						time: itemTime,
+						time: timelineItem.startTime,
 						robotIds: Object.keys(group.robots),
 						lines: blocks[timelineItem.blockId].javaScript.split('\n').filter((line) => line.length > 0),
 					});
