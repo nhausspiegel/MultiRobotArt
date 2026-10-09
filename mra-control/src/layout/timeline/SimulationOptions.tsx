@@ -1,4 +1,4 @@
-import {useRobartState} from '@MRAControl/state/useRobartState';
+import {type MRAState, useRobartState} from '@MRAControl/state/useRobartState';
 import {useSimulator} from '@MRAControl/state/useSimulator';
 import React from 'react';
 
@@ -9,17 +9,17 @@ export const formatTime = (seconds: number) => {
 	return `${Math.floor(wholeSeconds / 60)}:${String(wholeSeconds % 60).padStart(2, '0')}`;
 };
 
+// Where the last timeline item ends (s), 0 with none
+export const lastItemEnd = (state: Pick<MRAState, 'timelineState'>) => Math.max(0, ...Object.values(state.timelineState.groups).flatMap((group) =>
+	Object.values(group.items).map((item) => item.startTime + item.duration),
+));
+
 // How far the playhead can be scrubbed: the show's length as measured when it starts (exact), or before the first run
 // the end of the last timeline item (an estimate). 0 with no blocks.
 export const useShowLength = () => {
 	const time = useSimulator((state) => state.time);
 	const measuredEndTime = useSimulator((state) => state.endTime);
-	const estimatedEndTime = useRobartState((state) => {
-		const itemEnds = Object.values(state.timelineState.groups).flatMap((group) =>
-			Object.values(group.items).map((item) => item.startTime + item.duration),
-		);
-		return Math.max(0, ...itemEnds);
-	});
+	const estimatedEndTime = useRobartState(lastItemEnd);
 	// Keep the playhead in range if the sim runs slightly past the measured end (frame timing)
 	return Math.max(measuredEndTime > 0 ? measuredEndTime : estimatedEndTime, time);
 };

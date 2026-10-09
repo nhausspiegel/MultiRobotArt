@@ -116,7 +116,7 @@ const blockLengthCache = new Map<string, number>();
 // Seconds between recorded points of each robot's planned path
 const pathSampleInterval = 0.1;
 
-// Upper bound when measuring a show's length, in case something never finishes (lanes are 120 s long)
+// Upper bound when measuring a show's length, in case something never finishes
 const maxShowLength = 10 * 60;
 
 // Nothing left to start, queue, or fly
