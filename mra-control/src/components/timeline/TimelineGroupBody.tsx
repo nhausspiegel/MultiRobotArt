@@ -4,7 +4,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import {type DragEventHandler, useRef, useState} from 'react';
 
-import {type TimelineGroupState, useRobartState} from '../../state/useRobartState';
+import {allDronesGroupId} from '../../state/groupMigration';
+import {type TimelineGroupState, type TimelineItem, useRobartState} from '../../state/useRobartState';
 import {HoverTimelineBlock} from './HoverTimelineBlock';
 import {TimelineBlock} from './TimelineBlock';
 import React from 'react';
@@ -27,14 +28,14 @@ export const convertSecondsToPixels = (duration: number, scale: number) => {
 };
 
 export const blockOverlaps = (
-	group: TimelineGroupState,
+	occupiedItems: TimelineItem[],
 	startTime: number | undefined,
 	duration: number,
 	id?: string,
 ) =>
 	startTime === undefined ||
   startTime < 0 ||
-  Object.values(group.items).some((items) => {
+  occupiedItems.some((items) => {
   	if (items === undefined) {
   		return false;
   	}
@@ -48,11 +49,22 @@ export const blockOverlaps = (
   	return !(currItemEnd < newBlockStart || newBlockEnd < currItemStart);
   });
 
+// What a block placed on this lane must not overlap: the lane's own items and, on group lanes, All drones' items
+// (those run on every drone, this group's included)
+export const laneOccupiedItems = (groups: Record<string, TimelineGroupState>, laneId: string): TimelineItem[] => [
+	...Object.values(groups[laneId]?.items ?? {}),
+	...(laneId === allDronesGroupId ? [] : Object.values(groups[allDronesGroupId]?.items ?? {})),
+];
+
 export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 	const addBlockToTimeline = useRobartState((state) => state.addBlockToTimeline);
 	const selectedBlockId = useRobartState((state) => state.editingBlockId);
 	const blocks = useRobartState((state) => state.blocks);
 	const scale = useRobartState((state) => state.timelineState.scale);
+	const groups = useRobartState((state) => state.timelineState.groups);
+	const occupiedItems = laneOccupiedItems(groups, group.id);
+	// Shown greyed out on group lanes: time these drones are already busy
+	const allDronesItems = group.id === allDronesGroupId ? [] : Object.values(groups[allDronesGroupId]?.items ?? {});
 
 	// Pointer x while a block from the block list is dragged over this lane
 	const [hoverX, setHoverX] = useState<number | undefined>();
@@ -96,7 +108,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 
 		const startTime = computeTimelineBlockOffset(e.clientX, blockId);
 
-		if (startTime !== undefined && !blockOverlaps(group, startTime, blocks[blockId].duration)) {
+		if (startTime !== undefined && !blockOverlaps(occupiedItems, startTime, blocks[blockId].duration)) {
 			// TODO: Add isTraj appropriately (Currently hardcoded false), find better way to do it...
 			var isTraj = false;
 			if ( blocks[blockId].javaScript.includes('circle')) {
@@ -119,6 +131,8 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 		<div
 			className="relative h-16 rounded bg-blue-300 bg-repeat-x"
 			ref={laneBodyRef}
+			// Found by timeline items dragged between lanes
+			data-lane-id={group.id}
 			onDragOver={handleDragOver}
 			onDragLeave={handleDragLeave}
 			onDrop={handleDrop}
@@ -133,6 +147,20 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 					{index * labelEvery}
 				</span>
 			))}
+			{allDronesItems.map((item) => (
+				<div
+					key={`all-drones-${item.id}`}
+					className="pointer-events-none absolute top-1/2 flex h-5/6 -translate-y-1/2 items-center justify-center overflow-hidden rounded-xl text-gray-500"
+					style={{
+						width: convertSecondsToPixels(item.duration, scale),
+						minWidth: minItemWidth,
+						left: convertSecondsToPixels(item.startTime, scale),
+						background: 'repeating-linear-gradient(45deg, #d1d5db, #d1d5db 6px, #e5e7eb 6px, #e5e7eb 12px)',
+					}}
+				>
+					<span className="truncate px-1">{blocks[item.blockId]?.name}</span>
+				</div>
+			))}
 			{Object.values(group.items).map((item) => (
 				<TimelineBlock key={item.id} scale={scale} item={item} />
 			))}
@@ -140,7 +168,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 				<HoverTimelineBlock
 					scale={scale}
 					startTime={computeTimelineBlockOffset(hoverX, selectedBlockId)}
-					cannotDrop={isEmptyBlock(selectedBlockId) || blockOverlaps(group, computeTimelineBlockOffset(hoverX, selectedBlockId), blocks[selectedBlockId ?? '']?.duration ?? 0)}
+					cannotDrop={isEmptyBlock(selectedBlockId) || blockOverlaps(occupiedItems, computeTimelineBlockOffset(hoverX, selectedBlockId), blocks[selectedBlockId ?? '']?.duration ?? 0)}
 				/>
 			)}
 		</div>

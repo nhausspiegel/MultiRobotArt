@@ -131,6 +131,10 @@ export type TimelineActions = {
 	setRobotGroup: (robotId: string, groupId: string | undefined) => void;
 	updateBlockInTimeline: (groupId: string, itemId: string, startTime: number) => void;
 	/**
+   * Moves a timeline item to another lane, at a new start time.
+   */
+	moveTimelineItem: (fromGroupId: string, itemId: string, toGroupId: string, startTime: number) => void;
+	/**
    * Sets the timeline zoom (pixels per second multiplier). Visual only.
    */
 	setTimelineScale: (scale: number) => void;
@@ -343,6 +347,13 @@ export const useRobartState = create<MRAState & MRAActions>()(
 
 						set((state) => {
 							state.timelineState.groups[groupId].items = oldItems;
+						});
+					},
+					moveTimelineItem: (fromGroupId, itemId, toGroupId, startTime) => {
+						set((state) => {
+							const item = {...state.timelineState.groups[fromGroupId].items[itemId], groupId: toGroupId, startTime};
+							delete state.timelineState.groups[fromGroupId].items[itemId];
+							state.timelineState.groups[toGroupId].items[itemId] = item;
 						});
 					},
 					setTimelineScale: (scale) => {
