@@ -74801,6 +74801,40 @@ const useCrazyflieConstraintState = create$2()(
     }))
   )
 );
+const laneOverlapWarnings = (state2) => {
+  const warnings = [];
+  const groups = Object.values(state2.timelineState.groups);
+  Object.values(state2.robots).forEach((robot) => {
+    const items = groups.filter((group) => robot.id in group.robots).flatMap((group) => Object.values(group.items).map((item) => ({ item, group })));
+    items.forEach((a2, i2) => {
+      items.slice(i2 + 1).forEach((b2) => {
+        if (a2.group.id === b2.group.id)
+          return;
+        const start = Math.max(a2.item.startTime, b2.item.startTime);
+        const end2 = Math.min(a2.item.startTime + a2.item.duration, b2.item.startTime + b2.item.duration);
+        if (start < end2) {
+          warnings.push({
+            time: start,
+            short: `${robot.name} in ${a2.group.name} and ${b2.group.name} at once`,
+            full: `robot ${robot.name} is in lanes ${a2.group.name} and ${b2.group.name}, which both have blocks between ${start.toFixed(2)} s and ${end2.toFixed(2)} s.
+`
+          });
+        }
+      });
+    });
+  });
+  return warnings;
+};
+const overlappingPairs = (positions, [sizeX, sizeY, sizeZ]) => {
+  const ids = Object.keys(positions);
+  return ids.flatMap((a2, i2) => ids.slice(i2 + 1).filter((b2) => Math.abs(positions[a2].x - positions[b2].x) < sizeX && Math.abs(positions[a2].y - positions[b2].y) < sizeY && Math.abs(positions[a2].z - positions[b2].z) < sizeZ).map((b2) => [a2, b2]));
+};
+const collisionWarning = (time2, nameA, nameB) => ({
+  time: time2,
+  short: `${nameA} and ${nameB} too close`,
+  full: `robots ${nameA} and ${nameB} came too close at time ${time2.toFixed(2)} (their bounding boxes overlapped).
+`
+});
 const fps = 60;
 const defaultSimulatorState = {
   robots: {},
@@ -74970,10 +75004,29 @@ const useSimulator = create$2()(
           (plannedPaths[_a3 = robot.id] ?? (plannedPaths[_a3] = [])).push(robot.pos.clone());
         });
       };
+      const boxSize = useRobartState.getState().boundingBoxSize ?? defaultBoundingBoxSize;
+      const robotNames = useRobartState.getState().robots;
+      const collisionWarnings = [];
+      let overlapping = /* @__PURE__ */ new Set();
+      const checkCollisions = () => {
+        const positions = Object.fromEntries(Object.values(get().robots).map((robot) => [robot.id, robot.pos]));
+        const nowOverlapping = /* @__PURE__ */ new Set();
+        overlappingPairs(positions, boxSize).forEach(([a2, b2]) => {
+          var _a3, _b2;
+          const pair2 = `${a2} ${b2}`;
+          nowOverlapping.add(pair2);
+          if (!overlapping.has(pair2)) {
+            collisionWarnings.push(collisionWarning(get().time, ((_a3 = robotNames[a2]) == null ? void 0 : _a3.name) ?? "Deleted robot", ((_b2 = robotNames[b2]) == null ? void 0 : _b2.name) ?? "Deleted robot"));
+          }
+        });
+        overlapping = nowOverlapping;
+      };
       recordPositions();
+      checkCollisions();
       let nextSampleTime = pathSampleInterval;
       while (!isFinished(get().robots) && get().time < maxShowLength) {
         get().advance(1 / fps);
+        checkCollisions();
         if (get().time >= nextSampleTime) {
           recordPositions();
           nextSampleTime += pathSampleInterval;
@@ -74990,6 +75043,10 @@ const useSimulator = create$2()(
         });
       });
       const constraintWarnings = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots)) ?? [];
+      const timedWarnings = [
+        ...constraintWarnings.map((warning) => ({ time: warning.time, short: warning.short, full: warning.repr })),
+        ...collisionWarnings
+      ].sort((a2, b2) => a2.time - b2.time);
       const blockLengths = {};
       Object.values(useRobartState.getState().blocks).forEach((block) => {
         if (!blockLengthCache.has(block.javaScript))
@@ -75000,9 +75057,9 @@ const useSimulator = create$2()(
       set({
         endTime,
         plannedPaths,
-        timedWarnings: constraintWarnings.map((warning) => ({ time: warning.time, short: warning.short, full: warning.repr }))
+        timedWarnings
       });
-      useRobartState.setState({ warnings: constraintWarnings.map((warning) => warning.repr) });
+      useRobartState.setState({ warnings: timedWarnings.map((warning) => warning.full) });
       useRobartState.getState().setMeasuredDurations(durations, blockLengths);
     },
     measureBlockLength: (javaScript) => {
@@ -137059,30 +137116,6 @@ const Simulation = () => {
     Object.values(trajectoryMarkers2).map((trajectoryMarker) => /* @__PURE__ */ jsx("group", { position: trajectoryMarker.position, children: /* @__PURE__ */ jsx(Sphere, { args: [0.03], children: /* @__PURE__ */ jsx("meshBasicMaterial", { color: [trajectoryMarker.color.r / 255, trajectoryMarker.color.g / 255, trajectoryMarker.color.b / 255] }) }) }, trajectoryMarker.id)),
     /* @__PURE__ */ jsx("primitive", { object: camera })
   ] });
-};
-const laneOverlapWarnings = (state2) => {
-  const warnings = [];
-  const groups = Object.values(state2.timelineState.groups);
-  Object.values(state2.robots).forEach((robot) => {
-    const items = groups.filter((group) => robot.id in group.robots).flatMap((group) => Object.values(group.items).map((item) => ({ item, group })));
-    items.forEach((a2, i2) => {
-      items.slice(i2 + 1).forEach((b2) => {
-        if (a2.group.id === b2.group.id)
-          return;
-        const start = Math.max(a2.item.startTime, b2.item.startTime);
-        const end2 = Math.min(a2.item.startTime + a2.item.duration, b2.item.startTime + b2.item.duration);
-        if (start < end2) {
-          warnings.push({
-            time: start,
-            short: `${robot.name} in ${a2.group.name} and ${b2.group.name} at once`,
-            full: `robot ${robot.name} is in lanes ${a2.group.name} and ${b2.group.name}, which both have blocks between ${start.toFixed(2)} s and ${end2.toFixed(2)} s.
-`
-          });
-        }
-      });
-    });
-  });
-  return warnings;
 };
 const speeds = [0.5, 1, 2, 4, 8];
 const formatTime = (seconds) => {
