@@ -5,13 +5,16 @@ export type UIState = {
 	settingsModalOpen: boolean;
 	curveEditorOpen: boolean;
 	openSimulation: boolean;
-	robotManagerModalOpen: boolean;
+	/**
+   * Drone whose window is open (opened by clicking its name tag on the timeline).
+   */
+	editingRobotId: string | undefined;
 };
 
 export type UIActions = {
 	toggleSettingsModal: () => void;
 	toggleCurveEditor: () => void;
-	toggleRobotManager: () => void;
+	setEditingRobotId: (robotId: string | undefined) => void;
 	toggleSimulation: () => void;
 };
 
@@ -24,15 +27,15 @@ export const useUIState = create<UIStoreState>()((set, get) => ({
 	settingsModalOpen: false,
 	curveEditorOpen: false,
 	openSimulation: false,
-	robotManagerModalOpen: false,
+	editingRobotId: undefined,
 	toggleSettingsModal: () => {
 		set({settingsModalOpen: !get().settingsModalOpen}); 
 	},
 	toggleCurveEditor: () => {
 		set({curveEditorOpen: !get().curveEditorOpen}); 
 	},
-	toggleRobotManager: () => {
-		set({robotManagerModalOpen: !get().robotManagerModalOpen});
+	setEditingRobotId: (robotId) => {
+		set({editingRobotId: robotId});
 	},
 	toggleSimulation: () => {
 		set({openSimulation: !get().openSimulation});

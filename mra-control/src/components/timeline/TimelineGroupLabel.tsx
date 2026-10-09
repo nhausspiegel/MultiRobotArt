@@ -3,6 +3,7 @@ import React, {type DragEvent, useState} from 'react';
 
 import {allDronesGroupId} from '../../state/groupMigration';
 import {type TimelineGroupState, useRobartState} from '../../state/useRobartState';
+import {useUIState} from '../../state/useUIState';
 import {ConfirmationModal} from '../modal/ConfirmationModal';
 import {RenamableText} from '../utils/RenamableText';
 
@@ -30,12 +31,16 @@ const useGroupOf = () => {
 
 const RobotTag = ({robotId, color}: {robotId: string; color: string}) => {
 	const name = useRobartState((state) => state.robots[robotId]?.name);
+	const setEditingRobotId = useUIState((state) => state.setEditingRobotId);
 	return (
 		<span
 			draggable
 			onDragStart={(e) => {
 				e.dataTransfer.setData(robotDragType, robotId);
 				e.dataTransfer.effectAllowed = 'move';
+			}}
+			onClick={() => {
+				setEditingRobotId(robotId);
 			}}
 			title="Drag onto another group to move"
 			className="cursor-grab whitespace-nowrap rounded-full px-2 text-xs"
@@ -49,13 +54,13 @@ const RobotTag = ({robotId, color}: {robotId: string; color: string}) => {
 const GroupMembersModal = ({open, onClose, group}: {open: boolean; onClose: () => void; group: TimelineGroupState}) => {
 	const robots = useRobartState((state) => state.robots);
 	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
+	const createRobot = useRobartState((state) => state.createRobot);
 	const groupOf = useGroupOf();
 
 	return (
 		<Modal show={open} onClose={onClose} size="md">
 			<Modal.Header>Drones in {group.name}</Modal.Header>
 			<Modal.Body>
-				{Object.keys(robots).length === 0 && <p>No drones yet. Add them in Manage Robots.</p>}
 				{Object.values(robots).map((robot) => {
 					const currentGroup = groupOf(robot.id);
 					return (
@@ -75,6 +80,11 @@ const GroupMembersModal = ({open, onClose, group}: {open: boolean; onClose: () =
 						</label>
 					);
 				})}
+				<button className="mt-2 font-bold text-blue-900 hover:underline" onClick={() => {
+					setRobotGroup(createRobot(), group.id);
+				}}>
+					+ New drone
+				</button>
 			</Modal.Body>
 			<Modal.Footer>
 				<Button onClick={onClose}>Done</Button>
@@ -154,13 +164,15 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 	);
 };
 
-// Robots that are only in All drones. Also a drop target for taking a robot out of its group.
+// Robots that are only in All drones, and where new drones are created. Also a drop target for taking a robot out of
+// its group. Always shown, since it holds the only "+ New drone" outside a group's checklist.
 export const UngroupedRobots = () => {
 	const robots = useRobartState((state) => state.robots);
 	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
+	const createRobot = useRobartState((state) => state.createRobot);
+	const setEditingRobotId = useUIState((state) => state.setEditingRobotId);
 	const groupOf = useGroupOf();
 
-	if (Object.keys(robots).length === 0) return null;
 	const ungrouped = Object.values(robots).filter((robot) => groupOf(robot.id) === undefined);
 	return (
 		<div
@@ -170,9 +182,15 @@ export const UngroupedRobots = () => {
 			})}
 		>
 			<span>Not in a group:</span>
-			{ungrouped.length === 0
-				? <span className="text-gray-400">none (drag a drone here to take it out of its group)</span>
-				: ungrouped.map((robot) => <RobotTag key={robot.id} robotId={robot.id} color={noGroupColor} />)}
+			{ungrouped.length === 0 && Object.keys(robots).length > 0
+				&& <span className="text-gray-400">none (drag a drone here to take it out of its group)</span>}
+			{ungrouped.map((robot) => <RobotTag key={robot.id} robotId={robot.id} color={noGroupColor} />)}
+			{/* Opens the new drone's window, to set its starting position */}
+			<button className="ml-2 rounded border border-blue-600 px-2 text-blue-900 hover:bg-blue-100" onClick={() => {
+				setEditingRobotId(createRobot());
+			}}>
+				+ New drone
+			</button>
 		</div>
 	);
 };

@@ -1,15 +1,12 @@
 import {TimelineMarker} from '@MRAControl/components/timeline/TimelineMarker';
-import {faRobot} from '@fortawesome/free-solid-svg-icons';
 
 import {usePinch} from '@use-gesture/react';
 
-import {IconButton} from '../../components/buttons/IconButton';
+import {DroneEditor} from '../../components/timeline/DroneEditor';
 import {convertPixelsToSeconds, convertSecondsToPixels, TimelineGroupBody} from '../../components/timeline/TimelineGroupBody';
 import {TimelineGroupLabel, UngroupedRobots} from '../../components/timeline/TimelineGroupLabel';
 import {useRobartState} from '../../state/useRobartState';
 import {useSimulator} from '../../state/useSimulator';
-import {useUIState} from '../../state/useUIState';
-import {RobotManagerModal} from '../robotManager/RobotManagerModal';
 import {TimelineSimulationButtons} from './TimelineSimulationButtons';
 import React, {useEffect, useLayoutEffect, useRef} from 'react';
 
@@ -24,7 +21,6 @@ const addNewGroup = () => {
 export const Timeline = () => {
 	const timelineState = useRobartState((state) => state.timelineState);
 	const groups = Object.values(timelineState.groups);
-	const toggleRobotManagerModal = useUIState((state) => state.toggleRobotManager);
 	const setTimelineScale = useRobartState((state) => state.setTimelineScale);
 
 	// Pinch to zoom, keeping the time under the fingers in place
@@ -81,8 +77,6 @@ export const Timeline = () => {
 				<div className="flex flex-grow" />
 				<div className="flex gap-3 pt-2 pr-3">
 					<TimelineSimulationButtons />
-					<IconButton icon={faRobot} onClick={toggleRobotManagerModal} text="Manage Robots" />
-					<RobotManagerModal />
 				</div>
 			</div>
 
@@ -105,6 +99,7 @@ export const Timeline = () => {
 					</div>
 				</div>
 				<UngroupedRobots />
+				<DroneEditor />
 			</div>
 		</div>
 	);
