@@ -12,7 +12,7 @@ export const ConfirmationModal = ({open, onCancel, onConfirm, header, children}:
 	return (
 		<Modal show={open} onClose={onCancel}>
 			<Modal.Header>{header}</Modal.Header>
-			<Modal.Body>{children}</Modal.Body>
+			{children && <Modal.Body>{children}</Modal.Body>}
 			<Modal.Footer>
 				<Button color="gray" onClick={onCancel}>
           Cancel

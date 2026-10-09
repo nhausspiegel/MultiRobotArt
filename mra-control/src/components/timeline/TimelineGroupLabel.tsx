@@ -94,7 +94,6 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 		return (
 			<div className="flex h-16 w-52 flex-col justify-center rounded bg-green-400 px-2">
 				<div className="font-bold">{group.name}</div>
-				<div className="text-xs">runs on everyone</div>
 			</div>
 		);
 	}
@@ -150,9 +149,7 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 					removeGroup(group.id);
 					setConfirmRemoveOpen(false);
 				}}
-			>
-				Its blocks are removed from the timeline and its drones go to &quot;Not in a group&quot;.
-			</ConfirmationModal>
+			/>
 		</div>
 	);
 };
