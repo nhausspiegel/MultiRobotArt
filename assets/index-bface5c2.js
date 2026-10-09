@@ -146220,13 +146220,13 @@ const roundSeconds = [1, 2, 5, 10, 15, 30, 60];
 const everyAtLeast = (secondWidth, minWidth) => roundSeconds.find((seconds) => seconds * secondWidth >= minWidth) ?? 60;
 const tickBackground = (scale, majorHeight, minorHeight) => {
   const secondWidth = convertSecondsToPixels(1, scale);
-  const majorWidth = everyAtLeast(secondWidth, 6) * secondWidth;
-  const minorWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
+  const majorWidth = everyAtLeast(secondWidth, 10) * secondWidth;
+  const subdivisions = majorWidth === secondWidth ? [8, 4, 2].find((perSecond) => secondWidth / perSecond >= 12) : void 0;
   const ticks = (spacing) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
   const area2 = `calc(100% - ${timelineStartPadding}px)`;
   const layers2 = [{ image: ticks(majorWidth), height: majorHeight }];
-  if (majorWidth === secondWidth && minorWidth >= 6)
-    layers2.push({ image: ticks(minorWidth), height: minorHeight });
+  if (subdivisions)
+    layers2.push({ image: ticks(secondWidth / subdivisions), height: minorHeight });
   return {
     backgroundImage: layers2.map((layer2) => layer2.image).join(", "),
     backgroundSize: layers2.map((layer2) => `${area2} ${layer2.height}`).join(", "),
@@ -146235,7 +146235,6 @@ const tickBackground = (scale, majorHeight, minorHeight) => {
   };
 };
 const timelineLength = (state2) => Math.max(minTimelineLength, lastItemEnd(state2) + roomAfterLastBlock);
-const SUBDIVISIONS_PER_SECOND = 8;
 const minItemWidth = 12;
 const convertPixelsToSeconds = (distance, scale) => {
   return distance / (pixelsPerSecond * scale);
@@ -146261,7 +146260,7 @@ const laneOccupiedItems = (groups, laneId) => {
   var _a3, _b2;
   return laneId === allDronesGroupId ? Object.values(groups).flatMap((group) => Object.values(group.items)) : [...Object.values(((_a3 = groups[laneId]) == null ? void 0 : _a3.items) ?? {}), ...Object.values(((_b2 = groups[allDronesGroupId]) == null ? void 0 : _b2.items) ?? {})];
 };
-const TimelineGroupBody = ({ group }) => {
+const TimelineGroupBody = ({ group, labelRange }) => {
   var _a3, _b2;
   const addBlockToTimeline = useRobartState((state2) => state2.addBlockToTimeline);
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
@@ -146318,6 +146317,8 @@ const TimelineGroupBody = ({ group }) => {
     }
   };
   const labelEvery = everyAtLeast(convertSecondsToPixels(1, scale), 32);
+  const firstLabel = Math.max(0, Math.floor(labelRange[0] / labelEvery));
+  const labelCount = Math.max(0, Math.min(Math.ceil(length / labelEvery), Math.ceil(labelRange[1] / labelEvery)) - firstLabel);
   return /* @__PURE__ */ jsxs(
     "div",
     {
@@ -146332,9 +146333,9 @@ const TimelineGroupBody = ({ group }) => {
         ...tickBackground(scale, "25%", "16.67%")
       },
       children: [
-        !group.collapsed && [...new Array(Math.ceil(length / labelEvery))].map((_2, index2) => (
+        !group.collapsed && [...new Array(labelCount)].map((_2, i2) => (firstLabel + i2) * labelEvery).map((seconds) => (
           // Centered on their ticks
-          /* @__PURE__ */ jsx("span", { className: "absolute top-1/4 -translate-x-1/2", style: { left: timeToX(index2 * labelEvery, scale) }, children: index2 * labelEvery }, index2)
+          /* @__PURE__ */ jsx("span", { className: "absolute top-1/4 -translate-x-1/2", style: { left: timeToX(seconds, scale) }, children: seconds }, seconds)
         )),
         allDronesItems.map((item) => {
           var _a4;
@@ -146703,14 +146704,30 @@ const Timeline = () => {
       return { min: Math.min(Math.max(fitScale, 0.01), maxScale), max: maxScale };
     }
   });
+  const [labelRange, setLabelRange] = reactExports.useState([0, 0]);
+  const updateLabelRange = reactExports.useCallback(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller)
+      return;
+    const { scale } = useRobartState.getState().timelineState;
+    const from = convertPixelsToSeconds(scroller.scrollLeft - timelineStartPadding, scale);
+    const span = convertPixelsToSeconds(scroller.clientWidth, scale);
+    setLabelRange((range) => from >= range[0] && from + span <= range[1] && range[1] - range[0] <= 4 * span ? range : [from - span, from + 2 * span]);
+  }, []);
+  reactExports.useEffect(() => {
+    window.addEventListener("resize", updateLabelRange);
+    return () => {
+      window.removeEventListener("resize", updateLabelRange);
+    };
+  }, [updateLabelRange]);
   reactExports.useLayoutEffect(() => {
     const scroller = scrollerRef.current;
     const anchor = zoomAnchor.current;
-    if (!scroller || !anchor)
-      return;
-    scroller.scrollLeft = timeToX(anchor.time, timelineState.scale) - anchor.x;
+    if (scroller && anchor)
+      scroller.scrollLeft = timeToX(anchor.time, timelineState.scale) - anchor.x;
     zoomAnchor.current = void 0;
-  }, [timelineState.scale]);
+    updateLabelRange();
+  }, [timelineState.scale, updateLabelRange]);
   reactExports.useEffect(() => {
     let timer2;
     const remeasure = () => {
@@ -146744,8 +146761,8 @@ const Timeline = () => {
           groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupLabel, { group }, group.id)),
           /* @__PURE__ */ jsx("button", { className: "h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200", onClick: addNewGroup, children: "+ New group" })
         ] }),
-        /* @__PURE__ */ jsxs("div", { ref: scrollerRef, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-5", children: [
-          groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group }, group.id)),
+        /* @__PURE__ */ jsxs("div", { ref: scrollerRef, onScroll: updateLabelRange, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-5", children: [
+          groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group, labelRange }, group.id)),
           /* @__PURE__ */ jsx(TimelineMarker, {})
         ] })
       ] }),
