@@ -90082,7 +90082,7 @@ const RenamableText = ({ text, updateText, className }) => {
   const [width, setWidth] = reactExports.useState(0);
   const span = reactExports.useRef(null);
   const finished = reactExports.useRef(false);
-  reactExports.useEffect(() => {
+  reactExports.useLayoutEffect(() => {
     var _a3;
     if (span.current === null)
       return;
