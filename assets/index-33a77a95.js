@@ -145402,15 +145402,13 @@ const formatTime = (seconds) => {
   const wholeSeconds = Math.floor(seconds);
   return `${Math.floor(wholeSeconds / 60)}:${String(wholeSeconds % 60).padStart(2, "0")}`;
 };
+const lastItemEnd = (state2) => Math.max(0, ...Object.values(state2.timelineState.groups).flatMap(
+  (group) => Object.values(group.items).map((item) => item.startTime + item.duration)
+));
 const useShowLength = () => {
   const time2 = useSimulator((state2) => state2.time);
   const measuredEndTime = useSimulator((state2) => state2.endTime);
-  const estimatedEndTime = useRobartState((state2) => {
-    const itemEnds = Object.values(state2.timelineState.groups).flatMap(
-      (group) => Object.values(group.items).map((item) => item.startTime + item.duration)
-    );
-    return Math.max(0, ...itemEnds);
-  });
+  const estimatedEndTime = useRobartState(lastItemEnd);
   return Math.max(measuredEndTime > 0 ? measuredEndTime : estimatedEndTime, time2);
 };
 const SimulationOptions = () => {
@@ -146028,6 +146026,8 @@ const TimelineBlock = ({ item, scale }) => {
   );
 };
 const pixelsPerSecond = 100;
+const roomAfterLastBlock = 30;
+const minTimelineLength = 120;
 const SUBDIVISIONS_PER_SECOND = 8;
 const minItemWidth = 12;
 const convertPixelsToSeconds = (distance, scale) => {
@@ -146063,6 +146063,7 @@ const TimelineGroupBody = ({ group }) => {
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
   const blocks = useRobartState((state2) => state2.blocks);
   const scale = useRobartState((state2) => state2.timelineState.scale);
+  const timelineLength = useRobartState((state2) => Math.max(minTimelineLength, lastItemEnd(state2) + roomAfterLastBlock));
   const groups = useRobartState((state2) => state2.timelineState.groups);
   const occupiedItems = laneOccupiedItems(groups, group.id);
   const allDronesItems = group.id === allDronesGroupId ? [] : Object.values(((_a3 = groups[allDronesGroupId]) == null ? void 0 : _a3.items) ?? {});
@@ -146128,13 +146129,13 @@ const TimelineGroupBody = ({ group }) => {
       onDragLeave: handleDragLeave,
       onDrop: handleDrop,
       style: {
-        width: `${timeToX(group.duration, scale)}px`,
+        width: `${timeToX(timelineLength, scale)}px`,
         backgroundImage: showSubdivisions ? `${ticks(secondWidth)}, ${ticks(subdivisionWidth)}` : ticks(secondWidth),
         backgroundSize: showSubdivisions ? `${tickArea} 25%, ${tickArea} 16.67%` : `${tickArea} 25%`,
         backgroundPosition: `${timelineStartPadding}px 0`
       },
       children: [
-        !group.collapsed && [...new Array(Math.ceil(group.duration / labelEvery))].map((_2, index2) => (
+        !group.collapsed && [...new Array(Math.ceil(timelineLength / labelEvery))].map((_2, index2) => (
           // Centered on their ticks
           /* @__PURE__ */ jsx("span", { className: "absolute top-1/4 -translate-x-1/2", style: { left: timeToX(index2 * labelEvery, scale) }, children: index2 * labelEvery }, index2)
         )),
