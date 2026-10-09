@@ -146025,16 +146025,16 @@ const RightPanel = () => {
   const warnings = useWarningCount();
   return /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 h-full", children: [
     /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(Button.Group, { children: [
-      /* @__PURE__ */ jsx(Button, { color: selectedTab == "simulation" ? "blue" : "gray", onClick: () => {
+      /* @__PURE__ */ jsx(Button, { color: selectedTab == "simulation" ? "info" : "gray", onClick: () => {
         setSelectedTab("simulation");
       }, children: "Simulation" }),
-      /* @__PURE__ */ jsx(Button, { color: selectedTab == "python" ? "blue" : "gray", onClick: () => {
+      /* @__PURE__ */ jsx(Button, { color: selectedTab == "python" ? "info" : "gray", onClick: () => {
         setSelectedTab("python");
       }, children: "Python Code" }),
-      /* @__PURE__ */ jsx(Button, { color: selectedTab == "javascript" ? "blue" : "gray", onClick: () => {
+      /* @__PURE__ */ jsx(Button, { color: selectedTab == "javascript" ? "info" : "gray", onClick: () => {
         setSelectedTab("javascript");
       }, children: "JavaScript Code" }),
-      /* @__PURE__ */ jsxs(Button, { color: selectedTab == "warnings" ? "blue" : "gray", onClick: () => {
+      /* @__PURE__ */ jsxs(Button, { color: selectedTab == "warnings" ? "info" : "gray", onClick: () => {
         setSelectedTab("warnings");
       }, children: [
         "Warnings",
