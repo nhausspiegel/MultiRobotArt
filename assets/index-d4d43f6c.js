@@ -81517,24 +81517,12 @@ const SIM = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty(
 const useCrazyflieConstraintState = create$2()(
   subscribeWithSelector(
     immer((set2, get2) => ({
-      maxVelocity: 1,
       maxAcceleration: 5,
-      workspaceDimensions: new Box3(new Vector3(-4, -2.5, -0.01), new Vector3(2, 2.5, 2.5)),
       positionHistory: [],
       deltaT: 1 / 60,
-      setMaxVelocity(vel) {
-        set2({
-          maxVelocity: vel
-        });
-      },
       setMaxAcceleration(acc) {
         set2({
           maxAcceleration: acc
-        });
-      },
-      setWorkspaceDimensions(dim) {
-        set2({
-          workspaceDimensions: dim
         });
       },
       checkDynamicConstraints(robotIDs) {
@@ -81542,6 +81530,9 @@ const useCrazyflieConstraintState = create$2()(
         if (positions.length === 0) {
           return void 0;
         }
+        const { speedLimitOn, speedLimit } = useRobartState.getState().limits ?? defaultLimits;
+        if (!speedLimitOn)
+          return [];
         let warnings = [];
         robotIDs.forEach((id2) => {
           var _a3, _b2, _c2;
@@ -81555,7 +81546,7 @@ const useCrazyflieConstraintState = create$2()(
               continue;
             }
             const velocity = currentPosition.distanceTo(previousPosition) / timeBetween;
-            if (velocity > get2().maxVelocity && !violating) {
+            if (velocity > speedLimit && !violating) {
               const robotName = ((_c2 = useRobartState.getState().robots[id2]) == null ? void 0 : _c2.name) ?? "Deleted robot";
               warnings.push({
                 time: positions[i2].timestep,
@@ -81565,7 +81556,7 @@ const useCrazyflieConstraintState = create$2()(
                 robotId: id2
               });
             }
-            violating = velocity > get2().maxVelocity;
+            violating = velocity > speedLimit;
           }
         });
         return warnings;
@@ -81580,6 +81571,10 @@ const useCrazyflieConstraintState = create$2()(
       checkKinematicConstraints(robotIDs) {
         const history2 = get2().positionHistory;
         if (history2.length > 0) {
+          const { workAreaOn, workAreaMin, workAreaMax } = useRobartState.getState().limits ?? defaultLimits;
+          if (!workAreaOn)
+            return [];
+          const workArea = new Box3(new Vector3(...workAreaMin), new Vector3(...workAreaMax)).expandByScalar(0.01);
           let warnings = [];
           robotIDs.forEach((id2) => {
             var _a3, _b2;
@@ -81588,7 +81583,7 @@ const useCrazyflieConstraintState = create$2()(
               const currentPosition = (_a3 = history2[i2]) == null ? void 0 : _a3.robotPositions[id2];
               if (!currentPosition)
                 continue;
-              const isOutside = !this.workspaceDimensions.containsPoint(currentPosition);
+              const isOutside = !workArea.containsPoint(currentPosition);
               if (isOutside && !outside) {
                 const robotName = ((_b2 = useRobartState.getState().robots[id2]) == null ? void 0 : _b2.name) ?? "Deleted robot";
                 warnings.push({
@@ -81656,6 +81651,7 @@ const defaultSimulatorState = {
   timedWarnings: [],
   warningsShownUntil: 0,
   showPaths: true,
+  showWorkArea: false,
   trajectoryQueue: new Queue_1(),
   trajectoryMarkers: [],
   markerFrequency: 0.25,
@@ -81870,7 +81866,6 @@ const useSimulator = create$2()(
         plannedPaths,
         timedWarnings
       });
-      useRobartState.setState({ warnings: timedWarnings.map((warning) => warning.full) });
       useRobartState.getState().setMeasuredDurations(durations, blockLengths);
     },
     measureBlockLength: (javaScript) => {
@@ -81892,6 +81887,9 @@ const useSimulator = create$2()(
     },
     togglePaths: () => {
       set({ showPaths: !get().showPaths });
+    },
+    toggleWorkArea: () => {
+      set({ showWorkArea: !get().showWorkArea });
     },
     setRobots: (robots2) => {
       const simRobots = {};
@@ -82010,7 +82008,6 @@ const useSimulator = create$2()(
     },
     reset: () => {
       set({ status: "STOPPED", endTime: 0, plannedPaths: {}, timedWarnings: [], warningsShownUntil: 0 });
-      useRobartState.setState({ warnings: [] });
       get().executeSimulation(0);
       get().cancelSimulation();
     }
@@ -82095,6 +82092,13 @@ const migrateGroups = (state2) => {
   return { ...state2, timelineState: { ...state2.timelineState, groups }, notices };
 };
 const defaultBoundingBoxSize = [0.4, 0.4, 0.7];
+const defaultLimits = {
+  speedLimitOn: true,
+  speedLimit: 1,
+  workAreaOn: true,
+  workAreaMin: [-4, -2.5, 0],
+  workAreaMax: [2, 2.5, 2.5]
+};
 const firstDrone = { id: uuid$2(), name: "CF 1", type: "crazyflie", startingPosition: [0, 0, 0] };
 const firstGroup = { ...newGroup("Group 1", {}), robots: { [firstDrone.id]: firstDrone } };
 const defaultRobartState = {
@@ -82118,7 +82122,8 @@ const defaultRobartState = {
   robots: { [firstDrone.id]: firstDrone },
   warnings: [],
   notices: [],
-  boundingBoxSize: defaultBoundingBoxSize
+  boundingBoxSize: defaultBoundingBoxSize,
+  limits: defaultLimits
 };
 function* startingPositionGenerator() {
   let i2 = 0;
@@ -82141,7 +82146,7 @@ const useRobartState = create$2()(
           ...defaultRobartState,
           loadProject: (file) => {
             const newState = migrateGroups(loadProjectFromFile(file));
-            set2({ ...newState, boundingBoxSize: newState.boundingBoxSize ?? defaultBoundingBoxSize });
+            set2({ ...newState, boundingBoxSize: newState.boundingBoxSize ?? defaultBoundingBoxSize, limits: newState.limits ?? defaultLimits });
             useSimulator.getState().reset();
           },
           saveProject: (fileName) => {
@@ -82153,7 +82158,8 @@ const useRobartState = create$2()(
               version: ROBART_VERSION,
               robots: get2().robots,
               warnings: get2().warnings,
-              boundingBoxSize: get2().boundingBoxSize
+              boundingBoxSize: get2().boundingBoxSize,
+              limits: get2().limits
             };
             saveProjectToFile(state2, fileName);
           },
@@ -82242,6 +82248,9 @@ const useRobartState = create$2()(
           },
           setBoundingBoxSize: (size) => {
             set2({ boundingBoxSize: size });
+          },
+          setLimits: (limits) => {
+            set2({ limits: { ...get2().limits ?? defaultLimits, ...limits } });
           },
           setTimelineScale: (scale) => {
             set2((state2) => {
@@ -122581,6 +122590,79 @@ const BoundingBoxSizeEditor = () => {
     ] }, axis)) })
   ] });
 };
+const isNumber$1 = (value) => value.trim() !== "" && Number.isFinite(Number(value));
+const fieldClass = (valid) => clsx("w-20 rounded px-2 py-1 disabled:opacity-50", valid ? "border border-gray-300" : "border-2 border-red-500");
+const LimitsEditor = () => {
+  const limits = useRobartState((state2) => state2.limits ?? defaultLimits);
+  const setLimits = useRobartState((state2) => state2.setLimits);
+  const area2 = [...limits.workAreaMin, ...limits.workAreaMax];
+  const [speed, setSpeed] = reactExports.useState(String(limits.speedLimit));
+  const [areaValues, setAreaValues] = reactExports.useState(area2.map(String));
+  reactExports.useEffect(() => {
+    if (Number(speed) !== limits.speedLimit)
+      setSpeed(String(limits.speedLimit));
+  }, [limits.speedLimit]);
+  reactExports.useEffect(() => {
+    if (!areaValues.every((value, i2) => Number(value) === area2[i2]))
+      setAreaValues(area2.map(String));
+  }, [limits.workAreaMin, limits.workAreaMax]);
+  const axisValid = (values, axis) => isNumber$1(values[axis]) && isNumber$1(values[axis + 3]) && Number(values[axis]) < Number(values[axis + 3]);
+  const areaField = (index2) => /* @__PURE__ */ jsx(
+    "input",
+    {
+      className: fieldClass(axisValid(areaValues, index2 % 3)),
+      value: areaValues[index2],
+      disabled: !limits.workAreaOn,
+      onChange: (e2) => {
+        const next2 = areaValues.map((value, j2) => j2 === index2 ? e2.target.value : value);
+        setAreaValues(next2);
+        if ([0, 1, 2].every((axis) => axisValid(next2, axis))) {
+          setLimits({
+            workAreaMin: next2.slice(0, 3).map(Number),
+            workAreaMax: next2.slice(3).map(Number)
+          });
+        }
+      }
+    }
+  );
+  return /* @__PURE__ */ jsxs("div", { className: "mt-4 flex flex-col gap-2", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+      /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2", children: [
+        /* @__PURE__ */ jsx(Checkbox, { checked: limits.speedLimitOn, onChange: () => {
+          setLimits({ speedLimitOn: !limits.speedLimitOn });
+        } }),
+        "Speed limit (m/s):"
+      ] }),
+      /* @__PURE__ */ jsx(
+        "input",
+        {
+          className: fieldClass(isPositiveNumber(speed)),
+          inputMode: "decimal",
+          value: speed,
+          disabled: !limits.speedLimitOn,
+          onChange: (e2) => {
+            setSpeed(e2.target.value);
+            if (isPositiveNumber(e2.target.value))
+              setLimits({ speedLimit: Number(e2.target.value) });
+          }
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2", children: [
+      /* @__PURE__ */ jsx(Checkbox, { checked: limits.workAreaOn, onChange: () => {
+        setLimits({ workAreaOn: !limits.workAreaOn });
+      } }),
+      "Work area (m):"
+    ] }),
+    ["X", "Y", "Z"].map((axis, i2) => /* @__PURE__ */ jsxs("div", { className: "ml-6 flex items-center gap-2", children: [
+      axis,
+      " from ",
+      areaField(i2),
+      " to ",
+      areaField(i2 + 3)
+    ] }, axis))
+  ] });
+};
 const SettingsModal = () => {
   const settingsModalOpen = useUIState((state2) => state2.settingsModalOpen);
   const toggleSettingsModal = useUIState((state2) => state2.toggleSettingsModal);
@@ -122616,7 +122698,8 @@ const SettingsModal = () => {
               }
             ),
             /* @__PURE__ */ jsx("span", { style: { marginLeft: "10px" }, children: "Remove Bounding Boxes" })
-          ] })
+          ] }),
+          /* @__PURE__ */ jsx(LimitsEditor, {})
         ] }),
         /* @__PURE__ */ jsx(Tabs.Item, { title: "Utilities", children: /* @__PURE__ */ jsx(Button, { onClick: toggleCurveEditor, children: "Curve Editor" }) })
       ] }) }),
@@ -145239,6 +145322,10 @@ const BlockPythonCodePanel = () => {
   return /* @__PURE__ */ jsx("div", { className: "h-full w-full overflow-auto", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: currentBlock == null ? void 0 : currentBlock.python, className: "h-full w-full", extensions: [python()], readOnly: true }) });
 };
 let init = true;
+const boxEdges = (min, max) => {
+  const corner = (i2) => [i2 & 1 ? max[0] : min[0], i2 & 2 ? max[1] : min[1], i2 & 4 ? max[2] : min[2]];
+  return [0, 1, 2, 3, 4, 5, 6, 7].flatMap((i2) => [1, 2, 4].filter((axis) => !(i2 & axis)).flatMap((axis) => [corner(i2), corner(i2 | axis)]));
+};
 const Simulation = () => {
   const marker = reactExports.useRef(null);
   const robots2 = useSimulator((state2) => state2.robots);
@@ -145288,6 +145375,10 @@ const Simulation = () => {
     ),
     /* @__PURE__ */ jsx(Plane, { args: [1e3, 1e3], rotation: [0, 0, -Math.PI / 2], position: [0, 0, -0.02], children: /* @__PURE__ */ jsx("meshStandardMaterial", { color: "black" }) }),
     Object.values(robots2).map((robot) => /* @__PURE__ */ jsx("group", { ref: marker, position: robot.pos, children: /* @__PURE__ */ jsx(Crazyflie, { robotId: robot.id, renderBoundingBox: renderBB }) }, robot.id)),
+    simulatorState.showWorkArea && (() => {
+      const { workAreaMin, workAreaMax } = robartState.limits ?? defaultLimits;
+      return /* @__PURE__ */ jsx(Line$1, { points: boxEdges(workAreaMin, workAreaMax), segments: true, color: "white", lineWidth: 1, transparent: true, opacity: 0.5 });
+    })(),
     simulatorState.showPaths && Object.entries(simulatorState.plannedPaths).filter(([, points]) => points.some((point) => !point.equals(points[0]))).map(([robotId2, points]) => {
       var _a3;
       return /* @__PURE__ */ jsx(
@@ -145331,6 +145422,8 @@ const SimulationOptions = () => {
   const togglePaths = useSimulator((state2) => state2.togglePaths);
   const showCoordinates = useSimulator((state2) => state2.showCoordinates);
   const toggleCoordinates = useSimulator((state2) => state2.toggleCoordinates);
+  const showWorkArea = useSimulator((state2) => state2.showWorkArea);
+  const toggleWorkArea = useSimulator((state2) => state2.toggleWorkArea);
   return /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 text-sm", children: [
     /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
       /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showCoordinates, onChange: toggleCoordinates }),
@@ -145339,6 +145432,10 @@ const SimulationOptions = () => {
     /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
       /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showPaths, onChange: togglePaths }),
       "Paths"
+    ] }),
+    /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
+      /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showWorkArea, onChange: toggleWorkArea }),
+      "Work area"
     ] }),
     /* @__PURE__ */ jsx(
       "select",
@@ -145363,14 +145460,17 @@ const SimulationOptions = () => {
   ] });
 };
 const maxShown = 4;
-const SimulationWarnings = () => {
+const useReachedWarnings = () => {
   const shownUntil = useSimulator((state2) => state2.warningsShownUntil);
   const atStart = useSimulator((state2) => state2.status === "STOPPED" && state2.time === 0);
   const timedWarnings = useSimulator((state2) => state2.timedWarnings);
   const overlapWarnings = useRobartState(laneOverlapWarnings);
   if (atStart)
-    return null;
-  const reached = [...timedWarnings, ...overlapWarnings].filter((warning) => warning.time <= shownUntil).sort((a2, b2) => b2.time - a2.time);
+    return [];
+  return [...timedWarnings, ...overlapWarnings].filter((warning) => warning.time <= shownUntil).sort((a2, b2) => a2.time - b2.time);
+};
+const SimulationWarnings = () => {
+  const reached = useReachedWarnings();
   if (reached.length === 0)
     return null;
   return /* @__PURE__ */ jsxs("div", { className: "pointer-events-none absolute right-2 top-2 max-w-xs rounded bg-black/60 px-2 py-1 text-xs text-white", children: [
@@ -145379,7 +145479,7 @@ const SimulationWarnings = () => {
       " ",
       reached.length
     ] }),
-    reached.slice(0, maxShown).map((warning, i2) => /* @__PURE__ */ jsxs("div", { className: "truncate", children: [
+    reached.slice(-maxShown).reverse().map((warning, i2) => /* @__PURE__ */ jsxs("div", { className: "truncate", children: [
       /* @__PURE__ */ jsx("span", { className: "tabular-nums text-gray-300", children: formatTime(warning.time) }),
       " ",
       warning.short
@@ -145807,21 +145907,19 @@ const BlockJavaScriptCodePanel = () => {
   const currentBlock = useRobartState((state2) => state2.blocks[currentBlockId ?? ""]);
   return /* @__PURE__ */ jsx("div", { className: "h-full w-full overflow-auto", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: currentBlock == null ? void 0 : currentBlock.javaScript, className: "h-full w-full", extensions: [javascript()], readOnly: true }) });
 };
-const warningLines = (state2) => [
-  // Notes from loading the project, e.g. robots moved out of extra groups
-  ...state2.notices ?? [],
-  ...laneOverlapWarnings(state2).map((warning) => warning.full),
-  // Speed and work area, found when the show is measured
-  ...state2.warnings ?? []
-];
-const warningCount = (state2) => warningLines(state2).length;
+const useWarningLines = () => {
+  const notices = useRobartState((state2) => state2.notices);
+  const reached = useReachedWarnings();
+  return [...notices ?? [], ...reached.map((warning) => warning.full)];
+};
+const useWarningCount = () => useWarningLines().length;
 const WarningsPanel = () => {
-  const text = useRobartState((state2) => warningLines(state2).join(""));
+  const text = useWarningLines().join("");
   return /* @__PURE__ */ jsx("div", { className: "overflow-auto h-full w-full ", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: text, className: "h-full w-full", readOnly: true }) });
 };
 const RightPanel = () => {
   const [selectedTab, setSelectedTab] = reactExports.useState("simulation");
-  const warnings = useRobartState(warningCount);
+  const warnings = useWarningCount();
   return /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 h-full", children: [
     /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(Button.Group, { children: [
       /* @__PURE__ */ jsx(Button, { color: selectedTab == "simulation" ? "blue" : "gray", onClick: () => {
@@ -146360,10 +146458,10 @@ const TimelineSimulationButtons = () => {
     };
   }, []);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    simulationStatus !== "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faSquare, onClick: halt, text: "Stop Sim", color: "failure" }),
     simulationStatus === "RUNNING" && /* @__PURE__ */ jsx(IconButton, { icon: faPause, onClick: pause, text: "Pause Sim", color: "gray" }),
     simulationStatus === "PAUSED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: resume, text: "Resume Sim", color: "success" }),
-    simulationStatus === "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: play, text: "Run Sim", color: "success", disabled: !hasDrones })
+    simulationStatus === "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: play, text: "Run Sim", color: "success", disabled: !hasDrones }),
+    simulationStatus !== "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faSquare, onClick: halt, text: "Stop Sim", color: "failure" })
   ] });
 };
 const addNewGroup = () => {
@@ -146411,7 +146509,7 @@ const Timeline = () => {
     };
     remeasure();
     const unsubscribe = useRobartState.subscribe((state2, previous) => {
-      if (state2.timelineState.groups !== previous.timelineState.groups || state2.blocks !== previous.blocks || state2.robots !== previous.robots || state2.boundingBoxSize !== previous.boundingBoxSize) {
+      if (state2.timelineState.groups !== previous.timelineState.groups || state2.blocks !== previous.blocks || state2.robots !== previous.robots || state2.boundingBoxSize !== previous.boundingBoxSize || state2.limits !== previous.limits) {
         remeasure();
       }
     });
@@ -146421,12 +146519,9 @@ const Timeline = () => {
     };
   }, []);
   return /* @__PURE__ */ jsxs("div", { className: "flex h-full w-full flex-col gap-2 rounded bg-blue-100", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex", children: [
-      /* @__PURE__ */ jsx("div", { className: "flex flex-grow" }),
-      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 pt-2 pr-3", children: [
-        /* @__PURE__ */ jsx(TimelineSimulationButtons, {}),
-        /* @__PURE__ */ jsx(SimulationOptions, {})
-      ] })
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 pl-2 pt-2", children: [
+      /* @__PURE__ */ jsx(TimelineSimulationButtons, {}),
+      /* @__PURE__ */ jsx(SimulationOptions, {})
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "overflow-y-auto", children: [
       /* @__PURE__ */ jsxs("div", { className: "flex flex-shrink-0 gap-2", children: [
