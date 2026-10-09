@@ -52,6 +52,11 @@ export type SimulatorState = {
 	status: 'RUNNING' | 'STOPPED' | 'PAUSED';
 	renderBoundingBoxes: boolean;
 	showCoordinates: boolean;
+	/**
+   * Each robot's whole flight path (sampled), recorded when the show is measured. Drawn in the 3D view.
+   */
+	plannedPaths: Record<string, THREE.Vector3[]>;
+	showPaths: boolean;
 	trajectoryQueue: Queue<string>;
 	trajectoryMarkers: Array<{ position: THREE.Vector3; color: THREE.Color; id: string }>;
 	markerFrequency: number;
@@ -70,6 +75,8 @@ const defaultSimulatorState: SimulatorState = {
 	status: 'STOPPED',
 	renderBoundingBoxes: true,
 	showCoordinates: false,
+	plannedPaths: {},
+	showPaths: true,
 	trajectoryQueue: new Queue<string>(),
 	trajectoryMarkers: [],
 	markerFrequency: 0.25,
@@ -89,6 +96,9 @@ let itemEndTimes: Record<string, number> = {};
 
 // Block code -> its length run alone, so blocks are only re-timed when their code changes
 const blockLengthCache = new Map<string, number>();
+
+// Seconds between recorded points of each robot's planned path
+const pathSampleInterval = 0.1;
 
 // Upper bound when measuring a show's length, in case something never finishes (lanes are 120 s long)
 const maxShowLength = 10 * 60;
@@ -123,6 +133,7 @@ export type SimulatorActions = {
 	measureBlockLength: (javaScript: string) => number;
 	setTimeDilation: (timeDilation: number) => void;
 	toggleCoordinates: () => void;
+	togglePaths: () => void;
 	/**
    * Can only be used when simulator is STOPPED mode.
    * @param robots
@@ -302,9 +313,23 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		},
 		measureShowLength: () => {
 			get().executeSimulation(0);
+			// Each robot's position every pathSampleInterval, drawn as its planned path
+			const plannedPaths: Record<string, THREE.Vector3[]> = {};
+			const recordPositions = () => {
+				Object.values(get().robots).forEach((robot) => {
+					(plannedPaths[robot.id] ??= []).push(robot.pos.clone());
+				});
+			};
+			recordPositions();
+			let nextSampleTime = pathSampleInterval;
 			while (!isFinished(get().robots) && get().time < maxShowLength) {
 				get().advance(1 / fps);
+				if (get().time >= nextSampleTime) {
+					recordPositions();
+					nextSampleTime += pathSampleInterval;
+				}
 			}
+			recordPositions();
 			const endTime = get().time;
 
 			// Timeline items are drawn this long. Items on lanes without robots never run and keep their old length.
@@ -324,7 +349,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			});
 
 			get().executeSimulation(0);
-			set({ endTime });
+			set({ endTime, plannedPaths });
 			useRobartState.getState().setMeasuredDurations(durations, blockLengths);
 		},
 		measureBlockLength: (javaScript) => {
@@ -345,6 +370,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		},
 		toggleCoordinates: () => {
 			set({ showCoordinates: !get().showCoordinates });
+		},
+		togglePaths: () => {
+			set({ showPaths: !get().showPaths });
 		},
 		setRobots: (robots) => {
 			const simRobots: Record<string, RobotSimState> = {};
@@ -526,7 +554,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			pendingItems.length = 0;
 		},
 		reset: () => {
-			set({ status: 'STOPPED', endTime: 0 });
+			set({ status: 'STOPPED', endTime: 0, plannedPaths: {} });
 			get().executeSimulation(0);
 			get().cancelSimulation();
 		},

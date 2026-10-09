@@ -16,6 +16,8 @@ export const SimulationControls = () => {
 	const seek = useSimulator((state) => state.seek);
 	const setTimeDilation = useSimulator((state) => state.setTimeDilation);
 	const toggleCoordinates = useSimulator((state) => state.toggleCoordinates);
+	const showPaths = useSimulator((state) => state.showPaths);
+	const togglePaths = useSimulator((state) => state.togglePaths);
 	// Measured when the sim starts; exact
 	const measuredEndTime = useSimulator((state) => state.endTime);
 	// Before the first run: end of the last timeline item, a rough estimate
@@ -60,6 +62,10 @@ export const SimulationControls = () => {
 					</option>
 				))}
 			</select>
+			<label className="flex items-center gap-1">
+				<input type="checkbox" checked={showPaths} onChange={togglePaths} />
+				Paths
+			</label>
 			<label className="flex items-center gap-1">
 				<input type="checkbox" checked={showCoordinates} onChange={toggleCoordinates} />
 				Coordinates

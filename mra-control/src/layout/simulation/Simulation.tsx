@@ -3,7 +3,8 @@
 import { Crazyflie } from '@MRAControl/components/vector/Crazyflie';
 import { useRobartState } from '@MRAControl/state/useRobartState';
 import { useSimulator } from '@MRAControl/state/useSimulator';
-import { CatmullRomLine, GizmoHelper, GizmoViewport, Grid, OrbitControls, Plane, Sphere } from '@react-three/drei';
+import { CatmullRomLine, GizmoHelper, GizmoViewport, Grid, Line, OrbitControls, Plane, Sphere } from '@react-three/drei';
+import { allDronesGroupId } from '@MRAControl/state/groupMigration';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useRef } from 'react';
 import React from 'react';
@@ -77,6 +78,20 @@ export const Simulation = () => {
 
 				</group>
 			))}
+			{/* Each robot's whole planned flight, in its group's color; drones that never move have no line */}
+			{simulatorState.showPaths && Object.entries(simulatorState.plannedPaths)
+				.filter(([, points]) => points.some((point) => !point.equals(points[0])))
+				.map(([robotId, points]) => (
+					<Line
+						key={`path-${robotId}`}
+						points={points}
+						color={Object.values(robartState.timelineState.groups)
+							.find((group) => group.id !== allDronesGroupId && robotId in group.robots)?.color ?? '#9ca3af'}
+						lineWidth={1.5}
+						transparent
+						opacity={0.6}
+					/>
+				))}
 			{Object.values(trajectoryMarkers).map((trajectoryMarker) => (
 				<group key={trajectoryMarker.id} position={trajectoryMarker.position}>
 					<Sphere args={[0.03]}>
