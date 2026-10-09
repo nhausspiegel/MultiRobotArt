@@ -22,6 +22,7 @@ const old = {
 			group1: lane('group1', 'Group 1', ['a', 'b']),
 			group2: lane('group2', 'Group 2', ['b', 'deleted'], {i: item}),
 			group3: lane('group3', 'Group 3', []),
+			group4: lane('group4', 'Group 4', ['a']),
 		},
 	},
 };
@@ -38,12 +39,14 @@ assert.equal(groups[allDronesGroupId].robots.a.name, 'CF 1');
 // Robot c was in no group: added to the top-most group, with a note.
 assert.deepEqual(Object.keys(groups.group1.robots).sort(), ['a', 'b', 'c']);
 assert.deepEqual(Object.keys(groups.group2.robots), []); // deleted robot dropped too
-assert.equal(migrated.notices.length, 2);
+assert.equal(migrated.notices.length, 3);
 assert.match(migrated.notices[0], /CF 2 .*kept in Group 1, removed from Group 2/);
-assert.match(migrated.notices[1], /CF 3 had no group: added to Group 1/);
+assert.match(migrated.notices[1], /CF 1 .*kept in Group 1, removed from Group 4/);
+assert.match(migrated.notices[2], /CF 3 had no group: added to Group 1/);
 
-// group2 kept (has a block), group3 dropped (empty), lanes keep their order with All drones first
-assert.deepEqual(Object.keys(groups), [allDronesGroupId, 'group1', 'group2']);
+// group2 kept (has a block), group3 kept (left empty by the user, e.g. just added), group4 dropped (emptied by the
+// migration), lanes keep their order with All drones first
+assert.deepEqual(Object.keys(groups), [allDronesGroupId, 'group1', 'group2', 'group3']);
 
 // Colors: every group but All drones, all different
 assert.equal(groups[allDronesGroupId].color, undefined);

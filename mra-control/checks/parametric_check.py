@@ -60,4 +60,9 @@ assert np.allclose(cf.commands[-1][1], end)
 f = namespace["_parametric_function"]("pow(t, 2) + max(0, t - 1) + pi")
 assert math.isclose(f(3), 9 + 2 + math.pi)
 
+# Values that can't be computed are 0, like in the simulator (these raised or gave NaN under the empty builtins)
+assert namespace["_parametric_function"]("log(t)")(0) == 0.0
+assert namespace["_parametric_function"]("sqrt(3 - t)")(4) == 0.0
+assert namespace["_parametric_function"]("exp(t)")(1e6) == 0.0
+
 print("python parametric ok")

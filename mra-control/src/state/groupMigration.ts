@@ -57,7 +57,8 @@ export const migrateGroups = <T extends Pick<MRAState, 'robots' | 'timelineState
 			keptIn.set(robotId, group.name);
 			robots[robotId] = robot;
 		});
-		if (Object.keys(robots).length === 0 && Object.keys(group.items).length === 0) return;
+		// Drop groups the migration emptied (all their robots kept elsewhere), not lanes the user left empty
+		if (Object.keys(group.robots).length > 0 && Object.keys(robots).length === 0 && Object.keys(group.items).length === 0) return;
 		groups[group.id] = {...group, robots};
 	});
 

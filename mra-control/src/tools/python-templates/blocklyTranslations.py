@@ -253,7 +253,18 @@ _parametric_names = {
 
 def _parametric_function(expression):
     code = compile(expression, "<parametric>", "eval")
-    return lambda t: float(eval(code, {"__builtins__": {}}, {**_parametric_names, "t": t}))
+
+    def f(t):
+        # Like the simulator: a value that can't be computed (log(0), sqrt of a negative, overflow) is 0. errstate also
+        # keeps numpy from warning, which fails under the empty builtins.
+        try:
+            with np.errstate(all="ignore"):
+                value = float(eval(code, {"__builtins__": {}}, {**_parametric_names, "t": t}))
+        except (ArithmeticError, ValueError):
+            return 0.0
+        return value if np.isfinite(value) else 0.0
+
+    return f
 
 
 def parametric(groupState, x, y, z, start_t, end_t, duration):

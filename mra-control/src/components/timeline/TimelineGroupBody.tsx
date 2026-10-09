@@ -64,10 +64,10 @@ export const blockOverlaps = (
 
 // What a block placed on this lane must not overlap: the lane's own items and, on group lanes, All drones' items
 // (those run on every drone, this group's included)
-export const laneOccupiedItems = (groups: Record<string, TimelineGroupState>, laneId: string): TimelineItem[] => [
-	...Object.values(groups[laneId]?.items ?? {}),
-	...(laneId === allDronesGroupId ? [] : Object.values(groups[allDronesGroupId]?.items ?? {})),
-];
+export const laneOccupiedItems = (groups: Record<string, TimelineGroupState>, laneId: string): TimelineItem[] => (laneId === allDronesGroupId
+	// All drones runs on everyone, so every lane's blocks are in the way
+	? Object.values(groups).flatMap((group) => Object.values(group.items))
+	: [...Object.values(groups[laneId]?.items ?? {}), ...Object.values(groups[allDronesGroupId]?.items ?? {})]);
 
 export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 	const addBlockToTimeline = useRobartState((state) => state.addBlockToTimeline);

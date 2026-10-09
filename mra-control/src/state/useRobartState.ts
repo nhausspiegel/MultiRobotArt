@@ -640,6 +640,8 @@ export const useRobartState = create<MRAState & MRAActions>()(
 useRobartState.subscribe(
 	(state) => state.robots,
 	(robots) => {
-		useSimulator.getState().setRobots(robots);
+		// Only while stopped: mid-show this put every drone back at its start and emptied its queue, which could end the
+		// show. Timeline's re-measure updates a paused or running show instead.
+		if (useSimulator.getState().status === 'STOPPED') useSimulator.getState().setRobots(robots);
 	},
 );

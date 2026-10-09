@@ -63,6 +63,8 @@ export const Timeline = () => {
 			timer = setTimeout(() => {
 				const {status, time, measureShowLength, seek} = useSimulator.getState();
 				measureShowLength();
+				// The show changed, so its warnings count as reached only up to the playhead
+				useSimulator.setState({warningsShownUntil: status === 'STOPPED' ? 0 : time});
 				// Measuring rewinds to the start; put a paused or running simulation back where it was
 				if (status !== 'STOPPED') seek(time);
 			}, 300);

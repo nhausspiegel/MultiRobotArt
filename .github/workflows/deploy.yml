@@ -23,8 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      # package-lock.json is gitignored, so install fresh instead of npm ci
-      - run: npm install --no-audit --no-fund
+      # The lockfile pins every dependency, including the ones installed from GitHub
+      - run: npm ci --no-audit --no-fund
       # gh-pages' -u parser rejects "[bot]", so it reads the committer from git config
       - run: |
           git config --global user.name "github-actions[bot]"

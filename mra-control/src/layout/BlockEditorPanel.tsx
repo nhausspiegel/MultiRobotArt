@@ -77,6 +77,9 @@ export const BlockEditorPanel = () => {
 			const javaScript = javascriptGenerator.workspaceToCode(workspaceChanged) as string;
 			// Read the layout from the workspace itself; the hook's xml copy updates 200 ms late, so saving it dropped the latest edit
 			const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspaceChanged));
+			// Blockly also reports selecting, scrolling and zooming; saving those anyway re-measured the whole show
+			const saved = useRobartState.getState().blocks[loadedBlockId.current];
+			if (saved?.xml === xml && saved.python === python && saved.javaScript === javaScript) return;
 			saveBlock(loadedBlockId.current, {xml, python, javaScript});
 		},
 		ref: workspaceRef,

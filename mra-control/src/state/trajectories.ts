@@ -200,6 +200,11 @@ export const compileExpression = (expression: string): ((t: number) => number) =
 // it never reaches the exported Python either. ^ is rejected too: it's bitwise in both languages, not a power.
 export const isValidExpression = (expression: string): boolean => {
 	if (expression.trim() === '' || expression.includes('^')) return false;
+	// Only what reads the same in Python: numbers, t, the scope's names, + - * / ( ) and commas. JavaScript-only syntax
+	// (?:, <, &&, %, Math.sin) passed the check below but broke or changed meaning in the exported Python.
+	if (!/^[\w\s.+\-*/(),]*$/.test(expression)) return false;
+	const names = expression.replace(/\b\d+(\.\d*)?(e[+-]?\d+)?\b/gi, '0').match(/[A-Za-z_]\w*/g) ?? [];
+	if (names.some((name) => name !== 't' && !(name in parametricScope))) return false;
 	try {
 		new SandboxClass().compile(`return (${expression});`)({...parametricScope, t: 0}).run();
 		return true;

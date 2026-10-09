@@ -28,6 +28,13 @@ assert.equal(compileExpression('nope(t)')(1), 0);
 
 // What the block's text fields accept
 for (const ok of ['sin(t)', 'pow(t, 3) / 2', 'pi * t', 'max(0, t - 1)', '0']) assert.ok(isValidExpression(ok), ok);
-for (const bad of ['', 't ** 2', 't ^ 2', 'sin(t', 'nope(t)']) assert.ok(!isValidExpression(bad), bad);
+for (const ok of ['1e3 * t', '2.5e-1', '-t']) assert.ok(isValidExpression(ok), ok);
+// Also JavaScript-only syntax that would break or change meaning in the exported Python
+for (const bad of ['', 't ** 2', 't ^ 2', 'sin(t', 'nope(t)', 't < 3 ? t : 3', 't > 1 && t < 2', 'Math.sin(t)', 'Number(t)', '-1 % 3']) {
+	assert.ok(!isValidExpression(bad), bad);
+}
+// Values that can't be computed are 0, like in the exported Python
+assert.equal(compileExpression('log(t)')(0), 0);
+assert.equal(compileExpression('sqrt(3 - t)')(4), 0);
 
 console.log('parametric ok');

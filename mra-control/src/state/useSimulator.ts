@@ -194,7 +194,14 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		step: () => {
 			if (get().status !== 'RUNNING') return;
 			const currentTime = performance.now();
-			get().advance((currentTime - get().lastStepTime) / 1000 * get().timeDilation);
+			// In 1/fps substeps, like measuring and seeking. A command that ends within a step drops the rest of that step,
+			// so one big step (fast speeds, a frame after the browser tab was hidden) fell behind the timeline.
+			let remaining = (currentTime - get().lastStepTime) / 1000 * get().timeDilation;
+			while (remaining > 1e-9 && !isFinished(get().robots)) {
+				const deltaT = Math.min(1 / fps, remaining);
+				get().advance(deltaT);
+				remaining -= deltaT;
+			}
 			set({ lastStepTime: currentTime, warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
 			if (isFinished(get().robots)) {
 				get().halt();
@@ -274,6 +281,8 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 
 				// if trajectory doesn't exist or has non-positive duration, do nothing
 				if (get().robots[robotId]?.trajectory.duration === undefined || get().robots[robotId].trajectory.duration <= 0) {
+					// Still recorded, so a drone left outside the work area is warned about
+					if (positionHistory) positionHistory[positionHistory.length - 1].robotPositions[robotId] = robots[robotId].pos;
 					return;
 				}
 
@@ -595,6 +604,8 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 
 				Object.values(group.items).forEach(timelineItem => {
 					if (timelineItem.startTime < startTime) return;
+					// A project file can have an item whose block is gone
+					if (!blocks[timelineItem.blockId]) return;
 
 					pendingItems.push({
 						itemId: timelineItem.id,
@@ -623,8 +634,12 @@ let frameRequest = 0;
 useSimulator.subscribe((state) => {
 	if (state.status !== 'RUNNING' || frameRequest) return;
 	const loop = () => {
-		useSimulator.getState().step();
-		frameRequest = useSimulator.getState().status === 'RUNNING' ? requestAnimationFrame(loop) : 0;
+		try {
+			useSimulator.getState().step();
+		} finally {
+			// Even if a step threw, or the loop would never run again
+			frameRequest = useSimulator.getState().status === 'RUNNING' ? requestAnimationFrame(loop) : 0;
+		}
 	};
 	frameRequest = requestAnimationFrame(loop);
 });
