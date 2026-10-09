@@ -9,7 +9,6 @@ import {convertPixelsToSeconds, timelineStartPadding, timeToX} from './TimelineG
 // The playhead: a line through the lanes with a round handle above them. Dragging the handle scrubs the simulation.
 export const TimelineMarker = () => {
 	const time = useSimulator((state) => state.time);
-	const stopped = useSimulator((state) => state.status === 'STOPPED');
 	const seek = useSimulator((state) => state.seek);
 	const scale = useRobartState((state) => state.timelineState.scale);
 	const showLength = useShowLength();
@@ -23,8 +22,6 @@ export const TimelineMarker = () => {
 		seek(Math.min(showLength, Math.max(0, convertPixelsToSeconds(contentX - timelineStartPadding, scale))));
 	}, {pointer: {keys: false}, filterTaps: true});
 
-	// Stopped at the start, only the handle shows: the line would sit on every lane's "0" label
-	const lineHidden = stopped && time === 0;
 	return (
 		<div
 			ref={markerRef}
@@ -32,7 +29,7 @@ export const TimelineMarker = () => {
 			style={{left: timeToX(time, scale)}}
 		>
 			<div {...bind()} className="pointer-events-auto h-3 w-3 shrink-0 cursor-grab touch-none rounded-full bg-black" />
-			{!lineHidden && <div className="w-[3px] flex-1 bg-black" />}
+			<div className="w-[3px] flex-1 bg-black" />
 		</div>
 	);
 };
