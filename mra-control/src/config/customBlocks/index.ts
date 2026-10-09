@@ -22,6 +22,7 @@ import {blockStretchTrajectories} from './trajectoryModifiers/stretch_trajectory
 import {blockRotateTrajectoryDegrees, blockRotateTrajectoryRadians} from './trajectoryModifiers/rotate_trajectory';
 import {blockTranslateTrajectory} from './trajectoryModifiers/translate_trajectory';
 import {blockParametricPath} from './curves/parametric_path';
+import {blockRepeat} from './loops/repeat';
 
 /**
  * This is where we collect all of the custom blocks and actually update Blockly definitions.
@@ -51,6 +52,7 @@ export const CUSTOM_BLOCKS = {
 	blockTranslateTrajectory,
 	blockParametricPath,
 	blockRandomColor,
+	blockRepeat,
 };
 
 Object.values(CUSTOM_BLOCKS).forEach((block) => {

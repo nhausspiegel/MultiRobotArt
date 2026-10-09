@@ -55,6 +55,13 @@ export const blocklyToolboxConfiguration: ToolboxDefinition = {
 		},
 		{
 			kind: 'category',
+			name: 'Loops',
+			contents: [
+				blockToToolbox(CUSTOM_BLOCKS.blockRepeat),
+			],
+		},
+		{
+			kind: 'category',
 			name: 'Trajectory Modifiers',
 			contents: [
 				blockToToolbox(CUSTOM_BLOCKS.blockNegate),
