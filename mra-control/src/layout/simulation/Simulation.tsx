@@ -29,7 +29,9 @@ export const Simulation = () => {
 	if (Object.keys(robots).length !== 0) {
 		if (simulatorState.time === 0) {
 			Object.values(robots).forEach((robot) => {
-				robot.pos.set(...robartState.robots[robot.id].startingPosition);
+				// Skip robots that were just deleted; the simulator's list catches up right after
+				const startingPosition = robartState.robots[robot.id]?.startingPosition;
+				if (startingPosition) robot.pos.set(...startingPosition);
 			});
 		}
 

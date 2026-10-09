@@ -83,7 +83,7 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 						if (currentPosition && previousPosition) {
 							const velocity = currentPosition.distanceTo(previousPosition) / get().deltaT;
 							if (currentPosition && previousPosition &&  velocity > get().maxVelocity) {
-								const robotName = useRobartState.getState().robots[id].name;
+								const robotName = useRobartState.getState().robots[id]?.name ?? 'Deleted robot';
 								warnings.push({
 									time: positions[i].timestep,
 									repr: 'robot ' + robotName + ' has violated a velocity constraint at time ' + positions[i].timestep.toFixed(2) + '. It was travelling at ' + velocity.toFixed(2) + ' m/s.\n',
@@ -118,7 +118,7 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 							const currentPosition = history[i]?.robotPositions[id];
 							if (currentPosition) {
 								if (!this.workspaceDimensions.containsPoint(currentPosition)) {
-									const robotName = useRobartState.getState().robots[id].name;
+									const robotName = useRobartState.getState().robots[id]?.name ?? 'Deleted robot';
 									console.log(history[i])
 									warnings.push({
 										time: history[i].timestep,

@@ -286,6 +286,7 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					loadProject: (file) => {
 						const newState = loadProjectFromFile(file);
 						set(newState);
+						useSimulator.getState().reset();
 					},
 					saveProject: (fileName: string | undefined) => {
 						const state: MRAState = {
@@ -317,6 +318,7 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					},
 					resetProject: () => {
 						set(defaultRobartState);
+						useSimulator.getState().reset();
 					},
 					setProjectName: (name) => {
 						set({projectName: name}); 
@@ -506,10 +508,14 @@ export const useRobartState = create<MRAState & MRAActions>()(
 						});
 					},
 					deleteRobot: (id) => {
-						const newRobots = {...get().robots};
-						delete newRobots[id];
-
-						set({robots: newRobots});
+						set((state) => {
+							delete state.robots[id];
+							// Lanes keep their own copy of their robots; without this they keep a ghost entry
+							Object.values(state.timelineState.groups).forEach((group) => {
+								delete group.robots[id];
+							});
+						});
+						useSimulator.getState().reset();
 					},
 					removeTimelineItem: (groupId, itemId) => {
 						const newItems = {...get().timelineState.groups[groupId].items};

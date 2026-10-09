@@ -63,7 +63,7 @@ export function Crazyflie({ robotId, renderBoundingBox }: CrazyflieProps) {
 		<>
 			{showText || showCoordinates ? (
 				<Text quaternion={camera.quaternion.clone()} position={[0, 0, 1]} fontSize={0.25}>
-					{`${robot.name}, Position: (${simRobot.pos.x.toFixed(1)}, ${simRobot.pos.y.toFixed(1)}, ${simRobot.pos.z.toFixed(1)})`}
+					{`${robot?.name ?? 'Deleted robot'}, Position: (${simRobot.pos.x.toFixed(1)}, ${simRobot.pos.y.toFixed(1)}, ${simRobot.pos.z.toFixed(1)})`}
 				</Text>
 			) : null}
 			<group>

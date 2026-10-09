@@ -130,6 +130,10 @@ export type SimulatorActions = {
 	robotCircle: (robotId: string, radius?: number, axes?: string[], radians?: number, clockwise?: boolean, duration?: number) => traj.Trajectory;
 	executeSimulation: (startTime: number) => void;
 	cancelSimulation: () => void;
+	/**
+   * Stops the simulation and reloads robots from the project, e.g. after robots are deleted or a project is loaded.
+   */
+	reset: () => void;
 };
 export const useSimulator = create<SimulatorState & SimulatorActions>()(
 	immer((set, get) => ({
@@ -492,6 +496,11 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		},
 		cancelSimulation: () => {
 			pendingItems.length = 0;
+		},
+		reset: () => {
+			set({ status: 'STOPPED', endTime: 0 });
+			get().executeSimulation(0);
+			get().cancelSimulation();
 		},
 	})),
 );
