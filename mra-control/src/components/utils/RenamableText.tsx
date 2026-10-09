@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import {useEffect, useRef, useState} from 'react';
+import {useLayoutEffect, useRef, useState} from 'react';
 import React from 'react';
 type RenamableTextProps = {
 	text: string;
@@ -15,7 +15,8 @@ export const RenamableText = ({text, updateText, className}: RenamableTextProps)
 	// Set once Enter or Escape has handled the edit, so the blur that follows doesn't apply it again
 	const finished = useRef(false);
 
-	useEffect(() => {
+	// Before the box is drawn: measured after (useEffect), the first edit showed it 0 wide for a frame
+	useLayoutEffect(() => {
 		if (span.current === null) return;
 
 		setWidth(span.current?.offsetWidth);
