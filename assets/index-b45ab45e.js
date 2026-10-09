@@ -146363,27 +146363,31 @@ const TimelineMarker = () => {
   const seek = useSimulator((state2) => state2.seek);
   const scale = useRobartState((state2) => state2.timelineState.scale);
   const showLength = useShowLength();
+  const length = useRobartState(timelineLength);
   const markerRef = reactExports.useRef(null);
-  const bind = useDrag(({ xy: [x2], tap }) => {
+  const bind = useDrag(({ xy: [x2] }) => {
     var _a3;
     const scroller = (_a3 = markerRef.current) == null ? void 0 : _a3.parentElement;
-    if (tap || !scroller || showLength === 0)
+    if (!scroller || showLength === 0)
       return;
     const contentX = x2 - scroller.getBoundingClientRect().left + scroller.scrollLeft;
     seek(Math.min(showLength, Math.max(0, convertPixelsToSeconds(contentX - timelineStartPadding, scale))));
-  }, { pointer: { keys: false }, filterTaps: true });
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      ref: markerRef,
-      className: "pointer-events-none absolute inset-y-0 z-10 flex -translate-x-1/2 flex-col items-center",
-      style: { left: timeToX(time2, scale) },
-      children: [
-        /* @__PURE__ */ jsx("div", { ...bind(), className: "pointer-events-auto h-3 w-3 shrink-0 cursor-grab touch-none rounded-full bg-black" }),
-        /* @__PURE__ */ jsx("div", { className: "w-[3px] flex-1 bg-black" })
-      ]
-    }
-  );
+  }, { pointer: { keys: false } });
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx("div", { ...bind(), className: "absolute left-0 top-0 h-4 cursor-pointer touch-none rounded bg-blue-200", style: { width: timeToX(length, scale) } }),
+    /* @__PURE__ */ jsxs(
+      "div",
+      {
+        ref: markerRef,
+        className: "pointer-events-none absolute inset-y-0 z-10 flex -translate-x-1/2 flex-col items-center",
+        style: { left: timeToX(time2, scale) },
+        children: [
+          /* @__PURE__ */ jsx("div", { ...bind(), className: "pointer-events-auto h-3 w-3 shrink-0 cursor-grab touch-none rounded-full bg-black" }),
+          /* @__PURE__ */ jsx("div", { className: "w-[3px] flex-1 bg-black" })
+        ]
+      }
+    )
+  ] });
 };
 const axes = ["x", "y", "z"];
 const isNumber = (value) => value.trim() !== "" && Number.isFinite(Number(value));
