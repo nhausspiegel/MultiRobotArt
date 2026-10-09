@@ -123,11 +123,12 @@ export type TimelineActions = {
    */
 	setTimelineScale: (scale: number) => void;
 	/**
-   * Stores how long timeline items really take, measured by simulating the show.
-   * Also stores it on each item's block, for the drop preview of new copies.
+   * Stores lengths measured by simulating: how long timeline items take in the show, and how long each block takes
+   * on its own (used for the drop preview and the initial length of new timeline items).
    * @param durations Duration in seconds by timeline item id.
+   * @param blockLengths Duration in seconds by block id.
    */
-	setMeasuredDurations: (durations: Record<string, number>) => void;
+	setMeasuredDurations: (durations: Record<string, number>, blockLengths: Record<string, number>) => void;
 	removeGroups: (groupsToRemove: string[]) => void;
 };
 
@@ -442,18 +443,21 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							state.blocks[blockId].duration = duration;
 						});
 					},
-					setMeasuredDurations: (durations) => {
+					setMeasuredDurations: (durations, blockLengths) => {
+						const changed = (measured: number | undefined, current: number) => measured !== undefined && Math.abs(measured - current) > 1e-3;
 						const items = Object.values(get().timelineState.groups).flatMap((group) => Object.values(group.items));
-						// Skip no-op writes: every write to the timeline triggers another measurement
-						if (!items.some((item) => durations[item.id] !== undefined && Math.abs(durations[item.id] - item.duration) > 1e-3)) return;
+						// Skip no-op writes: every write to the timeline or blocks triggers another measurement
+						if (!items.some((item) => changed(durations[item.id], item.duration))
+							&& !Object.values(get().blocks).some((block) => changed(blockLengths[block.id], block.duration))) return;
 
 						set((state) => {
 							Object.values(state.timelineState.groups).forEach((group) => {
 								Object.values(group.items).forEach((item) => {
-									if (durations[item.id] === undefined) return;
-									item.duration = durations[item.id];
-									if (state.blocks[item.blockId]) state.blocks[item.blockId].duration = durations[item.id];
+									if (durations[item.id] !== undefined) item.duration = durations[item.id];
 								});
+							});
+							Object.values(state.blocks).forEach((block) => {
+								if (blockLengths[block.id] !== undefined) block.duration = blockLengths[block.id];
 							});
 						});
 					},

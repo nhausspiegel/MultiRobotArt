@@ -87,6 +87,9 @@ const pendingItems: Array<{ itemId: string; time: number; robotIds: string[]; li
 const runningItemIds: Record<string, string> = {};
 let itemEndTimes: Record<string, number> = {};
 
+// Block code -> its length run alone, so blocks are only re-timed when their code changes
+const blockLengthCache = new Map<string, number>();
+
 // Upper bound when measuring a show's length, in case something never finishes (lanes are 120 s long)
 const maxShowLength = 10 * 60;
 
@@ -113,6 +116,11 @@ export type SimulatorActions = {
    * Runs the whole show without rendering to find endTime, then resets to the start.
    */
 	measureShowLength: () => void;
+	/**
+   * Runs one block's code alone, without rendering, and returns how long it takes. Leaves the simulator dirty;
+   * callers reset it.
+   */
+	measureBlockLength: (javaScript: string) => number;
 	setTimeDilation: (timeDilation: number) => void;
 	toggleCoordinates: () => void;
 	/**
@@ -308,9 +316,29 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				});
 			});
 
+			// Each block's own length, so the drop preview is right before the block is on the timeline
+			const blockLengths: Record<string, number> = {};
+			Object.values(useRobartState.getState().blocks).forEach((block) => {
+				if (!blockLengthCache.has(block.javaScript)) blockLengthCache.set(block.javaScript, get().measureBlockLength(block.javaScript));
+				blockLengths[block.id] = blockLengthCache.get(block.javaScript);
+			});
+
 			get().executeSimulation(0);
 			set({ endTime });
-			useRobartState.getState().setMeasuredDurations(durations);
+			useRobartState.getState().setMeasuredDurations(durations, blockLengths);
+		},
+		measureBlockLength: (javaScript) => {
+			// A stand-in robot on the ground at the origin. Only an estimate for position-dependent blocks (e.g. go to at a speed);
+			// the in-context length replaces it once the block is on the timeline.
+			set({ time: 0, trajectoryMarkers: [] });
+			get().setRobots({ standIn: { id: 'standIn', name: 'standIn', type: 'crazyflie', startingPosition: [0, 0, 0] } });
+			itemEndTimes = {};
+			pendingItems.length = 0;
+			pendingItems.push({ itemId: 'standIn', time: 0, robotIds: ['standIn'], lines: javaScript.split('\n').filter((line) => line.length > 0) });
+			while (!isFinished(get().robots) && get().time < maxShowLength) {
+				get().advance(1 / fps);
+			}
+			return Math.max(0.1, itemEndTimes.standIn ?? 0);
 		},
 		setTimeDilation: (timeDilation) => {
 			set({ timeDilation });
