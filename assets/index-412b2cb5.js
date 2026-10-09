@@ -35946,5089 +35946,35 @@ const blockRotateTrajectoryRadians = {
 `;
   }
 };
-const CUSTOM_BLOCKS = {
-  //  blockGoTo_xyz,
-  blockGoToSpeed,
-  blockGoTo,
-  blockLand,
-  blockMoveXyz,
-  // blockMove,
-  blockStop,
-  blockTakeoff,
-  blockCircle,
-  blockCircleRadians,
-  blockCircleArc,
-  blockGetPosition,
-  blockColor,
-  blockColorOff,
-  // multiTraj,
-  blockNegate,
-  blockAddTrajectories,
-  blockSubtractTrajectories,
-  blockStretchTrajectories,
-  blockRotateTrajectoryDegrees,
-  blockRotateTrajectoryRadians,
-  blockRandomColor
-};
-Object.values(CUSTOM_BLOCKS).forEach((block) => {
-  Blockly.Blocks[block.name] = block.block;
-  pythonExports.pythonGenerator[block.name] = (b2) => block.pythonGenerator(b2, pythonExports.pythonGenerator);
-  javascriptExports.javascriptGenerator[block.name] = (b2) => block.javascriptGenerator(b2, javascriptExports.javascriptGenerator);
-});
-const blockToToolbox = (block) => ({
-  kind: "block",
-  type: block.name
-});
-const blocklyToolboxConfiguration = {
-  kind: "categoryToolbox",
-  contents: [
-    {
-      kind: "category",
-      name: "Straight Motion",
-      contents: [
-        // blockToToolbox(CUSTOM_BLOCKS.blockGoTo_xyz),
-        blockToToolbox(CUSTOM_BLOCKS.blockTakeoff),
-        blockToToolbox(CUSTOM_BLOCKS.blockLand),
-        blockToToolbox(CUSTOM_BLOCKS.blockGoTo),
-        blockToToolbox(CUSTOM_BLOCKS.blockGoToSpeed),
-        blockToToolbox(CUSTOM_BLOCKS.blockMoveXyz),
-        // blockToToolbox(CUSTOM_BLOCKS.blockMove),
-        //blockToToolbox(CUSTOM_BLOCKS.blockStartLinearMotion),
-        blockToToolbox(CUSTOM_BLOCKS.blockStop)
-        //blockToToolbox(CUSTOM_BLOCKS.blockTurn),
-      ]
-    },
-    {
-      kind: "category",
-      name: "Curves",
-      contents: [
-        blockToToolbox(CUSTOM_BLOCKS.blockCircle),
-        blockToToolbox(CUSTOM_BLOCKS.blockCircleRadians)
-        // blockToToolbox(CUSTOM_BLOCKS.blockCircleArc),
-        //blockToToolbox(CUSTOM_BLOCKS.block_start_circle),
-      ]
-    },
-    // {
-    // 	kind: 'category',
-    // 	name: 'Config',
-    // 	contents: [
-    // 		blockToToolbox(CUSTOM_BLOCKS.blockGetPosition),
-    // 	],
-    // },
-    {
-      kind: "category",
-      name: "Colors",
-      contents: [
-        blockToToolbox(CUSTOM_BLOCKS.blockColor),
-        blockToToolbox(CUSTOM_BLOCKS.blockRandomColor),
-        blockToToolbox(CUSTOM_BLOCKS.blockColorOff)
-      ]
-    },
-    {
-      kind: "category",
-      name: "Trajectory Modifiers",
-      contents: [
-        blockToToolbox(CUSTOM_BLOCKS.blockNegate),
-        // blockToToolbox(CUSTOM_BLOCKS.multiTraj),
-        blockToToolbox(CUSTOM_BLOCKS.blockAddTrajectories),
-        blockToToolbox(CUSTOM_BLOCKS.blockSubtractTrajectories),
-        blockToToolbox(CUSTOM_BLOCKS.blockStretchTrajectories),
-        blockToToolbox(CUSTOM_BLOCKS.blockRotateTrajectoryDegrees),
-        blockToToolbox(CUSTOM_BLOCKS.blockRotateTrajectoryRadians)
-      ]
+const blockTranslateTrajectory = {
+  name: "translateTrajectory",
+  block: {
+    init: function() {
+      this.appendDummyInput().appendField("Translate Trajectory").appendField("x: ").appendField(new Blockly.FieldNumber(0), "x").appendField(" y: ").appendField(new Blockly.FieldNumber(0), "y").appendField(" z: ").appendField(new Blockly.FieldNumber(0), "z");
+      this.appendStatementInput("originalTraj").appendField("Trajectory: ");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(90);
+      this.setTooltip("Shift the given trajectory by x, y, z meters. The drones first fly to the shifted start at 0.5 m/s.");
+      this.setHelpUrl("");
     }
-    // {
-    // 	kind: 'category',
-    // 	name: 'Logic',
-    // 	// colour: '#5C81A6',
-    // 	contents: [
-    // 		{
-    // 			kind: 'block',
-    // 			type: 'controls_if',
-    // 		},
-    // 		{
-    // 			kind: 'block',
-    // 			type: 'logic_compare',
-    // 		},
-    // 	],
-    // },
-    // {
-    // 	kind: 'category',
-    // 	name: 'Math',
-    // 	// colour: '#5CA65C',
-    // 	contents: [
-    // 		{
-    // 			kind: 'block',
-    // 			type: 'math_round',
-    // 		},
-    // 		{
-    // 			kind: 'block',
-    // 			type: 'math_number',
-    // 		},
-    // 	],
-    // },
-  ]
-};
-function uuid$1() {
-  const hashTable = [
-    "a",
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9"
-  ];
-  let uuid2 = [];
-  for (let i2 = 0; i2 < 36; i2++) {
-    if (i2 === 8 || i2 === 13 || i2 === 18 || i2 === 23) {
-      uuid2[i2] = "-";
-    } else {
-      uuid2[i2] = hashTable[Math.ceil(Math.random() * hashTable.length - 1)];
-    }
-  }
-  return uuid2.join("");
-}
-var uuid_1 = uuid$1;
-const uuid$2 = /* @__PURE__ */ getDefaultExportFromCjs(uuid_1);
-const createStoreImpl = (createState) => {
-  let state2;
-  const listeners = /* @__PURE__ */ new Set();
-  const setState = (partial, replace2) => {
-    const nextState = typeof partial === "function" ? partial(state2) : partial;
-    if (!Object.is(nextState, state2)) {
-      const previousState = state2;
-      state2 = (replace2 != null ? replace2 : typeof nextState !== "object") ? nextState : Object.assign({}, state2, nextState);
-      listeners.forEach((listener2) => listener2(state2, previousState));
-    }
-  };
-  const getState = () => state2;
-  const subscribe = (listener2) => {
-    listeners.add(listener2);
-    return () => listeners.delete(listener2);
-  };
-  const destroy = () => {
-    if (({ "BASE_URL": "/MultiRobotArt/", "MODE": "production", "DEV": false, "PROD": true, "SSR": false } && "production") !== "production") {
-      console.warn(
-        "[DEPRECATED] The `destroy` method will be unsupported in a future version. Instead use unsubscribe function returned by subscribe. Everything will be garbage-collected if store is garbage-collected."
-      );
-    }
-    listeners.clear();
-  };
-  const api2 = { setState, getState, subscribe, destroy };
-  state2 = createState(setState, getState, api2);
-  return api2;
-};
-const createStore$2 = (createState) => createState ? createStoreImpl(createState) : createStoreImpl;
-var withSelector = { exports: {} };
-var withSelector_production_min = {};
-var shim = { exports: {} };
-var useSyncExternalStoreShim_production_min = {};
-/**
- * @license React
- * use-sync-external-store-shim.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-var e$1 = reactExports;
-function h$7(a2, b2) {
-  return a2 === b2 && (0 !== a2 || 1 / a2 === 1 / b2) || a2 !== a2 && b2 !== b2;
-}
-var k$3 = "function" === typeof Object.is ? Object.is : h$7, l$7 = e$1.useState, m$4 = e$1.useEffect, n$6 = e$1.useLayoutEffect, p$6 = e$1.useDebugValue;
-function q$3(a2, b2) {
-  var d2 = b2(), f2 = l$7({ inst: { value: d2, getSnapshot: b2 } }), c2 = f2[0].inst, g2 = f2[1];
-  n$6(function() {
-    c2.value = d2;
-    c2.getSnapshot = b2;
-    r$9(c2) && g2({ inst: c2 });
-  }, [a2, d2, b2]);
-  m$4(function() {
-    r$9(c2) && g2({ inst: c2 });
-    return a2(function() {
-      r$9(c2) && g2({ inst: c2 });
-    });
-  }, [a2]);
-  p$6(d2);
-  return d2;
-}
-function r$9(a2) {
-  var b2 = a2.getSnapshot;
-  a2 = a2.value;
-  try {
-    var d2 = b2();
-    return !k$3(a2, d2);
-  } catch (f2) {
-    return true;
-  }
-}
-function t$5(a2, b2) {
-  return b2();
-}
-var u$7 = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? t$5 : q$3;
-useSyncExternalStoreShim_production_min.useSyncExternalStore = void 0 !== e$1.useSyncExternalStore ? e$1.useSyncExternalStore : u$7;
-{
-  shim.exports = useSyncExternalStoreShim_production_min;
-}
-var shimExports = shim.exports;
-/**
- * @license React
- * use-sync-external-store-shim/with-selector.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-var h$6 = reactExports, n$5 = shimExports;
-function p$5(a2, b2) {
-  return a2 === b2 && (0 !== a2 || 1 / a2 === 1 / b2) || a2 !== a2 && b2 !== b2;
-}
-var q$2 = "function" === typeof Object.is ? Object.is : p$5, r$8 = n$5.useSyncExternalStore, t$4 = h$6.useRef, u$6 = h$6.useEffect, v$5 = h$6.useMemo, w$4 = h$6.useDebugValue;
-withSelector_production_min.useSyncExternalStoreWithSelector = function(a2, b2, e2, l2, g2) {
-  var c2 = t$4(null);
-  if (null === c2.current) {
-    var f2 = { hasValue: false, value: null };
-    c2.current = f2;
-  } else
-    f2 = c2.current;
-  c2 = v$5(function() {
-    function a3(a4) {
-      if (!c3) {
-        c3 = true;
-        d3 = a4;
-        a4 = l2(a4);
-        if (void 0 !== g2 && f2.hasValue) {
-          var b3 = f2.value;
-          if (g2(b3, a4))
-            return k2 = b3;
-        }
-        return k2 = a4;
-      }
-      b3 = k2;
-      if (q$2(d3, a4))
-        return b3;
-      var e3 = l2(a4);
-      if (void 0 !== g2 && g2(b3, e3))
-        return b3;
-      d3 = a4;
-      return k2 = e3;
-    }
-    var c3 = false, d3, k2, m2 = void 0 === e2 ? null : e2;
-    return [function() {
-      return a3(b2());
-    }, null === m2 ? void 0 : function() {
-      return a3(m2());
-    }];
-  }, [b2, e2, l2, g2]);
-  var d2 = r$8(a2, c2[0], c2[1]);
-  u$6(function() {
-    f2.hasValue = true;
-    f2.value = d2;
-  }, [d2]);
-  w$4(d2);
-  return d2;
-};
-{
-  withSelector.exports = withSelector_production_min;
-}
-var withSelectorExports = withSelector.exports;
-const useSyncExternalStoreExports = /* @__PURE__ */ getDefaultExportFromCjs(withSelectorExports);
-const { useSyncExternalStoreWithSelector } = useSyncExternalStoreExports;
-function useStore$1(api2, selector = api2.getState, equalityFn) {
-  const slice = useSyncExternalStoreWithSelector(
-    api2.subscribe,
-    api2.getState,
-    api2.getServerState || api2.getState,
-    selector,
-    equalityFn
-  );
-  reactExports.useDebugValue(slice);
-  return slice;
-}
-const createImpl = (createState) => {
-  if (({ "BASE_URL": "/MultiRobotArt/", "MODE": "production", "DEV": false, "PROD": true, "SSR": false } && "production") !== "production" && typeof createState !== "function") {
-    console.warn(
-      "[DEPRECATED] Passing a vanilla store will be unsupported in a future version. Instead use `import { useStore } from 'zustand'`."
-    );
-  }
-  const api2 = typeof createState === "function" ? createStore$2(createState) : createState;
-  const useBoundStore = (selector, equalityFn) => useStore$1(api2, selector, equalityFn);
-  Object.assign(useBoundStore, api2);
-  return useBoundStore;
-};
-const create$2 = (createState) => createState ? createImpl(createState) : createImpl;
-const subscribeWithSelectorImpl = (fn2) => (set2, get2, api2) => {
-  const origSubscribe = api2.subscribe;
-  api2.subscribe = (selector, optListener, options) => {
-    let listener2 = selector;
-    if (optListener) {
-      const equalityFn = (options == null ? void 0 : options.equalityFn) || Object.is;
-      let currentSlice = selector(api2.getState());
-      listener2 = (state2) => {
-        const nextSlice = selector(state2);
-        if (!equalityFn(currentSlice, nextSlice)) {
-          const previousSlice = currentSlice;
-          optListener(currentSlice = nextSlice, previousSlice);
-        }
-      };
-      if (options == null ? void 0 : options.fireImmediately) {
-        optListener(currentSlice, currentSlice);
-      }
-    }
-    return origSubscribe(listener2);
-  };
-  const initialState2 = fn2(set2, get2, api2);
-  return initialState2;
-};
-const subscribeWithSelector = subscribeWithSelectorImpl;
-function createJSONStorage(getStorage) {
-  let storage;
-  try {
-    storage = getStorage();
-  } catch (e2) {
-    return;
-  }
-  const persistStorage = {
-    getItem: (name2) => {
-      var _a3;
-      const parse2 = (str2) => {
-        if (str2 === null) {
-          return null;
-        }
-        return JSON.parse(str2);
-      };
-      const str = (_a3 = storage.getItem(name2)) != null ? _a3 : null;
-      if (str instanceof Promise) {
-        return str.then(parse2);
-      }
-      return parse2(str);
-    },
-    setItem: (name2, newValue) => storage.setItem(name2, JSON.stringify(newValue)),
-    removeItem: (name2) => storage.removeItem(name2)
-  };
-  return persistStorage;
-}
-const toThenable = (fn2) => (input) => {
-  try {
-    const result = fn2(input);
-    if (result instanceof Promise) {
-      return result;
-    }
-    return {
-      then(onFulfilled) {
-        return toThenable(onFulfilled)(result);
-      },
-      catch(_onRejected) {
-        return this;
-      }
-    };
-  } catch (e2) {
-    return {
-      then(_onFulfilled) {
-        return this;
-      },
-      catch(onRejected) {
-        return toThenable(onRejected)(e2);
-      }
-    };
-  }
-};
-const oldImpl = (config2, baseOptions) => (set2, get2, api2) => {
-  let options = {
-    getStorage: () => localStorage,
-    serialize: JSON.stringify,
-    deserialize: JSON.parse,
-    partialize: (state2) => state2,
-    version: 0,
-    merge: (persistedState, currentState) => ({
-      ...currentState,
-      ...persistedState
-    }),
-    ...baseOptions
-  };
-  let hasHydrated = false;
-  const hydrationListeners = /* @__PURE__ */ new Set();
-  const finishHydrationListeners = /* @__PURE__ */ new Set();
-  let storage;
-  try {
-    storage = options.getStorage();
-  } catch (e2) {
-  }
-  if (!storage) {
-    return config2(
-      (...args) => {
-        console.warn(
-          `[zustand persist middleware] Unable to update item '${options.name}', the given storage is currently unavailable.`
-        );
-        set2(...args);
-      },
-      get2,
-      api2
-    );
-  }
-  const thenableSerialize = toThenable(options.serialize);
-  const setItem = () => {
-    const state2 = options.partialize({ ...get2() });
-    let errorInSync;
-    const thenable = thenableSerialize({ state: state2, version: options.version }).then(
-      (serializedValue) => storage.setItem(options.name, serializedValue)
-    ).catch((e2) => {
-      errorInSync = e2;
-    });
-    if (errorInSync) {
-      throw errorInSync;
-    }
-    return thenable;
-  };
-  const savedSetState = api2.setState;
-  api2.setState = (state2, replace2) => {
-    savedSetState(state2, replace2);
-    void setItem();
-  };
-  const configResult = config2(
-    (...args) => {
-      set2(...args);
-      void setItem();
-    },
-    get2,
-    api2
-  );
-  let stateFromStorage;
-  const hydrate = () => {
-    var _a3;
-    if (!storage)
-      return;
-    hasHydrated = false;
-    hydrationListeners.forEach((cb2) => cb2(get2()));
-    const postRehydrationCallback = ((_a3 = options.onRehydrateStorage) == null ? void 0 : _a3.call(options, get2())) || void 0;
-    return toThenable(storage.getItem.bind(storage))(options.name).then((storageValue) => {
-      if (storageValue) {
-        return options.deserialize(storageValue);
-      }
-    }).then((deserializedStorageValue) => {
-      if (deserializedStorageValue) {
-        if (typeof deserializedStorageValue.version === "number" && deserializedStorageValue.version !== options.version) {
-          if (options.migrate) {
-            return options.migrate(
-              deserializedStorageValue.state,
-              deserializedStorageValue.version
-            );
-          }
-          console.error(
-            `State loaded from storage couldn't be migrated since no migrate function was provided`
-          );
-        } else {
-          return deserializedStorageValue.state;
-        }
-      }
-    }).then((migratedState) => {
-      var _a22;
-      stateFromStorage = options.merge(
-        migratedState,
-        (_a22 = get2()) != null ? _a22 : configResult
-      );
-      set2(stateFromStorage, true);
-      return setItem();
-    }).then(() => {
-      postRehydrationCallback == null ? void 0 : postRehydrationCallback(stateFromStorage, void 0);
-      hasHydrated = true;
-      finishHydrationListeners.forEach((cb2) => cb2(stateFromStorage));
-    }).catch((e2) => {
-      postRehydrationCallback == null ? void 0 : postRehydrationCallback(void 0, e2);
-    });
-  };
-  api2.persist = {
-    setOptions: (newOptions) => {
-      options = {
-        ...options,
-        ...newOptions
-      };
-      if (newOptions.getStorage) {
-        storage = newOptions.getStorage();
-      }
-    },
-    clearStorage: () => {
-      storage == null ? void 0 : storage.removeItem(options.name);
-    },
-    getOptions: () => options,
-    rehydrate: () => hydrate(),
-    hasHydrated: () => hasHydrated,
-    onHydrate: (cb2) => {
-      hydrationListeners.add(cb2);
-      return () => {
-        hydrationListeners.delete(cb2);
-      };
-    },
-    onFinishHydration: (cb2) => {
-      finishHydrationListeners.add(cb2);
-      return () => {
-        finishHydrationListeners.delete(cb2);
-      };
-    }
-  };
-  hydrate();
-  return stateFromStorage || configResult;
-};
-const newImpl = (config2, baseOptions) => (set2, get2, api2) => {
-  let options = {
-    storage: createJSONStorage(() => localStorage),
-    partialize: (state2) => state2,
-    version: 0,
-    merge: (persistedState, currentState) => ({
-      ...currentState,
-      ...persistedState
-    }),
-    ...baseOptions
-  };
-  let hasHydrated = false;
-  const hydrationListeners = /* @__PURE__ */ new Set();
-  const finishHydrationListeners = /* @__PURE__ */ new Set();
-  let storage = options.storage;
-  if (!storage) {
-    return config2(
-      (...args) => {
-        console.warn(
-          `[zustand persist middleware] Unable to update item '${options.name}', the given storage is currently unavailable.`
-        );
-        set2(...args);
-      },
-      get2,
-      api2
-    );
-  }
-  const setItem = () => {
-    const state2 = options.partialize({ ...get2() });
-    return storage.setItem(options.name, {
-      state: state2,
-      version: options.version
-    });
-  };
-  const savedSetState = api2.setState;
-  api2.setState = (state2, replace2) => {
-    savedSetState(state2, replace2);
-    void setItem();
-  };
-  const configResult = config2(
-    (...args) => {
-      set2(...args);
-      void setItem();
-    },
-    get2,
-    api2
-  );
-  let stateFromStorage;
-  const hydrate = () => {
-    var _a3;
-    if (!storage)
-      return;
-    hasHydrated = false;
-    hydrationListeners.forEach((cb2) => cb2(get2()));
-    const postRehydrationCallback = ((_a3 = options.onRehydrateStorage) == null ? void 0 : _a3.call(options, get2())) || void 0;
-    return toThenable(storage.getItem.bind(storage))(options.name).then((deserializedStorageValue) => {
-      if (deserializedStorageValue) {
-        if (typeof deserializedStorageValue.version === "number" && deserializedStorageValue.version !== options.version) {
-          if (options.migrate) {
-            return options.migrate(
-              deserializedStorageValue.state,
-              deserializedStorageValue.version
-            );
-          }
-          console.error(
-            `State loaded from storage couldn't be migrated since no migrate function was provided`
-          );
-        } else {
-          return deserializedStorageValue.state;
-        }
-      }
-    }).then((migratedState) => {
-      var _a22;
-      stateFromStorage = options.merge(
-        migratedState,
-        (_a22 = get2()) != null ? _a22 : configResult
-      );
-      set2(stateFromStorage, true);
-      return setItem();
-    }).then(() => {
-      postRehydrationCallback == null ? void 0 : postRehydrationCallback(stateFromStorage, void 0);
-      hasHydrated = true;
-      finishHydrationListeners.forEach((cb2) => cb2(stateFromStorage));
-    }).catch((e2) => {
-      postRehydrationCallback == null ? void 0 : postRehydrationCallback(void 0, e2);
-    });
-  };
-  api2.persist = {
-    setOptions: (newOptions) => {
-      options = {
-        ...options,
-        ...newOptions
-      };
-      if (newOptions.storage) {
-        storage = newOptions.storage;
-      }
-    },
-    clearStorage: () => {
-      storage == null ? void 0 : storage.removeItem(options.name);
-    },
-    getOptions: () => options,
-    rehydrate: () => hydrate(),
-    hasHydrated: () => hasHydrated,
-    onHydrate: (cb2) => {
-      hydrationListeners.add(cb2);
-      return () => {
-        hydrationListeners.delete(cb2);
-      };
-    },
-    onFinishHydration: (cb2) => {
-      finishHydrationListeners.add(cb2);
-      return () => {
-        finishHydrationListeners.delete(cb2);
-      };
-    }
-  };
-  hydrate();
-  return stateFromStorage || configResult;
-};
-const persistImpl = (config2, baseOptions) => {
-  if ("getStorage" in baseOptions || "serialize" in baseOptions || "deserialize" in baseOptions) {
-    if (({ "BASE_URL": "/MultiRobotArt/", "MODE": "production", "DEV": false, "PROD": true, "SSR": false } && "production") !== "production") {
-      console.warn(
-        "[DEPRECATED] `getStorage`, `serialize` and `deserialize` options are deprecated. Use `storage` option instead."
-      );
-    }
-    return oldImpl(config2, baseOptions);
-  }
-  return newImpl(config2, baseOptions);
-};
-const persist = persistImpl;
-function n$4(n2) {
-  for (var r2 = arguments.length, t2 = Array(r2 > 1 ? r2 - 1 : 0), e2 = 1; e2 < r2; e2++)
-    t2[e2 - 1] = arguments[e2];
-  throw Error("[Immer] minified error nr: " + n2 + (t2.length ? " " + t2.map(function(n3) {
-    return "'" + n3 + "'";
-  }).join(",") : "") + ". Find the full error at: https://bit.ly/3cXEKWf");
-}
-function r$7(n2) {
-  return !!n2 && !!n2[Q$3];
-}
-function t$3(n2) {
-  var r2;
-  return !!n2 && (function(n3) {
-    if (!n3 || "object" != typeof n3)
-      return false;
-    var r3 = Object.getPrototypeOf(n3);
-    if (null === r3)
-      return true;
-    var t2 = Object.hasOwnProperty.call(r3, "constructor") && r3.constructor;
-    return t2 === Object || "function" == typeof t2 && Function.toString.call(t2) === Z$1;
-  }(n2) || Array.isArray(n2) || !!n2[L$2] || !!(null === (r2 = n2.constructor) || void 0 === r2 ? void 0 : r2[L$2]) || s$3(n2) || v$4(n2));
-}
-function i$6(n2, r2, t2) {
-  void 0 === t2 && (t2 = false), 0 === o$5(n2) ? (t2 ? Object.keys : nn$1)(n2).forEach(function(e2) {
-    t2 && "symbol" == typeof e2 || r2(e2, n2[e2], n2);
-  }) : n2.forEach(function(t3, e2) {
-    return r2(e2, t3, n2);
-  });
-}
-function o$5(n2) {
-  var r2 = n2[Q$3];
-  return r2 ? r2.i > 3 ? r2.i - 4 : r2.i : Array.isArray(n2) ? 1 : s$3(n2) ? 2 : v$4(n2) ? 3 : 0;
-}
-function u$5(n2, r2) {
-  return 2 === o$5(n2) ? n2.has(r2) : Object.prototype.hasOwnProperty.call(n2, r2);
-}
-function a$4(n2, r2) {
-  return 2 === o$5(n2) ? n2.get(r2) : n2[r2];
-}
-function f$5(n2, r2, t2) {
-  var e2 = o$5(n2);
-  2 === e2 ? n2.set(r2, t2) : 3 === e2 ? n2.add(t2) : n2[r2] = t2;
-}
-function c$7(n2, r2) {
-  return n2 === r2 ? 0 !== n2 || 1 / n2 == 1 / r2 : n2 != n2 && r2 != r2;
-}
-function s$3(n2) {
-  return X$1 && n2 instanceof Map;
-}
-function v$4(n2) {
-  return q$1 && n2 instanceof Set;
-}
-function p$4(n2) {
-  return n2.o || n2.t;
-}
-function l$6(n2) {
-  if (Array.isArray(n2))
-    return Array.prototype.slice.call(n2);
-  var r2 = rn$1(n2);
-  delete r2[Q$3];
-  for (var t2 = nn$1(r2), e2 = 0; e2 < t2.length; e2++) {
-    var i2 = t2[e2], o2 = r2[i2];
-    false === o2.writable && (o2.writable = true, o2.configurable = true), (o2.get || o2.set) && (r2[i2] = { configurable: true, writable: true, enumerable: o2.enumerable, value: n2[i2] });
-  }
-  return Object.create(Object.getPrototypeOf(n2), r2);
-}
-function d$5(n2, e2) {
-  return void 0 === e2 && (e2 = false), y$6(n2) || r$7(n2) || !t$3(n2) || (o$5(n2) > 1 && (n2.set = n2.add = n2.clear = n2.delete = h$5), Object.freeze(n2), e2 && i$6(n2, function(n3, r2) {
-    return d$5(r2, true);
-  }, true)), n2;
-}
-function h$5() {
-  n$4(2);
-}
-function y$6(n2) {
-  return null == n2 || "object" != typeof n2 || Object.isFrozen(n2);
-}
-function b$5(r2) {
-  var t2 = tn[r2];
-  return t2 || n$4(18, r2), t2;
-}
-function _$1() {
-  return U$1;
-}
-function j$2(n2, r2) {
-  r2 && (b$5("Patches"), n2.u = [], n2.s = [], n2.v = r2);
-}
-function O$3(n2) {
-  g$3(n2), n2.p.forEach(S$2), n2.p = null;
-}
-function g$3(n2) {
-  n2 === U$1 && (U$1 = n2.l);
-}
-function w$3(n2) {
-  return U$1 = { p: [], l: U$1, h: n2, m: true, _: 0 };
-}
-function S$2(n2) {
-  var r2 = n2[Q$3];
-  0 === r2.i || 1 === r2.i ? r2.j() : r2.O = true;
-}
-function P$2(r2, e2) {
-  e2._ = e2.p.length;
-  var i2 = e2.p[0], o2 = void 0 !== r2 && r2 !== i2;
-  return e2.h.g || b$5("ES5").S(e2, r2, o2), o2 ? (i2[Q$3].P && (O$3(e2), n$4(4)), t$3(r2) && (r2 = M$1(e2, r2), e2.l || x$4(e2, r2)), e2.u && b$5("Patches").M(i2[Q$3].t, r2, e2.u, e2.s)) : r2 = M$1(e2, i2, []), O$3(e2), e2.u && e2.v(e2.u, e2.s), r2 !== H$3 ? r2 : void 0;
-}
-function M$1(n2, r2, t2) {
-  if (y$6(r2))
-    return r2;
-  var e2 = r2[Q$3];
-  if (!e2)
-    return i$6(r2, function(i2, o3) {
-      return A$2(n2, e2, r2, i2, o3, t2);
-    }, true), r2;
-  if (e2.A !== n2)
-    return r2;
-  if (!e2.P)
-    return x$4(n2, e2.t, true), e2.t;
-  if (!e2.I) {
-    e2.I = true, e2.A._--;
-    var o2 = 4 === e2.i || 5 === e2.i ? e2.o = l$6(e2.k) : e2.o, u2 = o2, a2 = false;
-    3 === e2.i && (u2 = new Set(o2), o2.clear(), a2 = true), i$6(u2, function(r3, i2) {
-      return A$2(n2, e2, o2, r3, i2, t2, a2);
-    }), x$4(n2, o2, false), t2 && n2.u && b$5("Patches").N(e2, t2, n2.u, n2.s);
-  }
-  return e2.o;
-}
-function A$2(e2, i2, o2, a2, c2, s2, v2) {
-  if (r$7(c2)) {
-    var p2 = M$1(e2, c2, s2 && i2 && 3 !== i2.i && !u$5(i2.R, a2) ? s2.concat(a2) : void 0);
-    if (f$5(o2, a2, p2), !r$7(p2))
-      return;
-    e2.m = false;
-  } else
-    v2 && o2.add(c2);
-  if (t$3(c2) && !y$6(c2)) {
-    if (!e2.h.D && e2._ < 1)
-      return;
-    M$1(e2, c2), i2 && i2.A.l || x$4(e2, c2);
-  }
-}
-function x$4(n2, r2, t2) {
-  void 0 === t2 && (t2 = false), !n2.l && n2.h.D && n2.m && d$5(r2, t2);
-}
-function z$3(n2, r2) {
-  var t2 = n2[Q$3];
-  return (t2 ? p$4(t2) : n2)[r2];
-}
-function I$2(n2, r2) {
-  if (r2 in n2)
-    for (var t2 = Object.getPrototypeOf(n2); t2; ) {
-      var e2 = Object.getOwnPropertyDescriptor(t2, r2);
-      if (e2)
-        return e2;
-      t2 = Object.getPrototypeOf(t2);
-    }
-}
-function k$2(n2) {
-  n2.P || (n2.P = true, n2.l && k$2(n2.l));
-}
-function E$5(n2) {
-  n2.o || (n2.o = l$6(n2.t));
-}
-function N$1(n2, r2, t2) {
-  var e2 = s$3(r2) ? b$5("MapSet").F(r2, t2) : v$4(r2) ? b$5("MapSet").T(r2, t2) : n2.g ? function(n3, r3) {
-    var t3 = Array.isArray(n3), e3 = { i: t3 ? 1 : 0, A: r3 ? r3.A : _$1(), P: false, I: false, R: {}, l: r3, t: n3, k: null, o: null, j: null, C: false }, i2 = e3, o2 = en;
-    t3 && (i2 = [e3], o2 = on$1);
-    var u2 = Proxy.revocable(i2, o2), a2 = u2.revoke, f2 = u2.proxy;
-    return e3.k = f2, e3.j = a2, f2;
-  }(r2, t2) : b$5("ES5").J(r2, t2);
-  return (t2 ? t2.A : _$1()).p.push(e2), e2;
-}
-function R$2(e2) {
-  return r$7(e2) || n$4(22, e2), function n2(r2) {
-    if (!t$3(r2))
-      return r2;
-    var e3, u2 = r2[Q$3], c2 = o$5(r2);
-    if (u2) {
-      if (!u2.P && (u2.i < 4 || !b$5("ES5").K(u2)))
-        return u2.t;
-      u2.I = true, e3 = D$4(r2, c2), u2.I = false;
-    } else
-      e3 = D$4(r2, c2);
-    return i$6(e3, function(r3, t2) {
-      u2 && a$4(u2.t, r3) === t2 || f$5(e3, r3, n2(t2));
-    }), 3 === c2 ? new Set(e3) : e3;
-  }(e2);
-}
-function D$4(n2, r2) {
-  switch (r2) {
-    case 2:
-      return new Map(n2);
-    case 3:
-      return Array.from(n2);
-  }
-  return l$6(n2);
-}
-var G, U$1, W$3 = "undefined" != typeof Symbol && "symbol" == typeof Symbol("x"), X$1 = "undefined" != typeof Map, q$1 = "undefined" != typeof Set, B$1 = "undefined" != typeof Proxy && void 0 !== Proxy.revocable && "undefined" != typeof Reflect, H$3 = W$3 ? Symbol.for("immer-nothing") : ((G = {})["immer-nothing"] = true, G), L$2 = W$3 ? Symbol.for("immer-draftable") : "__$immer_draftable", Q$3 = W$3 ? Symbol.for("immer-state") : "__$immer_state", Z$1 = "" + Object.prototype.constructor, nn$1 = "undefined" != typeof Reflect && Reflect.ownKeys ? Reflect.ownKeys : void 0 !== Object.getOwnPropertySymbols ? function(n2) {
-  return Object.getOwnPropertyNames(n2).concat(Object.getOwnPropertySymbols(n2));
-} : Object.getOwnPropertyNames, rn$1 = Object.getOwnPropertyDescriptors || function(n2) {
-  var r2 = {};
-  return nn$1(n2).forEach(function(t2) {
-    r2[t2] = Object.getOwnPropertyDescriptor(n2, t2);
-  }), r2;
-}, tn = {}, en = { get: function(n2, r2) {
-  if (r2 === Q$3)
-    return n2;
-  var e2 = p$4(n2);
-  if (!u$5(e2, r2))
-    return function(n3, r3, t2) {
-      var e3, i3 = I$2(r3, t2);
-      return i3 ? "value" in i3 ? i3.value : null === (e3 = i3.get) || void 0 === e3 ? void 0 : e3.call(n3.k) : void 0;
-    }(n2, e2, r2);
-  var i2 = e2[r2];
-  return n2.I || !t$3(i2) ? i2 : i2 === z$3(n2.t, r2) ? (E$5(n2), n2.o[r2] = N$1(n2.A.h, i2, n2)) : i2;
-}, has: function(n2, r2) {
-  return r2 in p$4(n2);
-}, ownKeys: function(n2) {
-  return Reflect.ownKeys(p$4(n2));
-}, set: function(n2, r2, t2) {
-  var e2 = I$2(p$4(n2), r2);
-  if (null == e2 ? void 0 : e2.set)
-    return e2.set.call(n2.k, t2), true;
-  if (!n2.P) {
-    var i2 = z$3(p$4(n2), r2), o2 = null == i2 ? void 0 : i2[Q$3];
-    if (o2 && o2.t === t2)
-      return n2.o[r2] = t2, n2.R[r2] = false, true;
-    if (c$7(t2, i2) && (void 0 !== t2 || u$5(n2.t, r2)))
-      return true;
-    E$5(n2), k$2(n2);
-  }
-  return n2.o[r2] === t2 && (void 0 !== t2 || r2 in n2.o) || Number.isNaN(t2) && Number.isNaN(n2.o[r2]) || (n2.o[r2] = t2, n2.R[r2] = true), true;
-}, deleteProperty: function(n2, r2) {
-  return void 0 !== z$3(n2.t, r2) || r2 in n2.t ? (n2.R[r2] = false, E$5(n2), k$2(n2)) : delete n2.R[r2], n2.o && delete n2.o[r2], true;
-}, getOwnPropertyDescriptor: function(n2, r2) {
-  var t2 = p$4(n2), e2 = Reflect.getOwnPropertyDescriptor(t2, r2);
-  return e2 ? { writable: true, configurable: 1 !== n2.i || "length" !== r2, enumerable: e2.enumerable, value: t2[r2] } : e2;
-}, defineProperty: function() {
-  n$4(11);
-}, getPrototypeOf: function(n2) {
-  return Object.getPrototypeOf(n2.t);
-}, setPrototypeOf: function() {
-  n$4(12);
-} }, on$1 = {};
-i$6(en, function(n2, r2) {
-  on$1[n2] = function() {
-    return arguments[0] = arguments[0][0], r2.apply(this, arguments);
-  };
-}), on$1.deleteProperty = function(r2, t2) {
-  return on$1.set.call(this, r2, t2, void 0);
-}, on$1.set = function(r2, t2, e2) {
-  return en.set.call(this, r2[0], t2, e2, r2[0]);
-};
-var un = function() {
-  function e2(r2) {
-    var e3 = this;
-    this.g = B$1, this.D = true, this.produce = function(r3, i3, o2) {
-      if ("function" == typeof r3 && "function" != typeof i3) {
-        var u2 = i3;
-        i3 = r3;
-        var a2 = e3;
-        return function(n2) {
-          var r4 = this;
-          void 0 === n2 && (n2 = u2);
-          for (var t2 = arguments.length, e4 = Array(t2 > 1 ? t2 - 1 : 0), o3 = 1; o3 < t2; o3++)
-            e4[o3 - 1] = arguments[o3];
-          return a2.produce(n2, function(n3) {
-            var t3;
-            return (t3 = i3).call.apply(t3, [r4, n3].concat(e4));
-          });
-        };
-      }
-      var f2;
-      if ("function" != typeof i3 && n$4(6), void 0 !== o2 && "function" != typeof o2 && n$4(7), t$3(r3)) {
-        var c2 = w$3(e3), s2 = N$1(e3, r3, void 0), v2 = true;
-        try {
-          f2 = i3(s2), v2 = false;
-        } finally {
-          v2 ? O$3(c2) : g$3(c2);
-        }
-        return "undefined" != typeof Promise && f2 instanceof Promise ? f2.then(function(n2) {
-          return j$2(c2, o2), P$2(n2, c2);
-        }, function(n2) {
-          throw O$3(c2), n2;
-        }) : (j$2(c2, o2), P$2(f2, c2));
-      }
-      if (!r3 || "object" != typeof r3) {
-        if (void 0 === (f2 = i3(r3)) && (f2 = r3), f2 === H$3 && (f2 = void 0), e3.D && d$5(f2, true), o2) {
-          var p2 = [], l2 = [];
-          b$5("Patches").M(r3, f2, p2, l2), o2(p2, l2);
-        }
-        return f2;
-      }
-      n$4(21, r3);
-    }, this.produceWithPatches = function(n2, r3) {
-      if ("function" == typeof n2)
-        return function(r4) {
-          for (var t3 = arguments.length, i4 = Array(t3 > 1 ? t3 - 1 : 0), o3 = 1; o3 < t3; o3++)
-            i4[o3 - 1] = arguments[o3];
-          return e3.produceWithPatches(r4, function(r5) {
-            return n2.apply(void 0, [r5].concat(i4));
-          });
-        };
-      var t2, i3, o2 = e3.produce(n2, r3, function(n3, r4) {
-        t2 = n3, i3 = r4;
-      });
-      return "undefined" != typeof Promise && o2 instanceof Promise ? o2.then(function(n3) {
-        return [n3, t2, i3];
-      }) : [o2, t2, i3];
-    }, "boolean" == typeof (null == r2 ? void 0 : r2.useProxies) && this.setUseProxies(r2.useProxies), "boolean" == typeof (null == r2 ? void 0 : r2.autoFreeze) && this.setAutoFreeze(r2.autoFreeze);
-  }
-  var i2 = e2.prototype;
-  return i2.createDraft = function(e3) {
-    t$3(e3) || n$4(8), r$7(e3) && (e3 = R$2(e3));
-    var i3 = w$3(this), o2 = N$1(this, e3, void 0);
-    return o2[Q$3].C = true, g$3(i3), o2;
-  }, i2.finishDraft = function(r2, t2) {
-    var e3 = r2 && r2[Q$3];
-    var i3 = e3.A;
-    return j$2(i3, t2), P$2(void 0, i3);
-  }, i2.setAutoFreeze = function(n2) {
-    this.D = n2;
-  }, i2.setUseProxies = function(r2) {
-    r2 && !B$1 && n$4(20), this.g = r2;
-  }, i2.applyPatches = function(n2, t2) {
-    var e3;
-    for (e3 = t2.length - 1; e3 >= 0; e3--) {
-      var i3 = t2[e3];
-      if (0 === i3.path.length && "replace" === i3.op) {
-        n2 = i3.value;
-        break;
-      }
-    }
-    e3 > -1 && (t2 = t2.slice(e3 + 1));
-    var o2 = b$5("Patches").$;
-    return r$7(n2) ? o2(n2, t2) : this.produce(n2, function(n3) {
-      return o2(n3, t2);
-    });
-  }, e2;
-}(), an = new un(), fn = an.produce;
-an.produceWithPatches.bind(an);
-an.setAutoFreeze.bind(an);
-an.setUseProxies.bind(an);
-an.applyPatches.bind(an);
-an.createDraft.bind(an);
-an.finishDraft.bind(an);
-const immerImpl = (initializer) => (set2, get2, store) => {
-  store.setState = (updater, replace2, ...a2) => {
-    const nextState = typeof updater === "function" ? fn(updater) : updater;
-    return set2(nextState, replace2, ...a2);
-  };
-  return initializer(store.setState, get2, store);
-};
-const immer = immerImpl;
-const ROBART_VERSION = 0.1;
-const saveToFile = (fileName, contents) => {
-  const element = document.createElement("a");
-  const file = new Blob([contents], { type: "text/plain" });
-  element.href = URL.createObjectURL(file);
-  element.download = fileName;
-  document.body.appendChild(element);
-  element.click();
-  document.body.removeChild(element);
-};
-function commonjsRequire(path) {
-  throw new Error('Could not dynamically require "' + path + '". Please configure the dynamicRequireTargets or/and ignoreDynamicRequires option of @rollup/plugin-commonjs appropriately for this require call to work.');
-}
-var jszip_min = { exports: {} };
-/*!
-
-JSZip v3.10.1 - A JavaScript class for generating and reading zip files
-<http://stuartk.com/jszip>
-
-(c) 2009-2016 Stuart Knightley <stuart [at] stuartk.com>
-Dual licenced under the MIT license or GPLv3. See https://raw.github.com/Stuk/jszip/main/LICENSE.markdown.
-
-JSZip uses the library pako released under the MIT license :
-https://github.com/nodeca/pako/blob/main/LICENSE
-*/
-(function(module, exports) {
-  !function(e2) {
-    module.exports = e2();
-  }(function() {
-    return function s2(a2, o2, h2) {
-      function u2(r2, e3) {
-        if (!o2[r2]) {
-          if (!a2[r2]) {
-            var t2 = "function" == typeof commonjsRequire && commonjsRequire;
-            if (!e3 && t2)
-              return t2(r2, true);
-            if (l2)
-              return l2(r2, true);
-            var n2 = new Error("Cannot find module '" + r2 + "'");
-            throw n2.code = "MODULE_NOT_FOUND", n2;
-          }
-          var i2 = o2[r2] = { exports: {} };
-          a2[r2][0].call(i2.exports, function(e4) {
-            var t3 = a2[r2][1][e4];
-            return u2(t3 || e4);
-          }, i2, i2.exports, s2, a2, o2, h2);
-        }
-        return o2[r2].exports;
-      }
-      for (var l2 = "function" == typeof commonjsRequire && commonjsRequire, e2 = 0; e2 < h2.length; e2++)
-        u2(h2[e2]);
-      return u2;
-    }({ 1: [function(e2, t2, r2) {
-      var d2 = e2("./utils"), c2 = e2("./support"), p2 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-      r2.encode = function(e3) {
-        for (var t3, r3, n2, i2, s2, a2, o2, h2 = [], u2 = 0, l2 = e3.length, f2 = l2, c3 = "string" !== d2.getTypeOf(e3); u2 < e3.length; )
-          f2 = l2 - u2, n2 = c3 ? (t3 = e3[u2++], r3 = u2 < l2 ? e3[u2++] : 0, u2 < l2 ? e3[u2++] : 0) : (t3 = e3.charCodeAt(u2++), r3 = u2 < l2 ? e3.charCodeAt(u2++) : 0, u2 < l2 ? e3.charCodeAt(u2++) : 0), i2 = t3 >> 2, s2 = (3 & t3) << 4 | r3 >> 4, a2 = 1 < f2 ? (15 & r3) << 2 | n2 >> 6 : 64, o2 = 2 < f2 ? 63 & n2 : 64, h2.push(p2.charAt(i2) + p2.charAt(s2) + p2.charAt(a2) + p2.charAt(o2));
-        return h2.join("");
-      }, r2.decode = function(e3) {
-        var t3, r3, n2, i2, s2, a2, o2 = 0, h2 = 0, u2 = "data:";
-        if (e3.substr(0, u2.length) === u2)
-          throw new Error("Invalid base64 input, it looks like a data url.");
-        var l2, f2 = 3 * (e3 = e3.replace(/[^A-Za-z0-9+/=]/g, "")).length / 4;
-        if (e3.charAt(e3.length - 1) === p2.charAt(64) && f2--, e3.charAt(e3.length - 2) === p2.charAt(64) && f2--, f2 % 1 != 0)
-          throw new Error("Invalid base64 input, bad content length.");
-        for (l2 = c2.uint8array ? new Uint8Array(0 | f2) : new Array(0 | f2); o2 < e3.length; )
-          t3 = p2.indexOf(e3.charAt(o2++)) << 2 | (i2 = p2.indexOf(e3.charAt(o2++))) >> 4, r3 = (15 & i2) << 4 | (s2 = p2.indexOf(e3.charAt(o2++))) >> 2, n2 = (3 & s2) << 6 | (a2 = p2.indexOf(e3.charAt(o2++))), l2[h2++] = t3, 64 !== s2 && (l2[h2++] = r3), 64 !== a2 && (l2[h2++] = n2);
-        return l2;
-      };
-    }, { "./support": 30, "./utils": 32 }], 2: [function(e2, t2, r2) {
-      var n2 = e2("./external"), i2 = e2("./stream/DataWorker"), s2 = e2("./stream/Crc32Probe"), a2 = e2("./stream/DataLengthProbe");
-      function o2(e3, t3, r3, n3, i3) {
-        this.compressedSize = e3, this.uncompressedSize = t3, this.crc32 = r3, this.compression = n3, this.compressedContent = i3;
-      }
-      o2.prototype = { getContentWorker: function() {
-        var e3 = new i2(n2.Promise.resolve(this.compressedContent)).pipe(this.compression.uncompressWorker()).pipe(new a2("data_length")), t3 = this;
-        return e3.on("end", function() {
-          if (this.streamInfo.data_length !== t3.uncompressedSize)
-            throw new Error("Bug : uncompressed data size mismatch");
-        }), e3;
-      }, getCompressedWorker: function() {
-        return new i2(n2.Promise.resolve(this.compressedContent)).withStreamInfo("compressedSize", this.compressedSize).withStreamInfo("uncompressedSize", this.uncompressedSize).withStreamInfo("crc32", this.crc32).withStreamInfo("compression", this.compression);
-      } }, o2.createWorkerFrom = function(e3, t3, r3) {
-        return e3.pipe(new s2()).pipe(new a2("uncompressedSize")).pipe(t3.compressWorker(r3)).pipe(new a2("compressedSize")).withStreamInfo("compression", t3);
-      }, t2.exports = o2;
-    }, { "./external": 6, "./stream/Crc32Probe": 25, "./stream/DataLengthProbe": 26, "./stream/DataWorker": 27 }], 3: [function(e2, t2, r2) {
-      var n2 = e2("./stream/GenericWorker");
-      r2.STORE = { magic: "\0\0", compressWorker: function() {
-        return new n2("STORE compression");
-      }, uncompressWorker: function() {
-        return new n2("STORE decompression");
-      } }, r2.DEFLATE = e2("./flate");
-    }, { "./flate": 7, "./stream/GenericWorker": 28 }], 4: [function(e2, t2, r2) {
-      var n2 = e2("./utils");
-      var o2 = function() {
-        for (var e3, t3 = [], r3 = 0; r3 < 256; r3++) {
-          e3 = r3;
-          for (var n3 = 0; n3 < 8; n3++)
-            e3 = 1 & e3 ? 3988292384 ^ e3 >>> 1 : e3 >>> 1;
-          t3[r3] = e3;
-        }
-        return t3;
-      }();
-      t2.exports = function(e3, t3) {
-        return void 0 !== e3 && e3.length ? "string" !== n2.getTypeOf(e3) ? function(e4, t4, r3, n3) {
-          var i2 = o2, s2 = n3 + r3;
-          e4 ^= -1;
-          for (var a2 = n3; a2 < s2; a2++)
-            e4 = e4 >>> 8 ^ i2[255 & (e4 ^ t4[a2])];
-          return -1 ^ e4;
-        }(0 | t3, e3, e3.length, 0) : function(e4, t4, r3, n3) {
-          var i2 = o2, s2 = n3 + r3;
-          e4 ^= -1;
-          for (var a2 = n3; a2 < s2; a2++)
-            e4 = e4 >>> 8 ^ i2[255 & (e4 ^ t4.charCodeAt(a2))];
-          return -1 ^ e4;
-        }(0 | t3, e3, e3.length, 0) : 0;
-      };
-    }, { "./utils": 32 }], 5: [function(e2, t2, r2) {
-      r2.base64 = false, r2.binary = false, r2.dir = false, r2.createFolders = true, r2.date = null, r2.compression = null, r2.compressionOptions = null, r2.comment = null, r2.unixPermissions = null, r2.dosPermissions = null;
-    }, {}], 6: [function(e2, t2, r2) {
-      var n2 = null;
-      n2 = "undefined" != typeof Promise ? Promise : e2("lie"), t2.exports = { Promise: n2 };
-    }, { lie: 37 }], 7: [function(e2, t2, r2) {
-      var n2 = "undefined" != typeof Uint8Array && "undefined" != typeof Uint16Array && "undefined" != typeof Uint32Array, i2 = e2("pako"), s2 = e2("./utils"), a2 = e2("./stream/GenericWorker"), o2 = n2 ? "uint8array" : "array";
-      function h2(e3, t3) {
-        a2.call(this, "FlateWorker/" + e3), this._pako = null, this._pakoAction = e3, this._pakoOptions = t3, this.meta = {};
-      }
-      r2.magic = "\b\0", s2.inherits(h2, a2), h2.prototype.processChunk = function(e3) {
-        this.meta = e3.meta, null === this._pako && this._createPako(), this._pako.push(s2.transformTo(o2, e3.data), false);
-      }, h2.prototype.flush = function() {
-        a2.prototype.flush.call(this), null === this._pako && this._createPako(), this._pako.push([], true);
-      }, h2.prototype.cleanUp = function() {
-        a2.prototype.cleanUp.call(this), this._pako = null;
-      }, h2.prototype._createPako = function() {
-        this._pako = new i2[this._pakoAction]({ raw: true, level: this._pakoOptions.level || -1 });
-        var t3 = this;
-        this._pako.onData = function(e3) {
-          t3.push({ data: e3, meta: t3.meta });
-        };
-      }, r2.compressWorker = function(e3) {
-        return new h2("Deflate", e3);
-      }, r2.uncompressWorker = function() {
-        return new h2("Inflate", {});
-      };
-    }, { "./stream/GenericWorker": 28, "./utils": 32, pako: 38 }], 8: [function(e2, t2, r2) {
-      function A2(e3, t3) {
-        var r3, n3 = "";
-        for (r3 = 0; r3 < t3; r3++)
-          n3 += String.fromCharCode(255 & e3), e3 >>>= 8;
-        return n3;
-      }
-      function n2(e3, t3, r3, n3, i3, s3) {
-        var a2, o2, h2 = e3.file, u2 = e3.compression, l2 = s3 !== O2.utf8encode, f2 = I2.transformTo("string", s3(h2.name)), c2 = I2.transformTo("string", O2.utf8encode(h2.name)), d2 = h2.comment, p2 = I2.transformTo("string", s3(d2)), m2 = I2.transformTo("string", O2.utf8encode(d2)), _2 = c2.length !== h2.name.length, g2 = m2.length !== d2.length, b2 = "", v2 = "", y2 = "", w2 = h2.dir, k2 = h2.date, x2 = { crc32: 0, compressedSize: 0, uncompressedSize: 0 };
-        t3 && !r3 || (x2.crc32 = e3.crc32, x2.compressedSize = e3.compressedSize, x2.uncompressedSize = e3.uncompressedSize);
-        var S2 = 0;
-        t3 && (S2 |= 8), l2 || !_2 && !g2 || (S2 |= 2048);
-        var z2 = 0, C2 = 0;
-        w2 && (z2 |= 16), "UNIX" === i3 ? (C2 = 798, z2 |= function(e4, t4) {
-          var r4 = e4;
-          return e4 || (r4 = t4 ? 16893 : 33204), (65535 & r4) << 16;
-        }(h2.unixPermissions, w2)) : (C2 = 20, z2 |= function(e4) {
-          return 63 & (e4 || 0);
-        }(h2.dosPermissions)), a2 = k2.getUTCHours(), a2 <<= 6, a2 |= k2.getUTCMinutes(), a2 <<= 5, a2 |= k2.getUTCSeconds() / 2, o2 = k2.getUTCFullYear() - 1980, o2 <<= 4, o2 |= k2.getUTCMonth() + 1, o2 <<= 5, o2 |= k2.getUTCDate(), _2 && (v2 = A2(1, 1) + A2(B2(f2), 4) + c2, b2 += "up" + A2(v2.length, 2) + v2), g2 && (y2 = A2(1, 1) + A2(B2(p2), 4) + m2, b2 += "uc" + A2(y2.length, 2) + y2);
-        var E2 = "";
-        return E2 += "\n\0", E2 += A2(S2, 2), E2 += u2.magic, E2 += A2(a2, 2), E2 += A2(o2, 2), E2 += A2(x2.crc32, 4), E2 += A2(x2.compressedSize, 4), E2 += A2(x2.uncompressedSize, 4), E2 += A2(f2.length, 2), E2 += A2(b2.length, 2), { fileRecord: R2.LOCAL_FILE_HEADER + E2 + f2 + b2, dirRecord: R2.CENTRAL_FILE_HEADER + A2(C2, 2) + E2 + A2(p2.length, 2) + "\0\0\0\0" + A2(z2, 4) + A2(n3, 4) + f2 + b2 + p2 };
-      }
-      var I2 = e2("../utils"), i2 = e2("../stream/GenericWorker"), O2 = e2("../utf8"), B2 = e2("../crc32"), R2 = e2("../signature");
-      function s2(e3, t3, r3, n3) {
-        i2.call(this, "ZipFileWorker"), this.bytesWritten = 0, this.zipComment = t3, this.zipPlatform = r3, this.encodeFileName = n3, this.streamFiles = e3, this.accumulate = false, this.contentBuffer = [], this.dirRecords = [], this.currentSourceOffset = 0, this.entriesCount = 0, this.currentFile = null, this._sources = [];
-      }
-      I2.inherits(s2, i2), s2.prototype.push = function(e3) {
-        var t3 = e3.meta.percent || 0, r3 = this.entriesCount, n3 = this._sources.length;
-        this.accumulate ? this.contentBuffer.push(e3) : (this.bytesWritten += e3.data.length, i2.prototype.push.call(this, { data: e3.data, meta: { currentFile: this.currentFile, percent: r3 ? (t3 + 100 * (r3 - n3 - 1)) / r3 : 100 } }));
-      }, s2.prototype.openedSource = function(e3) {
-        this.currentSourceOffset = this.bytesWritten, this.currentFile = e3.file.name;
-        var t3 = this.streamFiles && !e3.file.dir;
-        if (t3) {
-          var r3 = n2(e3, t3, false, this.currentSourceOffset, this.zipPlatform, this.encodeFileName);
-          this.push({ data: r3.fileRecord, meta: { percent: 0 } });
-        } else
-          this.accumulate = true;
-      }, s2.prototype.closedSource = function(e3) {
-        this.accumulate = false;
-        var t3 = this.streamFiles && !e3.file.dir, r3 = n2(e3, t3, true, this.currentSourceOffset, this.zipPlatform, this.encodeFileName);
-        if (this.dirRecords.push(r3.dirRecord), t3)
-          this.push({ data: function(e4) {
-            return R2.DATA_DESCRIPTOR + A2(e4.crc32, 4) + A2(e4.compressedSize, 4) + A2(e4.uncompressedSize, 4);
-          }(e3), meta: { percent: 100 } });
-        else
-          for (this.push({ data: r3.fileRecord, meta: { percent: 0 } }); this.contentBuffer.length; )
-            this.push(this.contentBuffer.shift());
-        this.currentFile = null;
-      }, s2.prototype.flush = function() {
-        for (var e3 = this.bytesWritten, t3 = 0; t3 < this.dirRecords.length; t3++)
-          this.push({ data: this.dirRecords[t3], meta: { percent: 100 } });
-        var r3 = this.bytesWritten - e3, n3 = function(e4, t4, r4, n4, i3) {
-          var s3 = I2.transformTo("string", i3(n4));
-          return R2.CENTRAL_DIRECTORY_END + "\0\0\0\0" + A2(e4, 2) + A2(e4, 2) + A2(t4, 4) + A2(r4, 4) + A2(s3.length, 2) + s3;
-        }(this.dirRecords.length, r3, e3, this.zipComment, this.encodeFileName);
-        this.push({ data: n3, meta: { percent: 100 } });
-      }, s2.prototype.prepareNextSource = function() {
-        this.previous = this._sources.shift(), this.openedSource(this.previous.streamInfo), this.isPaused ? this.previous.pause() : this.previous.resume();
-      }, s2.prototype.registerPrevious = function(e3) {
-        this._sources.push(e3);
-        var t3 = this;
-        return e3.on("data", function(e4) {
-          t3.processChunk(e4);
-        }), e3.on("end", function() {
-          t3.closedSource(t3.previous.streamInfo), t3._sources.length ? t3.prepareNextSource() : t3.end();
-        }), e3.on("error", function(e4) {
-          t3.error(e4);
-        }), this;
-      }, s2.prototype.resume = function() {
-        return !!i2.prototype.resume.call(this) && (!this.previous && this._sources.length ? (this.prepareNextSource(), true) : this.previous || this._sources.length || this.generatedError ? void 0 : (this.end(), true));
-      }, s2.prototype.error = function(e3) {
-        var t3 = this._sources;
-        if (!i2.prototype.error.call(this, e3))
-          return false;
-        for (var r3 = 0; r3 < t3.length; r3++)
-          try {
-            t3[r3].error(e3);
-          } catch (e4) {
-          }
-        return true;
-      }, s2.prototype.lock = function() {
-        i2.prototype.lock.call(this);
-        for (var e3 = this._sources, t3 = 0; t3 < e3.length; t3++)
-          e3[t3].lock();
-      }, t2.exports = s2;
-    }, { "../crc32": 4, "../signature": 23, "../stream/GenericWorker": 28, "../utf8": 31, "../utils": 32 }], 9: [function(e2, t2, r2) {
-      var u2 = e2("../compressions"), n2 = e2("./ZipFileWorker");
-      r2.generateWorker = function(e3, a2, t3) {
-        var o2 = new n2(a2.streamFiles, t3, a2.platform, a2.encodeFileName), h2 = 0;
-        try {
-          e3.forEach(function(e4, t4) {
-            h2++;
-            var r3 = function(e5, t5) {
-              var r4 = e5 || t5, n4 = u2[r4];
-              if (!n4)
-                throw new Error(r4 + " is not a valid compression method !");
-              return n4;
-            }(t4.options.compression, a2.compression), n3 = t4.options.compressionOptions || a2.compressionOptions || {}, i2 = t4.dir, s2 = t4.date;
-            t4._compressWorker(r3, n3).withStreamInfo("file", { name: e4, dir: i2, date: s2, comment: t4.comment || "", unixPermissions: t4.unixPermissions, dosPermissions: t4.dosPermissions }).pipe(o2);
-          }), o2.entriesCount = h2;
-        } catch (e4) {
-          o2.error(e4);
-        }
-        return o2;
-      };
-    }, { "../compressions": 3, "./ZipFileWorker": 8 }], 10: [function(e2, t2, r2) {
-      function n2() {
-        if (!(this instanceof n2))
-          return new n2();
-        if (arguments.length)
-          throw new Error("The constructor with parameters has been removed in JSZip 3.0, please check the upgrade guide.");
-        this.files = /* @__PURE__ */ Object.create(null), this.comment = null, this.root = "", this.clone = function() {
-          var e3 = new n2();
-          for (var t3 in this)
-            "function" != typeof this[t3] && (e3[t3] = this[t3]);
-          return e3;
-        };
-      }
-      (n2.prototype = e2("./object")).loadAsync = e2("./load"), n2.support = e2("./support"), n2.defaults = e2("./defaults"), n2.version = "3.10.1", n2.loadAsync = function(e3, t3) {
-        return new n2().loadAsync(e3, t3);
-      }, n2.external = e2("./external"), t2.exports = n2;
-    }, { "./defaults": 5, "./external": 6, "./load": 11, "./object": 15, "./support": 30 }], 11: [function(e2, t2, r2) {
-      var u2 = e2("./utils"), i2 = e2("./external"), n2 = e2("./utf8"), s2 = e2("./zipEntries"), a2 = e2("./stream/Crc32Probe"), l2 = e2("./nodejsUtils");
-      function f2(n3) {
-        return new i2.Promise(function(e3, t3) {
-          var r3 = n3.decompressed.getContentWorker().pipe(new a2());
-          r3.on("error", function(e4) {
-            t3(e4);
-          }).on("end", function() {
-            r3.streamInfo.crc32 !== n3.decompressed.crc32 ? t3(new Error("Corrupted zip : CRC32 mismatch")) : e3();
-          }).resume();
-        });
-      }
-      t2.exports = function(e3, o2) {
-        var h2 = this;
-        return o2 = u2.extend(o2 || {}, { base64: false, checkCRC32: false, optimizedBinaryString: false, createFolders: false, decodeFileName: n2.utf8decode }), l2.isNode && l2.isStream(e3) ? i2.Promise.reject(new Error("JSZip can't accept a stream when loading a zip file.")) : u2.prepareContent("the loaded zip file", e3, true, o2.optimizedBinaryString, o2.base64).then(function(e4) {
-          var t3 = new s2(o2);
-          return t3.load(e4), t3;
-        }).then(function(e4) {
-          var t3 = [i2.Promise.resolve(e4)], r3 = e4.files;
-          if (o2.checkCRC32)
-            for (var n3 = 0; n3 < r3.length; n3++)
-              t3.push(f2(r3[n3]));
-          return i2.Promise.all(t3);
-        }).then(function(e4) {
-          for (var t3 = e4.shift(), r3 = t3.files, n3 = 0; n3 < r3.length; n3++) {
-            var i3 = r3[n3], s3 = i3.fileNameStr, a3 = u2.resolve(i3.fileNameStr);
-            h2.file(a3, i3.decompressed, { binary: true, optimizedBinaryString: true, date: i3.date, dir: i3.dir, comment: i3.fileCommentStr.length ? i3.fileCommentStr : null, unixPermissions: i3.unixPermissions, dosPermissions: i3.dosPermissions, createFolders: o2.createFolders }), i3.dir || (h2.file(a3).unsafeOriginalName = s3);
-          }
-          return t3.zipComment.length && (h2.comment = t3.zipComment), h2;
-        });
-      };
-    }, { "./external": 6, "./nodejsUtils": 14, "./stream/Crc32Probe": 25, "./utf8": 31, "./utils": 32, "./zipEntries": 33 }], 12: [function(e2, t2, r2) {
-      var n2 = e2("../utils"), i2 = e2("../stream/GenericWorker");
-      function s2(e3, t3) {
-        i2.call(this, "Nodejs stream input adapter for " + e3), this._upstreamEnded = false, this._bindStream(t3);
-      }
-      n2.inherits(s2, i2), s2.prototype._bindStream = function(e3) {
-        var t3 = this;
-        (this._stream = e3).pause(), e3.on("data", function(e4) {
-          t3.push({ data: e4, meta: { percent: 0 } });
-        }).on("error", function(e4) {
-          t3.isPaused ? this.generatedError = e4 : t3.error(e4);
-        }).on("end", function() {
-          t3.isPaused ? t3._upstreamEnded = true : t3.end();
-        });
-      }, s2.prototype.pause = function() {
-        return !!i2.prototype.pause.call(this) && (this._stream.pause(), true);
-      }, s2.prototype.resume = function() {
-        return !!i2.prototype.resume.call(this) && (this._upstreamEnded ? this.end() : this._stream.resume(), true);
-      }, t2.exports = s2;
-    }, { "../stream/GenericWorker": 28, "../utils": 32 }], 13: [function(e2, t2, r2) {
-      var i2 = e2("readable-stream").Readable;
-      function n2(e3, t3, r3) {
-        i2.call(this, t3), this._helper = e3;
-        var n3 = this;
-        e3.on("data", function(e4, t4) {
-          n3.push(e4) || n3._helper.pause(), r3 && r3(t4);
-        }).on("error", function(e4) {
-          n3.emit("error", e4);
-        }).on("end", function() {
-          n3.push(null);
-        });
-      }
-      e2("../utils").inherits(n2, i2), n2.prototype._read = function() {
-        this._helper.resume();
-      }, t2.exports = n2;
-    }, { "../utils": 32, "readable-stream": 16 }], 14: [function(e2, t2, r2) {
-      t2.exports = { isNode: "undefined" != typeof Buffer, newBufferFrom: function(e3, t3) {
-        if (Buffer.from && Buffer.from !== Uint8Array.from)
-          return Buffer.from(e3, t3);
-        if ("number" == typeof e3)
-          throw new Error('The "data" argument must not be a number');
-        return new Buffer(e3, t3);
-      }, allocBuffer: function(e3) {
-        if (Buffer.alloc)
-          return Buffer.alloc(e3);
-        var t3 = new Buffer(e3);
-        return t3.fill(0), t3;
-      }, isBuffer: function(e3) {
-        return Buffer.isBuffer(e3);
-      }, isStream: function(e3) {
-        return e3 && "function" == typeof e3.on && "function" == typeof e3.pause && "function" == typeof e3.resume;
-      } };
-    }, {}], 15: [function(e2, t2, r2) {
-      function s2(e3, t3, r3) {
-        var n3, i3 = u2.getTypeOf(t3), s3 = u2.extend(r3 || {}, f2);
-        s3.date = s3.date || /* @__PURE__ */ new Date(), null !== s3.compression && (s3.compression = s3.compression.toUpperCase()), "string" == typeof s3.unixPermissions && (s3.unixPermissions = parseInt(s3.unixPermissions, 8)), s3.unixPermissions && 16384 & s3.unixPermissions && (s3.dir = true), s3.dosPermissions && 16 & s3.dosPermissions && (s3.dir = true), s3.dir && (e3 = g2(e3)), s3.createFolders && (n3 = _2(e3)) && b2.call(this, n3, true);
-        var a3 = "string" === i3 && false === s3.binary && false === s3.base64;
-        r3 && void 0 !== r3.binary || (s3.binary = !a3), (t3 instanceof c2 && 0 === t3.uncompressedSize || s3.dir || !t3 || 0 === t3.length) && (s3.base64 = false, s3.binary = true, t3 = "", s3.compression = "STORE", i3 = "string");
-        var o3 = null;
-        o3 = t3 instanceof c2 || t3 instanceof l2 ? t3 : p2.isNode && p2.isStream(t3) ? new m2(e3, t3) : u2.prepareContent(e3, t3, s3.binary, s3.optimizedBinaryString, s3.base64);
-        var h3 = new d2(e3, o3, s3);
-        this.files[e3] = h3;
-      }
-      var i2 = e2("./utf8"), u2 = e2("./utils"), l2 = e2("./stream/GenericWorker"), a2 = e2("./stream/StreamHelper"), f2 = e2("./defaults"), c2 = e2("./compressedObject"), d2 = e2("./zipObject"), o2 = e2("./generate"), p2 = e2("./nodejsUtils"), m2 = e2("./nodejs/NodejsStreamInputAdapter"), _2 = function(e3) {
-        "/" === e3.slice(-1) && (e3 = e3.substring(0, e3.length - 1));
-        var t3 = e3.lastIndexOf("/");
-        return 0 < t3 ? e3.substring(0, t3) : "";
-      }, g2 = function(e3) {
-        return "/" !== e3.slice(-1) && (e3 += "/"), e3;
-      }, b2 = function(e3, t3) {
-        return t3 = void 0 !== t3 ? t3 : f2.createFolders, e3 = g2(e3), this.files[e3] || s2.call(this, e3, null, { dir: true, createFolders: t3 }), this.files[e3];
-      };
-      function h2(e3) {
-        return "[object RegExp]" === Object.prototype.toString.call(e3);
-      }
-      var n2 = { load: function() {
-        throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.");
-      }, forEach: function(e3) {
-        var t3, r3, n3;
-        for (t3 in this.files)
-          n3 = this.files[t3], (r3 = t3.slice(this.root.length, t3.length)) && t3.slice(0, this.root.length) === this.root && e3(r3, n3);
-      }, filter: function(r3) {
-        var n3 = [];
-        return this.forEach(function(e3, t3) {
-          r3(e3, t3) && n3.push(t3);
-        }), n3;
-      }, file: function(e3, t3, r3) {
-        if (1 !== arguments.length)
-          return e3 = this.root + e3, s2.call(this, e3, t3, r3), this;
-        if (h2(e3)) {
-          var n3 = e3;
-          return this.filter(function(e4, t4) {
-            return !t4.dir && n3.test(e4);
-          });
-        }
-        var i3 = this.files[this.root + e3];
-        return i3 && !i3.dir ? i3 : null;
-      }, folder: function(r3) {
-        if (!r3)
-          return this;
-        if (h2(r3))
-          return this.filter(function(e4, t4) {
-            return t4.dir && r3.test(e4);
-          });
-        var e3 = this.root + r3, t3 = b2.call(this, e3), n3 = this.clone();
-        return n3.root = t3.name, n3;
-      }, remove: function(r3) {
-        r3 = this.root + r3;
-        var e3 = this.files[r3];
-        if (e3 || ("/" !== r3.slice(-1) && (r3 += "/"), e3 = this.files[r3]), e3 && !e3.dir)
-          delete this.files[r3];
-        else
-          for (var t3 = this.filter(function(e4, t4) {
-            return t4.name.slice(0, r3.length) === r3;
-          }), n3 = 0; n3 < t3.length; n3++)
-            delete this.files[t3[n3].name];
-        return this;
-      }, generate: function() {
-        throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.");
-      }, generateInternalStream: function(e3) {
-        var t3, r3 = {};
-        try {
-          if ((r3 = u2.extend(e3 || {}, { streamFiles: false, compression: "STORE", compressionOptions: null, type: "", platform: "DOS", comment: null, mimeType: "application/zip", encodeFileName: i2.utf8encode })).type = r3.type.toLowerCase(), r3.compression = r3.compression.toUpperCase(), "binarystring" === r3.type && (r3.type = "string"), !r3.type)
-            throw new Error("No output type specified.");
-          u2.checkSupport(r3.type), "darwin" !== r3.platform && "freebsd" !== r3.platform && "linux" !== r3.platform && "sunos" !== r3.platform || (r3.platform = "UNIX"), "win32" === r3.platform && (r3.platform = "DOS");
-          var n3 = r3.comment || this.comment || "";
-          t3 = o2.generateWorker(this, r3, n3);
-        } catch (e4) {
-          (t3 = new l2("error")).error(e4);
-        }
-        return new a2(t3, r3.type || "string", r3.mimeType);
-      }, generateAsync: function(e3, t3) {
-        return this.generateInternalStream(e3).accumulate(t3);
-      }, generateNodeStream: function(e3, t3) {
-        return (e3 = e3 || {}).type || (e3.type = "nodebuffer"), this.generateInternalStream(e3).toNodejsStream(t3);
-      } };
-      t2.exports = n2;
-    }, { "./compressedObject": 2, "./defaults": 5, "./generate": 9, "./nodejs/NodejsStreamInputAdapter": 12, "./nodejsUtils": 14, "./stream/GenericWorker": 28, "./stream/StreamHelper": 29, "./utf8": 31, "./utils": 32, "./zipObject": 35 }], 16: [function(e2, t2, r2) {
-      t2.exports = e2("stream");
-    }, { stream: void 0 }], 17: [function(e2, t2, r2) {
-      var n2 = e2("./DataReader");
-      function i2(e3) {
-        n2.call(this, e3);
-        for (var t3 = 0; t3 < this.data.length; t3++)
-          e3[t3] = 255 & e3[t3];
-      }
-      e2("../utils").inherits(i2, n2), i2.prototype.byteAt = function(e3) {
-        return this.data[this.zero + e3];
-      }, i2.prototype.lastIndexOfSignature = function(e3) {
-        for (var t3 = e3.charCodeAt(0), r3 = e3.charCodeAt(1), n3 = e3.charCodeAt(2), i3 = e3.charCodeAt(3), s2 = this.length - 4; 0 <= s2; --s2)
-          if (this.data[s2] === t3 && this.data[s2 + 1] === r3 && this.data[s2 + 2] === n3 && this.data[s2 + 3] === i3)
-            return s2 - this.zero;
-        return -1;
-      }, i2.prototype.readAndCheckSignature = function(e3) {
-        var t3 = e3.charCodeAt(0), r3 = e3.charCodeAt(1), n3 = e3.charCodeAt(2), i3 = e3.charCodeAt(3), s2 = this.readData(4);
-        return t3 === s2[0] && r3 === s2[1] && n3 === s2[2] && i3 === s2[3];
-      }, i2.prototype.readData = function(e3) {
-        if (this.checkOffset(e3), 0 === e3)
-          return [];
-        var t3 = this.data.slice(this.zero + this.index, this.zero + this.index + e3);
-        return this.index += e3, t3;
-      }, t2.exports = i2;
-    }, { "../utils": 32, "./DataReader": 18 }], 18: [function(e2, t2, r2) {
-      var n2 = e2("../utils");
-      function i2(e3) {
-        this.data = e3, this.length = e3.length, this.index = 0, this.zero = 0;
-      }
-      i2.prototype = { checkOffset: function(e3) {
-        this.checkIndex(this.index + e3);
-      }, checkIndex: function(e3) {
-        if (this.length < this.zero + e3 || e3 < 0)
-          throw new Error("End of data reached (data length = " + this.length + ", asked index = " + e3 + "). Corrupted zip ?");
-      }, setIndex: function(e3) {
-        this.checkIndex(e3), this.index = e3;
-      }, skip: function(e3) {
-        this.setIndex(this.index + e3);
-      }, byteAt: function() {
-      }, readInt: function(e3) {
-        var t3, r3 = 0;
-        for (this.checkOffset(e3), t3 = this.index + e3 - 1; t3 >= this.index; t3--)
-          r3 = (r3 << 8) + this.byteAt(t3);
-        return this.index += e3, r3;
-      }, readString: function(e3) {
-        return n2.transformTo("string", this.readData(e3));
-      }, readData: function() {
-      }, lastIndexOfSignature: function() {
-      }, readAndCheckSignature: function() {
-      }, readDate: function() {
-        var e3 = this.readInt(4);
-        return new Date(Date.UTC(1980 + (e3 >> 25 & 127), (e3 >> 21 & 15) - 1, e3 >> 16 & 31, e3 >> 11 & 31, e3 >> 5 & 63, (31 & e3) << 1));
-      } }, t2.exports = i2;
-    }, { "../utils": 32 }], 19: [function(e2, t2, r2) {
-      var n2 = e2("./Uint8ArrayReader");
-      function i2(e3) {
-        n2.call(this, e3);
-      }
-      e2("../utils").inherits(i2, n2), i2.prototype.readData = function(e3) {
-        this.checkOffset(e3);
-        var t3 = this.data.slice(this.zero + this.index, this.zero + this.index + e3);
-        return this.index += e3, t3;
-      }, t2.exports = i2;
-    }, { "../utils": 32, "./Uint8ArrayReader": 21 }], 20: [function(e2, t2, r2) {
-      var n2 = e2("./DataReader");
-      function i2(e3) {
-        n2.call(this, e3);
-      }
-      e2("../utils").inherits(i2, n2), i2.prototype.byteAt = function(e3) {
-        return this.data.charCodeAt(this.zero + e3);
-      }, i2.prototype.lastIndexOfSignature = function(e3) {
-        return this.data.lastIndexOf(e3) - this.zero;
-      }, i2.prototype.readAndCheckSignature = function(e3) {
-        return e3 === this.readData(4);
-      }, i2.prototype.readData = function(e3) {
-        this.checkOffset(e3);
-        var t3 = this.data.slice(this.zero + this.index, this.zero + this.index + e3);
-        return this.index += e3, t3;
-      }, t2.exports = i2;
-    }, { "../utils": 32, "./DataReader": 18 }], 21: [function(e2, t2, r2) {
-      var n2 = e2("./ArrayReader");
-      function i2(e3) {
-        n2.call(this, e3);
-      }
-      e2("../utils").inherits(i2, n2), i2.prototype.readData = function(e3) {
-        if (this.checkOffset(e3), 0 === e3)
-          return new Uint8Array(0);
-        var t3 = this.data.subarray(this.zero + this.index, this.zero + this.index + e3);
-        return this.index += e3, t3;
-      }, t2.exports = i2;
-    }, { "../utils": 32, "./ArrayReader": 17 }], 22: [function(e2, t2, r2) {
-      var n2 = e2("../utils"), i2 = e2("../support"), s2 = e2("./ArrayReader"), a2 = e2("./StringReader"), o2 = e2("./NodeBufferReader"), h2 = e2("./Uint8ArrayReader");
-      t2.exports = function(e3) {
-        var t3 = n2.getTypeOf(e3);
-        return n2.checkSupport(t3), "string" !== t3 || i2.uint8array ? "nodebuffer" === t3 ? new o2(e3) : i2.uint8array ? new h2(n2.transformTo("uint8array", e3)) : new s2(n2.transformTo("array", e3)) : new a2(e3);
-      };
-    }, { "../support": 30, "../utils": 32, "./ArrayReader": 17, "./NodeBufferReader": 19, "./StringReader": 20, "./Uint8ArrayReader": 21 }], 23: [function(e2, t2, r2) {
-      r2.LOCAL_FILE_HEADER = "PK", r2.CENTRAL_FILE_HEADER = "PK", r2.CENTRAL_DIRECTORY_END = "PK", r2.ZIP64_CENTRAL_DIRECTORY_LOCATOR = "PK\x07", r2.ZIP64_CENTRAL_DIRECTORY_END = "PK", r2.DATA_DESCRIPTOR = "PK\x07\b";
-    }, {}], 24: [function(e2, t2, r2) {
-      var n2 = e2("./GenericWorker"), i2 = e2("../utils");
-      function s2(e3) {
-        n2.call(this, "ConvertWorker to " + e3), this.destType = e3;
-      }
-      i2.inherits(s2, n2), s2.prototype.processChunk = function(e3) {
-        this.push({ data: i2.transformTo(this.destType, e3.data), meta: e3.meta });
-      }, t2.exports = s2;
-    }, { "../utils": 32, "./GenericWorker": 28 }], 25: [function(e2, t2, r2) {
-      var n2 = e2("./GenericWorker"), i2 = e2("../crc32");
-      function s2() {
-        n2.call(this, "Crc32Probe"), this.withStreamInfo("crc32", 0);
-      }
-      e2("../utils").inherits(s2, n2), s2.prototype.processChunk = function(e3) {
-        this.streamInfo.crc32 = i2(e3.data, this.streamInfo.crc32 || 0), this.push(e3);
-      }, t2.exports = s2;
-    }, { "../crc32": 4, "../utils": 32, "./GenericWorker": 28 }], 26: [function(e2, t2, r2) {
-      var n2 = e2("../utils"), i2 = e2("./GenericWorker");
-      function s2(e3) {
-        i2.call(this, "DataLengthProbe for " + e3), this.propName = e3, this.withStreamInfo(e3, 0);
-      }
-      n2.inherits(s2, i2), s2.prototype.processChunk = function(e3) {
-        if (e3) {
-          var t3 = this.streamInfo[this.propName] || 0;
-          this.streamInfo[this.propName] = t3 + e3.data.length;
-        }
-        i2.prototype.processChunk.call(this, e3);
-      }, t2.exports = s2;
-    }, { "../utils": 32, "./GenericWorker": 28 }], 27: [function(e2, t2, r2) {
-      var n2 = e2("../utils"), i2 = e2("./GenericWorker");
-      function s2(e3) {
-        i2.call(this, "DataWorker");
-        var t3 = this;
-        this.dataIsReady = false, this.index = 0, this.max = 0, this.data = null, this.type = "", this._tickScheduled = false, e3.then(function(e4) {
-          t3.dataIsReady = true, t3.data = e4, t3.max = e4 && e4.length || 0, t3.type = n2.getTypeOf(e4), t3.isPaused || t3._tickAndRepeat();
-        }, function(e4) {
-          t3.error(e4);
-        });
-      }
-      n2.inherits(s2, i2), s2.prototype.cleanUp = function() {
-        i2.prototype.cleanUp.call(this), this.data = null;
-      }, s2.prototype.resume = function() {
-        return !!i2.prototype.resume.call(this) && (!this._tickScheduled && this.dataIsReady && (this._tickScheduled = true, n2.delay(this._tickAndRepeat, [], this)), true);
-      }, s2.prototype._tickAndRepeat = function() {
-        this._tickScheduled = false, this.isPaused || this.isFinished || (this._tick(), this.isFinished || (n2.delay(this._tickAndRepeat, [], this), this._tickScheduled = true));
-      }, s2.prototype._tick = function() {
-        if (this.isPaused || this.isFinished)
-          return false;
-        var e3 = null, t3 = Math.min(this.max, this.index + 16384);
-        if (this.index >= this.max)
-          return this.end();
-        switch (this.type) {
-          case "string":
-            e3 = this.data.substring(this.index, t3);
-            break;
-          case "uint8array":
-            e3 = this.data.subarray(this.index, t3);
-            break;
-          case "array":
-          case "nodebuffer":
-            e3 = this.data.slice(this.index, t3);
-        }
-        return this.index = t3, this.push({ data: e3, meta: { percent: this.max ? this.index / this.max * 100 : 0 } });
-      }, t2.exports = s2;
-    }, { "../utils": 32, "./GenericWorker": 28 }], 28: [function(e2, t2, r2) {
-      function n2(e3) {
-        this.name = e3 || "default", this.streamInfo = {}, this.generatedError = null, this.extraStreamInfo = {}, this.isPaused = true, this.isFinished = false, this.isLocked = false, this._listeners = { data: [], end: [], error: [] }, this.previous = null;
-      }
-      n2.prototype = { push: function(e3) {
-        this.emit("data", e3);
-      }, end: function() {
-        if (this.isFinished)
-          return false;
-        this.flush();
-        try {
-          this.emit("end"), this.cleanUp(), this.isFinished = true;
-        } catch (e3) {
-          this.emit("error", e3);
-        }
-        return true;
-      }, error: function(e3) {
-        return !this.isFinished && (this.isPaused ? this.generatedError = e3 : (this.isFinished = true, this.emit("error", e3), this.previous && this.previous.error(e3), this.cleanUp()), true);
-      }, on: function(e3, t3) {
-        return this._listeners[e3].push(t3), this;
-      }, cleanUp: function() {
-        this.streamInfo = this.generatedError = this.extraStreamInfo = null, this._listeners = [];
-      }, emit: function(e3, t3) {
-        if (this._listeners[e3])
-          for (var r3 = 0; r3 < this._listeners[e3].length; r3++)
-            this._listeners[e3][r3].call(this, t3);
-      }, pipe: function(e3) {
-        return e3.registerPrevious(this);
-      }, registerPrevious: function(e3) {
-        if (this.isLocked)
-          throw new Error("The stream '" + this + "' has already been used.");
-        this.streamInfo = e3.streamInfo, this.mergeStreamInfo(), this.previous = e3;
-        var t3 = this;
-        return e3.on("data", function(e4) {
-          t3.processChunk(e4);
-        }), e3.on("end", function() {
-          t3.end();
-        }), e3.on("error", function(e4) {
-          t3.error(e4);
-        }), this;
-      }, pause: function() {
-        return !this.isPaused && !this.isFinished && (this.isPaused = true, this.previous && this.previous.pause(), true);
-      }, resume: function() {
-        if (!this.isPaused || this.isFinished)
-          return false;
-        var e3 = this.isPaused = false;
-        return this.generatedError && (this.error(this.generatedError), e3 = true), this.previous && this.previous.resume(), !e3;
-      }, flush: function() {
-      }, processChunk: function(e3) {
-        this.push(e3);
-      }, withStreamInfo: function(e3, t3) {
-        return this.extraStreamInfo[e3] = t3, this.mergeStreamInfo(), this;
-      }, mergeStreamInfo: function() {
-        for (var e3 in this.extraStreamInfo)
-          Object.prototype.hasOwnProperty.call(this.extraStreamInfo, e3) && (this.streamInfo[e3] = this.extraStreamInfo[e3]);
-      }, lock: function() {
-        if (this.isLocked)
-          throw new Error("The stream '" + this + "' has already been used.");
-        this.isLocked = true, this.previous && this.previous.lock();
-      }, toString: function() {
-        var e3 = "Worker " + this.name;
-        return this.previous ? this.previous + " -> " + e3 : e3;
-      } }, t2.exports = n2;
-    }, {}], 29: [function(e2, t2, r2) {
-      var h2 = e2("../utils"), i2 = e2("./ConvertWorker"), s2 = e2("./GenericWorker"), u2 = e2("../base64"), n2 = e2("../support"), a2 = e2("../external"), o2 = null;
-      if (n2.nodestream)
-        try {
-          o2 = e2("../nodejs/NodejsStreamOutputAdapter");
-        } catch (e3) {
-        }
-      function l2(e3, o3) {
-        return new a2.Promise(function(t3, r3) {
-          var n3 = [], i3 = e3._internalType, s3 = e3._outputType, a3 = e3._mimeType;
-          e3.on("data", function(e4, t4) {
-            n3.push(e4), o3 && o3(t4);
-          }).on("error", function(e4) {
-            n3 = [], r3(e4);
-          }).on("end", function() {
-            try {
-              var e4 = function(e5, t4, r4) {
-                switch (e5) {
-                  case "blob":
-                    return h2.newBlob(h2.transformTo("arraybuffer", t4), r4);
-                  case "base64":
-                    return u2.encode(t4);
-                  default:
-                    return h2.transformTo(e5, t4);
-                }
-              }(s3, function(e5, t4) {
-                var r4, n4 = 0, i4 = null, s4 = 0;
-                for (r4 = 0; r4 < t4.length; r4++)
-                  s4 += t4[r4].length;
-                switch (e5) {
-                  case "string":
-                    return t4.join("");
-                  case "array":
-                    return Array.prototype.concat.apply([], t4);
-                  case "uint8array":
-                    for (i4 = new Uint8Array(s4), r4 = 0; r4 < t4.length; r4++)
-                      i4.set(t4[r4], n4), n4 += t4[r4].length;
-                    return i4;
-                  case "nodebuffer":
-                    return Buffer.concat(t4);
-                  default:
-                    throw new Error("concat : unsupported type '" + e5 + "'");
-                }
-              }(i3, n3), a3);
-              t3(e4);
-            } catch (e5) {
-              r3(e5);
-            }
-            n3 = [];
-          }).resume();
-        });
-      }
-      function f2(e3, t3, r3) {
-        var n3 = t3;
-        switch (t3) {
-          case "blob":
-          case "arraybuffer":
-            n3 = "uint8array";
-            break;
-          case "base64":
-            n3 = "string";
-        }
-        try {
-          this._internalType = n3, this._outputType = t3, this._mimeType = r3, h2.checkSupport(n3), this._worker = e3.pipe(new i2(n3)), e3.lock();
-        } catch (e4) {
-          this._worker = new s2("error"), this._worker.error(e4);
-        }
-      }
-      f2.prototype = { accumulate: function(e3) {
-        return l2(this, e3);
-      }, on: function(e3, t3) {
-        var r3 = this;
-        return "data" === e3 ? this._worker.on(e3, function(e4) {
-          t3.call(r3, e4.data, e4.meta);
-        }) : this._worker.on(e3, function() {
-          h2.delay(t3, arguments, r3);
-        }), this;
-      }, resume: function() {
-        return h2.delay(this._worker.resume, [], this._worker), this;
-      }, pause: function() {
-        return this._worker.pause(), this;
-      }, toNodejsStream: function(e3) {
-        if (h2.checkSupport("nodestream"), "nodebuffer" !== this._outputType)
-          throw new Error(this._outputType + " is not supported by this method");
-        return new o2(this, { objectMode: "nodebuffer" !== this._outputType }, e3);
-      } }, t2.exports = f2;
-    }, { "../base64": 1, "../external": 6, "../nodejs/NodejsStreamOutputAdapter": 13, "../support": 30, "../utils": 32, "./ConvertWorker": 24, "./GenericWorker": 28 }], 30: [function(e2, t2, r2) {
-      if (r2.base64 = true, r2.array = true, r2.string = true, r2.arraybuffer = "undefined" != typeof ArrayBuffer && "undefined" != typeof Uint8Array, r2.nodebuffer = "undefined" != typeof Buffer, r2.uint8array = "undefined" != typeof Uint8Array, "undefined" == typeof ArrayBuffer)
-        r2.blob = false;
-      else {
-        var n2 = new ArrayBuffer(0);
-        try {
-          r2.blob = 0 === new Blob([n2], { type: "application/zip" }).size;
-        } catch (e3) {
-          try {
-            var i2 = new (self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder || self.MSBlobBuilder)();
-            i2.append(n2), r2.blob = 0 === i2.getBlob("application/zip").size;
-          } catch (e4) {
-            r2.blob = false;
-          }
-        }
-      }
-      try {
-        r2.nodestream = !!e2("readable-stream").Readable;
-      } catch (e3) {
-        r2.nodestream = false;
-      }
-    }, { "readable-stream": 16 }], 31: [function(e2, t2, s2) {
-      for (var o2 = e2("./utils"), h2 = e2("./support"), r2 = e2("./nodejsUtils"), n2 = e2("./stream/GenericWorker"), u2 = new Array(256), i2 = 0; i2 < 256; i2++)
-        u2[i2] = 252 <= i2 ? 6 : 248 <= i2 ? 5 : 240 <= i2 ? 4 : 224 <= i2 ? 3 : 192 <= i2 ? 2 : 1;
-      u2[254] = u2[254] = 1;
-      function a2() {
-        n2.call(this, "utf-8 decode"), this.leftOver = null;
-      }
-      function l2() {
-        n2.call(this, "utf-8 encode");
-      }
-      s2.utf8encode = function(e3) {
-        return h2.nodebuffer ? r2.newBufferFrom(e3, "utf-8") : function(e4) {
-          var t3, r3, n3, i3, s3, a3 = e4.length, o3 = 0;
-          for (i3 = 0; i3 < a3; i3++)
-            55296 == (64512 & (r3 = e4.charCodeAt(i3))) && i3 + 1 < a3 && 56320 == (64512 & (n3 = e4.charCodeAt(i3 + 1))) && (r3 = 65536 + (r3 - 55296 << 10) + (n3 - 56320), i3++), o3 += r3 < 128 ? 1 : r3 < 2048 ? 2 : r3 < 65536 ? 3 : 4;
-          for (t3 = h2.uint8array ? new Uint8Array(o3) : new Array(o3), i3 = s3 = 0; s3 < o3; i3++)
-            55296 == (64512 & (r3 = e4.charCodeAt(i3))) && i3 + 1 < a3 && 56320 == (64512 & (n3 = e4.charCodeAt(i3 + 1))) && (r3 = 65536 + (r3 - 55296 << 10) + (n3 - 56320), i3++), r3 < 128 ? t3[s3++] = r3 : (r3 < 2048 ? t3[s3++] = 192 | r3 >>> 6 : (r3 < 65536 ? t3[s3++] = 224 | r3 >>> 12 : (t3[s3++] = 240 | r3 >>> 18, t3[s3++] = 128 | r3 >>> 12 & 63), t3[s3++] = 128 | r3 >>> 6 & 63), t3[s3++] = 128 | 63 & r3);
-          return t3;
-        }(e3);
-      }, s2.utf8decode = function(e3) {
-        return h2.nodebuffer ? o2.transformTo("nodebuffer", e3).toString("utf-8") : function(e4) {
-          var t3, r3, n3, i3, s3 = e4.length, a3 = new Array(2 * s3);
-          for (t3 = r3 = 0; t3 < s3; )
-            if ((n3 = e4[t3++]) < 128)
-              a3[r3++] = n3;
-            else if (4 < (i3 = u2[n3]))
-              a3[r3++] = 65533, t3 += i3 - 1;
-            else {
-              for (n3 &= 2 === i3 ? 31 : 3 === i3 ? 15 : 7; 1 < i3 && t3 < s3; )
-                n3 = n3 << 6 | 63 & e4[t3++], i3--;
-              1 < i3 ? a3[r3++] = 65533 : n3 < 65536 ? a3[r3++] = n3 : (n3 -= 65536, a3[r3++] = 55296 | n3 >> 10 & 1023, a3[r3++] = 56320 | 1023 & n3);
-            }
-          return a3.length !== r3 && (a3.subarray ? a3 = a3.subarray(0, r3) : a3.length = r3), o2.applyFromCharCode(a3);
-        }(e3 = o2.transformTo(h2.uint8array ? "uint8array" : "array", e3));
-      }, o2.inherits(a2, n2), a2.prototype.processChunk = function(e3) {
-        var t3 = o2.transformTo(h2.uint8array ? "uint8array" : "array", e3.data);
-        if (this.leftOver && this.leftOver.length) {
-          if (h2.uint8array) {
-            var r3 = t3;
-            (t3 = new Uint8Array(r3.length + this.leftOver.length)).set(this.leftOver, 0), t3.set(r3, this.leftOver.length);
-          } else
-            t3 = this.leftOver.concat(t3);
-          this.leftOver = null;
-        }
-        var n3 = function(e4, t4) {
-          var r4;
-          for ((t4 = t4 || e4.length) > e4.length && (t4 = e4.length), r4 = t4 - 1; 0 <= r4 && 128 == (192 & e4[r4]); )
-            r4--;
-          return r4 < 0 ? t4 : 0 === r4 ? t4 : r4 + u2[e4[r4]] > t4 ? r4 : t4;
-        }(t3), i3 = t3;
-        n3 !== t3.length && (h2.uint8array ? (i3 = t3.subarray(0, n3), this.leftOver = t3.subarray(n3, t3.length)) : (i3 = t3.slice(0, n3), this.leftOver = t3.slice(n3, t3.length))), this.push({ data: s2.utf8decode(i3), meta: e3.meta });
-      }, a2.prototype.flush = function() {
-        this.leftOver && this.leftOver.length && (this.push({ data: s2.utf8decode(this.leftOver), meta: {} }), this.leftOver = null);
-      }, s2.Utf8DecodeWorker = a2, o2.inherits(l2, n2), l2.prototype.processChunk = function(e3) {
-        this.push({ data: s2.utf8encode(e3.data), meta: e3.meta });
-      }, s2.Utf8EncodeWorker = l2;
-    }, { "./nodejsUtils": 14, "./stream/GenericWorker": 28, "./support": 30, "./utils": 32 }], 32: [function(e2, t2, a2) {
-      var o2 = e2("./support"), h2 = e2("./base64"), r2 = e2("./nodejsUtils"), u2 = e2("./external");
-      function n2(e3) {
-        return e3;
-      }
-      function l2(e3, t3) {
-        for (var r3 = 0; r3 < e3.length; ++r3)
-          t3[r3] = 255 & e3.charCodeAt(r3);
-        return t3;
-      }
-      e2("setimmediate"), a2.newBlob = function(t3, r3) {
-        a2.checkSupport("blob");
-        try {
-          return new Blob([t3], { type: r3 });
-        } catch (e3) {
-          try {
-            var n3 = new (self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder || self.MSBlobBuilder)();
-            return n3.append(t3), n3.getBlob(r3);
-          } catch (e4) {
-            throw new Error("Bug : can't construct the Blob.");
-          }
-        }
-      };
-      var i2 = { stringifyByChunk: function(e3, t3, r3) {
-        var n3 = [], i3 = 0, s3 = e3.length;
-        if (s3 <= r3)
-          return String.fromCharCode.apply(null, e3);
-        for (; i3 < s3; )
-          "array" === t3 || "nodebuffer" === t3 ? n3.push(String.fromCharCode.apply(null, e3.slice(i3, Math.min(i3 + r3, s3)))) : n3.push(String.fromCharCode.apply(null, e3.subarray(i3, Math.min(i3 + r3, s3)))), i3 += r3;
-        return n3.join("");
-      }, stringifyByChar: function(e3) {
-        for (var t3 = "", r3 = 0; r3 < e3.length; r3++)
-          t3 += String.fromCharCode(e3[r3]);
-        return t3;
-      }, applyCanBeUsed: { uint8array: function() {
-        try {
-          return o2.uint8array && 1 === String.fromCharCode.apply(null, new Uint8Array(1)).length;
-        } catch (e3) {
-          return false;
-        }
-      }(), nodebuffer: function() {
-        try {
-          return o2.nodebuffer && 1 === String.fromCharCode.apply(null, r2.allocBuffer(1)).length;
-        } catch (e3) {
-          return false;
-        }
-      }() } };
-      function s2(e3) {
-        var t3 = 65536, r3 = a2.getTypeOf(e3), n3 = true;
-        if ("uint8array" === r3 ? n3 = i2.applyCanBeUsed.uint8array : "nodebuffer" === r3 && (n3 = i2.applyCanBeUsed.nodebuffer), n3)
-          for (; 1 < t3; )
-            try {
-              return i2.stringifyByChunk(e3, r3, t3);
-            } catch (e4) {
-              t3 = Math.floor(t3 / 2);
-            }
-        return i2.stringifyByChar(e3);
-      }
-      function f2(e3, t3) {
-        for (var r3 = 0; r3 < e3.length; r3++)
-          t3[r3] = e3[r3];
-        return t3;
-      }
-      a2.applyFromCharCode = s2;
-      var c2 = {};
-      c2.string = { string: n2, array: function(e3) {
-        return l2(e3, new Array(e3.length));
-      }, arraybuffer: function(e3) {
-        return c2.string.uint8array(e3).buffer;
-      }, uint8array: function(e3) {
-        return l2(e3, new Uint8Array(e3.length));
-      }, nodebuffer: function(e3) {
-        return l2(e3, r2.allocBuffer(e3.length));
-      } }, c2.array = { string: s2, array: n2, arraybuffer: function(e3) {
-        return new Uint8Array(e3).buffer;
-      }, uint8array: function(e3) {
-        return new Uint8Array(e3);
-      }, nodebuffer: function(e3) {
-        return r2.newBufferFrom(e3);
-      } }, c2.arraybuffer = { string: function(e3) {
-        return s2(new Uint8Array(e3));
-      }, array: function(e3) {
-        return f2(new Uint8Array(e3), new Array(e3.byteLength));
-      }, arraybuffer: n2, uint8array: function(e3) {
-        return new Uint8Array(e3);
-      }, nodebuffer: function(e3) {
-        return r2.newBufferFrom(new Uint8Array(e3));
-      } }, c2.uint8array = { string: s2, array: function(e3) {
-        return f2(e3, new Array(e3.length));
-      }, arraybuffer: function(e3) {
-        return e3.buffer;
-      }, uint8array: n2, nodebuffer: function(e3) {
-        return r2.newBufferFrom(e3);
-      } }, c2.nodebuffer = { string: s2, array: function(e3) {
-        return f2(e3, new Array(e3.length));
-      }, arraybuffer: function(e3) {
-        return c2.nodebuffer.uint8array(e3).buffer;
-      }, uint8array: function(e3) {
-        return f2(e3, new Uint8Array(e3.length));
-      }, nodebuffer: n2 }, a2.transformTo = function(e3, t3) {
-        if (t3 = t3 || "", !e3)
-          return t3;
-        a2.checkSupport(e3);
-        var r3 = a2.getTypeOf(t3);
-        return c2[r3][e3](t3);
-      }, a2.resolve = function(e3) {
-        for (var t3 = e3.split("/"), r3 = [], n3 = 0; n3 < t3.length; n3++) {
-          var i3 = t3[n3];
-          "." === i3 || "" === i3 && 0 !== n3 && n3 !== t3.length - 1 || (".." === i3 ? r3.pop() : r3.push(i3));
-        }
-        return r3.join("/");
-      }, a2.getTypeOf = function(e3) {
-        return "string" == typeof e3 ? "string" : "[object Array]" === Object.prototype.toString.call(e3) ? "array" : o2.nodebuffer && r2.isBuffer(e3) ? "nodebuffer" : o2.uint8array && e3 instanceof Uint8Array ? "uint8array" : o2.arraybuffer && e3 instanceof ArrayBuffer ? "arraybuffer" : void 0;
-      }, a2.checkSupport = function(e3) {
-        if (!o2[e3.toLowerCase()])
-          throw new Error(e3 + " is not supported by this platform");
-      }, a2.MAX_VALUE_16BITS = 65535, a2.MAX_VALUE_32BITS = -1, a2.pretty = function(e3) {
-        var t3, r3, n3 = "";
-        for (r3 = 0; r3 < (e3 || "").length; r3++)
-          n3 += "\\x" + ((t3 = e3.charCodeAt(r3)) < 16 ? "0" : "") + t3.toString(16).toUpperCase();
-        return n3;
-      }, a2.delay = function(e3, t3, r3) {
-        setImmediate(function() {
-          e3.apply(r3 || null, t3 || []);
-        });
-      }, a2.inherits = function(e3, t3) {
-        function r3() {
-        }
-        r3.prototype = t3.prototype, e3.prototype = new r3();
-      }, a2.extend = function() {
-        var e3, t3, r3 = {};
-        for (e3 = 0; e3 < arguments.length; e3++)
-          for (t3 in arguments[e3])
-            Object.prototype.hasOwnProperty.call(arguments[e3], t3) && void 0 === r3[t3] && (r3[t3] = arguments[e3][t3]);
-        return r3;
-      }, a2.prepareContent = function(r3, e3, n3, i3, s3) {
-        return u2.Promise.resolve(e3).then(function(n4) {
-          return o2.blob && (n4 instanceof Blob || -1 !== ["[object File]", "[object Blob]"].indexOf(Object.prototype.toString.call(n4))) && "undefined" != typeof FileReader ? new u2.Promise(function(t3, r4) {
-            var e4 = new FileReader();
-            e4.onload = function(e5) {
-              t3(e5.target.result);
-            }, e4.onerror = function(e5) {
-              r4(e5.target.error);
-            }, e4.readAsArrayBuffer(n4);
-          }) : n4;
-        }).then(function(e4) {
-          var t3 = a2.getTypeOf(e4);
-          return t3 ? ("arraybuffer" === t3 ? e4 = a2.transformTo("uint8array", e4) : "string" === t3 && (s3 ? e4 = h2.decode(e4) : n3 && true !== i3 && (e4 = function(e5) {
-            return l2(e5, o2.uint8array ? new Uint8Array(e5.length) : new Array(e5.length));
-          }(e4))), e4) : u2.Promise.reject(new Error("Can't read the data of '" + r3 + "'. Is it in a supported JavaScript type (String, Blob, ArrayBuffer, etc) ?"));
-        });
-      };
-    }, { "./base64": 1, "./external": 6, "./nodejsUtils": 14, "./support": 30, setimmediate: 54 }], 33: [function(e2, t2, r2) {
-      var n2 = e2("./reader/readerFor"), i2 = e2("./utils"), s2 = e2("./signature"), a2 = e2("./zipEntry"), o2 = e2("./support");
-      function h2(e3) {
-        this.files = [], this.loadOptions = e3;
-      }
-      h2.prototype = { checkSignature: function(e3) {
-        if (!this.reader.readAndCheckSignature(e3)) {
-          this.reader.index -= 4;
-          var t3 = this.reader.readString(4);
-          throw new Error("Corrupted zip or bug: unexpected signature (" + i2.pretty(t3) + ", expected " + i2.pretty(e3) + ")");
-        }
-      }, isSignature: function(e3, t3) {
-        var r3 = this.reader.index;
-        this.reader.setIndex(e3);
-        var n3 = this.reader.readString(4) === t3;
-        return this.reader.setIndex(r3), n3;
-      }, readBlockEndOfCentral: function() {
-        this.diskNumber = this.reader.readInt(2), this.diskWithCentralDirStart = this.reader.readInt(2), this.centralDirRecordsOnThisDisk = this.reader.readInt(2), this.centralDirRecords = this.reader.readInt(2), this.centralDirSize = this.reader.readInt(4), this.centralDirOffset = this.reader.readInt(4), this.zipCommentLength = this.reader.readInt(2);
-        var e3 = this.reader.readData(this.zipCommentLength), t3 = o2.uint8array ? "uint8array" : "array", r3 = i2.transformTo(t3, e3);
-        this.zipComment = this.loadOptions.decodeFileName(r3);
-      }, readBlockZip64EndOfCentral: function() {
-        this.zip64EndOfCentralSize = this.reader.readInt(8), this.reader.skip(4), this.diskNumber = this.reader.readInt(4), this.diskWithCentralDirStart = this.reader.readInt(4), this.centralDirRecordsOnThisDisk = this.reader.readInt(8), this.centralDirRecords = this.reader.readInt(8), this.centralDirSize = this.reader.readInt(8), this.centralDirOffset = this.reader.readInt(8), this.zip64ExtensibleData = {};
-        for (var e3, t3, r3, n3 = this.zip64EndOfCentralSize - 44; 0 < n3; )
-          e3 = this.reader.readInt(2), t3 = this.reader.readInt(4), r3 = this.reader.readData(t3), this.zip64ExtensibleData[e3] = { id: e3, length: t3, value: r3 };
-      }, readBlockZip64EndOfCentralLocator: function() {
-        if (this.diskWithZip64CentralDirStart = this.reader.readInt(4), this.relativeOffsetEndOfZip64CentralDir = this.reader.readInt(8), this.disksCount = this.reader.readInt(4), 1 < this.disksCount)
-          throw new Error("Multi-volumes zip are not supported");
-      }, readLocalFiles: function() {
-        var e3, t3;
-        for (e3 = 0; e3 < this.files.length; e3++)
-          t3 = this.files[e3], this.reader.setIndex(t3.localHeaderOffset), this.checkSignature(s2.LOCAL_FILE_HEADER), t3.readLocalPart(this.reader), t3.handleUTF8(), t3.processAttributes();
-      }, readCentralDir: function() {
-        var e3;
-        for (this.reader.setIndex(this.centralDirOffset); this.reader.readAndCheckSignature(s2.CENTRAL_FILE_HEADER); )
-          (e3 = new a2({ zip64: this.zip64 }, this.loadOptions)).readCentralPart(this.reader), this.files.push(e3);
-        if (this.centralDirRecords !== this.files.length && 0 !== this.centralDirRecords && 0 === this.files.length)
-          throw new Error("Corrupted zip or bug: expected " + this.centralDirRecords + " records in central dir, got " + this.files.length);
-      }, readEndOfCentral: function() {
-        var e3 = this.reader.lastIndexOfSignature(s2.CENTRAL_DIRECTORY_END);
-        if (e3 < 0)
-          throw !this.isSignature(0, s2.LOCAL_FILE_HEADER) ? new Error("Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html") : new Error("Corrupted zip: can't find end of central directory");
-        this.reader.setIndex(e3);
-        var t3 = e3;
-        if (this.checkSignature(s2.CENTRAL_DIRECTORY_END), this.readBlockEndOfCentral(), this.diskNumber === i2.MAX_VALUE_16BITS || this.diskWithCentralDirStart === i2.MAX_VALUE_16BITS || this.centralDirRecordsOnThisDisk === i2.MAX_VALUE_16BITS || this.centralDirRecords === i2.MAX_VALUE_16BITS || this.centralDirSize === i2.MAX_VALUE_32BITS || this.centralDirOffset === i2.MAX_VALUE_32BITS) {
-          if (this.zip64 = true, (e3 = this.reader.lastIndexOfSignature(s2.ZIP64_CENTRAL_DIRECTORY_LOCATOR)) < 0)
-            throw new Error("Corrupted zip: can't find the ZIP64 end of central directory locator");
-          if (this.reader.setIndex(e3), this.checkSignature(s2.ZIP64_CENTRAL_DIRECTORY_LOCATOR), this.readBlockZip64EndOfCentralLocator(), !this.isSignature(this.relativeOffsetEndOfZip64CentralDir, s2.ZIP64_CENTRAL_DIRECTORY_END) && (this.relativeOffsetEndOfZip64CentralDir = this.reader.lastIndexOfSignature(s2.ZIP64_CENTRAL_DIRECTORY_END), this.relativeOffsetEndOfZip64CentralDir < 0))
-            throw new Error("Corrupted zip: can't find the ZIP64 end of central directory");
-          this.reader.setIndex(this.relativeOffsetEndOfZip64CentralDir), this.checkSignature(s2.ZIP64_CENTRAL_DIRECTORY_END), this.readBlockZip64EndOfCentral();
-        }
-        var r3 = this.centralDirOffset + this.centralDirSize;
-        this.zip64 && (r3 += 20, r3 += 12 + this.zip64EndOfCentralSize);
-        var n3 = t3 - r3;
-        if (0 < n3)
-          this.isSignature(t3, s2.CENTRAL_FILE_HEADER) || (this.reader.zero = n3);
-        else if (n3 < 0)
-          throw new Error("Corrupted zip: missing " + Math.abs(n3) + " bytes.");
-      }, prepareReader: function(e3) {
-        this.reader = n2(e3);
-      }, load: function(e3) {
-        this.prepareReader(e3), this.readEndOfCentral(), this.readCentralDir(), this.readLocalFiles();
-      } }, t2.exports = h2;
-    }, { "./reader/readerFor": 22, "./signature": 23, "./support": 30, "./utils": 32, "./zipEntry": 34 }], 34: [function(e2, t2, r2) {
-      var n2 = e2("./reader/readerFor"), s2 = e2("./utils"), i2 = e2("./compressedObject"), a2 = e2("./crc32"), o2 = e2("./utf8"), h2 = e2("./compressions"), u2 = e2("./support");
-      function l2(e3, t3) {
-        this.options = e3, this.loadOptions = t3;
-      }
-      l2.prototype = { isEncrypted: function() {
-        return 1 == (1 & this.bitFlag);
-      }, useUTF8: function() {
-        return 2048 == (2048 & this.bitFlag);
-      }, readLocalPart: function(e3) {
-        var t3, r3;
-        if (e3.skip(22), this.fileNameLength = e3.readInt(2), r3 = e3.readInt(2), this.fileName = e3.readData(this.fileNameLength), e3.skip(r3), -1 === this.compressedSize || -1 === this.uncompressedSize)
-          throw new Error("Bug or corrupted zip : didn't get enough information from the central directory (compressedSize === -1 || uncompressedSize === -1)");
-        if (null === (t3 = function(e4) {
-          for (var t4 in h2)
-            if (Object.prototype.hasOwnProperty.call(h2, t4) && h2[t4].magic === e4)
-              return h2[t4];
-          return null;
-        }(this.compressionMethod)))
-          throw new Error("Corrupted zip : compression " + s2.pretty(this.compressionMethod) + " unknown (inner file : " + s2.transformTo("string", this.fileName) + ")");
-        this.decompressed = new i2(this.compressedSize, this.uncompressedSize, this.crc32, t3, e3.readData(this.compressedSize));
-      }, readCentralPart: function(e3) {
-        this.versionMadeBy = e3.readInt(2), e3.skip(2), this.bitFlag = e3.readInt(2), this.compressionMethod = e3.readString(2), this.date = e3.readDate(), this.crc32 = e3.readInt(4), this.compressedSize = e3.readInt(4), this.uncompressedSize = e3.readInt(4);
-        var t3 = e3.readInt(2);
-        if (this.extraFieldsLength = e3.readInt(2), this.fileCommentLength = e3.readInt(2), this.diskNumberStart = e3.readInt(2), this.internalFileAttributes = e3.readInt(2), this.externalFileAttributes = e3.readInt(4), this.localHeaderOffset = e3.readInt(4), this.isEncrypted())
-          throw new Error("Encrypted zip are not supported");
-        e3.skip(t3), this.readExtraFields(e3), this.parseZIP64ExtraField(e3), this.fileComment = e3.readData(this.fileCommentLength);
-      }, processAttributes: function() {
-        this.unixPermissions = null, this.dosPermissions = null;
-        var e3 = this.versionMadeBy >> 8;
-        this.dir = !!(16 & this.externalFileAttributes), 0 == e3 && (this.dosPermissions = 63 & this.externalFileAttributes), 3 == e3 && (this.unixPermissions = this.externalFileAttributes >> 16 & 65535), this.dir || "/" !== this.fileNameStr.slice(-1) || (this.dir = true);
-      }, parseZIP64ExtraField: function() {
-        if (this.extraFields[1]) {
-          var e3 = n2(this.extraFields[1].value);
-          this.uncompressedSize === s2.MAX_VALUE_32BITS && (this.uncompressedSize = e3.readInt(8)), this.compressedSize === s2.MAX_VALUE_32BITS && (this.compressedSize = e3.readInt(8)), this.localHeaderOffset === s2.MAX_VALUE_32BITS && (this.localHeaderOffset = e3.readInt(8)), this.diskNumberStart === s2.MAX_VALUE_32BITS && (this.diskNumberStart = e3.readInt(4));
-        }
-      }, readExtraFields: function(e3) {
-        var t3, r3, n3, i3 = e3.index + this.extraFieldsLength;
-        for (this.extraFields || (this.extraFields = {}); e3.index + 4 < i3; )
-          t3 = e3.readInt(2), r3 = e3.readInt(2), n3 = e3.readData(r3), this.extraFields[t3] = { id: t3, length: r3, value: n3 };
-        e3.setIndex(i3);
-      }, handleUTF8: function() {
-        var e3 = u2.uint8array ? "uint8array" : "array";
-        if (this.useUTF8())
-          this.fileNameStr = o2.utf8decode(this.fileName), this.fileCommentStr = o2.utf8decode(this.fileComment);
-        else {
-          var t3 = this.findExtraFieldUnicodePath();
-          if (null !== t3)
-            this.fileNameStr = t3;
-          else {
-            var r3 = s2.transformTo(e3, this.fileName);
-            this.fileNameStr = this.loadOptions.decodeFileName(r3);
-          }
-          var n3 = this.findExtraFieldUnicodeComment();
-          if (null !== n3)
-            this.fileCommentStr = n3;
-          else {
-            var i3 = s2.transformTo(e3, this.fileComment);
-            this.fileCommentStr = this.loadOptions.decodeFileName(i3);
-          }
-        }
-      }, findExtraFieldUnicodePath: function() {
-        var e3 = this.extraFields[28789];
-        if (e3) {
-          var t3 = n2(e3.value);
-          return 1 !== t3.readInt(1) ? null : a2(this.fileName) !== t3.readInt(4) ? null : o2.utf8decode(t3.readData(e3.length - 5));
-        }
-        return null;
-      }, findExtraFieldUnicodeComment: function() {
-        var e3 = this.extraFields[25461];
-        if (e3) {
-          var t3 = n2(e3.value);
-          return 1 !== t3.readInt(1) ? null : a2(this.fileComment) !== t3.readInt(4) ? null : o2.utf8decode(t3.readData(e3.length - 5));
-        }
-        return null;
-      } }, t2.exports = l2;
-    }, { "./compressedObject": 2, "./compressions": 3, "./crc32": 4, "./reader/readerFor": 22, "./support": 30, "./utf8": 31, "./utils": 32 }], 35: [function(e2, t2, r2) {
-      function n2(e3, t3, r3) {
-        this.name = e3, this.dir = r3.dir, this.date = r3.date, this.comment = r3.comment, this.unixPermissions = r3.unixPermissions, this.dosPermissions = r3.dosPermissions, this._data = t3, this._dataBinary = r3.binary, this.options = { compression: r3.compression, compressionOptions: r3.compressionOptions };
-      }
-      var s2 = e2("./stream/StreamHelper"), i2 = e2("./stream/DataWorker"), a2 = e2("./utf8"), o2 = e2("./compressedObject"), h2 = e2("./stream/GenericWorker");
-      n2.prototype = { internalStream: function(e3) {
-        var t3 = null, r3 = "string";
-        try {
-          if (!e3)
-            throw new Error("No output type specified.");
-          var n3 = "string" === (r3 = e3.toLowerCase()) || "text" === r3;
-          "binarystring" !== r3 && "text" !== r3 || (r3 = "string"), t3 = this._decompressWorker();
-          var i3 = !this._dataBinary;
-          i3 && !n3 && (t3 = t3.pipe(new a2.Utf8EncodeWorker())), !i3 && n3 && (t3 = t3.pipe(new a2.Utf8DecodeWorker()));
-        } catch (e4) {
-          (t3 = new h2("error")).error(e4);
-        }
-        return new s2(t3, r3, "");
-      }, async: function(e3, t3) {
-        return this.internalStream(e3).accumulate(t3);
-      }, nodeStream: function(e3, t3) {
-        return this.internalStream(e3 || "nodebuffer").toNodejsStream(t3);
-      }, _compressWorker: function(e3, t3) {
-        if (this._data instanceof o2 && this._data.compression.magic === e3.magic)
-          return this._data.getCompressedWorker();
-        var r3 = this._decompressWorker();
-        return this._dataBinary || (r3 = r3.pipe(new a2.Utf8EncodeWorker())), o2.createWorkerFrom(r3, e3, t3);
-      }, _decompressWorker: function() {
-        return this._data instanceof o2 ? this._data.getContentWorker() : this._data instanceof h2 ? this._data : new i2(this._data);
-      } };
-      for (var u2 = ["asText", "asBinary", "asNodeBuffer", "asUint8Array", "asArrayBuffer"], l2 = function() {
-        throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.");
-      }, f2 = 0; f2 < u2.length; f2++)
-        n2.prototype[u2[f2]] = l2;
-      t2.exports = n2;
-    }, { "./compressedObject": 2, "./stream/DataWorker": 27, "./stream/GenericWorker": 28, "./stream/StreamHelper": 29, "./utf8": 31 }], 36: [function(e2, l2, t2) {
-      (function(t3) {
-        var r2, n2, e3 = t3.MutationObserver || t3.WebKitMutationObserver;
-        if (e3) {
-          var i2 = 0, s2 = new e3(u2), a2 = t3.document.createTextNode("");
-          s2.observe(a2, { characterData: true }), r2 = function() {
-            a2.data = i2 = ++i2 % 2;
-          };
-        } else if (t3.setImmediate || void 0 === t3.MessageChannel)
-          r2 = "document" in t3 && "onreadystatechange" in t3.document.createElement("script") ? function() {
-            var e4 = t3.document.createElement("script");
-            e4.onreadystatechange = function() {
-              u2(), e4.onreadystatechange = null, e4.parentNode.removeChild(e4), e4 = null;
-            }, t3.document.documentElement.appendChild(e4);
-          } : function() {
-            setTimeout(u2, 0);
-          };
-        else {
-          var o2 = new t3.MessageChannel();
-          o2.port1.onmessage = u2, r2 = function() {
-            o2.port2.postMessage(0);
-          };
-        }
-        var h2 = [];
-        function u2() {
-          var e4, t4;
-          n2 = true;
-          for (var r3 = h2.length; r3; ) {
-            for (t4 = h2, h2 = [], e4 = -1; ++e4 < r3; )
-              t4[e4]();
-            r3 = h2.length;
-          }
-          n2 = false;
-        }
-        l2.exports = function(e4) {
-          1 !== h2.push(e4) || n2 || r2();
-        };
-      }).call(this, "undefined" != typeof commonjsGlobal ? commonjsGlobal : "undefined" != typeof self ? self : "undefined" != typeof window ? window : {});
-    }, {}], 37: [function(e2, t2, r2) {
-      var i2 = e2("immediate");
-      function u2() {
-      }
-      var l2 = {}, s2 = ["REJECTED"], a2 = ["FULFILLED"], n2 = ["PENDING"];
-      function o2(e3) {
-        if ("function" != typeof e3)
-          throw new TypeError("resolver must be a function");
-        this.state = n2, this.queue = [], this.outcome = void 0, e3 !== u2 && d2(this, e3);
-      }
-      function h2(e3, t3, r3) {
-        this.promise = e3, "function" == typeof t3 && (this.onFulfilled = t3, this.callFulfilled = this.otherCallFulfilled), "function" == typeof r3 && (this.onRejected = r3, this.callRejected = this.otherCallRejected);
-      }
-      function f2(t3, r3, n3) {
-        i2(function() {
-          var e3;
-          try {
-            e3 = r3(n3);
-          } catch (e4) {
-            return l2.reject(t3, e4);
-          }
-          e3 === t3 ? l2.reject(t3, new TypeError("Cannot resolve promise with itself")) : l2.resolve(t3, e3);
-        });
-      }
-      function c2(e3) {
-        var t3 = e3 && e3.then;
-        if (e3 && ("object" == typeof e3 || "function" == typeof e3) && "function" == typeof t3)
-          return function() {
-            t3.apply(e3, arguments);
-          };
-      }
-      function d2(t3, e3) {
-        var r3 = false;
-        function n3(e4) {
-          r3 || (r3 = true, l2.reject(t3, e4));
-        }
-        function i3(e4) {
-          r3 || (r3 = true, l2.resolve(t3, e4));
-        }
-        var s3 = p2(function() {
-          e3(i3, n3);
-        });
-        "error" === s3.status && n3(s3.value);
-      }
-      function p2(e3, t3) {
-        var r3 = {};
-        try {
-          r3.value = e3(t3), r3.status = "success";
-        } catch (e4) {
-          r3.status = "error", r3.value = e4;
-        }
-        return r3;
-      }
-      (t2.exports = o2).prototype.finally = function(t3) {
-        if ("function" != typeof t3)
-          return this;
-        var r3 = this.constructor;
-        return this.then(function(e3) {
-          return r3.resolve(t3()).then(function() {
-            return e3;
-          });
-        }, function(e3) {
-          return r3.resolve(t3()).then(function() {
-            throw e3;
-          });
-        });
-      }, o2.prototype.catch = function(e3) {
-        return this.then(null, e3);
-      }, o2.prototype.then = function(e3, t3) {
-        if ("function" != typeof e3 && this.state === a2 || "function" != typeof t3 && this.state === s2)
-          return this;
-        var r3 = new this.constructor(u2);
-        this.state !== n2 ? f2(r3, this.state === a2 ? e3 : t3, this.outcome) : this.queue.push(new h2(r3, e3, t3));
-        return r3;
-      }, h2.prototype.callFulfilled = function(e3) {
-        l2.resolve(this.promise, e3);
-      }, h2.prototype.otherCallFulfilled = function(e3) {
-        f2(this.promise, this.onFulfilled, e3);
-      }, h2.prototype.callRejected = function(e3) {
-        l2.reject(this.promise, e3);
-      }, h2.prototype.otherCallRejected = function(e3) {
-        f2(this.promise, this.onRejected, e3);
-      }, l2.resolve = function(e3, t3) {
-        var r3 = p2(c2, t3);
-        if ("error" === r3.status)
-          return l2.reject(e3, r3.value);
-        var n3 = r3.value;
-        if (n3)
-          d2(e3, n3);
-        else {
-          e3.state = a2, e3.outcome = t3;
-          for (var i3 = -1, s3 = e3.queue.length; ++i3 < s3; )
-            e3.queue[i3].callFulfilled(t3);
-        }
-        return e3;
-      }, l2.reject = function(e3, t3) {
-        e3.state = s2, e3.outcome = t3;
-        for (var r3 = -1, n3 = e3.queue.length; ++r3 < n3; )
-          e3.queue[r3].callRejected(t3);
-        return e3;
-      }, o2.resolve = function(e3) {
-        if (e3 instanceof this)
-          return e3;
-        return l2.resolve(new this(u2), e3);
-      }, o2.reject = function(e3) {
-        var t3 = new this(u2);
-        return l2.reject(t3, e3);
-      }, o2.all = function(e3) {
-        var r3 = this;
-        if ("[object Array]" !== Object.prototype.toString.call(e3))
-          return this.reject(new TypeError("must be an array"));
-        var n3 = e3.length, i3 = false;
-        if (!n3)
-          return this.resolve([]);
-        var s3 = new Array(n3), a3 = 0, t3 = -1, o3 = new this(u2);
-        for (; ++t3 < n3; )
-          h3(e3[t3], t3);
-        return o3;
-        function h3(e4, t4) {
-          r3.resolve(e4).then(function(e5) {
-            s3[t4] = e5, ++a3 !== n3 || i3 || (i3 = true, l2.resolve(o3, s3));
-          }, function(e5) {
-            i3 || (i3 = true, l2.reject(o3, e5));
-          });
-        }
-      }, o2.race = function(e3) {
-        var t3 = this;
-        if ("[object Array]" !== Object.prototype.toString.call(e3))
-          return this.reject(new TypeError("must be an array"));
-        var r3 = e3.length, n3 = false;
-        if (!r3)
-          return this.resolve([]);
-        var i3 = -1, s3 = new this(u2);
-        for (; ++i3 < r3; )
-          a3 = e3[i3], t3.resolve(a3).then(function(e4) {
-            n3 || (n3 = true, l2.resolve(s3, e4));
-          }, function(e4) {
-            n3 || (n3 = true, l2.reject(s3, e4));
-          });
-        var a3;
-        return s3;
-      };
-    }, { immediate: 36 }], 38: [function(e2, t2, r2) {
-      var n2 = {};
-      (0, e2("./lib/utils/common").assign)(n2, e2("./lib/deflate"), e2("./lib/inflate"), e2("./lib/zlib/constants")), t2.exports = n2;
-    }, { "./lib/deflate": 39, "./lib/inflate": 40, "./lib/utils/common": 41, "./lib/zlib/constants": 44 }], 39: [function(e2, t2, r2) {
-      var a2 = e2("./zlib/deflate"), o2 = e2("./utils/common"), h2 = e2("./utils/strings"), i2 = e2("./zlib/messages"), s2 = e2("./zlib/zstream"), u2 = Object.prototype.toString, l2 = 0, f2 = -1, c2 = 0, d2 = 8;
-      function p2(e3) {
-        if (!(this instanceof p2))
-          return new p2(e3);
-        this.options = o2.assign({ level: f2, method: d2, chunkSize: 16384, windowBits: 15, memLevel: 8, strategy: c2, to: "" }, e3 || {});
-        var t3 = this.options;
-        t3.raw && 0 < t3.windowBits ? t3.windowBits = -t3.windowBits : t3.gzip && 0 < t3.windowBits && t3.windowBits < 16 && (t3.windowBits += 16), this.err = 0, this.msg = "", this.ended = false, this.chunks = [], this.strm = new s2(), this.strm.avail_out = 0;
-        var r3 = a2.deflateInit2(this.strm, t3.level, t3.method, t3.windowBits, t3.memLevel, t3.strategy);
-        if (r3 !== l2)
-          throw new Error(i2[r3]);
-        if (t3.header && a2.deflateSetHeader(this.strm, t3.header), t3.dictionary) {
-          var n3;
-          if (n3 = "string" == typeof t3.dictionary ? h2.string2buf(t3.dictionary) : "[object ArrayBuffer]" === u2.call(t3.dictionary) ? new Uint8Array(t3.dictionary) : t3.dictionary, (r3 = a2.deflateSetDictionary(this.strm, n3)) !== l2)
-            throw new Error(i2[r3]);
-          this._dict_set = true;
-        }
-      }
-      function n2(e3, t3) {
-        var r3 = new p2(t3);
-        if (r3.push(e3, true), r3.err)
-          throw r3.msg || i2[r3.err];
-        return r3.result;
-      }
-      p2.prototype.push = function(e3, t3) {
-        var r3, n3, i3 = this.strm, s3 = this.options.chunkSize;
-        if (this.ended)
-          return false;
-        n3 = t3 === ~~t3 ? t3 : true === t3 ? 4 : 0, "string" == typeof e3 ? i3.input = h2.string2buf(e3) : "[object ArrayBuffer]" === u2.call(e3) ? i3.input = new Uint8Array(e3) : i3.input = e3, i3.next_in = 0, i3.avail_in = i3.input.length;
-        do {
-          if (0 === i3.avail_out && (i3.output = new o2.Buf8(s3), i3.next_out = 0, i3.avail_out = s3), 1 !== (r3 = a2.deflate(i3, n3)) && r3 !== l2)
-            return this.onEnd(r3), !(this.ended = true);
-          0 !== i3.avail_out && (0 !== i3.avail_in || 4 !== n3 && 2 !== n3) || ("string" === this.options.to ? this.onData(h2.buf2binstring(o2.shrinkBuf(i3.output, i3.next_out))) : this.onData(o2.shrinkBuf(i3.output, i3.next_out)));
-        } while ((0 < i3.avail_in || 0 === i3.avail_out) && 1 !== r3);
-        return 4 === n3 ? (r3 = a2.deflateEnd(this.strm), this.onEnd(r3), this.ended = true, r3 === l2) : 2 !== n3 || (this.onEnd(l2), !(i3.avail_out = 0));
-      }, p2.prototype.onData = function(e3) {
-        this.chunks.push(e3);
-      }, p2.prototype.onEnd = function(e3) {
-        e3 === l2 && ("string" === this.options.to ? this.result = this.chunks.join("") : this.result = o2.flattenChunks(this.chunks)), this.chunks = [], this.err = e3, this.msg = this.strm.msg;
-      }, r2.Deflate = p2, r2.deflate = n2, r2.deflateRaw = function(e3, t3) {
-        return (t3 = t3 || {}).raw = true, n2(e3, t3);
-      }, r2.gzip = function(e3, t3) {
-        return (t3 = t3 || {}).gzip = true, n2(e3, t3);
-      };
-    }, { "./utils/common": 41, "./utils/strings": 42, "./zlib/deflate": 46, "./zlib/messages": 51, "./zlib/zstream": 53 }], 40: [function(e2, t2, r2) {
-      var c2 = e2("./zlib/inflate"), d2 = e2("./utils/common"), p2 = e2("./utils/strings"), m2 = e2("./zlib/constants"), n2 = e2("./zlib/messages"), i2 = e2("./zlib/zstream"), s2 = e2("./zlib/gzheader"), _2 = Object.prototype.toString;
-      function a2(e3) {
-        if (!(this instanceof a2))
-          return new a2(e3);
-        this.options = d2.assign({ chunkSize: 16384, windowBits: 0, to: "" }, e3 || {});
-        var t3 = this.options;
-        t3.raw && 0 <= t3.windowBits && t3.windowBits < 16 && (t3.windowBits = -t3.windowBits, 0 === t3.windowBits && (t3.windowBits = -15)), !(0 <= t3.windowBits && t3.windowBits < 16) || e3 && e3.windowBits || (t3.windowBits += 32), 15 < t3.windowBits && t3.windowBits < 48 && 0 == (15 & t3.windowBits) && (t3.windowBits |= 15), this.err = 0, this.msg = "", this.ended = false, this.chunks = [], this.strm = new i2(), this.strm.avail_out = 0;
-        var r3 = c2.inflateInit2(this.strm, t3.windowBits);
-        if (r3 !== m2.Z_OK)
-          throw new Error(n2[r3]);
-        this.header = new s2(), c2.inflateGetHeader(this.strm, this.header);
-      }
-      function o2(e3, t3) {
-        var r3 = new a2(t3);
-        if (r3.push(e3, true), r3.err)
-          throw r3.msg || n2[r3.err];
-        return r3.result;
-      }
-      a2.prototype.push = function(e3, t3) {
-        var r3, n3, i3, s3, a3, o3, h2 = this.strm, u2 = this.options.chunkSize, l2 = this.options.dictionary, f2 = false;
-        if (this.ended)
-          return false;
-        n3 = t3 === ~~t3 ? t3 : true === t3 ? m2.Z_FINISH : m2.Z_NO_FLUSH, "string" == typeof e3 ? h2.input = p2.binstring2buf(e3) : "[object ArrayBuffer]" === _2.call(e3) ? h2.input = new Uint8Array(e3) : h2.input = e3, h2.next_in = 0, h2.avail_in = h2.input.length;
-        do {
-          if (0 === h2.avail_out && (h2.output = new d2.Buf8(u2), h2.next_out = 0, h2.avail_out = u2), (r3 = c2.inflate(h2, m2.Z_NO_FLUSH)) === m2.Z_NEED_DICT && l2 && (o3 = "string" == typeof l2 ? p2.string2buf(l2) : "[object ArrayBuffer]" === _2.call(l2) ? new Uint8Array(l2) : l2, r3 = c2.inflateSetDictionary(this.strm, o3)), r3 === m2.Z_BUF_ERROR && true === f2 && (r3 = m2.Z_OK, f2 = false), r3 !== m2.Z_STREAM_END && r3 !== m2.Z_OK)
-            return this.onEnd(r3), !(this.ended = true);
-          h2.next_out && (0 !== h2.avail_out && r3 !== m2.Z_STREAM_END && (0 !== h2.avail_in || n3 !== m2.Z_FINISH && n3 !== m2.Z_SYNC_FLUSH) || ("string" === this.options.to ? (i3 = p2.utf8border(h2.output, h2.next_out), s3 = h2.next_out - i3, a3 = p2.buf2string(h2.output, i3), h2.next_out = s3, h2.avail_out = u2 - s3, s3 && d2.arraySet(h2.output, h2.output, i3, s3, 0), this.onData(a3)) : this.onData(d2.shrinkBuf(h2.output, h2.next_out)))), 0 === h2.avail_in && 0 === h2.avail_out && (f2 = true);
-        } while ((0 < h2.avail_in || 0 === h2.avail_out) && r3 !== m2.Z_STREAM_END);
-        return r3 === m2.Z_STREAM_END && (n3 = m2.Z_FINISH), n3 === m2.Z_FINISH ? (r3 = c2.inflateEnd(this.strm), this.onEnd(r3), this.ended = true, r3 === m2.Z_OK) : n3 !== m2.Z_SYNC_FLUSH || (this.onEnd(m2.Z_OK), !(h2.avail_out = 0));
-      }, a2.prototype.onData = function(e3) {
-        this.chunks.push(e3);
-      }, a2.prototype.onEnd = function(e3) {
-        e3 === m2.Z_OK && ("string" === this.options.to ? this.result = this.chunks.join("") : this.result = d2.flattenChunks(this.chunks)), this.chunks = [], this.err = e3, this.msg = this.strm.msg;
-      }, r2.Inflate = a2, r2.inflate = o2, r2.inflateRaw = function(e3, t3) {
-        return (t3 = t3 || {}).raw = true, o2(e3, t3);
-      }, r2.ungzip = o2;
-    }, { "./utils/common": 41, "./utils/strings": 42, "./zlib/constants": 44, "./zlib/gzheader": 47, "./zlib/inflate": 49, "./zlib/messages": 51, "./zlib/zstream": 53 }], 41: [function(e2, t2, r2) {
-      var n2 = "undefined" != typeof Uint8Array && "undefined" != typeof Uint16Array && "undefined" != typeof Int32Array;
-      r2.assign = function(e3) {
-        for (var t3 = Array.prototype.slice.call(arguments, 1); t3.length; ) {
-          var r3 = t3.shift();
-          if (r3) {
-            if ("object" != typeof r3)
-              throw new TypeError(r3 + "must be non-object");
-            for (var n3 in r3)
-              r3.hasOwnProperty(n3) && (e3[n3] = r3[n3]);
-          }
-        }
-        return e3;
-      }, r2.shrinkBuf = function(e3, t3) {
-        return e3.length === t3 ? e3 : e3.subarray ? e3.subarray(0, t3) : (e3.length = t3, e3);
-      };
-      var i2 = { arraySet: function(e3, t3, r3, n3, i3) {
-        if (t3.subarray && e3.subarray)
-          e3.set(t3.subarray(r3, r3 + n3), i3);
-        else
-          for (var s3 = 0; s3 < n3; s3++)
-            e3[i3 + s3] = t3[r3 + s3];
-      }, flattenChunks: function(e3) {
-        var t3, r3, n3, i3, s3, a2;
-        for (t3 = n3 = 0, r3 = e3.length; t3 < r3; t3++)
-          n3 += e3[t3].length;
-        for (a2 = new Uint8Array(n3), t3 = i3 = 0, r3 = e3.length; t3 < r3; t3++)
-          s3 = e3[t3], a2.set(s3, i3), i3 += s3.length;
-        return a2;
-      } }, s2 = { arraySet: function(e3, t3, r3, n3, i3) {
-        for (var s3 = 0; s3 < n3; s3++)
-          e3[i3 + s3] = t3[r3 + s3];
-      }, flattenChunks: function(e3) {
-        return [].concat.apply([], e3);
-      } };
-      r2.setTyped = function(e3) {
-        e3 ? (r2.Buf8 = Uint8Array, r2.Buf16 = Uint16Array, r2.Buf32 = Int32Array, r2.assign(r2, i2)) : (r2.Buf8 = Array, r2.Buf16 = Array, r2.Buf32 = Array, r2.assign(r2, s2));
-      }, r2.setTyped(n2);
-    }, {}], 42: [function(e2, t2, r2) {
-      var h2 = e2("./common"), i2 = true, s2 = true;
-      try {
-        String.fromCharCode.apply(null, [0]);
-      } catch (e3) {
-        i2 = false;
-      }
-      try {
-        String.fromCharCode.apply(null, new Uint8Array(1));
-      } catch (e3) {
-        s2 = false;
-      }
-      for (var u2 = new h2.Buf8(256), n2 = 0; n2 < 256; n2++)
-        u2[n2] = 252 <= n2 ? 6 : 248 <= n2 ? 5 : 240 <= n2 ? 4 : 224 <= n2 ? 3 : 192 <= n2 ? 2 : 1;
-      function l2(e3, t3) {
-        if (t3 < 65537 && (e3.subarray && s2 || !e3.subarray && i2))
-          return String.fromCharCode.apply(null, h2.shrinkBuf(e3, t3));
-        for (var r3 = "", n3 = 0; n3 < t3; n3++)
-          r3 += String.fromCharCode(e3[n3]);
-        return r3;
-      }
-      u2[254] = u2[254] = 1, r2.string2buf = function(e3) {
-        var t3, r3, n3, i3, s3, a2 = e3.length, o2 = 0;
-        for (i3 = 0; i3 < a2; i3++)
-          55296 == (64512 & (r3 = e3.charCodeAt(i3))) && i3 + 1 < a2 && 56320 == (64512 & (n3 = e3.charCodeAt(i3 + 1))) && (r3 = 65536 + (r3 - 55296 << 10) + (n3 - 56320), i3++), o2 += r3 < 128 ? 1 : r3 < 2048 ? 2 : r3 < 65536 ? 3 : 4;
-        for (t3 = new h2.Buf8(o2), i3 = s3 = 0; s3 < o2; i3++)
-          55296 == (64512 & (r3 = e3.charCodeAt(i3))) && i3 + 1 < a2 && 56320 == (64512 & (n3 = e3.charCodeAt(i3 + 1))) && (r3 = 65536 + (r3 - 55296 << 10) + (n3 - 56320), i3++), r3 < 128 ? t3[s3++] = r3 : (r3 < 2048 ? t3[s3++] = 192 | r3 >>> 6 : (r3 < 65536 ? t3[s3++] = 224 | r3 >>> 12 : (t3[s3++] = 240 | r3 >>> 18, t3[s3++] = 128 | r3 >>> 12 & 63), t3[s3++] = 128 | r3 >>> 6 & 63), t3[s3++] = 128 | 63 & r3);
-        return t3;
-      }, r2.buf2binstring = function(e3) {
-        return l2(e3, e3.length);
-      }, r2.binstring2buf = function(e3) {
-        for (var t3 = new h2.Buf8(e3.length), r3 = 0, n3 = t3.length; r3 < n3; r3++)
-          t3[r3] = e3.charCodeAt(r3);
-        return t3;
-      }, r2.buf2string = function(e3, t3) {
-        var r3, n3, i3, s3, a2 = t3 || e3.length, o2 = new Array(2 * a2);
-        for (r3 = n3 = 0; r3 < a2; )
-          if ((i3 = e3[r3++]) < 128)
-            o2[n3++] = i3;
-          else if (4 < (s3 = u2[i3]))
-            o2[n3++] = 65533, r3 += s3 - 1;
-          else {
-            for (i3 &= 2 === s3 ? 31 : 3 === s3 ? 15 : 7; 1 < s3 && r3 < a2; )
-              i3 = i3 << 6 | 63 & e3[r3++], s3--;
-            1 < s3 ? o2[n3++] = 65533 : i3 < 65536 ? o2[n3++] = i3 : (i3 -= 65536, o2[n3++] = 55296 | i3 >> 10 & 1023, o2[n3++] = 56320 | 1023 & i3);
-          }
-        return l2(o2, n3);
-      }, r2.utf8border = function(e3, t3) {
-        var r3;
-        for ((t3 = t3 || e3.length) > e3.length && (t3 = e3.length), r3 = t3 - 1; 0 <= r3 && 128 == (192 & e3[r3]); )
-          r3--;
-        return r3 < 0 ? t3 : 0 === r3 ? t3 : r3 + u2[e3[r3]] > t3 ? r3 : t3;
-      };
-    }, { "./common": 41 }], 43: [function(e2, t2, r2) {
-      t2.exports = function(e3, t3, r3, n2) {
-        for (var i2 = 65535 & e3 | 0, s2 = e3 >>> 16 & 65535 | 0, a2 = 0; 0 !== r3; ) {
-          for (r3 -= a2 = 2e3 < r3 ? 2e3 : r3; s2 = s2 + (i2 = i2 + t3[n2++] | 0) | 0, --a2; )
-            ;
-          i2 %= 65521, s2 %= 65521;
-        }
-        return i2 | s2 << 16 | 0;
-      };
-    }, {}], 44: [function(e2, t2, r2) {
-      t2.exports = { Z_NO_FLUSH: 0, Z_PARTIAL_FLUSH: 1, Z_SYNC_FLUSH: 2, Z_FULL_FLUSH: 3, Z_FINISH: 4, Z_BLOCK: 5, Z_TREES: 6, Z_OK: 0, Z_STREAM_END: 1, Z_NEED_DICT: 2, Z_ERRNO: -1, Z_STREAM_ERROR: -2, Z_DATA_ERROR: -3, Z_BUF_ERROR: -5, Z_NO_COMPRESSION: 0, Z_BEST_SPEED: 1, Z_BEST_COMPRESSION: 9, Z_DEFAULT_COMPRESSION: -1, Z_FILTERED: 1, Z_HUFFMAN_ONLY: 2, Z_RLE: 3, Z_FIXED: 4, Z_DEFAULT_STRATEGY: 0, Z_BINARY: 0, Z_TEXT: 1, Z_UNKNOWN: 2, Z_DEFLATED: 8 };
-    }, {}], 45: [function(e2, t2, r2) {
-      var o2 = function() {
-        for (var e3, t3 = [], r3 = 0; r3 < 256; r3++) {
-          e3 = r3;
-          for (var n2 = 0; n2 < 8; n2++)
-            e3 = 1 & e3 ? 3988292384 ^ e3 >>> 1 : e3 >>> 1;
-          t3[r3] = e3;
-        }
-        return t3;
-      }();
-      t2.exports = function(e3, t3, r3, n2) {
-        var i2 = o2, s2 = n2 + r3;
-        e3 ^= -1;
-        for (var a2 = n2; a2 < s2; a2++)
-          e3 = e3 >>> 8 ^ i2[255 & (e3 ^ t3[a2])];
-        return -1 ^ e3;
-      };
-    }, {}], 46: [function(e2, t2, r2) {
-      var h2, c2 = e2("../utils/common"), u2 = e2("./trees"), d2 = e2("./adler32"), p2 = e2("./crc32"), n2 = e2("./messages"), l2 = 0, f2 = 4, m2 = 0, _2 = -2, g2 = -1, b2 = 4, i2 = 2, v2 = 8, y2 = 9, s2 = 286, a2 = 30, o2 = 19, w2 = 2 * s2 + 1, k2 = 15, x2 = 3, S2 = 258, z2 = S2 + x2 + 1, C2 = 42, E2 = 113, A2 = 1, I2 = 2, O2 = 3, B2 = 4;
-      function R2(e3, t3) {
-        return e3.msg = n2[t3], t3;
-      }
-      function T2(e3) {
-        return (e3 << 1) - (4 < e3 ? 9 : 0);
-      }
-      function D2(e3) {
-        for (var t3 = e3.length; 0 <= --t3; )
-          e3[t3] = 0;
-      }
-      function F2(e3) {
-        var t3 = e3.state, r3 = t3.pending;
-        r3 > e3.avail_out && (r3 = e3.avail_out), 0 !== r3 && (c2.arraySet(e3.output, t3.pending_buf, t3.pending_out, r3, e3.next_out), e3.next_out += r3, t3.pending_out += r3, e3.total_out += r3, e3.avail_out -= r3, t3.pending -= r3, 0 === t3.pending && (t3.pending_out = 0));
-      }
-      function N2(e3, t3) {
-        u2._tr_flush_block(e3, 0 <= e3.block_start ? e3.block_start : -1, e3.strstart - e3.block_start, t3), e3.block_start = e3.strstart, F2(e3.strm);
-      }
-      function U2(e3, t3) {
-        e3.pending_buf[e3.pending++] = t3;
-      }
-      function P2(e3, t3) {
-        e3.pending_buf[e3.pending++] = t3 >>> 8 & 255, e3.pending_buf[e3.pending++] = 255 & t3;
-      }
-      function L2(e3, t3) {
-        var r3, n3, i3 = e3.max_chain_length, s3 = e3.strstart, a3 = e3.prev_length, o3 = e3.nice_match, h3 = e3.strstart > e3.w_size - z2 ? e3.strstart - (e3.w_size - z2) : 0, u3 = e3.window, l3 = e3.w_mask, f3 = e3.prev, c3 = e3.strstart + S2, d3 = u3[s3 + a3 - 1], p3 = u3[s3 + a3];
-        e3.prev_length >= e3.good_match && (i3 >>= 2), o3 > e3.lookahead && (o3 = e3.lookahead);
-        do {
-          if (u3[(r3 = t3) + a3] === p3 && u3[r3 + a3 - 1] === d3 && u3[r3] === u3[s3] && u3[++r3] === u3[s3 + 1]) {
-            s3 += 2, r3++;
-            do {
-            } while (u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && s3 < c3);
-            if (n3 = S2 - (c3 - s3), s3 = c3 - S2, a3 < n3) {
-              if (e3.match_start = t3, o3 <= (a3 = n3))
-                break;
-              d3 = u3[s3 + a3 - 1], p3 = u3[s3 + a3];
-            }
-          }
-        } while ((t3 = f3[t3 & l3]) > h3 && 0 != --i3);
-        return a3 <= e3.lookahead ? a3 : e3.lookahead;
-      }
-      function j2(e3) {
-        var t3, r3, n3, i3, s3, a3, o3, h3, u3, l3, f3 = e3.w_size;
-        do {
-          if (i3 = e3.window_size - e3.lookahead - e3.strstart, e3.strstart >= f3 + (f3 - z2)) {
-            for (c2.arraySet(e3.window, e3.window, f3, f3, 0), e3.match_start -= f3, e3.strstart -= f3, e3.block_start -= f3, t3 = r3 = e3.hash_size; n3 = e3.head[--t3], e3.head[t3] = f3 <= n3 ? n3 - f3 : 0, --r3; )
-              ;
-            for (t3 = r3 = f3; n3 = e3.prev[--t3], e3.prev[t3] = f3 <= n3 ? n3 - f3 : 0, --r3; )
-              ;
-            i3 += f3;
-          }
-          if (0 === e3.strm.avail_in)
-            break;
-          if (a3 = e3.strm, o3 = e3.window, h3 = e3.strstart + e3.lookahead, u3 = i3, l3 = void 0, l3 = a3.avail_in, u3 < l3 && (l3 = u3), r3 = 0 === l3 ? 0 : (a3.avail_in -= l3, c2.arraySet(o3, a3.input, a3.next_in, l3, h3), 1 === a3.state.wrap ? a3.adler = d2(a3.adler, o3, l3, h3) : 2 === a3.state.wrap && (a3.adler = p2(a3.adler, o3, l3, h3)), a3.next_in += l3, a3.total_in += l3, l3), e3.lookahead += r3, e3.lookahead + e3.insert >= x2)
-            for (s3 = e3.strstart - e3.insert, e3.ins_h = e3.window[s3], e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[s3 + 1]) & e3.hash_mask; e3.insert && (e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[s3 + x2 - 1]) & e3.hash_mask, e3.prev[s3 & e3.w_mask] = e3.head[e3.ins_h], e3.head[e3.ins_h] = s3, s3++, e3.insert--, !(e3.lookahead + e3.insert < x2)); )
-              ;
-        } while (e3.lookahead < z2 && 0 !== e3.strm.avail_in);
-      }
-      function Z2(e3, t3) {
-        for (var r3, n3; ; ) {
-          if (e3.lookahead < z2) {
-            if (j2(e3), e3.lookahead < z2 && t3 === l2)
-              return A2;
-            if (0 === e3.lookahead)
-              break;
-          }
-          if (r3 = 0, e3.lookahead >= x2 && (e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[e3.strstart + x2 - 1]) & e3.hash_mask, r3 = e3.prev[e3.strstart & e3.w_mask] = e3.head[e3.ins_h], e3.head[e3.ins_h] = e3.strstart), 0 !== r3 && e3.strstart - r3 <= e3.w_size - z2 && (e3.match_length = L2(e3, r3)), e3.match_length >= x2)
-            if (n3 = u2._tr_tally(e3, e3.strstart - e3.match_start, e3.match_length - x2), e3.lookahead -= e3.match_length, e3.match_length <= e3.max_lazy_match && e3.lookahead >= x2) {
-              for (e3.match_length--; e3.strstart++, e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[e3.strstart + x2 - 1]) & e3.hash_mask, r3 = e3.prev[e3.strstart & e3.w_mask] = e3.head[e3.ins_h], e3.head[e3.ins_h] = e3.strstart, 0 != --e3.match_length; )
-                ;
-              e3.strstart++;
-            } else
-              e3.strstart += e3.match_length, e3.match_length = 0, e3.ins_h = e3.window[e3.strstart], e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[e3.strstart + 1]) & e3.hash_mask;
-          else
-            n3 = u2._tr_tally(e3, 0, e3.window[e3.strstart]), e3.lookahead--, e3.strstart++;
-          if (n3 && (N2(e3, false), 0 === e3.strm.avail_out))
-            return A2;
-        }
-        return e3.insert = e3.strstart < x2 - 1 ? e3.strstart : x2 - 1, t3 === f2 ? (N2(e3, true), 0 === e3.strm.avail_out ? O2 : B2) : e3.last_lit && (N2(e3, false), 0 === e3.strm.avail_out) ? A2 : I2;
-      }
-      function W2(e3, t3) {
-        for (var r3, n3, i3; ; ) {
-          if (e3.lookahead < z2) {
-            if (j2(e3), e3.lookahead < z2 && t3 === l2)
-              return A2;
-            if (0 === e3.lookahead)
-              break;
-          }
-          if (r3 = 0, e3.lookahead >= x2 && (e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[e3.strstart + x2 - 1]) & e3.hash_mask, r3 = e3.prev[e3.strstart & e3.w_mask] = e3.head[e3.ins_h], e3.head[e3.ins_h] = e3.strstart), e3.prev_length = e3.match_length, e3.prev_match = e3.match_start, e3.match_length = x2 - 1, 0 !== r3 && e3.prev_length < e3.max_lazy_match && e3.strstart - r3 <= e3.w_size - z2 && (e3.match_length = L2(e3, r3), e3.match_length <= 5 && (1 === e3.strategy || e3.match_length === x2 && 4096 < e3.strstart - e3.match_start) && (e3.match_length = x2 - 1)), e3.prev_length >= x2 && e3.match_length <= e3.prev_length) {
-            for (i3 = e3.strstart + e3.lookahead - x2, n3 = u2._tr_tally(e3, e3.strstart - 1 - e3.prev_match, e3.prev_length - x2), e3.lookahead -= e3.prev_length - 1, e3.prev_length -= 2; ++e3.strstart <= i3 && (e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[e3.strstart + x2 - 1]) & e3.hash_mask, r3 = e3.prev[e3.strstart & e3.w_mask] = e3.head[e3.ins_h], e3.head[e3.ins_h] = e3.strstart), 0 != --e3.prev_length; )
-              ;
-            if (e3.match_available = 0, e3.match_length = x2 - 1, e3.strstart++, n3 && (N2(e3, false), 0 === e3.strm.avail_out))
-              return A2;
-          } else if (e3.match_available) {
-            if ((n3 = u2._tr_tally(e3, 0, e3.window[e3.strstart - 1])) && N2(e3, false), e3.strstart++, e3.lookahead--, 0 === e3.strm.avail_out)
-              return A2;
-          } else
-            e3.match_available = 1, e3.strstart++, e3.lookahead--;
-        }
-        return e3.match_available && (n3 = u2._tr_tally(e3, 0, e3.window[e3.strstart - 1]), e3.match_available = 0), e3.insert = e3.strstart < x2 - 1 ? e3.strstart : x2 - 1, t3 === f2 ? (N2(e3, true), 0 === e3.strm.avail_out ? O2 : B2) : e3.last_lit && (N2(e3, false), 0 === e3.strm.avail_out) ? A2 : I2;
-      }
-      function M2(e3, t3, r3, n3, i3) {
-        this.good_length = e3, this.max_lazy = t3, this.nice_length = r3, this.max_chain = n3, this.func = i3;
-      }
-      function H2() {
-        this.strm = null, this.status = 0, this.pending_buf = null, this.pending_buf_size = 0, this.pending_out = 0, this.pending = 0, this.wrap = 0, this.gzhead = null, this.gzindex = 0, this.method = v2, this.last_flush = -1, this.w_size = 0, this.w_bits = 0, this.w_mask = 0, this.window = null, this.window_size = 0, this.prev = null, this.head = null, this.ins_h = 0, this.hash_size = 0, this.hash_bits = 0, this.hash_mask = 0, this.hash_shift = 0, this.block_start = 0, this.match_length = 0, this.prev_match = 0, this.match_available = 0, this.strstart = 0, this.match_start = 0, this.lookahead = 0, this.prev_length = 0, this.max_chain_length = 0, this.max_lazy_match = 0, this.level = 0, this.strategy = 0, this.good_match = 0, this.nice_match = 0, this.dyn_ltree = new c2.Buf16(2 * w2), this.dyn_dtree = new c2.Buf16(2 * (2 * a2 + 1)), this.bl_tree = new c2.Buf16(2 * (2 * o2 + 1)), D2(this.dyn_ltree), D2(this.dyn_dtree), D2(this.bl_tree), this.l_desc = null, this.d_desc = null, this.bl_desc = null, this.bl_count = new c2.Buf16(k2 + 1), this.heap = new c2.Buf16(2 * s2 + 1), D2(this.heap), this.heap_len = 0, this.heap_max = 0, this.depth = new c2.Buf16(2 * s2 + 1), D2(this.depth), this.l_buf = 0, this.lit_bufsize = 0, this.last_lit = 0, this.d_buf = 0, this.opt_len = 0, this.static_len = 0, this.matches = 0, this.insert = 0, this.bi_buf = 0, this.bi_valid = 0;
-      }
-      function G2(e3) {
-        var t3;
-        return e3 && e3.state ? (e3.total_in = e3.total_out = 0, e3.data_type = i2, (t3 = e3.state).pending = 0, t3.pending_out = 0, t3.wrap < 0 && (t3.wrap = -t3.wrap), t3.status = t3.wrap ? C2 : E2, e3.adler = 2 === t3.wrap ? 0 : 1, t3.last_flush = l2, u2._tr_init(t3), m2) : R2(e3, _2);
-      }
-      function K2(e3) {
-        var t3 = G2(e3);
-        return t3 === m2 && function(e4) {
-          e4.window_size = 2 * e4.w_size, D2(e4.head), e4.max_lazy_match = h2[e4.level].max_lazy, e4.good_match = h2[e4.level].good_length, e4.nice_match = h2[e4.level].nice_length, e4.max_chain_length = h2[e4.level].max_chain, e4.strstart = 0, e4.block_start = 0, e4.lookahead = 0, e4.insert = 0, e4.match_length = e4.prev_length = x2 - 1, e4.match_available = 0, e4.ins_h = 0;
-        }(e3.state), t3;
-      }
-      function Y2(e3, t3, r3, n3, i3, s3) {
-        if (!e3)
-          return _2;
-        var a3 = 1;
-        if (t3 === g2 && (t3 = 6), n3 < 0 ? (a3 = 0, n3 = -n3) : 15 < n3 && (a3 = 2, n3 -= 16), i3 < 1 || y2 < i3 || r3 !== v2 || n3 < 8 || 15 < n3 || t3 < 0 || 9 < t3 || s3 < 0 || b2 < s3)
-          return R2(e3, _2);
-        8 === n3 && (n3 = 9);
-        var o3 = new H2();
-        return (e3.state = o3).strm = e3, o3.wrap = a3, o3.gzhead = null, o3.w_bits = n3, o3.w_size = 1 << o3.w_bits, o3.w_mask = o3.w_size - 1, o3.hash_bits = i3 + 7, o3.hash_size = 1 << o3.hash_bits, o3.hash_mask = o3.hash_size - 1, o3.hash_shift = ~~((o3.hash_bits + x2 - 1) / x2), o3.window = new c2.Buf8(2 * o3.w_size), o3.head = new c2.Buf16(o3.hash_size), o3.prev = new c2.Buf16(o3.w_size), o3.lit_bufsize = 1 << i3 + 6, o3.pending_buf_size = 4 * o3.lit_bufsize, o3.pending_buf = new c2.Buf8(o3.pending_buf_size), o3.d_buf = 1 * o3.lit_bufsize, o3.l_buf = 3 * o3.lit_bufsize, o3.level = t3, o3.strategy = s3, o3.method = r3, K2(e3);
-      }
-      h2 = [new M2(0, 0, 0, 0, function(e3, t3) {
-        var r3 = 65535;
-        for (r3 > e3.pending_buf_size - 5 && (r3 = e3.pending_buf_size - 5); ; ) {
-          if (e3.lookahead <= 1) {
-            if (j2(e3), 0 === e3.lookahead && t3 === l2)
-              return A2;
-            if (0 === e3.lookahead)
-              break;
-          }
-          e3.strstart += e3.lookahead, e3.lookahead = 0;
-          var n3 = e3.block_start + r3;
-          if ((0 === e3.strstart || e3.strstart >= n3) && (e3.lookahead = e3.strstart - n3, e3.strstart = n3, N2(e3, false), 0 === e3.strm.avail_out))
-            return A2;
-          if (e3.strstart - e3.block_start >= e3.w_size - z2 && (N2(e3, false), 0 === e3.strm.avail_out))
-            return A2;
-        }
-        return e3.insert = 0, t3 === f2 ? (N2(e3, true), 0 === e3.strm.avail_out ? O2 : B2) : (e3.strstart > e3.block_start && (N2(e3, false), e3.strm.avail_out), A2);
-      }), new M2(4, 4, 8, 4, Z2), new M2(4, 5, 16, 8, Z2), new M2(4, 6, 32, 32, Z2), new M2(4, 4, 16, 16, W2), new M2(8, 16, 32, 32, W2), new M2(8, 16, 128, 128, W2), new M2(8, 32, 128, 256, W2), new M2(32, 128, 258, 1024, W2), new M2(32, 258, 258, 4096, W2)], r2.deflateInit = function(e3, t3) {
-        return Y2(e3, t3, v2, 15, 8, 0);
-      }, r2.deflateInit2 = Y2, r2.deflateReset = K2, r2.deflateResetKeep = G2, r2.deflateSetHeader = function(e3, t3) {
-        return e3 && e3.state ? 2 !== e3.state.wrap ? _2 : (e3.state.gzhead = t3, m2) : _2;
-      }, r2.deflate = function(e3, t3) {
-        var r3, n3, i3, s3;
-        if (!e3 || !e3.state || 5 < t3 || t3 < 0)
-          return e3 ? R2(e3, _2) : _2;
-        if (n3 = e3.state, !e3.output || !e3.input && 0 !== e3.avail_in || 666 === n3.status && t3 !== f2)
-          return R2(e3, 0 === e3.avail_out ? -5 : _2);
-        if (n3.strm = e3, r3 = n3.last_flush, n3.last_flush = t3, n3.status === C2)
-          if (2 === n3.wrap)
-            e3.adler = 0, U2(n3, 31), U2(n3, 139), U2(n3, 8), n3.gzhead ? (U2(n3, (n3.gzhead.text ? 1 : 0) + (n3.gzhead.hcrc ? 2 : 0) + (n3.gzhead.extra ? 4 : 0) + (n3.gzhead.name ? 8 : 0) + (n3.gzhead.comment ? 16 : 0)), U2(n3, 255 & n3.gzhead.time), U2(n3, n3.gzhead.time >> 8 & 255), U2(n3, n3.gzhead.time >> 16 & 255), U2(n3, n3.gzhead.time >> 24 & 255), U2(n3, 9 === n3.level ? 2 : 2 <= n3.strategy || n3.level < 2 ? 4 : 0), U2(n3, 255 & n3.gzhead.os), n3.gzhead.extra && n3.gzhead.extra.length && (U2(n3, 255 & n3.gzhead.extra.length), U2(n3, n3.gzhead.extra.length >> 8 & 255)), n3.gzhead.hcrc && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending, 0)), n3.gzindex = 0, n3.status = 69) : (U2(n3, 0), U2(n3, 0), U2(n3, 0), U2(n3, 0), U2(n3, 0), U2(n3, 9 === n3.level ? 2 : 2 <= n3.strategy || n3.level < 2 ? 4 : 0), U2(n3, 3), n3.status = E2);
-          else {
-            var a3 = v2 + (n3.w_bits - 8 << 4) << 8;
-            a3 |= (2 <= n3.strategy || n3.level < 2 ? 0 : n3.level < 6 ? 1 : 6 === n3.level ? 2 : 3) << 6, 0 !== n3.strstart && (a3 |= 32), a3 += 31 - a3 % 31, n3.status = E2, P2(n3, a3), 0 !== n3.strstart && (P2(n3, e3.adler >>> 16), P2(n3, 65535 & e3.adler)), e3.adler = 1;
-          }
-        if (69 === n3.status)
-          if (n3.gzhead.extra) {
-            for (i3 = n3.pending; n3.gzindex < (65535 & n3.gzhead.extra.length) && (n3.pending !== n3.pending_buf_size || (n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), F2(e3), i3 = n3.pending, n3.pending !== n3.pending_buf_size)); )
-              U2(n3, 255 & n3.gzhead.extra[n3.gzindex]), n3.gzindex++;
-            n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), n3.gzindex === n3.gzhead.extra.length && (n3.gzindex = 0, n3.status = 73);
-          } else
-            n3.status = 73;
-        if (73 === n3.status)
-          if (n3.gzhead.name) {
-            i3 = n3.pending;
-            do {
-              if (n3.pending === n3.pending_buf_size && (n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), F2(e3), i3 = n3.pending, n3.pending === n3.pending_buf_size)) {
-                s3 = 1;
-                break;
-              }
-              s3 = n3.gzindex < n3.gzhead.name.length ? 255 & n3.gzhead.name.charCodeAt(n3.gzindex++) : 0, U2(n3, s3);
-            } while (0 !== s3);
-            n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), 0 === s3 && (n3.gzindex = 0, n3.status = 91);
-          } else
-            n3.status = 91;
-        if (91 === n3.status)
-          if (n3.gzhead.comment) {
-            i3 = n3.pending;
-            do {
-              if (n3.pending === n3.pending_buf_size && (n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), F2(e3), i3 = n3.pending, n3.pending === n3.pending_buf_size)) {
-                s3 = 1;
-                break;
-              }
-              s3 = n3.gzindex < n3.gzhead.comment.length ? 255 & n3.gzhead.comment.charCodeAt(n3.gzindex++) : 0, U2(n3, s3);
-            } while (0 !== s3);
-            n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), 0 === s3 && (n3.status = 103);
-          } else
-            n3.status = 103;
-        if (103 === n3.status && (n3.gzhead.hcrc ? (n3.pending + 2 > n3.pending_buf_size && F2(e3), n3.pending + 2 <= n3.pending_buf_size && (U2(n3, 255 & e3.adler), U2(n3, e3.adler >> 8 & 255), e3.adler = 0, n3.status = E2)) : n3.status = E2), 0 !== n3.pending) {
-          if (F2(e3), 0 === e3.avail_out)
-            return n3.last_flush = -1, m2;
-        } else if (0 === e3.avail_in && T2(t3) <= T2(r3) && t3 !== f2)
-          return R2(e3, -5);
-        if (666 === n3.status && 0 !== e3.avail_in)
-          return R2(e3, -5);
-        if (0 !== e3.avail_in || 0 !== n3.lookahead || t3 !== l2 && 666 !== n3.status) {
-          var o3 = 2 === n3.strategy ? function(e4, t4) {
-            for (var r4; ; ) {
-              if (0 === e4.lookahead && (j2(e4), 0 === e4.lookahead)) {
-                if (t4 === l2)
-                  return A2;
-                break;
-              }
-              if (e4.match_length = 0, r4 = u2._tr_tally(e4, 0, e4.window[e4.strstart]), e4.lookahead--, e4.strstart++, r4 && (N2(e4, false), 0 === e4.strm.avail_out))
-                return A2;
-            }
-            return e4.insert = 0, t4 === f2 ? (N2(e4, true), 0 === e4.strm.avail_out ? O2 : B2) : e4.last_lit && (N2(e4, false), 0 === e4.strm.avail_out) ? A2 : I2;
-          }(n3, t3) : 3 === n3.strategy ? function(e4, t4) {
-            for (var r4, n4, i4, s4, a4 = e4.window; ; ) {
-              if (e4.lookahead <= S2) {
-                if (j2(e4), e4.lookahead <= S2 && t4 === l2)
-                  return A2;
-                if (0 === e4.lookahead)
-                  break;
-              }
-              if (e4.match_length = 0, e4.lookahead >= x2 && 0 < e4.strstart && (n4 = a4[i4 = e4.strstart - 1]) === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4]) {
-                s4 = e4.strstart + S2;
-                do {
-                } while (n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && i4 < s4);
-                e4.match_length = S2 - (s4 - i4), e4.match_length > e4.lookahead && (e4.match_length = e4.lookahead);
-              }
-              if (e4.match_length >= x2 ? (r4 = u2._tr_tally(e4, 1, e4.match_length - x2), e4.lookahead -= e4.match_length, e4.strstart += e4.match_length, e4.match_length = 0) : (r4 = u2._tr_tally(e4, 0, e4.window[e4.strstart]), e4.lookahead--, e4.strstart++), r4 && (N2(e4, false), 0 === e4.strm.avail_out))
-                return A2;
-            }
-            return e4.insert = 0, t4 === f2 ? (N2(e4, true), 0 === e4.strm.avail_out ? O2 : B2) : e4.last_lit && (N2(e4, false), 0 === e4.strm.avail_out) ? A2 : I2;
-          }(n3, t3) : h2[n3.level].func(n3, t3);
-          if (o3 !== O2 && o3 !== B2 || (n3.status = 666), o3 === A2 || o3 === O2)
-            return 0 === e3.avail_out && (n3.last_flush = -1), m2;
-          if (o3 === I2 && (1 === t3 ? u2._tr_align(n3) : 5 !== t3 && (u2._tr_stored_block(n3, 0, 0, false), 3 === t3 && (D2(n3.head), 0 === n3.lookahead && (n3.strstart = 0, n3.block_start = 0, n3.insert = 0))), F2(e3), 0 === e3.avail_out))
-            return n3.last_flush = -1, m2;
-        }
-        return t3 !== f2 ? m2 : n3.wrap <= 0 ? 1 : (2 === n3.wrap ? (U2(n3, 255 & e3.adler), U2(n3, e3.adler >> 8 & 255), U2(n3, e3.adler >> 16 & 255), U2(n3, e3.adler >> 24 & 255), U2(n3, 255 & e3.total_in), U2(n3, e3.total_in >> 8 & 255), U2(n3, e3.total_in >> 16 & 255), U2(n3, e3.total_in >> 24 & 255)) : (P2(n3, e3.adler >>> 16), P2(n3, 65535 & e3.adler)), F2(e3), 0 < n3.wrap && (n3.wrap = -n3.wrap), 0 !== n3.pending ? m2 : 1);
-      }, r2.deflateEnd = function(e3) {
-        var t3;
-        return e3 && e3.state ? (t3 = e3.state.status) !== C2 && 69 !== t3 && 73 !== t3 && 91 !== t3 && 103 !== t3 && t3 !== E2 && 666 !== t3 ? R2(e3, _2) : (e3.state = null, t3 === E2 ? R2(e3, -3) : m2) : _2;
-      }, r2.deflateSetDictionary = function(e3, t3) {
-        var r3, n3, i3, s3, a3, o3, h3, u3, l3 = t3.length;
-        if (!e3 || !e3.state)
-          return _2;
-        if (2 === (s3 = (r3 = e3.state).wrap) || 1 === s3 && r3.status !== C2 || r3.lookahead)
-          return _2;
-        for (1 === s3 && (e3.adler = d2(e3.adler, t3, l3, 0)), r3.wrap = 0, l3 >= r3.w_size && (0 === s3 && (D2(r3.head), r3.strstart = 0, r3.block_start = 0, r3.insert = 0), u3 = new c2.Buf8(r3.w_size), c2.arraySet(u3, t3, l3 - r3.w_size, r3.w_size, 0), t3 = u3, l3 = r3.w_size), a3 = e3.avail_in, o3 = e3.next_in, h3 = e3.input, e3.avail_in = l3, e3.next_in = 0, e3.input = t3, j2(r3); r3.lookahead >= x2; ) {
-          for (n3 = r3.strstart, i3 = r3.lookahead - (x2 - 1); r3.ins_h = (r3.ins_h << r3.hash_shift ^ r3.window[n3 + x2 - 1]) & r3.hash_mask, r3.prev[n3 & r3.w_mask] = r3.head[r3.ins_h], r3.head[r3.ins_h] = n3, n3++, --i3; )
-            ;
-          r3.strstart = n3, r3.lookahead = x2 - 1, j2(r3);
-        }
-        return r3.strstart += r3.lookahead, r3.block_start = r3.strstart, r3.insert = r3.lookahead, r3.lookahead = 0, r3.match_length = r3.prev_length = x2 - 1, r3.match_available = 0, e3.next_in = o3, e3.input = h3, e3.avail_in = a3, r3.wrap = s3, m2;
-      }, r2.deflateInfo = "pako deflate (from Nodeca project)";
-    }, { "../utils/common": 41, "./adler32": 43, "./crc32": 45, "./messages": 51, "./trees": 52 }], 47: [function(e2, t2, r2) {
-      t2.exports = function() {
-        this.text = 0, this.time = 0, this.xflags = 0, this.os = 0, this.extra = null, this.extra_len = 0, this.name = "", this.comment = "", this.hcrc = 0, this.done = false;
-      };
-    }, {}], 48: [function(e2, t2, r2) {
-      t2.exports = function(e3, t3) {
-        var r3, n2, i2, s2, a2, o2, h2, u2, l2, f2, c2, d2, p2, m2, _2, g2, b2, v2, y2, w2, k2, x2, S2, z2, C2;
-        r3 = e3.state, n2 = e3.next_in, z2 = e3.input, i2 = n2 + (e3.avail_in - 5), s2 = e3.next_out, C2 = e3.output, a2 = s2 - (t3 - e3.avail_out), o2 = s2 + (e3.avail_out - 257), h2 = r3.dmax, u2 = r3.wsize, l2 = r3.whave, f2 = r3.wnext, c2 = r3.window, d2 = r3.hold, p2 = r3.bits, m2 = r3.lencode, _2 = r3.distcode, g2 = (1 << r3.lenbits) - 1, b2 = (1 << r3.distbits) - 1;
-        e:
-          do {
-            p2 < 15 && (d2 += z2[n2++] << p2, p2 += 8, d2 += z2[n2++] << p2, p2 += 8), v2 = m2[d2 & g2];
-            t:
-              for (; ; ) {
-                if (d2 >>>= y2 = v2 >>> 24, p2 -= y2, 0 === (y2 = v2 >>> 16 & 255))
-                  C2[s2++] = 65535 & v2;
-                else {
-                  if (!(16 & y2)) {
-                    if (0 == (64 & y2)) {
-                      v2 = m2[(65535 & v2) + (d2 & (1 << y2) - 1)];
-                      continue t;
-                    }
-                    if (32 & y2) {
-                      r3.mode = 12;
-                      break e;
-                    }
-                    e3.msg = "invalid literal/length code", r3.mode = 30;
-                    break e;
-                  }
-                  w2 = 65535 & v2, (y2 &= 15) && (p2 < y2 && (d2 += z2[n2++] << p2, p2 += 8), w2 += d2 & (1 << y2) - 1, d2 >>>= y2, p2 -= y2), p2 < 15 && (d2 += z2[n2++] << p2, p2 += 8, d2 += z2[n2++] << p2, p2 += 8), v2 = _2[d2 & b2];
-                  r:
-                    for (; ; ) {
-                      if (d2 >>>= y2 = v2 >>> 24, p2 -= y2, !(16 & (y2 = v2 >>> 16 & 255))) {
-                        if (0 == (64 & y2)) {
-                          v2 = _2[(65535 & v2) + (d2 & (1 << y2) - 1)];
-                          continue r;
-                        }
-                        e3.msg = "invalid distance code", r3.mode = 30;
-                        break e;
-                      }
-                      if (k2 = 65535 & v2, p2 < (y2 &= 15) && (d2 += z2[n2++] << p2, (p2 += 8) < y2 && (d2 += z2[n2++] << p2, p2 += 8)), h2 < (k2 += d2 & (1 << y2) - 1)) {
-                        e3.msg = "invalid distance too far back", r3.mode = 30;
-                        break e;
-                      }
-                      if (d2 >>>= y2, p2 -= y2, (y2 = s2 - a2) < k2) {
-                        if (l2 < (y2 = k2 - y2) && r3.sane) {
-                          e3.msg = "invalid distance too far back", r3.mode = 30;
-                          break e;
-                        }
-                        if (S2 = c2, (x2 = 0) === f2) {
-                          if (x2 += u2 - y2, y2 < w2) {
-                            for (w2 -= y2; C2[s2++] = c2[x2++], --y2; )
-                              ;
-                            x2 = s2 - k2, S2 = C2;
-                          }
-                        } else if (f2 < y2) {
-                          if (x2 += u2 + f2 - y2, (y2 -= f2) < w2) {
-                            for (w2 -= y2; C2[s2++] = c2[x2++], --y2; )
-                              ;
-                            if (x2 = 0, f2 < w2) {
-                              for (w2 -= y2 = f2; C2[s2++] = c2[x2++], --y2; )
-                                ;
-                              x2 = s2 - k2, S2 = C2;
-                            }
-                          }
-                        } else if (x2 += f2 - y2, y2 < w2) {
-                          for (w2 -= y2; C2[s2++] = c2[x2++], --y2; )
-                            ;
-                          x2 = s2 - k2, S2 = C2;
-                        }
-                        for (; 2 < w2; )
-                          C2[s2++] = S2[x2++], C2[s2++] = S2[x2++], C2[s2++] = S2[x2++], w2 -= 3;
-                        w2 && (C2[s2++] = S2[x2++], 1 < w2 && (C2[s2++] = S2[x2++]));
-                      } else {
-                        for (x2 = s2 - k2; C2[s2++] = C2[x2++], C2[s2++] = C2[x2++], C2[s2++] = C2[x2++], 2 < (w2 -= 3); )
-                          ;
-                        w2 && (C2[s2++] = C2[x2++], 1 < w2 && (C2[s2++] = C2[x2++]));
-                      }
-                      break;
-                    }
-                }
-                break;
-              }
-          } while (n2 < i2 && s2 < o2);
-        n2 -= w2 = p2 >> 3, d2 &= (1 << (p2 -= w2 << 3)) - 1, e3.next_in = n2, e3.next_out = s2, e3.avail_in = n2 < i2 ? i2 - n2 + 5 : 5 - (n2 - i2), e3.avail_out = s2 < o2 ? o2 - s2 + 257 : 257 - (s2 - o2), r3.hold = d2, r3.bits = p2;
-      };
-    }, {}], 49: [function(e2, t2, r2) {
-      var I2 = e2("../utils/common"), O2 = e2("./adler32"), B2 = e2("./crc32"), R2 = e2("./inffast"), T2 = e2("./inftrees"), D2 = 1, F2 = 2, N2 = 0, U2 = -2, P2 = 1, n2 = 852, i2 = 592;
-      function L2(e3) {
-        return (e3 >>> 24 & 255) + (e3 >>> 8 & 65280) + ((65280 & e3) << 8) + ((255 & e3) << 24);
-      }
-      function s2() {
-        this.mode = 0, this.last = false, this.wrap = 0, this.havedict = false, this.flags = 0, this.dmax = 0, this.check = 0, this.total = 0, this.head = null, this.wbits = 0, this.wsize = 0, this.whave = 0, this.wnext = 0, this.window = null, this.hold = 0, this.bits = 0, this.length = 0, this.offset = 0, this.extra = 0, this.lencode = null, this.distcode = null, this.lenbits = 0, this.distbits = 0, this.ncode = 0, this.nlen = 0, this.ndist = 0, this.have = 0, this.next = null, this.lens = new I2.Buf16(320), this.work = new I2.Buf16(288), this.lendyn = null, this.distdyn = null, this.sane = 0, this.back = 0, this.was = 0;
-      }
-      function a2(e3) {
-        var t3;
-        return e3 && e3.state ? (t3 = e3.state, e3.total_in = e3.total_out = t3.total = 0, e3.msg = "", t3.wrap && (e3.adler = 1 & t3.wrap), t3.mode = P2, t3.last = 0, t3.havedict = 0, t3.dmax = 32768, t3.head = null, t3.hold = 0, t3.bits = 0, t3.lencode = t3.lendyn = new I2.Buf32(n2), t3.distcode = t3.distdyn = new I2.Buf32(i2), t3.sane = 1, t3.back = -1, N2) : U2;
-      }
-      function o2(e3) {
-        var t3;
-        return e3 && e3.state ? ((t3 = e3.state).wsize = 0, t3.whave = 0, t3.wnext = 0, a2(e3)) : U2;
-      }
-      function h2(e3, t3) {
-        var r3, n3;
-        return e3 && e3.state ? (n3 = e3.state, t3 < 0 ? (r3 = 0, t3 = -t3) : (r3 = 1 + (t3 >> 4), t3 < 48 && (t3 &= 15)), t3 && (t3 < 8 || 15 < t3) ? U2 : (null !== n3.window && n3.wbits !== t3 && (n3.window = null), n3.wrap = r3, n3.wbits = t3, o2(e3))) : U2;
-      }
-      function u2(e3, t3) {
-        var r3, n3;
-        return e3 ? (n3 = new s2(), (e3.state = n3).window = null, (r3 = h2(e3, t3)) !== N2 && (e3.state = null), r3) : U2;
-      }
-      var l2, f2, c2 = true;
-      function j2(e3) {
-        if (c2) {
-          var t3;
-          for (l2 = new I2.Buf32(512), f2 = new I2.Buf32(32), t3 = 0; t3 < 144; )
-            e3.lens[t3++] = 8;
-          for (; t3 < 256; )
-            e3.lens[t3++] = 9;
-          for (; t3 < 280; )
-            e3.lens[t3++] = 7;
-          for (; t3 < 288; )
-            e3.lens[t3++] = 8;
-          for (T2(D2, e3.lens, 0, 288, l2, 0, e3.work, { bits: 9 }), t3 = 0; t3 < 32; )
-            e3.lens[t3++] = 5;
-          T2(F2, e3.lens, 0, 32, f2, 0, e3.work, { bits: 5 }), c2 = false;
-        }
-        e3.lencode = l2, e3.lenbits = 9, e3.distcode = f2, e3.distbits = 5;
-      }
-      function Z2(e3, t3, r3, n3) {
-        var i3, s3 = e3.state;
-        return null === s3.window && (s3.wsize = 1 << s3.wbits, s3.wnext = 0, s3.whave = 0, s3.window = new I2.Buf8(s3.wsize)), n3 >= s3.wsize ? (I2.arraySet(s3.window, t3, r3 - s3.wsize, s3.wsize, 0), s3.wnext = 0, s3.whave = s3.wsize) : (n3 < (i3 = s3.wsize - s3.wnext) && (i3 = n3), I2.arraySet(s3.window, t3, r3 - n3, i3, s3.wnext), (n3 -= i3) ? (I2.arraySet(s3.window, t3, r3 - n3, n3, 0), s3.wnext = n3, s3.whave = s3.wsize) : (s3.wnext += i3, s3.wnext === s3.wsize && (s3.wnext = 0), s3.whave < s3.wsize && (s3.whave += i3))), 0;
-      }
-      r2.inflateReset = o2, r2.inflateReset2 = h2, r2.inflateResetKeep = a2, r2.inflateInit = function(e3) {
-        return u2(e3, 15);
-      }, r2.inflateInit2 = u2, r2.inflate = function(e3, t3) {
-        var r3, n3, i3, s3, a3, o3, h3, u3, l3, f3, c3, d2, p2, m2, _2, g2, b2, v2, y2, w2, k2, x2, S2, z2, C2 = 0, E2 = new I2.Buf8(4), A2 = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
-        if (!e3 || !e3.state || !e3.output || !e3.input && 0 !== e3.avail_in)
-          return U2;
-        12 === (r3 = e3.state).mode && (r3.mode = 13), a3 = e3.next_out, i3 = e3.output, h3 = e3.avail_out, s3 = e3.next_in, n3 = e3.input, o3 = e3.avail_in, u3 = r3.hold, l3 = r3.bits, f3 = o3, c3 = h3, x2 = N2;
-        e:
-          for (; ; )
-            switch (r3.mode) {
-              case P2:
-                if (0 === r3.wrap) {
-                  r3.mode = 13;
-                  break;
-                }
-                for (; l3 < 16; ) {
-                  if (0 === o3)
-                    break e;
-                  o3--, u3 += n3[s3++] << l3, l3 += 8;
-                }
-                if (2 & r3.wrap && 35615 === u3) {
-                  E2[r3.check = 0] = 255 & u3, E2[1] = u3 >>> 8 & 255, r3.check = B2(r3.check, E2, 2, 0), l3 = u3 = 0, r3.mode = 2;
-                  break;
-                }
-                if (r3.flags = 0, r3.head && (r3.head.done = false), !(1 & r3.wrap) || (((255 & u3) << 8) + (u3 >> 8)) % 31) {
-                  e3.msg = "incorrect header check", r3.mode = 30;
-                  break;
-                }
-                if (8 != (15 & u3)) {
-                  e3.msg = "unknown compression method", r3.mode = 30;
-                  break;
-                }
-                if (l3 -= 4, k2 = 8 + (15 & (u3 >>>= 4)), 0 === r3.wbits)
-                  r3.wbits = k2;
-                else if (k2 > r3.wbits) {
-                  e3.msg = "invalid window size", r3.mode = 30;
-                  break;
-                }
-                r3.dmax = 1 << k2, e3.adler = r3.check = 1, r3.mode = 512 & u3 ? 10 : 12, l3 = u3 = 0;
-                break;
-              case 2:
-                for (; l3 < 16; ) {
-                  if (0 === o3)
-                    break e;
-                  o3--, u3 += n3[s3++] << l3, l3 += 8;
-                }
-                if (r3.flags = u3, 8 != (255 & r3.flags)) {
-                  e3.msg = "unknown compression method", r3.mode = 30;
-                  break;
-                }
-                if (57344 & r3.flags) {
-                  e3.msg = "unknown header flags set", r3.mode = 30;
-                  break;
-                }
-                r3.head && (r3.head.text = u3 >> 8 & 1), 512 & r3.flags && (E2[0] = 255 & u3, E2[1] = u3 >>> 8 & 255, r3.check = B2(r3.check, E2, 2, 0)), l3 = u3 = 0, r3.mode = 3;
-              case 3:
-                for (; l3 < 32; ) {
-                  if (0 === o3)
-                    break e;
-                  o3--, u3 += n3[s3++] << l3, l3 += 8;
-                }
-                r3.head && (r3.head.time = u3), 512 & r3.flags && (E2[0] = 255 & u3, E2[1] = u3 >>> 8 & 255, E2[2] = u3 >>> 16 & 255, E2[3] = u3 >>> 24 & 255, r3.check = B2(r3.check, E2, 4, 0)), l3 = u3 = 0, r3.mode = 4;
-              case 4:
-                for (; l3 < 16; ) {
-                  if (0 === o3)
-                    break e;
-                  o3--, u3 += n3[s3++] << l3, l3 += 8;
-                }
-                r3.head && (r3.head.xflags = 255 & u3, r3.head.os = u3 >> 8), 512 & r3.flags && (E2[0] = 255 & u3, E2[1] = u3 >>> 8 & 255, r3.check = B2(r3.check, E2, 2, 0)), l3 = u3 = 0, r3.mode = 5;
-              case 5:
-                if (1024 & r3.flags) {
-                  for (; l3 < 16; ) {
-                    if (0 === o3)
-                      break e;
-                    o3--, u3 += n3[s3++] << l3, l3 += 8;
-                  }
-                  r3.length = u3, r3.head && (r3.head.extra_len = u3), 512 & r3.flags && (E2[0] = 255 & u3, E2[1] = u3 >>> 8 & 255, r3.check = B2(r3.check, E2, 2, 0)), l3 = u3 = 0;
-                } else
-                  r3.head && (r3.head.extra = null);
-                r3.mode = 6;
-              case 6:
-                if (1024 & r3.flags && (o3 < (d2 = r3.length) && (d2 = o3), d2 && (r3.head && (k2 = r3.head.extra_len - r3.length, r3.head.extra || (r3.head.extra = new Array(r3.head.extra_len)), I2.arraySet(r3.head.extra, n3, s3, d2, k2)), 512 & r3.flags && (r3.check = B2(r3.check, n3, d2, s3)), o3 -= d2, s3 += d2, r3.length -= d2), r3.length))
-                  break e;
-                r3.length = 0, r3.mode = 7;
-              case 7:
-                if (2048 & r3.flags) {
-                  if (0 === o3)
-                    break e;
-                  for (d2 = 0; k2 = n3[s3 + d2++], r3.head && k2 && r3.length < 65536 && (r3.head.name += String.fromCharCode(k2)), k2 && d2 < o3; )
-                    ;
-                  if (512 & r3.flags && (r3.check = B2(r3.check, n3, d2, s3)), o3 -= d2, s3 += d2, k2)
-                    break e;
-                } else
-                  r3.head && (r3.head.name = null);
-                r3.length = 0, r3.mode = 8;
-              case 8:
-                if (4096 & r3.flags) {
-                  if (0 === o3)
-                    break e;
-                  for (d2 = 0; k2 = n3[s3 + d2++], r3.head && k2 && r3.length < 65536 && (r3.head.comment += String.fromCharCode(k2)), k2 && d2 < o3; )
-                    ;
-                  if (512 & r3.flags && (r3.check = B2(r3.check, n3, d2, s3)), o3 -= d2, s3 += d2, k2)
-                    break e;
-                } else
-                  r3.head && (r3.head.comment = null);
-                r3.mode = 9;
-              case 9:
-                if (512 & r3.flags) {
-                  for (; l3 < 16; ) {
-                    if (0 === o3)
-                      break e;
-                    o3--, u3 += n3[s3++] << l3, l3 += 8;
-                  }
-                  if (u3 !== (65535 & r3.check)) {
-                    e3.msg = "header crc mismatch", r3.mode = 30;
-                    break;
-                  }
-                  l3 = u3 = 0;
-                }
-                r3.head && (r3.head.hcrc = r3.flags >> 9 & 1, r3.head.done = true), e3.adler = r3.check = 0, r3.mode = 12;
-                break;
-              case 10:
-                for (; l3 < 32; ) {
-                  if (0 === o3)
-                    break e;
-                  o3--, u3 += n3[s3++] << l3, l3 += 8;
-                }
-                e3.adler = r3.check = L2(u3), l3 = u3 = 0, r3.mode = 11;
-              case 11:
-                if (0 === r3.havedict)
-                  return e3.next_out = a3, e3.avail_out = h3, e3.next_in = s3, e3.avail_in = o3, r3.hold = u3, r3.bits = l3, 2;
-                e3.adler = r3.check = 1, r3.mode = 12;
-              case 12:
-                if (5 === t3 || 6 === t3)
-                  break e;
-              case 13:
-                if (r3.last) {
-                  u3 >>>= 7 & l3, l3 -= 7 & l3, r3.mode = 27;
-                  break;
-                }
-                for (; l3 < 3; ) {
-                  if (0 === o3)
-                    break e;
-                  o3--, u3 += n3[s3++] << l3, l3 += 8;
-                }
-                switch (r3.last = 1 & u3, l3 -= 1, 3 & (u3 >>>= 1)) {
-                  case 0:
-                    r3.mode = 14;
-                    break;
-                  case 1:
-                    if (j2(r3), r3.mode = 20, 6 !== t3)
-                      break;
-                    u3 >>>= 2, l3 -= 2;
-                    break e;
-                  case 2:
-                    r3.mode = 17;
-                    break;
-                  case 3:
-                    e3.msg = "invalid block type", r3.mode = 30;
-                }
-                u3 >>>= 2, l3 -= 2;
-                break;
-              case 14:
-                for (u3 >>>= 7 & l3, l3 -= 7 & l3; l3 < 32; ) {
-                  if (0 === o3)
-                    break e;
-                  o3--, u3 += n3[s3++] << l3, l3 += 8;
-                }
-                if ((65535 & u3) != (u3 >>> 16 ^ 65535)) {
-                  e3.msg = "invalid stored block lengths", r3.mode = 30;
-                  break;
-                }
-                if (r3.length = 65535 & u3, l3 = u3 = 0, r3.mode = 15, 6 === t3)
-                  break e;
-              case 15:
-                r3.mode = 16;
-              case 16:
-                if (d2 = r3.length) {
-                  if (o3 < d2 && (d2 = o3), h3 < d2 && (d2 = h3), 0 === d2)
-                    break e;
-                  I2.arraySet(i3, n3, s3, d2, a3), o3 -= d2, s3 += d2, h3 -= d2, a3 += d2, r3.length -= d2;
-                  break;
-                }
-                r3.mode = 12;
-                break;
-              case 17:
-                for (; l3 < 14; ) {
-                  if (0 === o3)
-                    break e;
-                  o3--, u3 += n3[s3++] << l3, l3 += 8;
-                }
-                if (r3.nlen = 257 + (31 & u3), u3 >>>= 5, l3 -= 5, r3.ndist = 1 + (31 & u3), u3 >>>= 5, l3 -= 5, r3.ncode = 4 + (15 & u3), u3 >>>= 4, l3 -= 4, 286 < r3.nlen || 30 < r3.ndist) {
-                  e3.msg = "too many length or distance symbols", r3.mode = 30;
-                  break;
-                }
-                r3.have = 0, r3.mode = 18;
-              case 18:
-                for (; r3.have < r3.ncode; ) {
-                  for (; l3 < 3; ) {
-                    if (0 === o3)
-                      break e;
-                    o3--, u3 += n3[s3++] << l3, l3 += 8;
-                  }
-                  r3.lens[A2[r3.have++]] = 7 & u3, u3 >>>= 3, l3 -= 3;
-                }
-                for (; r3.have < 19; )
-                  r3.lens[A2[r3.have++]] = 0;
-                if (r3.lencode = r3.lendyn, r3.lenbits = 7, S2 = { bits: r3.lenbits }, x2 = T2(0, r3.lens, 0, 19, r3.lencode, 0, r3.work, S2), r3.lenbits = S2.bits, x2) {
-                  e3.msg = "invalid code lengths set", r3.mode = 30;
-                  break;
-                }
-                r3.have = 0, r3.mode = 19;
-              case 19:
-                for (; r3.have < r3.nlen + r3.ndist; ) {
-                  for (; g2 = (C2 = r3.lencode[u3 & (1 << r3.lenbits) - 1]) >>> 16 & 255, b2 = 65535 & C2, !((_2 = C2 >>> 24) <= l3); ) {
-                    if (0 === o3)
-                      break e;
-                    o3--, u3 += n3[s3++] << l3, l3 += 8;
-                  }
-                  if (b2 < 16)
-                    u3 >>>= _2, l3 -= _2, r3.lens[r3.have++] = b2;
-                  else {
-                    if (16 === b2) {
-                      for (z2 = _2 + 2; l3 < z2; ) {
-                        if (0 === o3)
-                          break e;
-                        o3--, u3 += n3[s3++] << l3, l3 += 8;
-                      }
-                      if (u3 >>>= _2, l3 -= _2, 0 === r3.have) {
-                        e3.msg = "invalid bit length repeat", r3.mode = 30;
-                        break;
-                      }
-                      k2 = r3.lens[r3.have - 1], d2 = 3 + (3 & u3), u3 >>>= 2, l3 -= 2;
-                    } else if (17 === b2) {
-                      for (z2 = _2 + 3; l3 < z2; ) {
-                        if (0 === o3)
-                          break e;
-                        o3--, u3 += n3[s3++] << l3, l3 += 8;
-                      }
-                      l3 -= _2, k2 = 0, d2 = 3 + (7 & (u3 >>>= _2)), u3 >>>= 3, l3 -= 3;
-                    } else {
-                      for (z2 = _2 + 7; l3 < z2; ) {
-                        if (0 === o3)
-                          break e;
-                        o3--, u3 += n3[s3++] << l3, l3 += 8;
-                      }
-                      l3 -= _2, k2 = 0, d2 = 11 + (127 & (u3 >>>= _2)), u3 >>>= 7, l3 -= 7;
-                    }
-                    if (r3.have + d2 > r3.nlen + r3.ndist) {
-                      e3.msg = "invalid bit length repeat", r3.mode = 30;
-                      break;
-                    }
-                    for (; d2--; )
-                      r3.lens[r3.have++] = k2;
-                  }
-                }
-                if (30 === r3.mode)
-                  break;
-                if (0 === r3.lens[256]) {
-                  e3.msg = "invalid code -- missing end-of-block", r3.mode = 30;
-                  break;
-                }
-                if (r3.lenbits = 9, S2 = { bits: r3.lenbits }, x2 = T2(D2, r3.lens, 0, r3.nlen, r3.lencode, 0, r3.work, S2), r3.lenbits = S2.bits, x2) {
-                  e3.msg = "invalid literal/lengths set", r3.mode = 30;
-                  break;
-                }
-                if (r3.distbits = 6, r3.distcode = r3.distdyn, S2 = { bits: r3.distbits }, x2 = T2(F2, r3.lens, r3.nlen, r3.ndist, r3.distcode, 0, r3.work, S2), r3.distbits = S2.bits, x2) {
-                  e3.msg = "invalid distances set", r3.mode = 30;
-                  break;
-                }
-                if (r3.mode = 20, 6 === t3)
-                  break e;
-              case 20:
-                r3.mode = 21;
-              case 21:
-                if (6 <= o3 && 258 <= h3) {
-                  e3.next_out = a3, e3.avail_out = h3, e3.next_in = s3, e3.avail_in = o3, r3.hold = u3, r3.bits = l3, R2(e3, c3), a3 = e3.next_out, i3 = e3.output, h3 = e3.avail_out, s3 = e3.next_in, n3 = e3.input, o3 = e3.avail_in, u3 = r3.hold, l3 = r3.bits, 12 === r3.mode && (r3.back = -1);
-                  break;
-                }
-                for (r3.back = 0; g2 = (C2 = r3.lencode[u3 & (1 << r3.lenbits) - 1]) >>> 16 & 255, b2 = 65535 & C2, !((_2 = C2 >>> 24) <= l3); ) {
-                  if (0 === o3)
-                    break e;
-                  o3--, u3 += n3[s3++] << l3, l3 += 8;
-                }
-                if (g2 && 0 == (240 & g2)) {
-                  for (v2 = _2, y2 = g2, w2 = b2; g2 = (C2 = r3.lencode[w2 + ((u3 & (1 << v2 + y2) - 1) >> v2)]) >>> 16 & 255, b2 = 65535 & C2, !(v2 + (_2 = C2 >>> 24) <= l3); ) {
-                    if (0 === o3)
-                      break e;
-                    o3--, u3 += n3[s3++] << l3, l3 += 8;
-                  }
-                  u3 >>>= v2, l3 -= v2, r3.back += v2;
-                }
-                if (u3 >>>= _2, l3 -= _2, r3.back += _2, r3.length = b2, 0 === g2) {
-                  r3.mode = 26;
-                  break;
-                }
-                if (32 & g2) {
-                  r3.back = -1, r3.mode = 12;
-                  break;
-                }
-                if (64 & g2) {
-                  e3.msg = "invalid literal/length code", r3.mode = 30;
-                  break;
-                }
-                r3.extra = 15 & g2, r3.mode = 22;
-              case 22:
-                if (r3.extra) {
-                  for (z2 = r3.extra; l3 < z2; ) {
-                    if (0 === o3)
-                      break e;
-                    o3--, u3 += n3[s3++] << l3, l3 += 8;
-                  }
-                  r3.length += u3 & (1 << r3.extra) - 1, u3 >>>= r3.extra, l3 -= r3.extra, r3.back += r3.extra;
-                }
-                r3.was = r3.length, r3.mode = 23;
-              case 23:
-                for (; g2 = (C2 = r3.distcode[u3 & (1 << r3.distbits) - 1]) >>> 16 & 255, b2 = 65535 & C2, !((_2 = C2 >>> 24) <= l3); ) {
-                  if (0 === o3)
-                    break e;
-                  o3--, u3 += n3[s3++] << l3, l3 += 8;
-                }
-                if (0 == (240 & g2)) {
-                  for (v2 = _2, y2 = g2, w2 = b2; g2 = (C2 = r3.distcode[w2 + ((u3 & (1 << v2 + y2) - 1) >> v2)]) >>> 16 & 255, b2 = 65535 & C2, !(v2 + (_2 = C2 >>> 24) <= l3); ) {
-                    if (0 === o3)
-                      break e;
-                    o3--, u3 += n3[s3++] << l3, l3 += 8;
-                  }
-                  u3 >>>= v2, l3 -= v2, r3.back += v2;
-                }
-                if (u3 >>>= _2, l3 -= _2, r3.back += _2, 64 & g2) {
-                  e3.msg = "invalid distance code", r3.mode = 30;
-                  break;
-                }
-                r3.offset = b2, r3.extra = 15 & g2, r3.mode = 24;
-              case 24:
-                if (r3.extra) {
-                  for (z2 = r3.extra; l3 < z2; ) {
-                    if (0 === o3)
-                      break e;
-                    o3--, u3 += n3[s3++] << l3, l3 += 8;
-                  }
-                  r3.offset += u3 & (1 << r3.extra) - 1, u3 >>>= r3.extra, l3 -= r3.extra, r3.back += r3.extra;
-                }
-                if (r3.offset > r3.dmax) {
-                  e3.msg = "invalid distance too far back", r3.mode = 30;
-                  break;
-                }
-                r3.mode = 25;
-              case 25:
-                if (0 === h3)
-                  break e;
-                if (d2 = c3 - h3, r3.offset > d2) {
-                  if ((d2 = r3.offset - d2) > r3.whave && r3.sane) {
-                    e3.msg = "invalid distance too far back", r3.mode = 30;
-                    break;
-                  }
-                  p2 = d2 > r3.wnext ? (d2 -= r3.wnext, r3.wsize - d2) : r3.wnext - d2, d2 > r3.length && (d2 = r3.length), m2 = r3.window;
-                } else
-                  m2 = i3, p2 = a3 - r3.offset, d2 = r3.length;
-                for (h3 < d2 && (d2 = h3), h3 -= d2, r3.length -= d2; i3[a3++] = m2[p2++], --d2; )
-                  ;
-                0 === r3.length && (r3.mode = 21);
-                break;
-              case 26:
-                if (0 === h3)
-                  break e;
-                i3[a3++] = r3.length, h3--, r3.mode = 21;
-                break;
-              case 27:
-                if (r3.wrap) {
-                  for (; l3 < 32; ) {
-                    if (0 === o3)
-                      break e;
-                    o3--, u3 |= n3[s3++] << l3, l3 += 8;
-                  }
-                  if (c3 -= h3, e3.total_out += c3, r3.total += c3, c3 && (e3.adler = r3.check = r3.flags ? B2(r3.check, i3, c3, a3 - c3) : O2(r3.check, i3, c3, a3 - c3)), c3 = h3, (r3.flags ? u3 : L2(u3)) !== r3.check) {
-                    e3.msg = "incorrect data check", r3.mode = 30;
-                    break;
-                  }
-                  l3 = u3 = 0;
-                }
-                r3.mode = 28;
-              case 28:
-                if (r3.wrap && r3.flags) {
-                  for (; l3 < 32; ) {
-                    if (0 === o3)
-                      break e;
-                    o3--, u3 += n3[s3++] << l3, l3 += 8;
-                  }
-                  if (u3 !== (4294967295 & r3.total)) {
-                    e3.msg = "incorrect length check", r3.mode = 30;
-                    break;
-                  }
-                  l3 = u3 = 0;
-                }
-                r3.mode = 29;
-              case 29:
-                x2 = 1;
-                break e;
-              case 30:
-                x2 = -3;
-                break e;
-              case 31:
-                return -4;
-              case 32:
-              default:
-                return U2;
-            }
-        return e3.next_out = a3, e3.avail_out = h3, e3.next_in = s3, e3.avail_in = o3, r3.hold = u3, r3.bits = l3, (r3.wsize || c3 !== e3.avail_out && r3.mode < 30 && (r3.mode < 27 || 4 !== t3)) && Z2(e3, e3.output, e3.next_out, c3 - e3.avail_out) ? (r3.mode = 31, -4) : (f3 -= e3.avail_in, c3 -= e3.avail_out, e3.total_in += f3, e3.total_out += c3, r3.total += c3, r3.wrap && c3 && (e3.adler = r3.check = r3.flags ? B2(r3.check, i3, c3, e3.next_out - c3) : O2(r3.check, i3, c3, e3.next_out - c3)), e3.data_type = r3.bits + (r3.last ? 64 : 0) + (12 === r3.mode ? 128 : 0) + (20 === r3.mode || 15 === r3.mode ? 256 : 0), (0 == f3 && 0 === c3 || 4 === t3) && x2 === N2 && (x2 = -5), x2);
-      }, r2.inflateEnd = function(e3) {
-        if (!e3 || !e3.state)
-          return U2;
-        var t3 = e3.state;
-        return t3.window && (t3.window = null), e3.state = null, N2;
-      }, r2.inflateGetHeader = function(e3, t3) {
-        var r3;
-        return e3 && e3.state ? 0 == (2 & (r3 = e3.state).wrap) ? U2 : ((r3.head = t3).done = false, N2) : U2;
-      }, r2.inflateSetDictionary = function(e3, t3) {
-        var r3, n3 = t3.length;
-        return e3 && e3.state ? 0 !== (r3 = e3.state).wrap && 11 !== r3.mode ? U2 : 11 === r3.mode && O2(1, t3, n3, 0) !== r3.check ? -3 : Z2(e3, t3, n3, n3) ? (r3.mode = 31, -4) : (r3.havedict = 1, N2) : U2;
-      }, r2.inflateInfo = "pako inflate (from Nodeca project)";
-    }, { "../utils/common": 41, "./adler32": 43, "./crc32": 45, "./inffast": 48, "./inftrees": 50 }], 50: [function(e2, t2, r2) {
-      var D2 = e2("../utils/common"), F2 = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 0, 0], N2 = [16, 16, 16, 16, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 16, 72, 78], U2 = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577, 0, 0], P2 = [16, 16, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26, 26, 27, 27, 28, 28, 29, 29, 64, 64];
-      t2.exports = function(e3, t3, r3, n2, i2, s2, a2, o2) {
-        var h2, u2, l2, f2, c2, d2, p2, m2, _2, g2 = o2.bits, b2 = 0, v2 = 0, y2 = 0, w2 = 0, k2 = 0, x2 = 0, S2 = 0, z2 = 0, C2 = 0, E2 = 0, A2 = null, I2 = 0, O2 = new D2.Buf16(16), B2 = new D2.Buf16(16), R2 = null, T2 = 0;
-        for (b2 = 0; b2 <= 15; b2++)
-          O2[b2] = 0;
-        for (v2 = 0; v2 < n2; v2++)
-          O2[t3[r3 + v2]]++;
-        for (k2 = g2, w2 = 15; 1 <= w2 && 0 === O2[w2]; w2--)
-          ;
-        if (w2 < k2 && (k2 = w2), 0 === w2)
-          return i2[s2++] = 20971520, i2[s2++] = 20971520, o2.bits = 1, 0;
-        for (y2 = 1; y2 < w2 && 0 === O2[y2]; y2++)
-          ;
-        for (k2 < y2 && (k2 = y2), b2 = z2 = 1; b2 <= 15; b2++)
-          if (z2 <<= 1, (z2 -= O2[b2]) < 0)
-            return -1;
-        if (0 < z2 && (0 === e3 || 1 !== w2))
-          return -1;
-        for (B2[1] = 0, b2 = 1; b2 < 15; b2++)
-          B2[b2 + 1] = B2[b2] + O2[b2];
-        for (v2 = 0; v2 < n2; v2++)
-          0 !== t3[r3 + v2] && (a2[B2[t3[r3 + v2]]++] = v2);
-        if (d2 = 0 === e3 ? (A2 = R2 = a2, 19) : 1 === e3 ? (A2 = F2, I2 -= 257, R2 = N2, T2 -= 257, 256) : (A2 = U2, R2 = P2, -1), b2 = y2, c2 = s2, S2 = v2 = E2 = 0, l2 = -1, f2 = (C2 = 1 << (x2 = k2)) - 1, 1 === e3 && 852 < C2 || 2 === e3 && 592 < C2)
-          return 1;
-        for (; ; ) {
-          for (p2 = b2 - S2, _2 = a2[v2] < d2 ? (m2 = 0, a2[v2]) : a2[v2] > d2 ? (m2 = R2[T2 + a2[v2]], A2[I2 + a2[v2]]) : (m2 = 96, 0), h2 = 1 << b2 - S2, y2 = u2 = 1 << x2; i2[c2 + (E2 >> S2) + (u2 -= h2)] = p2 << 24 | m2 << 16 | _2 | 0, 0 !== u2; )
-            ;
-          for (h2 = 1 << b2 - 1; E2 & h2; )
-            h2 >>= 1;
-          if (0 !== h2 ? (E2 &= h2 - 1, E2 += h2) : E2 = 0, v2++, 0 == --O2[b2]) {
-            if (b2 === w2)
-              break;
-            b2 = t3[r3 + a2[v2]];
-          }
-          if (k2 < b2 && (E2 & f2) !== l2) {
-            for (0 === S2 && (S2 = k2), c2 += y2, z2 = 1 << (x2 = b2 - S2); x2 + S2 < w2 && !((z2 -= O2[x2 + S2]) <= 0); )
-              x2++, z2 <<= 1;
-            if (C2 += 1 << x2, 1 === e3 && 852 < C2 || 2 === e3 && 592 < C2)
-              return 1;
-            i2[l2 = E2 & f2] = k2 << 24 | x2 << 16 | c2 - s2 | 0;
-          }
-        }
-        return 0 !== E2 && (i2[c2 + E2] = b2 - S2 << 24 | 64 << 16 | 0), o2.bits = k2, 0;
-      };
-    }, { "../utils/common": 41 }], 51: [function(e2, t2, r2) {
-      t2.exports = { 2: "need dictionary", 1: "stream end", 0: "", "-1": "file error", "-2": "stream error", "-3": "data error", "-4": "insufficient memory", "-5": "buffer error", "-6": "incompatible version" };
-    }, {}], 52: [function(e2, t2, r2) {
-      var i2 = e2("../utils/common"), o2 = 0, h2 = 1;
-      function n2(e3) {
-        for (var t3 = e3.length; 0 <= --t3; )
-          e3[t3] = 0;
-      }
-      var s2 = 0, a2 = 29, u2 = 256, l2 = u2 + 1 + a2, f2 = 30, c2 = 19, _2 = 2 * l2 + 1, g2 = 15, d2 = 16, p2 = 7, m2 = 256, b2 = 16, v2 = 17, y2 = 18, w2 = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0], k2 = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13], x2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 7], S2 = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15], z2 = new Array(2 * (l2 + 2));
-      n2(z2);
-      var C2 = new Array(2 * f2);
-      n2(C2);
-      var E2 = new Array(512);
-      n2(E2);
-      var A2 = new Array(256);
-      n2(A2);
-      var I2 = new Array(a2);
-      n2(I2);
-      var O2, B2, R2, T2 = new Array(f2);
-      function D2(e3, t3, r3, n3, i3) {
-        this.static_tree = e3, this.extra_bits = t3, this.extra_base = r3, this.elems = n3, this.max_length = i3, this.has_stree = e3 && e3.length;
-      }
-      function F2(e3, t3) {
-        this.dyn_tree = e3, this.max_code = 0, this.stat_desc = t3;
-      }
-      function N2(e3) {
-        return e3 < 256 ? E2[e3] : E2[256 + (e3 >>> 7)];
-      }
-      function U2(e3, t3) {
-        e3.pending_buf[e3.pending++] = 255 & t3, e3.pending_buf[e3.pending++] = t3 >>> 8 & 255;
-      }
-      function P2(e3, t3, r3) {
-        e3.bi_valid > d2 - r3 ? (e3.bi_buf |= t3 << e3.bi_valid & 65535, U2(e3, e3.bi_buf), e3.bi_buf = t3 >> d2 - e3.bi_valid, e3.bi_valid += r3 - d2) : (e3.bi_buf |= t3 << e3.bi_valid & 65535, e3.bi_valid += r3);
-      }
-      function L2(e3, t3, r3) {
-        P2(e3, r3[2 * t3], r3[2 * t3 + 1]);
-      }
-      function j2(e3, t3) {
-        for (var r3 = 0; r3 |= 1 & e3, e3 >>>= 1, r3 <<= 1, 0 < --t3; )
-          ;
-        return r3 >>> 1;
-      }
-      function Z2(e3, t3, r3) {
-        var n3, i3, s3 = new Array(g2 + 1), a3 = 0;
-        for (n3 = 1; n3 <= g2; n3++)
-          s3[n3] = a3 = a3 + r3[n3 - 1] << 1;
-        for (i3 = 0; i3 <= t3; i3++) {
-          var o3 = e3[2 * i3 + 1];
-          0 !== o3 && (e3[2 * i3] = j2(s3[o3]++, o3));
-        }
-      }
-      function W2(e3) {
-        var t3;
-        for (t3 = 0; t3 < l2; t3++)
-          e3.dyn_ltree[2 * t3] = 0;
-        for (t3 = 0; t3 < f2; t3++)
-          e3.dyn_dtree[2 * t3] = 0;
-        for (t3 = 0; t3 < c2; t3++)
-          e3.bl_tree[2 * t3] = 0;
-        e3.dyn_ltree[2 * m2] = 1, e3.opt_len = e3.static_len = 0, e3.last_lit = e3.matches = 0;
-      }
-      function M2(e3) {
-        8 < e3.bi_valid ? U2(e3, e3.bi_buf) : 0 < e3.bi_valid && (e3.pending_buf[e3.pending++] = e3.bi_buf), e3.bi_buf = 0, e3.bi_valid = 0;
-      }
-      function H2(e3, t3, r3, n3) {
-        var i3 = 2 * t3, s3 = 2 * r3;
-        return e3[i3] < e3[s3] || e3[i3] === e3[s3] && n3[t3] <= n3[r3];
-      }
-      function G2(e3, t3, r3) {
-        for (var n3 = e3.heap[r3], i3 = r3 << 1; i3 <= e3.heap_len && (i3 < e3.heap_len && H2(t3, e3.heap[i3 + 1], e3.heap[i3], e3.depth) && i3++, !H2(t3, n3, e3.heap[i3], e3.depth)); )
-          e3.heap[r3] = e3.heap[i3], r3 = i3, i3 <<= 1;
-        e3.heap[r3] = n3;
-      }
-      function K2(e3, t3, r3) {
-        var n3, i3, s3, a3, o3 = 0;
-        if (0 !== e3.last_lit)
-          for (; n3 = e3.pending_buf[e3.d_buf + 2 * o3] << 8 | e3.pending_buf[e3.d_buf + 2 * o3 + 1], i3 = e3.pending_buf[e3.l_buf + o3], o3++, 0 === n3 ? L2(e3, i3, t3) : (L2(e3, (s3 = A2[i3]) + u2 + 1, t3), 0 !== (a3 = w2[s3]) && P2(e3, i3 -= I2[s3], a3), L2(e3, s3 = N2(--n3), r3), 0 !== (a3 = k2[s3]) && P2(e3, n3 -= T2[s3], a3)), o3 < e3.last_lit; )
-            ;
-        L2(e3, m2, t3);
-      }
-      function Y2(e3, t3) {
-        var r3, n3, i3, s3 = t3.dyn_tree, a3 = t3.stat_desc.static_tree, o3 = t3.stat_desc.has_stree, h3 = t3.stat_desc.elems, u3 = -1;
-        for (e3.heap_len = 0, e3.heap_max = _2, r3 = 0; r3 < h3; r3++)
-          0 !== s3[2 * r3] ? (e3.heap[++e3.heap_len] = u3 = r3, e3.depth[r3] = 0) : s3[2 * r3 + 1] = 0;
-        for (; e3.heap_len < 2; )
-          s3[2 * (i3 = e3.heap[++e3.heap_len] = u3 < 2 ? ++u3 : 0)] = 1, e3.depth[i3] = 0, e3.opt_len--, o3 && (e3.static_len -= a3[2 * i3 + 1]);
-        for (t3.max_code = u3, r3 = e3.heap_len >> 1; 1 <= r3; r3--)
-          G2(e3, s3, r3);
-        for (i3 = h3; r3 = e3.heap[1], e3.heap[1] = e3.heap[e3.heap_len--], G2(e3, s3, 1), n3 = e3.heap[1], e3.heap[--e3.heap_max] = r3, e3.heap[--e3.heap_max] = n3, s3[2 * i3] = s3[2 * r3] + s3[2 * n3], e3.depth[i3] = (e3.depth[r3] >= e3.depth[n3] ? e3.depth[r3] : e3.depth[n3]) + 1, s3[2 * r3 + 1] = s3[2 * n3 + 1] = i3, e3.heap[1] = i3++, G2(e3, s3, 1), 2 <= e3.heap_len; )
-          ;
-        e3.heap[--e3.heap_max] = e3.heap[1], function(e4, t4) {
-          var r4, n4, i4, s4, a4, o4, h4 = t4.dyn_tree, u4 = t4.max_code, l3 = t4.stat_desc.static_tree, f3 = t4.stat_desc.has_stree, c3 = t4.stat_desc.extra_bits, d3 = t4.stat_desc.extra_base, p3 = t4.stat_desc.max_length, m3 = 0;
-          for (s4 = 0; s4 <= g2; s4++)
-            e4.bl_count[s4] = 0;
-          for (h4[2 * e4.heap[e4.heap_max] + 1] = 0, r4 = e4.heap_max + 1; r4 < _2; r4++)
-            p3 < (s4 = h4[2 * h4[2 * (n4 = e4.heap[r4]) + 1] + 1] + 1) && (s4 = p3, m3++), h4[2 * n4 + 1] = s4, u4 < n4 || (e4.bl_count[s4]++, a4 = 0, d3 <= n4 && (a4 = c3[n4 - d3]), o4 = h4[2 * n4], e4.opt_len += o4 * (s4 + a4), f3 && (e4.static_len += o4 * (l3[2 * n4 + 1] + a4)));
-          if (0 !== m3) {
-            do {
-              for (s4 = p3 - 1; 0 === e4.bl_count[s4]; )
-                s4--;
-              e4.bl_count[s4]--, e4.bl_count[s4 + 1] += 2, e4.bl_count[p3]--, m3 -= 2;
-            } while (0 < m3);
-            for (s4 = p3; 0 !== s4; s4--)
-              for (n4 = e4.bl_count[s4]; 0 !== n4; )
-                u4 < (i4 = e4.heap[--r4]) || (h4[2 * i4 + 1] !== s4 && (e4.opt_len += (s4 - h4[2 * i4 + 1]) * h4[2 * i4], h4[2 * i4 + 1] = s4), n4--);
-          }
-        }(e3, t3), Z2(s3, u3, e3.bl_count);
-      }
-      function X2(e3, t3, r3) {
-        var n3, i3, s3 = -1, a3 = t3[1], o3 = 0, h3 = 7, u3 = 4;
-        for (0 === a3 && (h3 = 138, u3 = 3), t3[2 * (r3 + 1) + 1] = 65535, n3 = 0; n3 <= r3; n3++)
-          i3 = a3, a3 = t3[2 * (n3 + 1) + 1], ++o3 < h3 && i3 === a3 || (o3 < u3 ? e3.bl_tree[2 * i3] += o3 : 0 !== i3 ? (i3 !== s3 && e3.bl_tree[2 * i3]++, e3.bl_tree[2 * b2]++) : o3 <= 10 ? e3.bl_tree[2 * v2]++ : e3.bl_tree[2 * y2]++, s3 = i3, u3 = (o3 = 0) === a3 ? (h3 = 138, 3) : i3 === a3 ? (h3 = 6, 3) : (h3 = 7, 4));
-      }
-      function V2(e3, t3, r3) {
-        var n3, i3, s3 = -1, a3 = t3[1], o3 = 0, h3 = 7, u3 = 4;
-        for (0 === a3 && (h3 = 138, u3 = 3), n3 = 0; n3 <= r3; n3++)
-          if (i3 = a3, a3 = t3[2 * (n3 + 1) + 1], !(++o3 < h3 && i3 === a3)) {
-            if (o3 < u3)
-              for (; L2(e3, i3, e3.bl_tree), 0 != --o3; )
-                ;
-            else
-              0 !== i3 ? (i3 !== s3 && (L2(e3, i3, e3.bl_tree), o3--), L2(e3, b2, e3.bl_tree), P2(e3, o3 - 3, 2)) : o3 <= 10 ? (L2(e3, v2, e3.bl_tree), P2(e3, o3 - 3, 3)) : (L2(e3, y2, e3.bl_tree), P2(e3, o3 - 11, 7));
-            s3 = i3, u3 = (o3 = 0) === a3 ? (h3 = 138, 3) : i3 === a3 ? (h3 = 6, 3) : (h3 = 7, 4);
-          }
-      }
-      n2(T2);
-      var q3 = false;
-      function J2(e3, t3, r3, n3) {
-        P2(e3, (s2 << 1) + (n3 ? 1 : 0), 3), function(e4, t4, r4, n4) {
-          M2(e4), n4 && (U2(e4, r4), U2(e4, ~r4)), i2.arraySet(e4.pending_buf, e4.window, t4, r4, e4.pending), e4.pending += r4;
-        }(e3, t3, r3, true);
-      }
-      r2._tr_init = function(e3) {
-        q3 || (function() {
-          var e4, t3, r3, n3, i3, s3 = new Array(g2 + 1);
-          for (n3 = r3 = 0; n3 < a2 - 1; n3++)
-            for (I2[n3] = r3, e4 = 0; e4 < 1 << w2[n3]; e4++)
-              A2[r3++] = n3;
-          for (A2[r3 - 1] = n3, n3 = i3 = 0; n3 < 16; n3++)
-            for (T2[n3] = i3, e4 = 0; e4 < 1 << k2[n3]; e4++)
-              E2[i3++] = n3;
-          for (i3 >>= 7; n3 < f2; n3++)
-            for (T2[n3] = i3 << 7, e4 = 0; e4 < 1 << k2[n3] - 7; e4++)
-              E2[256 + i3++] = n3;
-          for (t3 = 0; t3 <= g2; t3++)
-            s3[t3] = 0;
-          for (e4 = 0; e4 <= 143; )
-            z2[2 * e4 + 1] = 8, e4++, s3[8]++;
-          for (; e4 <= 255; )
-            z2[2 * e4 + 1] = 9, e4++, s3[9]++;
-          for (; e4 <= 279; )
-            z2[2 * e4 + 1] = 7, e4++, s3[7]++;
-          for (; e4 <= 287; )
-            z2[2 * e4 + 1] = 8, e4++, s3[8]++;
-          for (Z2(z2, l2 + 1, s3), e4 = 0; e4 < f2; e4++)
-            C2[2 * e4 + 1] = 5, C2[2 * e4] = j2(e4, 5);
-          O2 = new D2(z2, w2, u2 + 1, l2, g2), B2 = new D2(C2, k2, 0, f2, g2), R2 = new D2(new Array(0), x2, 0, c2, p2);
-        }(), q3 = true), e3.l_desc = new F2(e3.dyn_ltree, O2), e3.d_desc = new F2(e3.dyn_dtree, B2), e3.bl_desc = new F2(e3.bl_tree, R2), e3.bi_buf = 0, e3.bi_valid = 0, W2(e3);
-      }, r2._tr_stored_block = J2, r2._tr_flush_block = function(e3, t3, r3, n3) {
-        var i3, s3, a3 = 0;
-        0 < e3.level ? (2 === e3.strm.data_type && (e3.strm.data_type = function(e4) {
-          var t4, r4 = 4093624447;
-          for (t4 = 0; t4 <= 31; t4++, r4 >>>= 1)
-            if (1 & r4 && 0 !== e4.dyn_ltree[2 * t4])
-              return o2;
-          if (0 !== e4.dyn_ltree[18] || 0 !== e4.dyn_ltree[20] || 0 !== e4.dyn_ltree[26])
-            return h2;
-          for (t4 = 32; t4 < u2; t4++)
-            if (0 !== e4.dyn_ltree[2 * t4])
-              return h2;
-          return o2;
-        }(e3)), Y2(e3, e3.l_desc), Y2(e3, e3.d_desc), a3 = function(e4) {
-          var t4;
-          for (X2(e4, e4.dyn_ltree, e4.l_desc.max_code), X2(e4, e4.dyn_dtree, e4.d_desc.max_code), Y2(e4, e4.bl_desc), t4 = c2 - 1; 3 <= t4 && 0 === e4.bl_tree[2 * S2[t4] + 1]; t4--)
-            ;
-          return e4.opt_len += 3 * (t4 + 1) + 5 + 5 + 4, t4;
-        }(e3), i3 = e3.opt_len + 3 + 7 >>> 3, (s3 = e3.static_len + 3 + 7 >>> 3) <= i3 && (i3 = s3)) : i3 = s3 = r3 + 5, r3 + 4 <= i3 && -1 !== t3 ? J2(e3, t3, r3, n3) : 4 === e3.strategy || s3 === i3 ? (P2(e3, 2 + (n3 ? 1 : 0), 3), K2(e3, z2, C2)) : (P2(e3, 4 + (n3 ? 1 : 0), 3), function(e4, t4, r4, n4) {
-          var i4;
-          for (P2(e4, t4 - 257, 5), P2(e4, r4 - 1, 5), P2(e4, n4 - 4, 4), i4 = 0; i4 < n4; i4++)
-            P2(e4, e4.bl_tree[2 * S2[i4] + 1], 3);
-          V2(e4, e4.dyn_ltree, t4 - 1), V2(e4, e4.dyn_dtree, r4 - 1);
-        }(e3, e3.l_desc.max_code + 1, e3.d_desc.max_code + 1, a3 + 1), K2(e3, e3.dyn_ltree, e3.dyn_dtree)), W2(e3), n3 && M2(e3);
-      }, r2._tr_tally = function(e3, t3, r3) {
-        return e3.pending_buf[e3.d_buf + 2 * e3.last_lit] = t3 >>> 8 & 255, e3.pending_buf[e3.d_buf + 2 * e3.last_lit + 1] = 255 & t3, e3.pending_buf[e3.l_buf + e3.last_lit] = 255 & r3, e3.last_lit++, 0 === t3 ? e3.dyn_ltree[2 * r3]++ : (e3.matches++, t3--, e3.dyn_ltree[2 * (A2[r3] + u2 + 1)]++, e3.dyn_dtree[2 * N2(t3)]++), e3.last_lit === e3.lit_bufsize - 1;
-      }, r2._tr_align = function(e3) {
-        P2(e3, 2, 3), L2(e3, m2, z2), function(e4) {
-          16 === e4.bi_valid ? (U2(e4, e4.bi_buf), e4.bi_buf = 0, e4.bi_valid = 0) : 8 <= e4.bi_valid && (e4.pending_buf[e4.pending++] = 255 & e4.bi_buf, e4.bi_buf >>= 8, e4.bi_valid -= 8);
-        }(e3);
-      };
-    }, { "../utils/common": 41 }], 53: [function(e2, t2, r2) {
-      t2.exports = function() {
-        this.input = null, this.next_in = 0, this.avail_in = 0, this.total_in = 0, this.output = null, this.next_out = 0, this.avail_out = 0, this.total_out = 0, this.msg = "", this.state = null, this.data_type = 2, this.adler = 0;
-      };
-    }, {}], 54: [function(e2, t2, r2) {
-      (function(e3) {
-        !function(r3, n2) {
-          if (!r3.setImmediate) {
-            var i2, s2, t3, a2, o2 = 1, h2 = {}, u2 = false, l2 = r3.document, e4 = Object.getPrototypeOf && Object.getPrototypeOf(r3);
-            e4 = e4 && e4.setTimeout ? e4 : r3, i2 = "[object process]" === {}.toString.call(r3.process) ? function(e5) {
-              process.nextTick(function() {
-                c2(e5);
-              });
-            } : function() {
-              if (r3.postMessage && !r3.importScripts) {
-                var e5 = true, t4 = r3.onmessage;
-                return r3.onmessage = function() {
-                  e5 = false;
-                }, r3.postMessage("", "*"), r3.onmessage = t4, e5;
-              }
-            }() ? (a2 = "setImmediate$" + Math.random() + "$", r3.addEventListener ? r3.addEventListener("message", d2, false) : r3.attachEvent("onmessage", d2), function(e5) {
-              r3.postMessage(a2 + e5, "*");
-            }) : r3.MessageChannel ? ((t3 = new MessageChannel()).port1.onmessage = function(e5) {
-              c2(e5.data);
-            }, function(e5) {
-              t3.port2.postMessage(e5);
-            }) : l2 && "onreadystatechange" in l2.createElement("script") ? (s2 = l2.documentElement, function(e5) {
-              var t4 = l2.createElement("script");
-              t4.onreadystatechange = function() {
-                c2(e5), t4.onreadystatechange = null, s2.removeChild(t4), t4 = null;
-              }, s2.appendChild(t4);
-            }) : function(e5) {
-              setTimeout(c2, 0, e5);
-            }, e4.setImmediate = function(e5) {
-              "function" != typeof e5 && (e5 = new Function("" + e5));
-              for (var t4 = new Array(arguments.length - 1), r4 = 0; r4 < t4.length; r4++)
-                t4[r4] = arguments[r4 + 1];
-              var n3 = { callback: e5, args: t4 };
-              return h2[o2] = n3, i2(o2), o2++;
-            }, e4.clearImmediate = f2;
-          }
-          function f2(e5) {
-            delete h2[e5];
-          }
-          function c2(e5) {
-            if (u2)
-              setTimeout(c2, 0, e5);
-            else {
-              var t4 = h2[e5];
-              if (t4) {
-                u2 = true;
-                try {
-                  !function(e6) {
-                    var t5 = e6.callback, r4 = e6.args;
-                    switch (r4.length) {
-                      case 0:
-                        t5();
-                        break;
-                      case 1:
-                        t5(r4[0]);
-                        break;
-                      case 2:
-                        t5(r4[0], r4[1]);
-                        break;
-                      case 3:
-                        t5(r4[0], r4[1], r4[2]);
-                        break;
-                      default:
-                        t5.apply(n2, r4);
-                    }
-                  }(t4);
-                } finally {
-                  f2(e5), u2 = false;
-                }
-              }
-            }
-          }
-          function d2(e5) {
-            e5.source === r3 && "string" == typeof e5.data && 0 === e5.data.indexOf(a2) && c2(+e5.data.slice(a2.length));
-          }
-        }("undefined" == typeof self ? void 0 === e3 ? this : e3 : self);
-      }).call(this, "undefined" != typeof commonjsGlobal ? commonjsGlobal : "undefined" != typeof self ? self : "undefined" != typeof window ? window : {});
-    }, {}] }, {}, [10])(10);
-  });
-})(jszip_min);
-var jszip_minExports = jszip_min.exports;
-const JsZip = /* @__PURE__ */ getDefaultExportFromCjs(jszip_minExports);
-var FileSaver_min = { exports: {} };
-(function(module, exports) {
-  (function(a2, b2) {
-    b2();
-  })(commonjsGlobal, function() {
-    function b2(a3, b3) {
-      return "undefined" == typeof b3 ? b3 = { autoBom: false } : "object" != typeof b3 && (console.warn("Deprecated: Expected third argument to be a object"), b3 = { autoBom: !b3 }), b3.autoBom && /^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a3.type) ? new Blob(["\uFEFF", a3], { type: a3.type }) : a3;
-    }
-    function c2(a3, b3, c3) {
-      var d3 = new XMLHttpRequest();
-      d3.open("GET", a3), d3.responseType = "blob", d3.onload = function() {
-        g2(d3.response, b3, c3);
-      }, d3.onerror = function() {
-        console.error("could not download file");
-      }, d3.send();
-    }
-    function d2(a3) {
-      var b3 = new XMLHttpRequest();
-      b3.open("HEAD", a3, false);
-      try {
-        b3.send();
-      } catch (a4) {
-      }
-      return 200 <= b3.status && 299 >= b3.status;
-    }
-    function e2(a3) {
-      try {
-        a3.dispatchEvent(new MouseEvent("click"));
-      } catch (c3) {
-        var b3 = document.createEvent("MouseEvents");
-        b3.initMouseEvent("click", true, true, window, 0, 0, 0, 80, 20, false, false, false, false, 0, null), a3.dispatchEvent(b3);
-      }
-    }
-    var f2 = "object" == typeof window && window.window === window ? window : "object" == typeof self && self.self === self ? self : "object" == typeof commonjsGlobal && commonjsGlobal.global === commonjsGlobal ? commonjsGlobal : void 0, a2 = f2.navigator && /Macintosh/.test(navigator.userAgent) && /AppleWebKit/.test(navigator.userAgent) && !/Safari/.test(navigator.userAgent), g2 = f2.saveAs || ("object" != typeof window || window !== f2 ? function() {
-    } : "download" in HTMLAnchorElement.prototype && !a2 ? function(b3, g3, h2) {
-      var i2 = f2.URL || f2.webkitURL, j2 = document.createElement("a");
-      g3 = g3 || b3.name || "download", j2.download = g3, j2.rel = "noopener", "string" == typeof b3 ? (j2.href = b3, j2.origin === location.origin ? e2(j2) : d2(j2.href) ? c2(b3, g3, h2) : e2(j2, j2.target = "_blank")) : (j2.href = i2.createObjectURL(b3), setTimeout(function() {
-        i2.revokeObjectURL(j2.href);
-      }, 4e4), setTimeout(function() {
-        e2(j2);
-      }, 0));
-    } : "msSaveOrOpenBlob" in navigator ? function(f3, g3, h2) {
-      if (g3 = g3 || f3.name || "download", "string" != typeof f3)
-        navigator.msSaveOrOpenBlob(b2(f3, h2), g3);
-      else if (d2(f3))
-        c2(f3, g3, h2);
-      else {
-        var i2 = document.createElement("a");
-        i2.href = f3, i2.target = "_blank", setTimeout(function() {
-          e2(i2);
-        });
-      }
-    } : function(b3, d3, e3, g3) {
-      if (g3 = g3 || open("", "_blank"), g3 && (g3.document.title = g3.document.body.innerText = "downloading..."), "string" == typeof b3)
-        return c2(b3, d3, e3);
-      var h2 = "application/octet-stream" === b3.type, i2 = /constructor/i.test(f2.HTMLElement) || f2.safari, j2 = /CriOS\/[\d]+/.test(navigator.userAgent);
-      if ((j2 || h2 && i2 || a2) && "undefined" != typeof FileReader) {
-        var k2 = new FileReader();
-        k2.onloadend = function() {
-          var a3 = k2.result;
-          a3 = j2 ? a3 : a3.replace(/^data:[^;]*;/, "data:attachment/file;"), g3 ? g3.location.href = a3 : location = a3, g3 = null;
-        }, k2.readAsDataURL(b3);
-      } else {
-        var l2 = f2.URL || f2.webkitURL, m2 = l2.createObjectURL(b3);
-        g3 ? g3.location = m2 : location.href = m2, g3 = null, setTimeout(function() {
-          l2.revokeObjectURL(m2);
-        }, 4e4);
-      }
-    });
-    f2.saveAs = g2.saveAs = g2, module.exports = g2;
-  });
-})(FileSaver_min);
-var FileSaver_minExports = FileSaver_min.exports;
-const FileSaver = /* @__PURE__ */ getDefaultExportFromCjs(FileSaver_minExports);
-const workerNodeTemplate = `import rclpy
-from rclpy.node import Node
-from std_msgs.msg import Int32
-from crazyflie_py import generate_trajectory
-import numpy as np
-from blocklyTranslations import *
-from types import SimpleNamespace
-from TimeHelper import TimeHelper  # TODO add to files downloaded
-
-Hz = 30
-
-class worker_node(Node):
-
-    def __init__(self, crazyflies, id=0, num_nodes=1):
-        """
-        id: a unique id between 0 and num_nodes corresponding to the thread number of this worker
-        num_nodes: number of nodes (threads) in total
-        """
-        super().__init__("worker_node_{}".format(id))
-        assert(isinstance(id, int))
-        self.id = id
-        self.num_nodes = num_nodes
-        self.crazyflies = crazyflies
-
-        self.timer = self.create_timer(1/Hz, self.timer_callback)
-        self.timeHelper = TimeHelper(self)
-        self.running = False
-        self.done = False
-    
-    def compute_trajectories(self):
-        """
-        Inject Trajectory computation code here...
-        """
-        trajectories = []
-        ### -----Insert Trajectories Here-------
-
-        return trajectories
-
-    def upload_trajectories(crazyflies, trajectories):
-        '''
-            Upload trajectories to crazyflies one by one
-        '''
-
-        for i, traj in enumerate(trajectories):
-            for cf in crazyflies:
-                cf.uploadTrajectory(traj, i, 0)
-
-    def start(self):
-        """
-            Start execution of blocks
-        """
-        trajectories = self.compute_trajectories()
-        self.upload_trajectories(trajectories)
-        self.execute_blocks()
-
-    def time(self):
-        return self.get_clock().now().nanoseconds / 1e9
-    
-    def execute_blocks(self):
-        """
-        Must be injected into...
-
-        Typical format should be:
-        
-        start_time = 0.0
-        self.timeHelper.sleepUntil(start_time)
-        takeoff(crazyflies, height=1.0, duration=2.0)
-
-        start_time = 5.0
-        self.wait_until(start_time)
-        land(crazyflies, height=0.0, duration=2.0)
-        
-        ...
-
-        Where a new start time is added for each block.
-        """
-        groupState = SimpleNamespace(crazyflies=self.crazyflies, timeHelper=self.timeHelper)
-        ### ---------Insert Execution Code Here------------
-        
-        self.done = True
-    
-    def timer_callback(self):
-        if not self.running:
-            self.start()
-            self.running = True`;
-const launcherNode = `import yaml
-from ament_index_python.packages import get_package_share_directory
-from crazyflie_py import Crazyswarm
-import rclpy
-import threading
-import time
-from rclpy.node import Node
-
-
-class crazyflie_node(Node):
-    def __init__(self, crazyswarm):
-        super().__init__("crazyswarm_node")
-        Hz = 20
-        self.crazyswarm = crazyswarm
-        self.timeHelper = crazyswarm.timeHelper
-        self.timer = self.create_timer(
-            1 / Hz,
-            self.timer_callback,
-        )
-
-    def timer_callback(self):
-        self.timeHelper.sleepForRate(50)
-# Inject Imports Here:
-
-def launch(nodes):
-    # Allocate extra threads because worker callbacks can block for long durations.
-    thread_count = max(8, len(nodes) * 2)
-    executor = rclpy.executors.MultiThreadedExecutor(num_threads=thread_count)
-
-    for node in nodes:
-        executor.add_node(node)
-    
-    thread = threading.Thread(target=executor.spin, daemon=True)
-    thread.start()
-    try:
-        while rclpy.ok():
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        pass
-    rclpy.shutdown()
-    thread.join()
-    
-
-def main():
-    # node_config_file = get_package_share_directory('crazyflie'), 'config', 'crazyflies.yaml'
-    
-    # Initialize swarm
-    swarm = Crazyswarm()
-    with open("cfs_ordering.yaml") as f:
-        ordering = yaml.safe_load(f) #TODO!!!
-        order = ordering['cfs']
-    
-    crazyflies = [swarm.allcfs.crazyfliesById[int(k)] for k in order]
-    counter = 0
-    nodes = []
-    cfs = []
-
-    #   -----------Insert Nodes Here----------- 
-
-    # nodes.append(crazyflie_node(swarm))
-    nodes.append(swarm.allcfs)
-    # Launch all nodes
-    return launch(nodes)
-
-if __name__ == '__main__':
-    main()
+  },
+  pythonGenerator: (block, python2) => {
+    const originalTraj = python2.statementToCode(block, "originalTraj").trim();
+    const x2 = block.getFieldValue("x");
+    const y2 = block.getFieldValue("y");
+    const z2 = block.getFieldValue("z");
+    return `translate(groupState, lambda groupState: ${originalTraj}, ${x2}, ${y2}, ${z2})
 `;
-const configure = `# Need to ask user which crazyflies they will use, and will tell them where to place them
-
-import yaml
-import copy
-import os, sys, stat
-
-# Load starting positions from blockly
-with open('starting_positions.yaml') as f:
-    starting_positions = yaml.safe_load(f)
-
-n_robots = len(starting_positions['positions'])
-
-print("You will need {} crazyflies".format(n_robots))
-print("Which crazyflies (by ID) will you use?")
-
-cfs = []
-for i in range(n_robots):
-    cf = input("crazyflie #{}: ".format(i + 1))
-    cfs.append(cf)
-
-    
-start_dict = {}
-for cf, pos in zip(cfs, starting_positions['positions']):
-    print("Place cf {} at location {}".format(cf, pos))
-    start_dict[cf] = pos #TODO: Ordering!
-
-# Make changes to local mycrazyflies.yaml
-with open(os.path.expanduser('~/ros2_ws/src/Brown-crazyswarm2/crazyflie/config/crazyflies.yaml'), 'r') as f:
-    all_crazyflies = yaml.safe_load(f)
-
-# TODO: All CFS have to be commented in...
-my_cfs = copy.deepcopy(all_crazyflies)
-for r in all_crazyflies['robots']:
-    id = r.strip('cf')
-    if id not in cfs:
-        del my_cfs['robots'][r]
-    else:
-        my_cfs['robots'][r]['enabled'] = True
-        my_cfs['robots'][r]['initial_position'] = start_dict[id]
-
-
-with open('my_crazyflies.yaml', 'w') as f:
-    yaml.dump(my_cfs, f)
-with open('cfs_ordering.yaml', 'w') as f:
-    yaml.dump({'cfs': cfs}, f)
-
-# Make commands for sim and non-sim launches
-with open('sim.sh', 'w') as f:
-    f.write('ros2 launch launch.py backend:=sim')
-    os.chmod('sim.sh', stat.S_IRWXU)
-with open('run.sh', 'w') as f:
-    f.write('ros2 launch launch.py')
-    os.chmod('run.sh', stat.S_IRWXU)`;
-const translations = `from collections import namedtuple
-from types import SimpleNamespace
-import numpy as np
-from PIL import ImageColor
-import rclpy
-import random
-import time
-from crazyflieLoggers import *
-import rowan
-from scipy.spatial.transform import Rotation as R
-
-import traceback
-
-Hz = 20
-
-
-def _safe_cf_position(cf, retries=50, retry_sleep=0.01):
-    """
-    Read Crazyflie position robustly while ROS pose callbacks are catching up.
-    """
-    last_error = None
-    for _ in range(retries):
-        try:
-            return cf.position()
-        except ValueError as e:
-            # Seen when pose cache is temporarily empty:
-            # "need at least one array to concatenate"
-            last_error = e
-            time.sleep(retry_sleep)
-    if last_error is not None:
-        raise last_error
-    return cf.position()
-
-###
-#  Landing/Takeoff commands
-###
-
-
-def takeoff(groupState, height=1.0, duration=2.0):
-    """Takeoff command, runs for every crazyflie in groupState
-
-    Args:
-        groupState GroupState: crazyflies and timehelper objects
-        height (float, optional): height to takeoff to. Defaults to 1.0.
-        duration (float, optional): duration of command. Defaults to 2.0.
-    """
-    timeHelper = groupState.timeHelper
-    crazyflies = groupState.crazyflies
-    for cf in crazyflies:
-        cf.takeoff(float(height), float(duration))
-    timeHelper.sleep(duration)
-
-
-def land(groupState, height=0.04, duration=2.0):
-    """Land command, runs for every crazyflie in groupState
-
-    Args:
-        groupState GroupState: crazyflies and timehelper objects
-        height (float, optional): height to land to. Defaults to 1.0.
-        duration (float, optional): duration of command. Defaults to 2.0.
-    """
-    timeHelper = groupState.timeHelper
-    crazyflies = groupState.crazyflies
-    for cf in crazyflies:
-        cf.land(float(height), float(duration))
-    timeHelper.sleep(duration)
-
-
-###
-#  Motion Primitive Commands
-###
-
-
-def goto_velocity(groupState, x, y, z, v, rel=False):
-    """goTo command at a given *average* velocity, runs for every crazyflie in groupState
-
-    Args:
-        groupState GroupState: crazyflies and timehelper objects
-        x float: Desired x position
-        y float: Desired y position
-        z float: Desired z position
-        v float: Desired average velocity
-        rel (bool, optional): Whether or not the command is relative or absolute. Defaults to False.
-    """
-    timeHelper = groupState.timeHelper
-    crazyflies = groupState.crazyflies
-    max_duration = 0
-    for cf in crazyflies:
-        # try:
-        #     if not isinstance(cf, CrazyflieSimLogger):
-        #         rclpy.spin_once(cf.node)
-        # except Exception:
-        #     cf.node.get_logger().error(traceback.format_exc())
-        #     pass
-        curr_pos = cf.position()
-        dist = np.linalg.norm(np.array(curr_pos) - np.array([x, y, z]))
-        duration = dist / v
-        cf.goTo((float(x), float(y), float(z)), 0, duration=duration, relative=rel)
-        max_duration = max(duration, max_duration)
-    timeHelper.sleep(max_duration)
-
-
-def goto_duration(groupState, x, y, z, duration, rel=False):
-    """goTo command at a given duration, runs for every crazyflie in groupState
-
-    Args:
-        groupState GroupState: crazyflies and timehelper objects
-        x float: Desired x position
-        y float: Desired y position
-        z float: Desired z position
-        duration float: duration of command
-        rel (bool, optional): Whether or not the command is relative or absolute. Defaults to False.
-    """
-    timeHelper = groupState.timeHelper
-    crazyflies = groupState.crazyflies
-    for cf in crazyflies:
-        cf.goTo((float(x), float(y), float(z)), 0, duration=duration, relative=rel)
-    timeHelper.sleep(duration)
-
-
-def goto_velocity_relative_position(groupState, x, y, z, v):
-    """goTo command with given average velocity and relative position
-
-    Args:
-        groupState GroupState: crazyflies and timehelper objects
-        x float: Desired x position
-        y float: Desired y position
-        z float: Desired z position
-        v float: average velocity
-    """
-    distance = np.linalg.norm((x, y, z))
-    time = distance / v
-    # time *= 2
-    crazyflies = groupState.crazyflies
-    timeHelper = groupState.timeHelper
-    for cf in crazyflies:
-        cf.goTo((float(x), float(y), float(z)), 0.0, time, relative=True)
-    timeHelper.sleep(time)
-
-
-def goto_duration_relative(groupState, x, y, z, duration):
-    goto_duration(groupState, x, y, z, duration, True)
-
-
-def move_direction(groupState, direction, distance, duration):
-    timeHelper = groupState.timeHelper
-    crazyflies = groupState.crazyflies
-    for cf in crazyflies:
-        pos = cf.getPosition()
-        if direction == "up":
-            cf.goTo((0, 0, distance), 0, duration, relative=True)
-        elif direction == "forward":
-            cf.goTo((distance, 0, 0), 0, duration=duration, relative=True)
-        elif direction == "backward":
-            cf.goTo((-distance, 0, 0), 0, duration=duration, relative=True)
-        elif direction == "down":
-            cf.goTo((0, 0, -distance), 0, duration, relative=True)
-    timeHelper.sleep(duration)
-    return duration
-
-
-def stop_and_hover(groupState, height=None):
-    crazyflies = groupState.crazyflies
-    for cf in crazyflies:
-        position = cf.position()
-        cf.goTo(position, 0, 1.0)
-
-
-###
-#  Low Level Commands...
-###
-def getPosition(cf):
-    return cf.position()
-
-
-# TODO: Enable low level commands...
-def cmdPosition(cf, pos):
-    cf.cmdPosition(pos)
-
-
-def enableHighLevelCommander(cf):
-    cf.notifySetpointsStop()
-
-
-###
-# Colors
-###
-
-
-def setLEDColorFromHex(groupState, hex):
-    # return
-    crazyflies = groupState.crazyflies
-    rgb = ImageColor.getcolor(hex, "RGB")
-    for cf in crazyflies:
-        cf.setLEDColor(*rgb)
-
-
-def setLEDColor(groupState, r, g, b):
-    # return
-    crazyflies = groupState.crazyflies
-    for cf in crazyflies:
-        cf.setLEDColor(r, g, b)
-
-
-def setRandomLEDColor(groupState):
-    # One random color for the whole group, like the simulator
-    setLEDColor(groupState, random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-
-
-###
-#  Trajectory commands...
-###
-def circle(groupState, radius, velocity, radians, direction):
-    crazyflies = groupState.crazyflies
-    timeHelper = groupState.timeHelper
-    clockwise = 1
-    if direction == "ccw":
-        clockwise = -1
-
-    # velocity is the speed along the circle (m/s), as in the simulator, so the turn rate depends on the radius
-    angular_velocity = velocity / radius
-
-    fx = lambda t: 0
-    fy = lambda t: radius * (np.cos(t * angular_velocity) - 1)
-    fz = lambda t: clockwise * radius * np.sin(t * angular_velocity)
-
-    timesteps = np.arange(0, radians / angular_velocity, 1 / Hz)
-
-    # start positions bumped up by 1 meter in z
-    initialPositions = [
-        (pos[0], pos[1], pos[2]) if len(pos) >= 3 else pos
-        for pos in (cf.position() for cf in crazyflies)
-    ]
-    for t in timesteps:
-        for initPos, cf in zip(initialPositions, crazyflies):
-            pos = np.array([fx(t), fy(t), fz(t)])
-            pos += np.array(initPos)
-            cf.cmdPosition(pos)
-        timeHelper.sleepForRate(Hz)
-
-    # for cf in crazyflies:
-    #     cf.notifySetpointsStop()
-
-
-# Trajectory Modifiers...
-
-
-def negate(groupState, command):
-    originalGroupState = groupState
-    simCrazyflies = []
-    for cf in groupState.crazyflies:
-        # try:
-        #     if not isinstance(cf, CrazyflieSimLogger):
-        #         rclpy.spin_once(cf.node)
-        # except Exception:
-        #     cf.node.get_logger().error(traceback.format_exc())
-        simCrazyflies.append(CrazyflieSimLogger(cf.position()))
-    simTimeHelper = TimeHelperSimLogger()
-    simTimeHelper.currTime = originalGroupState.timeHelper.time()
-    groupState = SimpleNamespace(crazyflies=simCrazyflies, timeHelper=simTimeHelper)
-    # Execute Simulated Commands
-    command(groupState)
-    # Process commands to add startTime
-    setStartTimes(groupState)
-    # negate every command
-    for simcf, cf in zip(groupState.crazyflies, originalGroupState.crazyflies):
-        # try:
-        #     rclpy.spin_once(cf.node)
-        # except Exception:
-        #     cf.node.get_logger().error(traceback.format_exc())
-        #     print('negate2')
-        #     pass
-        initialPosition = cf.position()
-        for i, command in enumerate(simcf.commands):
-            cfCommand = command.command
-            if (
-                cfCommand == "goTo"
-                or cfCommand == "cmdPos"
-                or cfCommand == "takeoff"
-                or cfCommand == "land"
-            ):
-                # Negate the direction (Note, do not negate land...)
-                if command.relative == False:
-                    originalDestination = command.position
-                    # (Start - goal) gives, vector from start, so add back starting position for 2*start - goal
-                    negatedDestination = 2 * np.array(initialPosition) - np.array(
-                        originalDestination
-                    )
-                    simcf.commands[i].position = negatedDestination
-                    # print(negatedDestination, originalDestination, initialPosition)
-                else:
-                    originalDestination = command.position
-                    negatedDestination = -originalDestination
-                    simcf.commands[i].position = negatedDestination
-            else:
-                # Just run the original command, no need to alter anything
-                pass
-    execute_commands(groupState, originalGroupState)
-
-
-def rotate(groupState, command, x_rot, y_rot, z_rot):
-    simGroupState = simCommand(groupState, command)
-    while x_rot > np.pi:
-        x_rot -= 2 * np.pi
-    while y_rot > np.pi:
-        y_rot -= 2 * np.pi
-    while z_rot > 2 * np.pi:
-        z_rot -= 2 * np.pi
-    r = R.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=False)
-
-    for simcf, cf in zip(simGroupState.crazyflies, groupState.crazyflies):
-        # try:
-        #     if not isinstance(cf, CrazyflieSimLogger):
-        #         rclpy.spin_once(cf.node)
-        # except Exception:
-        #     cf.node.get_logger().error(traceback.format_exc())
-        initialPosition = cf.position()
-        for i, command in enumerate(simcf.commands):
-            cfCommand = command.command
-            if cfCommand == "goTo" or cfCommand == "cmdPos":
-                if command.relative == False:
-                    originalDestination = command.position
-                    directionVector = np.array(originalDestination) - np.array(
-                        initialPosition
-                    )
-                    rotatedVector = r.apply(directionVector)
-                    # rotQuat = rowan.from_euler(x_rot, y_rot, z_rot, convention='xyz')
-                    # rotatedVector = rowan.rotate(rotQuat, directionVector)
-                    newDestination = rotatedVector + initialPosition
-                    simcf.commands[i].position = newDestination
-                else:
-                    originalDestination = command.position
-                    directionVector = np.array(originalDestination)
-                    # rotQuat = rowan.from_euler(x_rot, y_rot, z_rot, convention='xyz')
-                    # rotatedVector = rowan.rotate(rotQuat, directionVector)
-                    rotatedVector = r.apply(directionVector)
-                    newDestination = rotatedVector
-                    simcf.commands[i].position = newDestination
-            else:
-                # Just run the original command, no need to alter anything
-                pass
-    execute_commands(simGroupState, groupState)
-
-
-def stretchTrajectory(
-    groupState, command, x_stretch, y_stretch, z_stretch, time_stretch
-):
-    simGroupState = simCommand(groupState, command)
-    for simcf, cf in zip(simGroupState.crazyflies, groupState.crazyflies):
-        # try:
-        #     if not isinstance(cf, CrazyflieSimLogger):
-        #         rclpy.spin_once(cf.node)
-        # except Exception:
-        #     cf.node.get_logger().error(traceback.format_exc())
-        initialPosition = cf.position()
-        for i, command in enumerate(simcf.commands):
-            cfCommand = command.command
-            if (
-                cfCommand == "goTo"
-                or cfCommand == "cmdPos"
-                or cfCommand == "takeoff"
-                or cfCommand == "land"
-            ):
-                if command.relative == False:
-                    originalDestination = command.position
-                    directionVector = np.array(originalDestination) - np.array(
-                        initialPosition
-                    )
-                    stretchedVector = np.multiply(
-                        directionVector, (x_stretch, y_stretch, z_stretch)
-                    )  # directionVector.multiply(np.array((x_stretch, y_stretch, z_stretch)))
-                    newDestination = stretchedVector + initialPosition
-                    simcf.commands[i].position = newDestination
-                    simcf.commands[i].duration *= time_stretch
-                else:
-                    originalDestination = command.position
-                    directionVector = np.array(initialPosition) - np.array(
-                        originalDestination
-                    )
-                    newDestination = np.multiply(
-                        directionVector, (x_stretch, y_stretch, z_stretch)
-                    )
-                    simcf.commands[i].position = newDestination
-                    simcf.commands[i].duration *= time_stretch
-            else:
-                # Just run the original command, no need to alter anything
-                pass
-    execute_commands(simGroupState, groupState)
-
-
-def simCommand(originalGroupState, command):
-    simCrazyflies = []
-    for cf in originalGroupState.crazyflies:
-        # try:
-        #     if not isinstance(cf, CrazyflieSimLogger):
-        #         rclpy.spin_once(cf.node)
-        # except Exception:
-        #     cf.node.get_logger().error(traceback.format_exc())
-        simCrazyflies.append(CrazyflieSimLogger(_safe_cf_position(cf)))
-    simTimeHelper1 = TimeHelperSimLogger()
-    simTimeHelper1.currTime = originalGroupState.timeHelper.time()
-    simGroupState = SimpleNamespace(crazyflies=simCrazyflies, timeHelper=simTimeHelper1)
-    # Execute Simulated Commands
-    command(simGroupState)
-
-    # Reset position
-    for cf in simGroupState.crazyflies:
-        cf.currPosition = cf.initialPosition
-
-    setStartTimes(simGroupState)
-    return simGroupState
-
-
-def addTrajectories(groupState, command1, command2):
-    groupState1 = simCommand(groupState, command1)
-    groupState2 = simCommand(groupState, command2)
-
-    # Convert any goTo commands to LL Commands
-    convertToLL(groupState1)
-    convertToLL(groupState2)
-    groupState1.crazyflies[0].commands[0].startTime = 0
-    for i, command in enumerate(groupState1.crazyflies[0].commands):
-        if i > 0:
-            command.startTime = (
-                groupState1.crazyflies[0].commands[i - 1].startTime
-                + groupState1.crazyflies[0].commands[i - 1].duration
-            )
-
-    groupState2.crazyflies[0].commands[0].startTime = 0
-    for i, command in enumerate(groupState2.crazyflies[0].commands):
-        if i > 0:
-            command.startTime = (
-                groupState2.crazyflies[0].commands[i - 1].startTime
-                + groupState2.crazyflies[0].commands[i - 1].duration
-            )
-
-    # Get duration of latest non-notify setpoints stop command
-    if groupState1.crazyflies[0].commands[-1].command == "notifySetpointsStop":
-        finalCommand1 = -2
-    else:
-        finalCommand1 = -1
-    if groupState2.crazyflies[0].commands[-1].command == "notifySetpointsStop":
-        finalCommand2 = -2
-    else:
-        finalCommand2 = -1
-
-    # Get duration of each command
-    duration1 = (
-        groupState1.crazyflies[0].commands[finalCommand1].startTime
-        + groupState1.crazyflies[0].commands[finalCommand1].duration
-        - groupState1.crazyflies[0].commands[1].startTime
-    )
-    duration2 = (
-        groupState2.crazyflies[0].commands[finalCommand2].startTime
-        + groupState2.crazyflies[0].commands[finalCommand2].duration
-        - groupState2.crazyflies[0].commands[1].startTime
-    )
-
-    # if abs(duration1) > 1e9:
-    #     duration1 /= 1e9
-    duration1 = abs(duration1)
-    # if abs(duration2) > 1e9:
-    #     duration2 /= 1e9
-    duration2 = abs(duration2)
-    if duration1 > duration2:
-        # Command 1 is longer, scale 2 appropriately
-        command_duration = duration1
-        scaling_factor = duration1 / duration2
-        print("Scale", scaling_factor)
-        start_time = groupState2.crazyflies[0].commands[0].startTime
-        for cf in groupState2.crazyflies:
-            for command in cf.commands:
-                command.startTime *= scaling_factor
-                command.duration *= scaling_factor
-                command.startTime -= start_time
-                command.startTime = abs(command.startTime)
-                if abs(command.startTime) > 1e9:
-                    command.startTime /= 1e9
-
-    else:
-        # Command 2 is longer, scale 1 appropriately
-        command_duration = duration2
-        scaling_factor = duration2 / duration1
-        groupState1.crazyflies[0].commands[0].startTime = 0
-        for cf in groupState1.crazyflies:
-            for i, command in enumerate(cf.commands):
-                command.startTime *= scaling_factor
-                command.duration *= scaling_factor
-                if i > 0:
-                    command.startTime = (
-                        cf.commands[i - 1].startTime + cf.commands[i - 1].duration
-                    )
-                command.startTime = abs(command.startTime)
-                # if abs(command.startTime) > 1e9:
-                #     command.startTime /= 1e9
-
-        groupState2.crazyflies[0].commands[0].startTime = 0
-        for cf in groupState2.crazyflies:
-            for i, command in enumerate(cf.commands):
-                if i > 0:
-                    command.startTime = (
-                        cf.commands[i - 1].startTime + cf.commands[i - 1].duration
-                    )
-                command.startTime = abs(command.startTime)
-                # if abs(command.startTime) > 1e9:
-                #     command.startTime /= 1e9
-
-    # TODO: Convert to 20Hz
-
-    # New commands for group1
-    # for cf in groupState1.crazyflies:
-    #     new_commands = []
-    #     counter = 0
-    #     for t in np.arange(0, max(duration1, duration2), 0.05):
-    #         curr_command = cf.commands[counter]
-    #         if t == curr_command.startTime:
-
-    # take list of commands, gather positions, and interpolate/extrapolate
-    # Should be same duration and length, so just add...
-    for cf1, cf2, realCf in zip(
-        groupState1.crazyflies, groupState2.crazyflies, groupState.crazyflies
-    ):
-        initial_position = np.array(_safe_cf_position(realCf))
-        i1 = i2 = 0
-        new_commands = []
-        total_time = 0
-
-        cf1_start_time = cf1.commands[0].startTime
-        cf2_start_time = cf2.commands[0].startTime
-
-        while i1 < len(cf1.commands) or i2 < len(cf2.commands):
-            cmd1 = cf1.commands[i1] if i1 < len(cf1.commands) else None
-            cmd2 = cf2.commands[i2] if i2 < len(cf2.commands) else None
-
-            if cmd1 and (not cmd2 or cmd1.startTime <= cmd2.startTime):
-                if cmd1.startTime <= total_time:
-                    new_cmd = cmd1  # Use the original command object
-                    if new_cmd.command == "cmdPos":
-                        if not cmd2:
-                            cmd2 = Command(
-                                "",
-                                "",
-                                cf2.commands[min(i2, len(cf2.commands) - 1)].position,
-                            )
-                        new_cmd.position = np.array(new_cmd.position) + (
-                            np.array(cmd2.position) - initial_position
-                        )
-                    new_commands.append(new_cmd)
-                    total_time = max(total_time, cmd1.startTime + cmd1.duration)
-                    i1 += 1
-                else:
-                    total_time += 0.05  # Increment time if no command is ready
-            elif cmd2:
-                if cmd2.startTime <= total_time:
-                    new_cmd = cmd2  # Use the original command object
-                    if new_cmd.command == "cmdPos":
-                        cmd1 = Command(
-                            "",
-                            "",
-                            cf1.commands[min(i1, len(cf1.commands) - 1)].position,
-                        )
-                        new_cmd.position = np.array(new_cmd.position) + (
-                            np.array(cmd1.position) - initial_position
-                        )
-                    new_commands.append(new_cmd)
-                    total_time = max(total_time, cmd2.startTime + cmd2.duration)
-                    i2 += 1
-                else:
-                    total_time += 0.05  # Increment time if no command is ready
-            else:
-                break  # Both command lists are exhausted
-            print(new_commands[-1].position)
-    print(new_commands)
-    cf1.commands = new_commands  # Replace cf1's commands with the new commands
-    execute_commands(groupState1, groupState)
-
-
-def goToPolynomial(T, p, v, a, p2, v2, a2):
-    poly = [0] * 8
-
-    # Taken from crazyflie Firmware Library
-    T2 = T * T
-    T3 = T2 * T
-    T4 = T3 * T
-    T5 = T4 * T
-    T6 = T5 * T
-    T7 = T6 * T
-    poly[0] = p
-    poly[1] = v
-    poly[2] = a / 2
-    poly[3] = 0
-    poly[4] = -(
-        5 * (14 * p - 14 * p2 + 8 * T * v + 6 * T * v2 + 2 * T2 * a - T2 * a2)
-    ) / (2 * T4)
-    poly[5] = (
-        84 * p - 84 * p2 + 45 * T * v + 39 * T * v2 + 10 * T2 * a - 7 * T2 * a2
-    ) / T5
-    poly[6] = -(
-        140 * p - 140 * p2 + 72 * T * v + 68 * T * v2 + 15 * T2 * a - 13 * T2 * a2
-    ) / (2 * T6)
-    poly[7] = (2 * (10 * p - 10 * p2 + 5 * T * v + 5 * T * v2 + T2 * a - T2 * a2)) / T7
-    return lambda t: sum([poly[i] * t**i for i in range(len(poly))])
-
-
-def convertToLL(groupState):
-    # Convert high level command to series of low level commands
-    # Typically, this is converting a goTo command to cmdPos using a 7-Degree polynomial
-    for cf in groupState.crazyflies:
-        # TODO: Change to correct initialPosition!
-        simCF = CrazyflieSimLogger(cf.initialPosition)
-        currPosition = simCF.position()
-        new_commands = []
-        for command in cf.commands:
-            if (
-                command.command == "goTo"
-                or command.command == "land"
-                or command.command == "takeoff"
-            ):
-                startTime = command.startTime
-                # Convert to Polynomial
-                if command.relative == True:
-                    goal = np.array(command.position) + np.array(currPosition)
-                else:
-                    goal = command.position
-                fx = goToPolynomial(
-                    command.duration, currPosition[0], 0, 0, goal[0], 0, 0
-                )
-                fy = goToPolynomial(
-                    command.duration, currPosition[1], 0, 0, goal[1], 0, 0
-                )
-                fz = goToPolynomial(
-                    command.duration, currPosition[2], 0, 0, goal[2], 0, 0
-                )
-
-                timesteps = np.arange(0, command.duration, 1 / Hz)
-                commands = [
-                    Command(
-                        "cmdPos",
-                        t + startTime,
-                        (fx(t), fy(t), fz(t)),
-                        0,
-                        1 / Hz,
-                        relative=False,
-                    )
-                    for t in timesteps
-                ]
-                new_commands.extend(commands)
-            else:
-                new_commands.append(command)
-        cf.commands = new_commands
-
-
-def subtractTrajectories(groupState, command1, command2):
-    pass
-
-
-def execute_commands(simGroupState, originalGroupState):
-    # Note, assumes all crazyflies in group are issued similar commands (all are told goTo)
-    # Assumes first command is to be executed immediately
-    # If not the case, different groups should be used
-    commandsForSingleCF = simGroupState.crazyflies[0].commands
-    highLevel = True
-    for i, command in enumerate(commandsForSingleCF):
-        if highLevel and command.command == "cmdPos":
-            highLevel = False
-        if not highLevel and command.command != "cmdPos":
-            highLevel = True
-            # for realCF in originalGroupState.crazyflies:
-            #     realCF.notifySetpointsStop()
-            # realCF.goTo(realCF.position(), 0, 0.5)
-        for simCF, realCF in zip(
-            simGroupState.crazyflies, originalGroupState.crazyflies
-        ):
-            execute_single_command(simCF.commands[i], realCF)
-        originalGroupState.timeHelper.sleep(command.duration)
-    if not highLevel:
-        for realCF in originalGroupState.crazyflies:
-            realCF.notifySetpointsStop()
-        # originalGroupState.timeHelper.sleep(0.1)
-        for realCF in originalGroupState.crazyflies:
-            realCF.goTo(realCF.position(), 0, 2.00)
-            # realCF.setLEDColor(0, 0, 0.5)
-
-
-def execute_single_command(command, crazyflie):
-    if command.command == "goTo":
-        crazyflie.goTo(
-            command.position, command.yaw, command.duration, command.relative
-        )
-    elif command.command == "cmdPos":
-        # print(command.position)
-        crazyflie.cmdPosition(command.position)
-    elif command.command == "takeoff":
-        crazyflie.takeoff(command.height, command.duration)
-    elif command.command == "land":
-        crazyflie.land(command.height, command.duration)
-    elif command.command == "setLEDColor":
-        crazyflie.setLEDColor(*command.color)
-    elif command.command == "position":
-        pass
-    elif command.command == "notifySetpointsStop":
-        crazyflie.notifySetpointsStop()
-        pass
-`;
-const launchServer = `import os
-import yaml
-from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch_ros.actions import Node
-from launch.conditions import LaunchConfigurationEquals
-from launch.conditions import LaunchConfigurationNotEquals
-from launch.substitutions import LaunchConfiguration, PythonExpression
-
-
-def generate_launch_description():
-    # load crazyflies
-    crazyflies_yaml = 'my_crazyflies.yaml'
-
-    with open(crazyflies_yaml, 'r') as ymlfile:
-        crazyflies = yaml.safe_load(ymlfile)
-
-    # server params
-    server_yaml = os.path.join(
-        get_package_share_directory('crazyflie'),
-        'config',
-        'server.yaml')
-
-    with open(server_yaml, 'r') as ymlfile:
-        server_yaml_contents = yaml.safe_load(ymlfile)
-
-    server_params = [crazyflies] + [server_yaml_contents["/crazyflie_server"]["ros__parameters"]]
-
-    # construct motion_capture_configuration
-    motion_capture_yaml = os.path.join(
-        get_package_share_directory('crazyflie'),
-        'config',
-        'motion_capture.yaml')
-
-    with open(motion_capture_yaml, 'r') as ymlfile:
-        motion_capture = yaml.safe_load(ymlfile)
-
-    motion_capture_params = motion_capture["/motion_capture_tracking"]["ros__parameters"]
-    motion_capture_params["rigid_bodies"] = dict()
-    for key, value in crazyflies["robots"].items():
-        type = crazyflies["robot_types"][value["type"]]
-        if value["enabled"] and type["motion_capture"]["enabled"]:
-            motion_capture_params["rigid_bodies"][key] =  {
-                    "initial_position": value["initial_position"],
-                    "marker": type["motion_capture"]["marker"],
-                    "dynamics": type["motion_capture"]["dynamics"],
-                }
-
-    # copy relevent settings to server params
-    server_params[1]["poses_qos_deadline"] = motion_capture_params["topics"]["poses"]["qos"]["deadline"]
-
-    # teleop params
-    teleop_params = os.path.join(
-        get_package_share_directory('crazyflie'),
-        'config',
-        'teleop.yaml')
-
-
-    return LaunchDescription([
-        DeclareLaunchArgument('backend', default_value='cpp'),
-        DeclareLaunchArgument('debug', default_value='False'),
-        Node(
-            package='motion_capture_tracking',
-            executable='motion_capture_tracking_node',
-            condition=LaunchConfigurationNotEquals('backend','sim'),
-            name='motion_capture_tracking',
-            output='screen',
-            parameters=[motion_capture_params]
-        ),
-        Node(
-            package='crazyflie',
-            executable='teleop',
-            name='teleop',
-            remappings=[
-                ('emergency', 'all/emergency'),
-                ('takeoff', 'cf6/takeoff'),
-                ('land', 'cf6/land'),
-                ('cmd_vel_legacy', 'cf6/cmd_vel_legacy'),
-                ('cmd_full_state', 'cf6/cmd_full_state'),
-                ('notify_setpoints_stop', 'cf6/notify_setpoints_stop'),
-            ],
-            parameters=[teleop_params]
-        ),
-        Node(
-            package='joy',
-            executable='joy_node',
-            name='joy_node' # by default id=0
-        ),
-        Node(
-            package='crazyflie',
-            executable='crazyflie_server.py',
-            condition=LaunchConfigurationEquals('backend','cflib'),
-            name='crazyflie_server',
-            output='screen',
-            parameters=server_params
-        ),
-        Node(
-            package='crazyflie',
-            executable='crazyflie_server',
-            condition=LaunchConfigurationEquals('backend','cpp'),
-            name='crazyflie_server',
-            output='screen',
-            parameters=server_params,
-            prefix=PythonExpression(['"xterm -e gdb -ex run --args" if ', LaunchConfiguration('debug'), ' else ""']),
-        ),
-        Node(
-            package='crazyflie_sim',
-            executable='crazyflie_server',
-            condition=LaunchConfigurationEquals('backend','sim'),
-            name='crazyflie_server',
-            output='screen',
-            emulate_tty=True,
-            parameters=server_params
-        ),
-        Node(
-            package='rviz2',
-            namespace='',
-            executable='rviz2',
-            name='rviz2',
-            arguments=['-d' + os.path.join(get_package_share_directory('crazyflie'), 'config', 'config.rviz')],
-            parameters=[{
-                "use_sim_time": True,
-            }]
-        ),
-    ])
-`;
-const timeHelper = 'import rclpy\nimport time\n\nclass TimeHelper:\n\n    def __init__(self, node):\n        self.node = node\n        # self.rosRate = None\n        self.rateHz = None\n        self.nextTime = None\n        self.zeroTime = self.time()\n        # self.visualizer = visNull.VisNull()\n\n    def time(self):\n        """Return current time in seconds."""\n        return self.node.get_clock().now().nanoseconds / 1e9\n\n    def sleep(self, duration):\n        """Sleeps for the provided duration in seconds."""\n        start = self.time()\n        end = start + duration\n        while self.time() < end:\n            time.sleep(0.001)\n            # rclpy.spin_once(self.node, timeout_sec=0)\n\n    def sleepForRate(self, rateHz):\n        """Sleep so that, if called in a loop, executes at specified rate."""\n        # Note: The following ROS 2 construct cannot easily be used, because in ROS 2\n        #       there is no implicit threading anymore. Thus, the rosRate.sleep() call\n        #       is blocking. Instead, we simulate the rate behavior ourselves.\n        # if self.rosRate is None or self.rateHz != rateHz:\n        #     self.rosRate = self.node.create_rate(rateHz)\n        #     self.rateHz = rateHz\n        # self.rosRate.sleep()\n        if self.nextTime is None or self.rateHz != rateHz:\n            self.rateHz = rateHz\n            self.nextTime = self.time() + 1.0 / rateHz\n        while self.time() < self.nextTime:\n            time.sleep(0.001)\n            # rclpy.spin_once(self.node, timeout_sec=0)\n        self.nextTime += 1.0 / rateHz\n\n    def sleepUntil(self, end_time):\n        while self.time() - self.zeroTime < end_time:\n            time.sleep(0.001)\n            # rclpy.spin_once(self.node, timeout_sec=0)\n\n    def isShutdown(self):\n        """Return True if the script should abort, e.g. from Ctrl-C."""\n        return not rclpy.ok()\n';
-const crazyflieLoggers = `
-from typing import Any, Collection
-from dataclasses import dataclass
-from rclpy.node import Node
-import string 
-import random
-
-Hz = 20
-
-###
-#   Logger Classes
-###
-
-@dataclass
-class Command:
-    """A Data class to contain information about commands.
-    Used by simulated crazyflies to keep track of simulated commands
-    """    
-    command: Any = None
-    startTime: float = 0.0
-    position: Collection = (0, 0, 0)
-    yaw: float = 0
-    duration: float = 0
-    relative: bool = False
-    height: float = 0
-    color: Collection = (0, 0, 0)
-
-def generate_id():
-    """Generate a random ID number for unique node names
-
-    Returns:
-        string: unique (probably) id
-    """    
-    return ''.join(random.choice(string.ascii_lowercase) for _ in range(5))
-
-def setStartTimes(groupState):
-    """Set the appropriate start times for every command a simulated crazyflie ran (with a simulated timeHelper)
-
-    Args:
-        groupState : current (simulated) groupState (crazyflies and timehelper)
-    """    
-    # Takes simCF and simTimeHelper and adds start time to cf commands
-    simTimeHelper = groupState.timeHelper
-    simCFs = groupState.crazyflies
-
-    assert([len(cf.commands) == len(simTimeHelper.times) for cf in simCFs])
-
-    for cf in simCFs:
-        for (command, time) in zip(cf.commands, simTimeHelper.times):
-            command.startTime = time
-
-class CrazyflieSimLogger:
-    """ 
-    Crazyflie Logging class used instead of a standard Crazyflie object
-    when commands should *not* be executed. For example, when all commands
-    will be rotated or negated.
-    """    
-    
-    def __init__(self, initial_position):
-        """
-        Args:
-            initial_position [float, float ,float]: starting position of Crazyflie at time of construction
-        """        
-        self.node = Node('logger' + generate_id())
-        self.commands = []
-        self.initialPosition = initial_position
-        self.currPosition = initial_position
-
-    def goTo(self, pos, yaw, duration, relative=False):
-        """Simulate a goTo command
-
-        Args:
-            pos [float, float, float]: Desired destination of command
-            yaw float: Desired yaw
-            duration float: length of time of command
-            relative (bool, optional): Whether pos and yaw are relative to the starting position. Defaults to False.
-        """
-        goToCommand = Command(command='goTo', position=pos, yaw=yaw, relative=relative, duration=duration)
-        self.commands.append(goToCommand)
-        self.currPosition = pos
-    
-    def cmdPosition(self, pos):
-        """Simulate cmdPos (low level command)
-
-        Args:
-            pos [float, float, float]: desired position
-        """        
-        cmdPosCommand = Command(command='cmdPos', position=pos, duration=1/Hz)
-        self.commands.append(cmdPosCommand)
-        self.currPosition = pos
-    
-    def setLEDColor(self, r, g, b):
-        """Simulate setLEDColor 
-        If all parameters are <1, then float representations are assumed (color is given in the range [0, 1])
-        If not, then an 8 bit representation is assumed (color is given in the range [0, 255])
-
-        Args:
-            r float: red
-            g float: green
-            b float: blue
-        """        
-        colorCommand = Command(command='setLEDColor', color=(r, g, b))
-        self.currPosition.append(colorCommand)
-    
-    def takeoff(self, height, duration):
-        """Simulate takeoff command
-
-        Args:
-            height float: Desired height
-            duration float: duration of command
-        """        
-        takeoffCommand = Command(command='takeoff', height=height, duration=duration)
-        self.commands.append(takeoffCommand)
-        self.currPosition[2] = height # Just set Z to height
-
-    def land(self, height, duration):
-        """Simulate land command
-
-        Args:
-            height float: Desired height
-            duration float: duration of command
-        """
-        landCommand = Command(command='land', height=height, duration=duration)
-        self.commands.append(landCommand)
-        self.currPosition[2] = height
-
-    def position(self):
-        """get Position
-
-        Returns:
-            [float, float, float]: current position
-        """        
-        return self.currPosition
-
-    def notifySetpointsStop(self):
-        """Switch to high level mode
-        """        
-        # Just check mode in Evaluate phase
-        self.commands.append(Command(command='notifySetpointsStop'))
-
-class TimeHelperSimLogger:
-    """A simulated timer class to go with CrazyflieSimLogger
-    Does not actually sleep, but logs sleep durations to be used by a non-sim time helper
-    """    
-    def __init__(self):
-        self.times = []
-        self.currTime = 0
-
-    def time(self):
-        """Get current time of timehelper (in seconds)
-
-        Returns:
-            float: current time in seconds
-        """        
-        return self.currTime
-
-    def sleep(self, duration):
-        """sleep for a given duration (simulated)
-
-        Args:
-            duration float: duration of sleep
-        """        
-        self.times.append(self.currTime)
-        self.currTime += duration
-    
-    def sleepForRate(self, Hz):
-        """Simulate sleep for a specified rate (sleep for 1/Hz)
-
-        Args:
-            Hz float: rate to sleep at
-        """        
-        self.times.append(self.currTime)
-        self.currTime += 1/Hz
-    
-    def sleepUntil(self, time):
-        """Sleep until a specified time (in seconds)
-
-        Args:
-            time float: time to sleep until (in seconds)
-        """        
-        self.times.append(self.currTime)
-        self.currTime = time`;
-const readmeText = "1. Download and unzip zip files into a folder of your choosing (without another project in it)\n2. Open a terminal in that folder location (you can right click in file explorer and open terminal or navigate to your folder on the command line)\n3. You will need two terminal tabs total, you can open a new one with ctrl+shift+t.\n4. Find the correct number of (working) crazyflies for your project.\n5. Run ```python3 configure.py``` and follow the prompts, entering in the appropriate crazyflie IDs.\n6. Place the crazyflies out in the flight space, making sure the correct crazyflies are in the correct locations and oriented correctly.\n6. run ```ros2 launch launch.py``` in your first terminal. RViz should come up. Confirm that it shows what you are expecting and all crazyflies connect.\n7. In a new terminal tab, run ```python3 launch_nodes.py```. This will launch the ROS nodes for each group (with robots and blocks) in your webapp.";
-const extractLineNumber = (text, toMatch) => {
-  const index2 = text.indexOf(toMatch);
-  return text.substring(0, index2).split("\n").length;
-};
-const exportToROS = async (projectState, fileName) => {
-  const execBlocksLine = extractLineNumber(workerNodeTemplate, "---------Insert Execution Code Here------------");
-  let launcherNodeLine = extractLineNumber(launcherNode, "-----------Insert Nodes Here-----------");
-  var mainNode = launcherNode.split("\n");
-  var numGroups = 0;
-  const zip = JsZip();
-  const allRobots = projectState.robots;
-  const robotIndexMap = {};
-  Object.keys(allRobots).forEach((id2, index2) => {
-    robotIndexMap[id2] = index2;
-  });
-  const groups = projectState.timelineState.groups;
-  for (let groupName in groups) {
-    const groupState2 = projectState.timelineState.groups[groupName];
-    const robots2 = Object.values(groupState2.robots);
-    const robotIndices = [];
-    if (robots2.length === 0) {
-      continue;
-    }
-    numGroups += 1;
-    for (let r2 in robots2) {
-      const state2 = robots2[r2];
-      const index2 = robotIndexMap[state2.id];
-      robotIndices.push(index2);
-    }
-    var pythonBlocks = "";
-    if (Object.keys(groupState2.items).length === 0) {
-      continue;
-    }
-    const sortedItems = Object.entries(groupState2.items).sort((a2, b2) => {
-      return a2[1].startTime - b2[1].startTime;
-    });
-    for (let [block, blockState] of sortedItems) {
-      const startTime = blockState.startTime;
-      const pythonCode = projectState.blocks[blockState.blockId].python;
-      pythonBlocks += "        # Block Name: " + projectState.blocks[blockState.blockId].name + "\n";
-      pythonBlocks += `        start_time = ${startTime}
-`;
-      pythonBlocks += "        self.timeHelper.sleepUntil(start_time)\n";
-      var pythonLines = pythonCode.split("\n");
-      for (var i2 = 0; i2 < pythonLines.length - 1; i2++) {
-        pythonBlocks += `        ${pythonLines[i2]}
-`;
-      }
-    }
-    var workerNode = workerNodeTemplate.split("\n");
-    workerNode.splice(execBlocksLine, 0, pythonBlocks);
-    var launcherText = `    import ${groupName}_node
-`;
-    launcherText += "    cfs = []\n";
-    for (const r2 of robotIndices) {
-      if (r2 === void 0) {
-        continue;
-      }
-      launcherText += `    cfs.append(crazyflies[${r2}])
-`;
-    }
-    launcherText += `    nodes.append(${groupName}_node.worker_node(cfs, len(nodes), ${numGroups}))
-`;
-    launcherText += `
-`;
-    mainNode.splice(launcherNodeLine, 0, launcherText);
-    launcherNodeLine += 1;
-    const workerNodeFile = new Blob([workerNode.join("\n")], { type: "text/plain" });
-    zip.file(`${groupName}_node.py`, workerNodeFile);
-  }
-  const launcherFile = new Blob([mainNode.join("\n")], { type: "text/plain" });
-  const configureFile = new Blob([configure], { type: "text/plain" });
-  const loggersFile = new Blob([crazyflieLoggers], { type: "text/plain" });
-  const readmeFile = new Blob([readmeText], { type: "text/plain" });
-  var startingPositions = "positions:\n";
-  for (const robot in projectState.robots) {
-    var pos = [0, 0, 0];
-    if (projectState.robots[robot] != void 0)
-      pos = projectState.robots[robot].startingPosition;
-    startingPositions += `    - [${pos[0]}, ${pos[1]}, ${pos[2]}]
+  },
+  javascriptGenerator: (block, js) => {
+    const originalTraj = js.statementToCode(block, "originalTraj").trim();
+    const x2 = block.getFieldValue("x");
+    const y2 = block.getFieldValue("y");
+    const z2 = block.getFieldValue("z");
+    return `simulator.translateTrajectory(groupState, ${originalTraj}, ${x2}, ${y2}, ${z2})
 `;
   }
-  const startingPosFile = new Blob([startingPositions], { type: "text/plain" });
-  zip.file("starting_positions.yaml", startingPosFile);
-  zip.file("configure.py", configureFile);
-  zip.file("launch_nodes.py", launcherFile);
-  zip.file("TimeHelper.py", timeHelper);
-  zip.file("crazyflieLoggers.py", loggersFile);
-  zip.file("Readme.md", readmeFile);
-  const translationsFile = new Blob([translations], { type: "text/plain" });
-  zip.file("blocklyTranslations.py", translationsFile);
-  const launchFile = new Blob([launchServer], { type: "text/plain" });
-  zip.file("launch.py", launchFile);
-  const zipFile = await zip.generateAsync({ type: "blob" });
-  FileSaver.saveAs(zipFile, `${projectState.projectName}.zip`);
-};
-const saveProjectToFile = (projectState, fileName = void 0) => {
-  const projectStateJson = JSON.stringify(projectState);
-  fileName = fileName ?? projectState.projectName.replaceAll(" ", "") + ".robart";
-  saveToFile(fileName, projectStateJson);
-};
-const loadProjectFromFile = (fileContents) => {
-  var _a3;
-  const projectState = JSON.parse(fileContents);
-  if (typeof (projectState == null ? void 0 : projectState.blocks) !== "object" || typeof projectState.robots !== "object" || typeof ((_a3 = projectState.timelineState) == null ? void 0 : _a3.groups) !== "object") {
-    throw new Error("This file is not a Robart project.");
-  }
-  return projectState;
-};
-const exportROS = (projectState, fileName) => {
-  exportToROS(projectState);
 };
 /**
  * @license
@@ -70405,7 +65351,7 @@ if (typeof window !== "undefined") {
     window.__THREE__ = REVISION;
   }
 }
-const r$6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const r$9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   ACESFilmicToneMapping,
   AddEquation,
@@ -70816,213 +65762,6 @@ const r$6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty(
   _SRGBAFormat,
   sRGBEncoding: sRGBEncoding$1
 }, Symbol.toStringTag, { value: "Module" }));
-var src$1 = {};
-var src = {};
-Object.defineProperty(src, "__esModule", { value: true });
-class LinkedList {
-  constructor(...values) {
-    this._head = this._tail = null;
-    this._length = 0;
-    if (values.length > 0) {
-      values.forEach((value) => {
-        this.append(value);
-      });
-    }
-  }
-  *iterator() {
-    let currentItem = this._head;
-    while (currentItem) {
-      yield currentItem.value;
-      currentItem = currentItem.next;
-    }
-  }
-  [Symbol.iterator]() {
-    return this.iterator();
-  }
-  get head() {
-    return this._head ? this._head.value : null;
-  }
-  get tail() {
-    return this._tail ? this._tail.value : null;
-  }
-  get length() {
-    return this._length;
-  }
-  // Adds the element at a specific position inside the linked list
-  insert(val, previousItem, checkDuplicates = false) {
-    if (checkDuplicates && this.isDuplicate(val)) {
-      return false;
-    }
-    let newItem = new LinkedListItem(val);
-    let currentItem = this._head;
-    if (!currentItem) {
-      return false;
-    } else {
-      while (true) {
-        if (currentItem.value === previousItem) {
-          newItem.next = currentItem.next;
-          newItem.prev = currentItem;
-          currentItem.next = newItem;
-          if (newItem.next) {
-            newItem.next.prev = newItem;
-          } else {
-            this._tail = newItem;
-          }
-          this._length++;
-          return true;
-        } else {
-          if (currentItem.next) {
-            currentItem = currentItem.next;
-          } else {
-            return false;
-          }
-        }
-      }
-    }
-  }
-  // Adds the element at the end of the linked list
-  append(val, checkDuplicates = false) {
-    if (checkDuplicates && this.isDuplicate(val)) {
-      return false;
-    }
-    let newItem = new LinkedListItem(val);
-    if (!this._tail) {
-      this._head = this._tail = newItem;
-    } else {
-      this._tail.next = newItem;
-      newItem.prev = this._tail;
-      this._tail = newItem;
-    }
-    this._length++;
-    return true;
-  }
-  // Add the element at the beginning of the linked list
-  prepend(val, checkDuplicates = false) {
-    if (checkDuplicates && this.isDuplicate(val)) {
-      return false;
-    }
-    let newItem = new LinkedListItem(val);
-    if (!this._head) {
-      this._head = this._tail = newItem;
-    } else {
-      newItem.next = this._head;
-      this._head.prev = newItem;
-      this._head = newItem;
-    }
-    this._length++;
-    return true;
-  }
-  remove(val) {
-    let currentItem = this._head;
-    if (!currentItem) {
-      return;
-    }
-    if (currentItem.value === val) {
-      this._head = currentItem.next;
-      this._head.prev = null;
-      currentItem.next = currentItem.prev = null;
-      this._length--;
-      return currentItem.value;
-    } else {
-      while (true) {
-        if (currentItem.value === val) {
-          if (currentItem.next) {
-            currentItem.prev.next = currentItem.next;
-            currentItem.next.prev = currentItem.prev;
-            currentItem.next = currentItem.prev = null;
-          } else {
-            currentItem.prev.next = null;
-            this._tail = currentItem.prev;
-            currentItem.next = currentItem.prev = null;
-          }
-          this._length--;
-          return currentItem.value;
-        } else {
-          if (currentItem.next) {
-            currentItem = currentItem.next;
-          } else {
-            return;
-          }
-        }
-      }
-    }
-  }
-  removeHead() {
-    let currentItem = this._head;
-    if (!currentItem) {
-      return;
-    }
-    if (!this._head.next) {
-      this._head = null;
-      this._tail = null;
-    } else {
-      this._head.next.prev = null;
-      this._head = this._head.next;
-      currentItem.next = currentItem.prev = null;
-    }
-    this._length--;
-    return currentItem.value;
-  }
-  removeTail() {
-    let currentItem = this._tail;
-    if (!currentItem) {
-      return;
-    }
-    if (!this._tail.prev) {
-      this._head = null;
-      this._tail = null;
-    } else {
-      this._tail.prev.next = null;
-      this._tail = this._tail.prev;
-      currentItem.next = currentItem.prev = null;
-    }
-    this._length--;
-    return currentItem.value;
-  }
-  first(num) {
-    let iter = this.iterator();
-    let result = [];
-    let n2 = Math.min(num, this.length);
-    for (let i2 = 0; i2 < n2; i2++) {
-      let val = iter.next();
-      result.push(val.value);
-    }
-    return result;
-  }
-  toArray() {
-    return [...this];
-  }
-  isDuplicate(val) {
-    let set2 = new Set(this.toArray());
-    return set2.has(val);
-  }
-}
-src.LinkedList = LinkedList;
-class LinkedListItem {
-  constructor(val) {
-    this.value = val;
-    this.next = null;
-    this.prev = null;
-  }
-}
-src.LinkedListItem = LinkedListItem;
-Object.defineProperty(src$1, "__esModule", { value: true });
-const linked_list_typescript_1 = src;
-class Queue extends linked_list_typescript_1.LinkedList {
-  constructor(...values) {
-    super(...values);
-  }
-  get front() {
-    return this.head;
-  }
-  enqueue(val) {
-    this.append(val);
-  }
-  dequeue() {
-    return this.removeHead();
-  }
-}
-var Queue_1 = src$1.Queue = Queue;
 const SandboxGlobal = function SandboxGlobal2(globals2) {
   if (globals2 === globalThis)
     return globalThis;
@@ -74040,6 +68779,7 @@ class Sandbox extends SandboxExec {
     return exec;
   }
 }
+const SandboxClass = Sandbox.default ?? Sandbox;
 class Trajectory {
   constructor(duration2) {
     this.duration = duration2;
@@ -74157,47 +68897,73 @@ class ComponentTrajectory extends Trajectory {
     return new Vector3(x2, y2, z2);
   }
 }
-class ParametricTrajectory extends Trajectory {
-  constructor(initPos, x2, y2, z2, yaw, startTime, endTime, timeScaling) {
-    const duration2 = (endTime - startTime) * timeScaling;
-    super(duration2);
-    __publicField2(this, "duration");
-    __publicField2(this, "startTime");
-    __publicField2(this, "endTime");
-    __publicField2(this, "timeScaling");
-    __publicField2(this, "xFunction");
-    __publicField2(this, "yFunction");
-    __publicField2(this, "zFunction");
-    __publicField2(this, "yawFunction");
-    __publicField2(this, "initPos");
-    __publicField2(this, "offset");
-    this.initPos = initPos;
-    this.duration = duration2;
-    this.startTime = startTime;
-    this.endTime = endTime;
-    this.timeScaling = timeScaling;
-    this.xFunction = this.strToFunction(x2);
-    this.yFunction = this.strToFunction(y2);
-    this.zFunction = this.strToFunction(z2);
-    this.yawFunction = this.strToFunction(yaw);
-    this.offset = initPos.sub(new Vector3(this.xFunction(startTime), this.yFunction(startTime), this.zFunction(startTime)));
-  }
-  strToFunction(functionPlainText) {
-    const functionLambda = (t2) => {
-      const regexMatch = new RegExp("(?<![a-zA-Z])t(?![a-zA-Z])", "g");
-      const plainTextWithTInserted = functionPlainText.replaceAll(regexMatch, String(t2));
-      const sandbox = new Sandbox();
-      const exec = sandbox.compile(plainTextWithTInserted);
-      const result = exec().run();
-      return result;
+const parametricScope = {
+  sin: Math.sin,
+  cos: Math.cos,
+  tan: Math.tan,
+  asin: Math.asin,
+  acos: Math.acos,
+  atan: Math.atan,
+  atan2: Math.atan2,
+  sinh: Math.sinh,
+  cosh: Math.cosh,
+  tanh: Math.tanh,
+  sqrt: Math.sqrt,
+  abs: Math.abs,
+  exp: Math.exp,
+  log: Math.log,
+  pow: Math.pow,
+  floor: Math.floor,
+  ceil: Math.ceil,
+  min: Math.min,
+  max: Math.max,
+  pi: Math.PI,
+  e: Math.E
+};
+const compileExpression = (expression) => {
+  try {
+    const run2 = new SandboxClass().compile(`return (${expression});`);
+    return (t2) => {
+      try {
+        const value = Number(run2({ ...parametricScope, t: t2 }).run());
+        return Number.isFinite(value) ? value : 0;
+      } catch {
+        return 0;
+      }
     };
-    return functionLambda;
+  } catch {
+    console.warn(`Could not read the expression "${expression}"; using 0`);
+    return () => 0;
+  }
+};
+const isValidExpression = (expression) => {
+  if (expression.trim() === "" || expression.includes("^"))
+    return false;
+  try {
+    new SandboxClass().compile(`return (${expression});`)({ ...parametricScope, t: 0 }).run();
+    return true;
+  } catch {
+    return false;
+  }
+};
+class ParametricTrajectory extends Trajectory {
+  constructor(initPos, x2, y2, z2, startT, endT, duration2) {
+    super(duration2);
+    __publicField2(this, "functions");
+    __publicField2(this, "startT");
+    __publicField2(this, "endT");
+    __publicField2(this, "offset");
+    this.functions = [x2, y2, z2].map(compileExpression);
+    this.startT = startT;
+    this.endT = endT;
+    this.offset = initPos.clone().sub(this.pathAt(startT));
+  }
+  pathAt(t2) {
+    const [x2, y2, z2] = this.functions.map((f2) => f2(t2));
+    return new Vector3(x2, y2, z2);
   }
   evaluate(t2) {
-    const x2 = this.xFunction(t2);
-    const y2 = this.yFunction(t2);
-    const z2 = this.zFunction(t2);
-    return new Vector3(x2, y2, z2);
+    return this.pathAt(this.startT + t2 * (this.endT - this.startT)).add(this.offset);
   }
 }
 class NegateTrajectory extends Trajectory {
@@ -74279,6 +69045,5421 @@ class RotationTrajectory extends Trajectory {
     return this.originalTrajectory.evaluate(t2).sub(this.initialPosition).applyEuler(this.rotationEuler).add(this.initialPosition);
   }
 }
+const translationTravelSpeed = 0.5;
+class TranslationTrajectory extends Trajectory {
+  constructor(initialPosition, originalTrajectory, offset2) {
+    const travelDuration = offset2.length() / translationTravelSpeed;
+    super(travelDuration + originalTrajectory.duration);
+    __publicField2(this, "originalTrajectory");
+    __publicField2(this, "offset");
+    __publicField2(this, "initialPosition");
+    __publicField2(this, "travelDuration");
+    this.originalTrajectory = originalTrajectory;
+    this.offset = offset2;
+    this.initialPosition = new Vector3().copy(initialPosition);
+    this.travelDuration = travelDuration;
+  }
+  evaluate(t2) {
+    const elapsed = t2 * this.duration;
+    if (elapsed < this.travelDuration) {
+      const u2 = elapsed / this.travelDuration;
+      const ease = u2 * u2 * u2 * (10 - 15 * u2 + 6 * u2 * u2);
+      return this.initialPosition.clone().addScaledVector(this.offset, ease);
+    }
+    const originalDuration = this.originalTrajectory.duration;
+    const originalT = originalDuration > 0 ? Math.min(1, (elapsed - this.travelDuration) / originalDuration) : 1;
+    return this.originalTrajectory.evaluate(originalT).clone().add(this.offset);
+  }
+}
+const expressionField = (value) => new Blockly.FieldTextInput(value, (text) => text !== void 0 && isValidExpression(text) ? text : null);
+const fields = (block) => ({
+  x: JSON.stringify(block.getFieldValue("x")),
+  y: JSON.stringify(block.getFieldValue("y")),
+  z: JSON.stringify(block.getFieldValue("z")),
+  startT: block.getFieldValue("start_t"),
+  endT: block.getFieldValue("end_t"),
+  duration: block.getFieldValue("duration")
+});
+const blockParametricPath = {
+  name: "parametricPath",
+  block: {
+    init: function() {
+      this.appendDummyInput().appendField("Parametric path");
+      this.appendDummyInput().appendField("x(t) =").appendField(expressionField("sin(t)"), "x");
+      this.appendDummyInput().appendField("y(t) =").appendField(expressionField("sin(2 * t) / 2"), "y");
+      this.appendDummyInput().appendField("z(t) =").appendField(expressionField("0"), "z");
+      this.appendDummyInput().appendField("t from").appendField(new Blockly.FieldNumber(0), "start_t").appendField("to").appendField(new Blockly.FieldNumber(6.28), "end_t");
+      this.appendDummyInput().appendField("over").appendField(new Blockly.FieldNumber(8, 0.1), "duration").appendField("seconds");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(90);
+      this.setTooltip("Fly the path (x(t), y(t), z(t)) in meters, shifted so it starts where each drone is. Expressions can use t, sin, cos, tan, sqrt, abs, exp, log, pow(a, b) and pi.");
+      this.setHelpUrl("");
+    }
+  },
+  pythonGenerator: (block, _python) => {
+    const { x: x2, y: y2, z: z2, startT, endT, duration: duration2 } = fields(block);
+    return `parametric(groupState, ${x2}, ${y2}, ${z2}, ${startT}, ${endT}, ${duration2})
+`;
+  },
+  javascriptGenerator: (block, _js) => {
+    const { x: x2, y: y2, z: z2, startT, endT, duration: duration2 } = fields(block);
+    return `simulator.makeParametricTrajectory(groupState, ${x2}, ${y2}, ${z2}, ${startT}, ${endT}, ${duration2})
+`;
+  }
+};
+const CUSTOM_BLOCKS = {
+  //  blockGoTo_xyz,
+  blockGoToSpeed,
+  blockGoTo,
+  blockLand,
+  blockMoveXyz,
+  // blockMove,
+  blockStop,
+  blockTakeoff,
+  blockCircle,
+  blockCircleRadians,
+  blockCircleArc,
+  blockGetPosition,
+  blockColor,
+  blockColorOff,
+  // multiTraj,
+  blockNegate,
+  blockAddTrajectories,
+  blockSubtractTrajectories,
+  blockStretchTrajectories,
+  blockRotateTrajectoryDegrees,
+  blockRotateTrajectoryRadians,
+  blockTranslateTrajectory,
+  blockParametricPath,
+  blockRandomColor
+};
+Object.values(CUSTOM_BLOCKS).forEach((block) => {
+  Blockly.Blocks[block.name] = block.block;
+  pythonExports.pythonGenerator[block.name] = (b2) => block.pythonGenerator(b2, pythonExports.pythonGenerator);
+  javascriptExports.javascriptGenerator[block.name] = (b2) => block.javascriptGenerator(b2, javascriptExports.javascriptGenerator);
+});
+const blockToToolbox = (block) => ({
+  kind: "block",
+  type: block.name
+});
+const blocklyToolboxConfiguration = {
+  kind: "categoryToolbox",
+  contents: [
+    {
+      kind: "category",
+      name: "Straight Motion",
+      contents: [
+        // blockToToolbox(CUSTOM_BLOCKS.blockGoTo_xyz),
+        blockToToolbox(CUSTOM_BLOCKS.blockTakeoff),
+        blockToToolbox(CUSTOM_BLOCKS.blockLand),
+        blockToToolbox(CUSTOM_BLOCKS.blockGoTo),
+        blockToToolbox(CUSTOM_BLOCKS.blockGoToSpeed),
+        blockToToolbox(CUSTOM_BLOCKS.blockMoveXyz),
+        // blockToToolbox(CUSTOM_BLOCKS.blockMove),
+        //blockToToolbox(CUSTOM_BLOCKS.blockStartLinearMotion),
+        blockToToolbox(CUSTOM_BLOCKS.blockStop)
+        //blockToToolbox(CUSTOM_BLOCKS.blockTurn),
+      ]
+    },
+    {
+      kind: "category",
+      name: "Curves",
+      contents: [
+        blockToToolbox(CUSTOM_BLOCKS.blockCircle),
+        blockToToolbox(CUSTOM_BLOCKS.blockCircleRadians),
+        blockToToolbox(CUSTOM_BLOCKS.blockParametricPath)
+        // blockToToolbox(CUSTOM_BLOCKS.blockCircleArc),
+        //blockToToolbox(CUSTOM_BLOCKS.block_start_circle),
+      ]
+    },
+    // {
+    // 	kind: 'category',
+    // 	name: 'Config',
+    // 	contents: [
+    // 		blockToToolbox(CUSTOM_BLOCKS.blockGetPosition),
+    // 	],
+    // },
+    {
+      kind: "category",
+      name: "Colors",
+      contents: [
+        blockToToolbox(CUSTOM_BLOCKS.blockColor),
+        blockToToolbox(CUSTOM_BLOCKS.blockRandomColor),
+        blockToToolbox(CUSTOM_BLOCKS.blockColorOff)
+      ]
+    },
+    {
+      kind: "category",
+      name: "Trajectory Modifiers",
+      contents: [
+        blockToToolbox(CUSTOM_BLOCKS.blockNegate),
+        // blockToToolbox(CUSTOM_BLOCKS.multiTraj),
+        blockToToolbox(CUSTOM_BLOCKS.blockAddTrajectories),
+        blockToToolbox(CUSTOM_BLOCKS.blockSubtractTrajectories),
+        blockToToolbox(CUSTOM_BLOCKS.blockStretchTrajectories),
+        blockToToolbox(CUSTOM_BLOCKS.blockRotateTrajectoryDegrees),
+        blockToToolbox(CUSTOM_BLOCKS.blockRotateTrajectoryRadians),
+        blockToToolbox(CUSTOM_BLOCKS.blockTranslateTrajectory)
+      ]
+    }
+    // {
+    // 	kind: 'category',
+    // 	name: 'Logic',
+    // 	// colour: '#5C81A6',
+    // 	contents: [
+    // 		{
+    // 			kind: 'block',
+    // 			type: 'controls_if',
+    // 		},
+    // 		{
+    // 			kind: 'block',
+    // 			type: 'logic_compare',
+    // 		},
+    // 	],
+    // },
+    // {
+    // 	kind: 'category',
+    // 	name: 'Math',
+    // 	// colour: '#5CA65C',
+    // 	contents: [
+    // 		{
+    // 			kind: 'block',
+    // 			type: 'math_round',
+    // 		},
+    // 		{
+    // 			kind: 'block',
+    // 			type: 'math_number',
+    // 		},
+    // 	],
+    // },
+  ]
+};
+function uuid$1() {
+  const hashTable = [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9"
+  ];
+  let uuid2 = [];
+  for (let i2 = 0; i2 < 36; i2++) {
+    if (i2 === 8 || i2 === 13 || i2 === 18 || i2 === 23) {
+      uuid2[i2] = "-";
+    } else {
+      uuid2[i2] = hashTable[Math.ceil(Math.random() * hashTable.length - 1)];
+    }
+  }
+  return uuid2.join("");
+}
+var uuid_1 = uuid$1;
+const uuid$2 = /* @__PURE__ */ getDefaultExportFromCjs(uuid_1);
+const createStoreImpl = (createState) => {
+  let state2;
+  const listeners = /* @__PURE__ */ new Set();
+  const setState = (partial, replace2) => {
+    const nextState = typeof partial === "function" ? partial(state2) : partial;
+    if (!Object.is(nextState, state2)) {
+      const previousState = state2;
+      state2 = (replace2 != null ? replace2 : typeof nextState !== "object") ? nextState : Object.assign({}, state2, nextState);
+      listeners.forEach((listener2) => listener2(state2, previousState));
+    }
+  };
+  const getState = () => state2;
+  const subscribe = (listener2) => {
+    listeners.add(listener2);
+    return () => listeners.delete(listener2);
+  };
+  const destroy = () => {
+    if (({ "BASE_URL": "/MultiRobotArt/", "MODE": "production", "DEV": false, "PROD": true, "SSR": false } && "production") !== "production") {
+      console.warn(
+        "[DEPRECATED] The `destroy` method will be unsupported in a future version. Instead use unsubscribe function returned by subscribe. Everything will be garbage-collected if store is garbage-collected."
+      );
+    }
+    listeners.clear();
+  };
+  const api2 = { setState, getState, subscribe, destroy };
+  state2 = createState(setState, getState, api2);
+  return api2;
+};
+const createStore$2 = (createState) => createState ? createStoreImpl(createState) : createStoreImpl;
+var withSelector = { exports: {} };
+var withSelector_production_min = {};
+var shim = { exports: {} };
+var useSyncExternalStoreShim_production_min = {};
+/**
+ * @license React
+ * use-sync-external-store-shim.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+var e$1 = reactExports;
+function h$7(a2, b2) {
+  return a2 === b2 && (0 !== a2 || 1 / a2 === 1 / b2) || a2 !== a2 && b2 !== b2;
+}
+var k$3 = "function" === typeof Object.is ? Object.is : h$7, l$7 = e$1.useState, m$4 = e$1.useEffect, n$6 = e$1.useLayoutEffect, p$6 = e$1.useDebugValue;
+function q$3(a2, b2) {
+  var d2 = b2(), f2 = l$7({ inst: { value: d2, getSnapshot: b2 } }), c2 = f2[0].inst, g2 = f2[1];
+  n$6(function() {
+    c2.value = d2;
+    c2.getSnapshot = b2;
+    r$8(c2) && g2({ inst: c2 });
+  }, [a2, d2, b2]);
+  m$4(function() {
+    r$8(c2) && g2({ inst: c2 });
+    return a2(function() {
+      r$8(c2) && g2({ inst: c2 });
+    });
+  }, [a2]);
+  p$6(d2);
+  return d2;
+}
+function r$8(a2) {
+  var b2 = a2.getSnapshot;
+  a2 = a2.value;
+  try {
+    var d2 = b2();
+    return !k$3(a2, d2);
+  } catch (f2) {
+    return true;
+  }
+}
+function t$5(a2, b2) {
+  return b2();
+}
+var u$7 = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? t$5 : q$3;
+useSyncExternalStoreShim_production_min.useSyncExternalStore = void 0 !== e$1.useSyncExternalStore ? e$1.useSyncExternalStore : u$7;
+{
+  shim.exports = useSyncExternalStoreShim_production_min;
+}
+var shimExports = shim.exports;
+/**
+ * @license React
+ * use-sync-external-store-shim/with-selector.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+var h$6 = reactExports, n$5 = shimExports;
+function p$5(a2, b2) {
+  return a2 === b2 && (0 !== a2 || 1 / a2 === 1 / b2) || a2 !== a2 && b2 !== b2;
+}
+var q$2 = "function" === typeof Object.is ? Object.is : p$5, r$7 = n$5.useSyncExternalStore, t$4 = h$6.useRef, u$6 = h$6.useEffect, v$5 = h$6.useMemo, w$4 = h$6.useDebugValue;
+withSelector_production_min.useSyncExternalStoreWithSelector = function(a2, b2, e2, l2, g2) {
+  var c2 = t$4(null);
+  if (null === c2.current) {
+    var f2 = { hasValue: false, value: null };
+    c2.current = f2;
+  } else
+    f2 = c2.current;
+  c2 = v$5(function() {
+    function a3(a4) {
+      if (!c3) {
+        c3 = true;
+        d3 = a4;
+        a4 = l2(a4);
+        if (void 0 !== g2 && f2.hasValue) {
+          var b3 = f2.value;
+          if (g2(b3, a4))
+            return k2 = b3;
+        }
+        return k2 = a4;
+      }
+      b3 = k2;
+      if (q$2(d3, a4))
+        return b3;
+      var e3 = l2(a4);
+      if (void 0 !== g2 && g2(b3, e3))
+        return b3;
+      d3 = a4;
+      return k2 = e3;
+    }
+    var c3 = false, d3, k2, m2 = void 0 === e2 ? null : e2;
+    return [function() {
+      return a3(b2());
+    }, null === m2 ? void 0 : function() {
+      return a3(m2());
+    }];
+  }, [b2, e2, l2, g2]);
+  var d2 = r$7(a2, c2[0], c2[1]);
+  u$6(function() {
+    f2.hasValue = true;
+    f2.value = d2;
+  }, [d2]);
+  w$4(d2);
+  return d2;
+};
+{
+  withSelector.exports = withSelector_production_min;
+}
+var withSelectorExports = withSelector.exports;
+const useSyncExternalStoreExports = /* @__PURE__ */ getDefaultExportFromCjs(withSelectorExports);
+const { useSyncExternalStoreWithSelector } = useSyncExternalStoreExports;
+function useStore$1(api2, selector = api2.getState, equalityFn) {
+  const slice = useSyncExternalStoreWithSelector(
+    api2.subscribe,
+    api2.getState,
+    api2.getServerState || api2.getState,
+    selector,
+    equalityFn
+  );
+  reactExports.useDebugValue(slice);
+  return slice;
+}
+const createImpl = (createState) => {
+  if (({ "BASE_URL": "/MultiRobotArt/", "MODE": "production", "DEV": false, "PROD": true, "SSR": false } && "production") !== "production" && typeof createState !== "function") {
+    console.warn(
+      "[DEPRECATED] Passing a vanilla store will be unsupported in a future version. Instead use `import { useStore } from 'zustand'`."
+    );
+  }
+  const api2 = typeof createState === "function" ? createStore$2(createState) : createState;
+  const useBoundStore = (selector, equalityFn) => useStore$1(api2, selector, equalityFn);
+  Object.assign(useBoundStore, api2);
+  return useBoundStore;
+};
+const create$2 = (createState) => createState ? createImpl(createState) : createImpl;
+const subscribeWithSelectorImpl = (fn2) => (set2, get2, api2) => {
+  const origSubscribe = api2.subscribe;
+  api2.subscribe = (selector, optListener, options) => {
+    let listener2 = selector;
+    if (optListener) {
+      const equalityFn = (options == null ? void 0 : options.equalityFn) || Object.is;
+      let currentSlice = selector(api2.getState());
+      listener2 = (state2) => {
+        const nextSlice = selector(state2);
+        if (!equalityFn(currentSlice, nextSlice)) {
+          const previousSlice = currentSlice;
+          optListener(currentSlice = nextSlice, previousSlice);
+        }
+      };
+      if (options == null ? void 0 : options.fireImmediately) {
+        optListener(currentSlice, currentSlice);
+      }
+    }
+    return origSubscribe(listener2);
+  };
+  const initialState2 = fn2(set2, get2, api2);
+  return initialState2;
+};
+const subscribeWithSelector = subscribeWithSelectorImpl;
+function createJSONStorage(getStorage) {
+  let storage;
+  try {
+    storage = getStorage();
+  } catch (e2) {
+    return;
+  }
+  const persistStorage = {
+    getItem: (name2) => {
+      var _a3;
+      const parse2 = (str2) => {
+        if (str2 === null) {
+          return null;
+        }
+        return JSON.parse(str2);
+      };
+      const str = (_a3 = storage.getItem(name2)) != null ? _a3 : null;
+      if (str instanceof Promise) {
+        return str.then(parse2);
+      }
+      return parse2(str);
+    },
+    setItem: (name2, newValue) => storage.setItem(name2, JSON.stringify(newValue)),
+    removeItem: (name2) => storage.removeItem(name2)
+  };
+  return persistStorage;
+}
+const toThenable = (fn2) => (input) => {
+  try {
+    const result = fn2(input);
+    if (result instanceof Promise) {
+      return result;
+    }
+    return {
+      then(onFulfilled) {
+        return toThenable(onFulfilled)(result);
+      },
+      catch(_onRejected) {
+        return this;
+      }
+    };
+  } catch (e2) {
+    return {
+      then(_onFulfilled) {
+        return this;
+      },
+      catch(onRejected) {
+        return toThenable(onRejected)(e2);
+      }
+    };
+  }
+};
+const oldImpl = (config2, baseOptions) => (set2, get2, api2) => {
+  let options = {
+    getStorage: () => localStorage,
+    serialize: JSON.stringify,
+    deserialize: JSON.parse,
+    partialize: (state2) => state2,
+    version: 0,
+    merge: (persistedState, currentState) => ({
+      ...currentState,
+      ...persistedState
+    }),
+    ...baseOptions
+  };
+  let hasHydrated = false;
+  const hydrationListeners = /* @__PURE__ */ new Set();
+  const finishHydrationListeners = /* @__PURE__ */ new Set();
+  let storage;
+  try {
+    storage = options.getStorage();
+  } catch (e2) {
+  }
+  if (!storage) {
+    return config2(
+      (...args) => {
+        console.warn(
+          `[zustand persist middleware] Unable to update item '${options.name}', the given storage is currently unavailable.`
+        );
+        set2(...args);
+      },
+      get2,
+      api2
+    );
+  }
+  const thenableSerialize = toThenable(options.serialize);
+  const setItem = () => {
+    const state2 = options.partialize({ ...get2() });
+    let errorInSync;
+    const thenable = thenableSerialize({ state: state2, version: options.version }).then(
+      (serializedValue) => storage.setItem(options.name, serializedValue)
+    ).catch((e2) => {
+      errorInSync = e2;
+    });
+    if (errorInSync) {
+      throw errorInSync;
+    }
+    return thenable;
+  };
+  const savedSetState = api2.setState;
+  api2.setState = (state2, replace2) => {
+    savedSetState(state2, replace2);
+    void setItem();
+  };
+  const configResult = config2(
+    (...args) => {
+      set2(...args);
+      void setItem();
+    },
+    get2,
+    api2
+  );
+  let stateFromStorage;
+  const hydrate = () => {
+    var _a3;
+    if (!storage)
+      return;
+    hasHydrated = false;
+    hydrationListeners.forEach((cb2) => cb2(get2()));
+    const postRehydrationCallback = ((_a3 = options.onRehydrateStorage) == null ? void 0 : _a3.call(options, get2())) || void 0;
+    return toThenable(storage.getItem.bind(storage))(options.name).then((storageValue) => {
+      if (storageValue) {
+        return options.deserialize(storageValue);
+      }
+    }).then((deserializedStorageValue) => {
+      if (deserializedStorageValue) {
+        if (typeof deserializedStorageValue.version === "number" && deserializedStorageValue.version !== options.version) {
+          if (options.migrate) {
+            return options.migrate(
+              deserializedStorageValue.state,
+              deserializedStorageValue.version
+            );
+          }
+          console.error(
+            `State loaded from storage couldn't be migrated since no migrate function was provided`
+          );
+        } else {
+          return deserializedStorageValue.state;
+        }
+      }
+    }).then((migratedState) => {
+      var _a22;
+      stateFromStorage = options.merge(
+        migratedState,
+        (_a22 = get2()) != null ? _a22 : configResult
+      );
+      set2(stateFromStorage, true);
+      return setItem();
+    }).then(() => {
+      postRehydrationCallback == null ? void 0 : postRehydrationCallback(stateFromStorage, void 0);
+      hasHydrated = true;
+      finishHydrationListeners.forEach((cb2) => cb2(stateFromStorage));
+    }).catch((e2) => {
+      postRehydrationCallback == null ? void 0 : postRehydrationCallback(void 0, e2);
+    });
+  };
+  api2.persist = {
+    setOptions: (newOptions) => {
+      options = {
+        ...options,
+        ...newOptions
+      };
+      if (newOptions.getStorage) {
+        storage = newOptions.getStorage();
+      }
+    },
+    clearStorage: () => {
+      storage == null ? void 0 : storage.removeItem(options.name);
+    },
+    getOptions: () => options,
+    rehydrate: () => hydrate(),
+    hasHydrated: () => hasHydrated,
+    onHydrate: (cb2) => {
+      hydrationListeners.add(cb2);
+      return () => {
+        hydrationListeners.delete(cb2);
+      };
+    },
+    onFinishHydration: (cb2) => {
+      finishHydrationListeners.add(cb2);
+      return () => {
+        finishHydrationListeners.delete(cb2);
+      };
+    }
+  };
+  hydrate();
+  return stateFromStorage || configResult;
+};
+const newImpl = (config2, baseOptions) => (set2, get2, api2) => {
+  let options = {
+    storage: createJSONStorage(() => localStorage),
+    partialize: (state2) => state2,
+    version: 0,
+    merge: (persistedState, currentState) => ({
+      ...currentState,
+      ...persistedState
+    }),
+    ...baseOptions
+  };
+  let hasHydrated = false;
+  const hydrationListeners = /* @__PURE__ */ new Set();
+  const finishHydrationListeners = /* @__PURE__ */ new Set();
+  let storage = options.storage;
+  if (!storage) {
+    return config2(
+      (...args) => {
+        console.warn(
+          `[zustand persist middleware] Unable to update item '${options.name}', the given storage is currently unavailable.`
+        );
+        set2(...args);
+      },
+      get2,
+      api2
+    );
+  }
+  const setItem = () => {
+    const state2 = options.partialize({ ...get2() });
+    return storage.setItem(options.name, {
+      state: state2,
+      version: options.version
+    });
+  };
+  const savedSetState = api2.setState;
+  api2.setState = (state2, replace2) => {
+    savedSetState(state2, replace2);
+    void setItem();
+  };
+  const configResult = config2(
+    (...args) => {
+      set2(...args);
+      void setItem();
+    },
+    get2,
+    api2
+  );
+  let stateFromStorage;
+  const hydrate = () => {
+    var _a3;
+    if (!storage)
+      return;
+    hasHydrated = false;
+    hydrationListeners.forEach((cb2) => cb2(get2()));
+    const postRehydrationCallback = ((_a3 = options.onRehydrateStorage) == null ? void 0 : _a3.call(options, get2())) || void 0;
+    return toThenable(storage.getItem.bind(storage))(options.name).then((deserializedStorageValue) => {
+      if (deserializedStorageValue) {
+        if (typeof deserializedStorageValue.version === "number" && deserializedStorageValue.version !== options.version) {
+          if (options.migrate) {
+            return options.migrate(
+              deserializedStorageValue.state,
+              deserializedStorageValue.version
+            );
+          }
+          console.error(
+            `State loaded from storage couldn't be migrated since no migrate function was provided`
+          );
+        } else {
+          return deserializedStorageValue.state;
+        }
+      }
+    }).then((migratedState) => {
+      var _a22;
+      stateFromStorage = options.merge(
+        migratedState,
+        (_a22 = get2()) != null ? _a22 : configResult
+      );
+      set2(stateFromStorage, true);
+      return setItem();
+    }).then(() => {
+      postRehydrationCallback == null ? void 0 : postRehydrationCallback(stateFromStorage, void 0);
+      hasHydrated = true;
+      finishHydrationListeners.forEach((cb2) => cb2(stateFromStorage));
+    }).catch((e2) => {
+      postRehydrationCallback == null ? void 0 : postRehydrationCallback(void 0, e2);
+    });
+  };
+  api2.persist = {
+    setOptions: (newOptions) => {
+      options = {
+        ...options,
+        ...newOptions
+      };
+      if (newOptions.storage) {
+        storage = newOptions.storage;
+      }
+    },
+    clearStorage: () => {
+      storage == null ? void 0 : storage.removeItem(options.name);
+    },
+    getOptions: () => options,
+    rehydrate: () => hydrate(),
+    hasHydrated: () => hasHydrated,
+    onHydrate: (cb2) => {
+      hydrationListeners.add(cb2);
+      return () => {
+        hydrationListeners.delete(cb2);
+      };
+    },
+    onFinishHydration: (cb2) => {
+      finishHydrationListeners.add(cb2);
+      return () => {
+        finishHydrationListeners.delete(cb2);
+      };
+    }
+  };
+  hydrate();
+  return stateFromStorage || configResult;
+};
+const persistImpl = (config2, baseOptions) => {
+  if ("getStorage" in baseOptions || "serialize" in baseOptions || "deserialize" in baseOptions) {
+    if (({ "BASE_URL": "/MultiRobotArt/", "MODE": "production", "DEV": false, "PROD": true, "SSR": false } && "production") !== "production") {
+      console.warn(
+        "[DEPRECATED] `getStorage`, `serialize` and `deserialize` options are deprecated. Use `storage` option instead."
+      );
+    }
+    return oldImpl(config2, baseOptions);
+  }
+  return newImpl(config2, baseOptions);
+};
+const persist = persistImpl;
+function n$4(n2) {
+  for (var r2 = arguments.length, t2 = Array(r2 > 1 ? r2 - 1 : 0), e2 = 1; e2 < r2; e2++)
+    t2[e2 - 1] = arguments[e2];
+  throw Error("[Immer] minified error nr: " + n2 + (t2.length ? " " + t2.map(function(n3) {
+    return "'" + n3 + "'";
+  }).join(",") : "") + ". Find the full error at: https://bit.ly/3cXEKWf");
+}
+function r$6(n2) {
+  return !!n2 && !!n2[Q$3];
+}
+function t$3(n2) {
+  var r2;
+  return !!n2 && (function(n3) {
+    if (!n3 || "object" != typeof n3)
+      return false;
+    var r3 = Object.getPrototypeOf(n3);
+    if (null === r3)
+      return true;
+    var t2 = Object.hasOwnProperty.call(r3, "constructor") && r3.constructor;
+    return t2 === Object || "function" == typeof t2 && Function.toString.call(t2) === Z$1;
+  }(n2) || Array.isArray(n2) || !!n2[L$2] || !!(null === (r2 = n2.constructor) || void 0 === r2 ? void 0 : r2[L$2]) || s$3(n2) || v$4(n2));
+}
+function i$6(n2, r2, t2) {
+  void 0 === t2 && (t2 = false), 0 === o$5(n2) ? (t2 ? Object.keys : nn$1)(n2).forEach(function(e2) {
+    t2 && "symbol" == typeof e2 || r2(e2, n2[e2], n2);
+  }) : n2.forEach(function(t3, e2) {
+    return r2(e2, t3, n2);
+  });
+}
+function o$5(n2) {
+  var r2 = n2[Q$3];
+  return r2 ? r2.i > 3 ? r2.i - 4 : r2.i : Array.isArray(n2) ? 1 : s$3(n2) ? 2 : v$4(n2) ? 3 : 0;
+}
+function u$5(n2, r2) {
+  return 2 === o$5(n2) ? n2.has(r2) : Object.prototype.hasOwnProperty.call(n2, r2);
+}
+function a$4(n2, r2) {
+  return 2 === o$5(n2) ? n2.get(r2) : n2[r2];
+}
+function f$5(n2, r2, t2) {
+  var e2 = o$5(n2);
+  2 === e2 ? n2.set(r2, t2) : 3 === e2 ? n2.add(t2) : n2[r2] = t2;
+}
+function c$7(n2, r2) {
+  return n2 === r2 ? 0 !== n2 || 1 / n2 == 1 / r2 : n2 != n2 && r2 != r2;
+}
+function s$3(n2) {
+  return X$1 && n2 instanceof Map;
+}
+function v$4(n2) {
+  return q$1 && n2 instanceof Set;
+}
+function p$4(n2) {
+  return n2.o || n2.t;
+}
+function l$6(n2) {
+  if (Array.isArray(n2))
+    return Array.prototype.slice.call(n2);
+  var r2 = rn$1(n2);
+  delete r2[Q$3];
+  for (var t2 = nn$1(r2), e2 = 0; e2 < t2.length; e2++) {
+    var i2 = t2[e2], o2 = r2[i2];
+    false === o2.writable && (o2.writable = true, o2.configurable = true), (o2.get || o2.set) && (r2[i2] = { configurable: true, writable: true, enumerable: o2.enumerable, value: n2[i2] });
+  }
+  return Object.create(Object.getPrototypeOf(n2), r2);
+}
+function d$5(n2, e2) {
+  return void 0 === e2 && (e2 = false), y$6(n2) || r$6(n2) || !t$3(n2) || (o$5(n2) > 1 && (n2.set = n2.add = n2.clear = n2.delete = h$5), Object.freeze(n2), e2 && i$6(n2, function(n3, r2) {
+    return d$5(r2, true);
+  }, true)), n2;
+}
+function h$5() {
+  n$4(2);
+}
+function y$6(n2) {
+  return null == n2 || "object" != typeof n2 || Object.isFrozen(n2);
+}
+function b$5(r2) {
+  var t2 = tn[r2];
+  return t2 || n$4(18, r2), t2;
+}
+function _$1() {
+  return U$1;
+}
+function j$2(n2, r2) {
+  r2 && (b$5("Patches"), n2.u = [], n2.s = [], n2.v = r2);
+}
+function O$3(n2) {
+  g$3(n2), n2.p.forEach(S$2), n2.p = null;
+}
+function g$3(n2) {
+  n2 === U$1 && (U$1 = n2.l);
+}
+function w$3(n2) {
+  return U$1 = { p: [], l: U$1, h: n2, m: true, _: 0 };
+}
+function S$2(n2) {
+  var r2 = n2[Q$3];
+  0 === r2.i || 1 === r2.i ? r2.j() : r2.O = true;
+}
+function P$2(r2, e2) {
+  e2._ = e2.p.length;
+  var i2 = e2.p[0], o2 = void 0 !== r2 && r2 !== i2;
+  return e2.h.g || b$5("ES5").S(e2, r2, o2), o2 ? (i2[Q$3].P && (O$3(e2), n$4(4)), t$3(r2) && (r2 = M$1(e2, r2), e2.l || x$4(e2, r2)), e2.u && b$5("Patches").M(i2[Q$3].t, r2, e2.u, e2.s)) : r2 = M$1(e2, i2, []), O$3(e2), e2.u && e2.v(e2.u, e2.s), r2 !== H$3 ? r2 : void 0;
+}
+function M$1(n2, r2, t2) {
+  if (y$6(r2))
+    return r2;
+  var e2 = r2[Q$3];
+  if (!e2)
+    return i$6(r2, function(i2, o3) {
+      return A$2(n2, e2, r2, i2, o3, t2);
+    }, true), r2;
+  if (e2.A !== n2)
+    return r2;
+  if (!e2.P)
+    return x$4(n2, e2.t, true), e2.t;
+  if (!e2.I) {
+    e2.I = true, e2.A._--;
+    var o2 = 4 === e2.i || 5 === e2.i ? e2.o = l$6(e2.k) : e2.o, u2 = o2, a2 = false;
+    3 === e2.i && (u2 = new Set(o2), o2.clear(), a2 = true), i$6(u2, function(r3, i2) {
+      return A$2(n2, e2, o2, r3, i2, t2, a2);
+    }), x$4(n2, o2, false), t2 && n2.u && b$5("Patches").N(e2, t2, n2.u, n2.s);
+  }
+  return e2.o;
+}
+function A$2(e2, i2, o2, a2, c2, s2, v2) {
+  if (r$6(c2)) {
+    var p2 = M$1(e2, c2, s2 && i2 && 3 !== i2.i && !u$5(i2.R, a2) ? s2.concat(a2) : void 0);
+    if (f$5(o2, a2, p2), !r$6(p2))
+      return;
+    e2.m = false;
+  } else
+    v2 && o2.add(c2);
+  if (t$3(c2) && !y$6(c2)) {
+    if (!e2.h.D && e2._ < 1)
+      return;
+    M$1(e2, c2), i2 && i2.A.l || x$4(e2, c2);
+  }
+}
+function x$4(n2, r2, t2) {
+  void 0 === t2 && (t2 = false), !n2.l && n2.h.D && n2.m && d$5(r2, t2);
+}
+function z$3(n2, r2) {
+  var t2 = n2[Q$3];
+  return (t2 ? p$4(t2) : n2)[r2];
+}
+function I$2(n2, r2) {
+  if (r2 in n2)
+    for (var t2 = Object.getPrototypeOf(n2); t2; ) {
+      var e2 = Object.getOwnPropertyDescriptor(t2, r2);
+      if (e2)
+        return e2;
+      t2 = Object.getPrototypeOf(t2);
+    }
+}
+function k$2(n2) {
+  n2.P || (n2.P = true, n2.l && k$2(n2.l));
+}
+function E$5(n2) {
+  n2.o || (n2.o = l$6(n2.t));
+}
+function N$1(n2, r2, t2) {
+  var e2 = s$3(r2) ? b$5("MapSet").F(r2, t2) : v$4(r2) ? b$5("MapSet").T(r2, t2) : n2.g ? function(n3, r3) {
+    var t3 = Array.isArray(n3), e3 = { i: t3 ? 1 : 0, A: r3 ? r3.A : _$1(), P: false, I: false, R: {}, l: r3, t: n3, k: null, o: null, j: null, C: false }, i2 = e3, o2 = en;
+    t3 && (i2 = [e3], o2 = on$1);
+    var u2 = Proxy.revocable(i2, o2), a2 = u2.revoke, f2 = u2.proxy;
+    return e3.k = f2, e3.j = a2, f2;
+  }(r2, t2) : b$5("ES5").J(r2, t2);
+  return (t2 ? t2.A : _$1()).p.push(e2), e2;
+}
+function R$2(e2) {
+  return r$6(e2) || n$4(22, e2), function n2(r2) {
+    if (!t$3(r2))
+      return r2;
+    var e3, u2 = r2[Q$3], c2 = o$5(r2);
+    if (u2) {
+      if (!u2.P && (u2.i < 4 || !b$5("ES5").K(u2)))
+        return u2.t;
+      u2.I = true, e3 = D$4(r2, c2), u2.I = false;
+    } else
+      e3 = D$4(r2, c2);
+    return i$6(e3, function(r3, t2) {
+      u2 && a$4(u2.t, r3) === t2 || f$5(e3, r3, n2(t2));
+    }), 3 === c2 ? new Set(e3) : e3;
+  }(e2);
+}
+function D$4(n2, r2) {
+  switch (r2) {
+    case 2:
+      return new Map(n2);
+    case 3:
+      return Array.from(n2);
+  }
+  return l$6(n2);
+}
+var G, U$1, W$3 = "undefined" != typeof Symbol && "symbol" == typeof Symbol("x"), X$1 = "undefined" != typeof Map, q$1 = "undefined" != typeof Set, B$1 = "undefined" != typeof Proxy && void 0 !== Proxy.revocable && "undefined" != typeof Reflect, H$3 = W$3 ? Symbol.for("immer-nothing") : ((G = {})["immer-nothing"] = true, G), L$2 = W$3 ? Symbol.for("immer-draftable") : "__$immer_draftable", Q$3 = W$3 ? Symbol.for("immer-state") : "__$immer_state", Z$1 = "" + Object.prototype.constructor, nn$1 = "undefined" != typeof Reflect && Reflect.ownKeys ? Reflect.ownKeys : void 0 !== Object.getOwnPropertySymbols ? function(n2) {
+  return Object.getOwnPropertyNames(n2).concat(Object.getOwnPropertySymbols(n2));
+} : Object.getOwnPropertyNames, rn$1 = Object.getOwnPropertyDescriptors || function(n2) {
+  var r2 = {};
+  return nn$1(n2).forEach(function(t2) {
+    r2[t2] = Object.getOwnPropertyDescriptor(n2, t2);
+  }), r2;
+}, tn = {}, en = { get: function(n2, r2) {
+  if (r2 === Q$3)
+    return n2;
+  var e2 = p$4(n2);
+  if (!u$5(e2, r2))
+    return function(n3, r3, t2) {
+      var e3, i3 = I$2(r3, t2);
+      return i3 ? "value" in i3 ? i3.value : null === (e3 = i3.get) || void 0 === e3 ? void 0 : e3.call(n3.k) : void 0;
+    }(n2, e2, r2);
+  var i2 = e2[r2];
+  return n2.I || !t$3(i2) ? i2 : i2 === z$3(n2.t, r2) ? (E$5(n2), n2.o[r2] = N$1(n2.A.h, i2, n2)) : i2;
+}, has: function(n2, r2) {
+  return r2 in p$4(n2);
+}, ownKeys: function(n2) {
+  return Reflect.ownKeys(p$4(n2));
+}, set: function(n2, r2, t2) {
+  var e2 = I$2(p$4(n2), r2);
+  if (null == e2 ? void 0 : e2.set)
+    return e2.set.call(n2.k, t2), true;
+  if (!n2.P) {
+    var i2 = z$3(p$4(n2), r2), o2 = null == i2 ? void 0 : i2[Q$3];
+    if (o2 && o2.t === t2)
+      return n2.o[r2] = t2, n2.R[r2] = false, true;
+    if (c$7(t2, i2) && (void 0 !== t2 || u$5(n2.t, r2)))
+      return true;
+    E$5(n2), k$2(n2);
+  }
+  return n2.o[r2] === t2 && (void 0 !== t2 || r2 in n2.o) || Number.isNaN(t2) && Number.isNaN(n2.o[r2]) || (n2.o[r2] = t2, n2.R[r2] = true), true;
+}, deleteProperty: function(n2, r2) {
+  return void 0 !== z$3(n2.t, r2) || r2 in n2.t ? (n2.R[r2] = false, E$5(n2), k$2(n2)) : delete n2.R[r2], n2.o && delete n2.o[r2], true;
+}, getOwnPropertyDescriptor: function(n2, r2) {
+  var t2 = p$4(n2), e2 = Reflect.getOwnPropertyDescriptor(t2, r2);
+  return e2 ? { writable: true, configurable: 1 !== n2.i || "length" !== r2, enumerable: e2.enumerable, value: t2[r2] } : e2;
+}, defineProperty: function() {
+  n$4(11);
+}, getPrototypeOf: function(n2) {
+  return Object.getPrototypeOf(n2.t);
+}, setPrototypeOf: function() {
+  n$4(12);
+} }, on$1 = {};
+i$6(en, function(n2, r2) {
+  on$1[n2] = function() {
+    return arguments[0] = arguments[0][0], r2.apply(this, arguments);
+  };
+}), on$1.deleteProperty = function(r2, t2) {
+  return on$1.set.call(this, r2, t2, void 0);
+}, on$1.set = function(r2, t2, e2) {
+  return en.set.call(this, r2[0], t2, e2, r2[0]);
+};
+var un = function() {
+  function e2(r2) {
+    var e3 = this;
+    this.g = B$1, this.D = true, this.produce = function(r3, i3, o2) {
+      if ("function" == typeof r3 && "function" != typeof i3) {
+        var u2 = i3;
+        i3 = r3;
+        var a2 = e3;
+        return function(n2) {
+          var r4 = this;
+          void 0 === n2 && (n2 = u2);
+          for (var t2 = arguments.length, e4 = Array(t2 > 1 ? t2 - 1 : 0), o3 = 1; o3 < t2; o3++)
+            e4[o3 - 1] = arguments[o3];
+          return a2.produce(n2, function(n3) {
+            var t3;
+            return (t3 = i3).call.apply(t3, [r4, n3].concat(e4));
+          });
+        };
+      }
+      var f2;
+      if ("function" != typeof i3 && n$4(6), void 0 !== o2 && "function" != typeof o2 && n$4(7), t$3(r3)) {
+        var c2 = w$3(e3), s2 = N$1(e3, r3, void 0), v2 = true;
+        try {
+          f2 = i3(s2), v2 = false;
+        } finally {
+          v2 ? O$3(c2) : g$3(c2);
+        }
+        return "undefined" != typeof Promise && f2 instanceof Promise ? f2.then(function(n2) {
+          return j$2(c2, o2), P$2(n2, c2);
+        }, function(n2) {
+          throw O$3(c2), n2;
+        }) : (j$2(c2, o2), P$2(f2, c2));
+      }
+      if (!r3 || "object" != typeof r3) {
+        if (void 0 === (f2 = i3(r3)) && (f2 = r3), f2 === H$3 && (f2 = void 0), e3.D && d$5(f2, true), o2) {
+          var p2 = [], l2 = [];
+          b$5("Patches").M(r3, f2, p2, l2), o2(p2, l2);
+        }
+        return f2;
+      }
+      n$4(21, r3);
+    }, this.produceWithPatches = function(n2, r3) {
+      if ("function" == typeof n2)
+        return function(r4) {
+          for (var t3 = arguments.length, i4 = Array(t3 > 1 ? t3 - 1 : 0), o3 = 1; o3 < t3; o3++)
+            i4[o3 - 1] = arguments[o3];
+          return e3.produceWithPatches(r4, function(r5) {
+            return n2.apply(void 0, [r5].concat(i4));
+          });
+        };
+      var t2, i3, o2 = e3.produce(n2, r3, function(n3, r4) {
+        t2 = n3, i3 = r4;
+      });
+      return "undefined" != typeof Promise && o2 instanceof Promise ? o2.then(function(n3) {
+        return [n3, t2, i3];
+      }) : [o2, t2, i3];
+    }, "boolean" == typeof (null == r2 ? void 0 : r2.useProxies) && this.setUseProxies(r2.useProxies), "boolean" == typeof (null == r2 ? void 0 : r2.autoFreeze) && this.setAutoFreeze(r2.autoFreeze);
+  }
+  var i2 = e2.prototype;
+  return i2.createDraft = function(e3) {
+    t$3(e3) || n$4(8), r$6(e3) && (e3 = R$2(e3));
+    var i3 = w$3(this), o2 = N$1(this, e3, void 0);
+    return o2[Q$3].C = true, g$3(i3), o2;
+  }, i2.finishDraft = function(r2, t2) {
+    var e3 = r2 && r2[Q$3];
+    var i3 = e3.A;
+    return j$2(i3, t2), P$2(void 0, i3);
+  }, i2.setAutoFreeze = function(n2) {
+    this.D = n2;
+  }, i2.setUseProxies = function(r2) {
+    r2 && !B$1 && n$4(20), this.g = r2;
+  }, i2.applyPatches = function(n2, t2) {
+    var e3;
+    for (e3 = t2.length - 1; e3 >= 0; e3--) {
+      var i3 = t2[e3];
+      if (0 === i3.path.length && "replace" === i3.op) {
+        n2 = i3.value;
+        break;
+      }
+    }
+    e3 > -1 && (t2 = t2.slice(e3 + 1));
+    var o2 = b$5("Patches").$;
+    return r$6(n2) ? o2(n2, t2) : this.produce(n2, function(n3) {
+      return o2(n3, t2);
+    });
+  }, e2;
+}(), an = new un(), fn = an.produce;
+an.produceWithPatches.bind(an);
+an.setAutoFreeze.bind(an);
+an.setUseProxies.bind(an);
+an.applyPatches.bind(an);
+an.createDraft.bind(an);
+an.finishDraft.bind(an);
+const immerImpl = (initializer) => (set2, get2, store) => {
+  store.setState = (updater, replace2, ...a2) => {
+    const nextState = typeof updater === "function" ? fn(updater) : updater;
+    return set2(nextState, replace2, ...a2);
+  };
+  return initializer(store.setState, get2, store);
+};
+const immer = immerImpl;
+const ROBART_VERSION = 0.1;
+const saveToFile = (fileName, contents) => {
+  const element = document.createElement("a");
+  const file = new Blob([contents], { type: "text/plain" });
+  element.href = URL.createObjectURL(file);
+  element.download = fileName;
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+};
+function commonjsRequire(path) {
+  throw new Error('Could not dynamically require "' + path + '". Please configure the dynamicRequireTargets or/and ignoreDynamicRequires option of @rollup/plugin-commonjs appropriately for this require call to work.');
+}
+var jszip_min = { exports: {} };
+/*!
+
+JSZip v3.10.1 - A JavaScript class for generating and reading zip files
+<http://stuartk.com/jszip>
+
+(c) 2009-2016 Stuart Knightley <stuart [at] stuartk.com>
+Dual licenced under the MIT license or GPLv3. See https://raw.github.com/Stuk/jszip/main/LICENSE.markdown.
+
+JSZip uses the library pako released under the MIT license :
+https://github.com/nodeca/pako/blob/main/LICENSE
+*/
+(function(module, exports) {
+  !function(e2) {
+    module.exports = e2();
+  }(function() {
+    return function s2(a2, o2, h2) {
+      function u2(r2, e3) {
+        if (!o2[r2]) {
+          if (!a2[r2]) {
+            var t2 = "function" == typeof commonjsRequire && commonjsRequire;
+            if (!e3 && t2)
+              return t2(r2, true);
+            if (l2)
+              return l2(r2, true);
+            var n2 = new Error("Cannot find module '" + r2 + "'");
+            throw n2.code = "MODULE_NOT_FOUND", n2;
+          }
+          var i2 = o2[r2] = { exports: {} };
+          a2[r2][0].call(i2.exports, function(e4) {
+            var t3 = a2[r2][1][e4];
+            return u2(t3 || e4);
+          }, i2, i2.exports, s2, a2, o2, h2);
+        }
+        return o2[r2].exports;
+      }
+      for (var l2 = "function" == typeof commonjsRequire && commonjsRequire, e2 = 0; e2 < h2.length; e2++)
+        u2(h2[e2]);
+      return u2;
+    }({ 1: [function(e2, t2, r2) {
+      var d2 = e2("./utils"), c2 = e2("./support"), p2 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+      r2.encode = function(e3) {
+        for (var t3, r3, n2, i2, s2, a2, o2, h2 = [], u2 = 0, l2 = e3.length, f2 = l2, c3 = "string" !== d2.getTypeOf(e3); u2 < e3.length; )
+          f2 = l2 - u2, n2 = c3 ? (t3 = e3[u2++], r3 = u2 < l2 ? e3[u2++] : 0, u2 < l2 ? e3[u2++] : 0) : (t3 = e3.charCodeAt(u2++), r3 = u2 < l2 ? e3.charCodeAt(u2++) : 0, u2 < l2 ? e3.charCodeAt(u2++) : 0), i2 = t3 >> 2, s2 = (3 & t3) << 4 | r3 >> 4, a2 = 1 < f2 ? (15 & r3) << 2 | n2 >> 6 : 64, o2 = 2 < f2 ? 63 & n2 : 64, h2.push(p2.charAt(i2) + p2.charAt(s2) + p2.charAt(a2) + p2.charAt(o2));
+        return h2.join("");
+      }, r2.decode = function(e3) {
+        var t3, r3, n2, i2, s2, a2, o2 = 0, h2 = 0, u2 = "data:";
+        if (e3.substr(0, u2.length) === u2)
+          throw new Error("Invalid base64 input, it looks like a data url.");
+        var l2, f2 = 3 * (e3 = e3.replace(/[^A-Za-z0-9+/=]/g, "")).length / 4;
+        if (e3.charAt(e3.length - 1) === p2.charAt(64) && f2--, e3.charAt(e3.length - 2) === p2.charAt(64) && f2--, f2 % 1 != 0)
+          throw new Error("Invalid base64 input, bad content length.");
+        for (l2 = c2.uint8array ? new Uint8Array(0 | f2) : new Array(0 | f2); o2 < e3.length; )
+          t3 = p2.indexOf(e3.charAt(o2++)) << 2 | (i2 = p2.indexOf(e3.charAt(o2++))) >> 4, r3 = (15 & i2) << 4 | (s2 = p2.indexOf(e3.charAt(o2++))) >> 2, n2 = (3 & s2) << 6 | (a2 = p2.indexOf(e3.charAt(o2++))), l2[h2++] = t3, 64 !== s2 && (l2[h2++] = r3), 64 !== a2 && (l2[h2++] = n2);
+        return l2;
+      };
+    }, { "./support": 30, "./utils": 32 }], 2: [function(e2, t2, r2) {
+      var n2 = e2("./external"), i2 = e2("./stream/DataWorker"), s2 = e2("./stream/Crc32Probe"), a2 = e2("./stream/DataLengthProbe");
+      function o2(e3, t3, r3, n3, i3) {
+        this.compressedSize = e3, this.uncompressedSize = t3, this.crc32 = r3, this.compression = n3, this.compressedContent = i3;
+      }
+      o2.prototype = { getContentWorker: function() {
+        var e3 = new i2(n2.Promise.resolve(this.compressedContent)).pipe(this.compression.uncompressWorker()).pipe(new a2("data_length")), t3 = this;
+        return e3.on("end", function() {
+          if (this.streamInfo.data_length !== t3.uncompressedSize)
+            throw new Error("Bug : uncompressed data size mismatch");
+        }), e3;
+      }, getCompressedWorker: function() {
+        return new i2(n2.Promise.resolve(this.compressedContent)).withStreamInfo("compressedSize", this.compressedSize).withStreamInfo("uncompressedSize", this.uncompressedSize).withStreamInfo("crc32", this.crc32).withStreamInfo("compression", this.compression);
+      } }, o2.createWorkerFrom = function(e3, t3, r3) {
+        return e3.pipe(new s2()).pipe(new a2("uncompressedSize")).pipe(t3.compressWorker(r3)).pipe(new a2("compressedSize")).withStreamInfo("compression", t3);
+      }, t2.exports = o2;
+    }, { "./external": 6, "./stream/Crc32Probe": 25, "./stream/DataLengthProbe": 26, "./stream/DataWorker": 27 }], 3: [function(e2, t2, r2) {
+      var n2 = e2("./stream/GenericWorker");
+      r2.STORE = { magic: "\0\0", compressWorker: function() {
+        return new n2("STORE compression");
+      }, uncompressWorker: function() {
+        return new n2("STORE decompression");
+      } }, r2.DEFLATE = e2("./flate");
+    }, { "./flate": 7, "./stream/GenericWorker": 28 }], 4: [function(e2, t2, r2) {
+      var n2 = e2("./utils");
+      var o2 = function() {
+        for (var e3, t3 = [], r3 = 0; r3 < 256; r3++) {
+          e3 = r3;
+          for (var n3 = 0; n3 < 8; n3++)
+            e3 = 1 & e3 ? 3988292384 ^ e3 >>> 1 : e3 >>> 1;
+          t3[r3] = e3;
+        }
+        return t3;
+      }();
+      t2.exports = function(e3, t3) {
+        return void 0 !== e3 && e3.length ? "string" !== n2.getTypeOf(e3) ? function(e4, t4, r3, n3) {
+          var i2 = o2, s2 = n3 + r3;
+          e4 ^= -1;
+          for (var a2 = n3; a2 < s2; a2++)
+            e4 = e4 >>> 8 ^ i2[255 & (e4 ^ t4[a2])];
+          return -1 ^ e4;
+        }(0 | t3, e3, e3.length, 0) : function(e4, t4, r3, n3) {
+          var i2 = o2, s2 = n3 + r3;
+          e4 ^= -1;
+          for (var a2 = n3; a2 < s2; a2++)
+            e4 = e4 >>> 8 ^ i2[255 & (e4 ^ t4.charCodeAt(a2))];
+          return -1 ^ e4;
+        }(0 | t3, e3, e3.length, 0) : 0;
+      };
+    }, { "./utils": 32 }], 5: [function(e2, t2, r2) {
+      r2.base64 = false, r2.binary = false, r2.dir = false, r2.createFolders = true, r2.date = null, r2.compression = null, r2.compressionOptions = null, r2.comment = null, r2.unixPermissions = null, r2.dosPermissions = null;
+    }, {}], 6: [function(e2, t2, r2) {
+      var n2 = null;
+      n2 = "undefined" != typeof Promise ? Promise : e2("lie"), t2.exports = { Promise: n2 };
+    }, { lie: 37 }], 7: [function(e2, t2, r2) {
+      var n2 = "undefined" != typeof Uint8Array && "undefined" != typeof Uint16Array && "undefined" != typeof Uint32Array, i2 = e2("pako"), s2 = e2("./utils"), a2 = e2("./stream/GenericWorker"), o2 = n2 ? "uint8array" : "array";
+      function h2(e3, t3) {
+        a2.call(this, "FlateWorker/" + e3), this._pako = null, this._pakoAction = e3, this._pakoOptions = t3, this.meta = {};
+      }
+      r2.magic = "\b\0", s2.inherits(h2, a2), h2.prototype.processChunk = function(e3) {
+        this.meta = e3.meta, null === this._pako && this._createPako(), this._pako.push(s2.transformTo(o2, e3.data), false);
+      }, h2.prototype.flush = function() {
+        a2.prototype.flush.call(this), null === this._pako && this._createPako(), this._pako.push([], true);
+      }, h2.prototype.cleanUp = function() {
+        a2.prototype.cleanUp.call(this), this._pako = null;
+      }, h2.prototype._createPako = function() {
+        this._pako = new i2[this._pakoAction]({ raw: true, level: this._pakoOptions.level || -1 });
+        var t3 = this;
+        this._pako.onData = function(e3) {
+          t3.push({ data: e3, meta: t3.meta });
+        };
+      }, r2.compressWorker = function(e3) {
+        return new h2("Deflate", e3);
+      }, r2.uncompressWorker = function() {
+        return new h2("Inflate", {});
+      };
+    }, { "./stream/GenericWorker": 28, "./utils": 32, pako: 38 }], 8: [function(e2, t2, r2) {
+      function A2(e3, t3) {
+        var r3, n3 = "";
+        for (r3 = 0; r3 < t3; r3++)
+          n3 += String.fromCharCode(255 & e3), e3 >>>= 8;
+        return n3;
+      }
+      function n2(e3, t3, r3, n3, i3, s3) {
+        var a2, o2, h2 = e3.file, u2 = e3.compression, l2 = s3 !== O2.utf8encode, f2 = I2.transformTo("string", s3(h2.name)), c2 = I2.transformTo("string", O2.utf8encode(h2.name)), d2 = h2.comment, p2 = I2.transformTo("string", s3(d2)), m2 = I2.transformTo("string", O2.utf8encode(d2)), _2 = c2.length !== h2.name.length, g2 = m2.length !== d2.length, b2 = "", v2 = "", y2 = "", w2 = h2.dir, k2 = h2.date, x2 = { crc32: 0, compressedSize: 0, uncompressedSize: 0 };
+        t3 && !r3 || (x2.crc32 = e3.crc32, x2.compressedSize = e3.compressedSize, x2.uncompressedSize = e3.uncompressedSize);
+        var S2 = 0;
+        t3 && (S2 |= 8), l2 || !_2 && !g2 || (S2 |= 2048);
+        var z2 = 0, C2 = 0;
+        w2 && (z2 |= 16), "UNIX" === i3 ? (C2 = 798, z2 |= function(e4, t4) {
+          var r4 = e4;
+          return e4 || (r4 = t4 ? 16893 : 33204), (65535 & r4) << 16;
+        }(h2.unixPermissions, w2)) : (C2 = 20, z2 |= function(e4) {
+          return 63 & (e4 || 0);
+        }(h2.dosPermissions)), a2 = k2.getUTCHours(), a2 <<= 6, a2 |= k2.getUTCMinutes(), a2 <<= 5, a2 |= k2.getUTCSeconds() / 2, o2 = k2.getUTCFullYear() - 1980, o2 <<= 4, o2 |= k2.getUTCMonth() + 1, o2 <<= 5, o2 |= k2.getUTCDate(), _2 && (v2 = A2(1, 1) + A2(B2(f2), 4) + c2, b2 += "up" + A2(v2.length, 2) + v2), g2 && (y2 = A2(1, 1) + A2(B2(p2), 4) + m2, b2 += "uc" + A2(y2.length, 2) + y2);
+        var E2 = "";
+        return E2 += "\n\0", E2 += A2(S2, 2), E2 += u2.magic, E2 += A2(a2, 2), E2 += A2(o2, 2), E2 += A2(x2.crc32, 4), E2 += A2(x2.compressedSize, 4), E2 += A2(x2.uncompressedSize, 4), E2 += A2(f2.length, 2), E2 += A2(b2.length, 2), { fileRecord: R2.LOCAL_FILE_HEADER + E2 + f2 + b2, dirRecord: R2.CENTRAL_FILE_HEADER + A2(C2, 2) + E2 + A2(p2.length, 2) + "\0\0\0\0" + A2(z2, 4) + A2(n3, 4) + f2 + b2 + p2 };
+      }
+      var I2 = e2("../utils"), i2 = e2("../stream/GenericWorker"), O2 = e2("../utf8"), B2 = e2("../crc32"), R2 = e2("../signature");
+      function s2(e3, t3, r3, n3) {
+        i2.call(this, "ZipFileWorker"), this.bytesWritten = 0, this.zipComment = t3, this.zipPlatform = r3, this.encodeFileName = n3, this.streamFiles = e3, this.accumulate = false, this.contentBuffer = [], this.dirRecords = [], this.currentSourceOffset = 0, this.entriesCount = 0, this.currentFile = null, this._sources = [];
+      }
+      I2.inherits(s2, i2), s2.prototype.push = function(e3) {
+        var t3 = e3.meta.percent || 0, r3 = this.entriesCount, n3 = this._sources.length;
+        this.accumulate ? this.contentBuffer.push(e3) : (this.bytesWritten += e3.data.length, i2.prototype.push.call(this, { data: e3.data, meta: { currentFile: this.currentFile, percent: r3 ? (t3 + 100 * (r3 - n3 - 1)) / r3 : 100 } }));
+      }, s2.prototype.openedSource = function(e3) {
+        this.currentSourceOffset = this.bytesWritten, this.currentFile = e3.file.name;
+        var t3 = this.streamFiles && !e3.file.dir;
+        if (t3) {
+          var r3 = n2(e3, t3, false, this.currentSourceOffset, this.zipPlatform, this.encodeFileName);
+          this.push({ data: r3.fileRecord, meta: { percent: 0 } });
+        } else
+          this.accumulate = true;
+      }, s2.prototype.closedSource = function(e3) {
+        this.accumulate = false;
+        var t3 = this.streamFiles && !e3.file.dir, r3 = n2(e3, t3, true, this.currentSourceOffset, this.zipPlatform, this.encodeFileName);
+        if (this.dirRecords.push(r3.dirRecord), t3)
+          this.push({ data: function(e4) {
+            return R2.DATA_DESCRIPTOR + A2(e4.crc32, 4) + A2(e4.compressedSize, 4) + A2(e4.uncompressedSize, 4);
+          }(e3), meta: { percent: 100 } });
+        else
+          for (this.push({ data: r3.fileRecord, meta: { percent: 0 } }); this.contentBuffer.length; )
+            this.push(this.contentBuffer.shift());
+        this.currentFile = null;
+      }, s2.prototype.flush = function() {
+        for (var e3 = this.bytesWritten, t3 = 0; t3 < this.dirRecords.length; t3++)
+          this.push({ data: this.dirRecords[t3], meta: { percent: 100 } });
+        var r3 = this.bytesWritten - e3, n3 = function(e4, t4, r4, n4, i3) {
+          var s3 = I2.transformTo("string", i3(n4));
+          return R2.CENTRAL_DIRECTORY_END + "\0\0\0\0" + A2(e4, 2) + A2(e4, 2) + A2(t4, 4) + A2(r4, 4) + A2(s3.length, 2) + s3;
+        }(this.dirRecords.length, r3, e3, this.zipComment, this.encodeFileName);
+        this.push({ data: n3, meta: { percent: 100 } });
+      }, s2.prototype.prepareNextSource = function() {
+        this.previous = this._sources.shift(), this.openedSource(this.previous.streamInfo), this.isPaused ? this.previous.pause() : this.previous.resume();
+      }, s2.prototype.registerPrevious = function(e3) {
+        this._sources.push(e3);
+        var t3 = this;
+        return e3.on("data", function(e4) {
+          t3.processChunk(e4);
+        }), e3.on("end", function() {
+          t3.closedSource(t3.previous.streamInfo), t3._sources.length ? t3.prepareNextSource() : t3.end();
+        }), e3.on("error", function(e4) {
+          t3.error(e4);
+        }), this;
+      }, s2.prototype.resume = function() {
+        return !!i2.prototype.resume.call(this) && (!this.previous && this._sources.length ? (this.prepareNextSource(), true) : this.previous || this._sources.length || this.generatedError ? void 0 : (this.end(), true));
+      }, s2.prototype.error = function(e3) {
+        var t3 = this._sources;
+        if (!i2.prototype.error.call(this, e3))
+          return false;
+        for (var r3 = 0; r3 < t3.length; r3++)
+          try {
+            t3[r3].error(e3);
+          } catch (e4) {
+          }
+        return true;
+      }, s2.prototype.lock = function() {
+        i2.prototype.lock.call(this);
+        for (var e3 = this._sources, t3 = 0; t3 < e3.length; t3++)
+          e3[t3].lock();
+      }, t2.exports = s2;
+    }, { "../crc32": 4, "../signature": 23, "../stream/GenericWorker": 28, "../utf8": 31, "../utils": 32 }], 9: [function(e2, t2, r2) {
+      var u2 = e2("../compressions"), n2 = e2("./ZipFileWorker");
+      r2.generateWorker = function(e3, a2, t3) {
+        var o2 = new n2(a2.streamFiles, t3, a2.platform, a2.encodeFileName), h2 = 0;
+        try {
+          e3.forEach(function(e4, t4) {
+            h2++;
+            var r3 = function(e5, t5) {
+              var r4 = e5 || t5, n4 = u2[r4];
+              if (!n4)
+                throw new Error(r4 + " is not a valid compression method !");
+              return n4;
+            }(t4.options.compression, a2.compression), n3 = t4.options.compressionOptions || a2.compressionOptions || {}, i2 = t4.dir, s2 = t4.date;
+            t4._compressWorker(r3, n3).withStreamInfo("file", { name: e4, dir: i2, date: s2, comment: t4.comment || "", unixPermissions: t4.unixPermissions, dosPermissions: t4.dosPermissions }).pipe(o2);
+          }), o2.entriesCount = h2;
+        } catch (e4) {
+          o2.error(e4);
+        }
+        return o2;
+      };
+    }, { "../compressions": 3, "./ZipFileWorker": 8 }], 10: [function(e2, t2, r2) {
+      function n2() {
+        if (!(this instanceof n2))
+          return new n2();
+        if (arguments.length)
+          throw new Error("The constructor with parameters has been removed in JSZip 3.0, please check the upgrade guide.");
+        this.files = /* @__PURE__ */ Object.create(null), this.comment = null, this.root = "", this.clone = function() {
+          var e3 = new n2();
+          for (var t3 in this)
+            "function" != typeof this[t3] && (e3[t3] = this[t3]);
+          return e3;
+        };
+      }
+      (n2.prototype = e2("./object")).loadAsync = e2("./load"), n2.support = e2("./support"), n2.defaults = e2("./defaults"), n2.version = "3.10.1", n2.loadAsync = function(e3, t3) {
+        return new n2().loadAsync(e3, t3);
+      }, n2.external = e2("./external"), t2.exports = n2;
+    }, { "./defaults": 5, "./external": 6, "./load": 11, "./object": 15, "./support": 30 }], 11: [function(e2, t2, r2) {
+      var u2 = e2("./utils"), i2 = e2("./external"), n2 = e2("./utf8"), s2 = e2("./zipEntries"), a2 = e2("./stream/Crc32Probe"), l2 = e2("./nodejsUtils");
+      function f2(n3) {
+        return new i2.Promise(function(e3, t3) {
+          var r3 = n3.decompressed.getContentWorker().pipe(new a2());
+          r3.on("error", function(e4) {
+            t3(e4);
+          }).on("end", function() {
+            r3.streamInfo.crc32 !== n3.decompressed.crc32 ? t3(new Error("Corrupted zip : CRC32 mismatch")) : e3();
+          }).resume();
+        });
+      }
+      t2.exports = function(e3, o2) {
+        var h2 = this;
+        return o2 = u2.extend(o2 || {}, { base64: false, checkCRC32: false, optimizedBinaryString: false, createFolders: false, decodeFileName: n2.utf8decode }), l2.isNode && l2.isStream(e3) ? i2.Promise.reject(new Error("JSZip can't accept a stream when loading a zip file.")) : u2.prepareContent("the loaded zip file", e3, true, o2.optimizedBinaryString, o2.base64).then(function(e4) {
+          var t3 = new s2(o2);
+          return t3.load(e4), t3;
+        }).then(function(e4) {
+          var t3 = [i2.Promise.resolve(e4)], r3 = e4.files;
+          if (o2.checkCRC32)
+            for (var n3 = 0; n3 < r3.length; n3++)
+              t3.push(f2(r3[n3]));
+          return i2.Promise.all(t3);
+        }).then(function(e4) {
+          for (var t3 = e4.shift(), r3 = t3.files, n3 = 0; n3 < r3.length; n3++) {
+            var i3 = r3[n3], s3 = i3.fileNameStr, a3 = u2.resolve(i3.fileNameStr);
+            h2.file(a3, i3.decompressed, { binary: true, optimizedBinaryString: true, date: i3.date, dir: i3.dir, comment: i3.fileCommentStr.length ? i3.fileCommentStr : null, unixPermissions: i3.unixPermissions, dosPermissions: i3.dosPermissions, createFolders: o2.createFolders }), i3.dir || (h2.file(a3).unsafeOriginalName = s3);
+          }
+          return t3.zipComment.length && (h2.comment = t3.zipComment), h2;
+        });
+      };
+    }, { "./external": 6, "./nodejsUtils": 14, "./stream/Crc32Probe": 25, "./utf8": 31, "./utils": 32, "./zipEntries": 33 }], 12: [function(e2, t2, r2) {
+      var n2 = e2("../utils"), i2 = e2("../stream/GenericWorker");
+      function s2(e3, t3) {
+        i2.call(this, "Nodejs stream input adapter for " + e3), this._upstreamEnded = false, this._bindStream(t3);
+      }
+      n2.inherits(s2, i2), s2.prototype._bindStream = function(e3) {
+        var t3 = this;
+        (this._stream = e3).pause(), e3.on("data", function(e4) {
+          t3.push({ data: e4, meta: { percent: 0 } });
+        }).on("error", function(e4) {
+          t3.isPaused ? this.generatedError = e4 : t3.error(e4);
+        }).on("end", function() {
+          t3.isPaused ? t3._upstreamEnded = true : t3.end();
+        });
+      }, s2.prototype.pause = function() {
+        return !!i2.prototype.pause.call(this) && (this._stream.pause(), true);
+      }, s2.prototype.resume = function() {
+        return !!i2.prototype.resume.call(this) && (this._upstreamEnded ? this.end() : this._stream.resume(), true);
+      }, t2.exports = s2;
+    }, { "../stream/GenericWorker": 28, "../utils": 32 }], 13: [function(e2, t2, r2) {
+      var i2 = e2("readable-stream").Readable;
+      function n2(e3, t3, r3) {
+        i2.call(this, t3), this._helper = e3;
+        var n3 = this;
+        e3.on("data", function(e4, t4) {
+          n3.push(e4) || n3._helper.pause(), r3 && r3(t4);
+        }).on("error", function(e4) {
+          n3.emit("error", e4);
+        }).on("end", function() {
+          n3.push(null);
+        });
+      }
+      e2("../utils").inherits(n2, i2), n2.prototype._read = function() {
+        this._helper.resume();
+      }, t2.exports = n2;
+    }, { "../utils": 32, "readable-stream": 16 }], 14: [function(e2, t2, r2) {
+      t2.exports = { isNode: "undefined" != typeof Buffer, newBufferFrom: function(e3, t3) {
+        if (Buffer.from && Buffer.from !== Uint8Array.from)
+          return Buffer.from(e3, t3);
+        if ("number" == typeof e3)
+          throw new Error('The "data" argument must not be a number');
+        return new Buffer(e3, t3);
+      }, allocBuffer: function(e3) {
+        if (Buffer.alloc)
+          return Buffer.alloc(e3);
+        var t3 = new Buffer(e3);
+        return t3.fill(0), t3;
+      }, isBuffer: function(e3) {
+        return Buffer.isBuffer(e3);
+      }, isStream: function(e3) {
+        return e3 && "function" == typeof e3.on && "function" == typeof e3.pause && "function" == typeof e3.resume;
+      } };
+    }, {}], 15: [function(e2, t2, r2) {
+      function s2(e3, t3, r3) {
+        var n3, i3 = u2.getTypeOf(t3), s3 = u2.extend(r3 || {}, f2);
+        s3.date = s3.date || /* @__PURE__ */ new Date(), null !== s3.compression && (s3.compression = s3.compression.toUpperCase()), "string" == typeof s3.unixPermissions && (s3.unixPermissions = parseInt(s3.unixPermissions, 8)), s3.unixPermissions && 16384 & s3.unixPermissions && (s3.dir = true), s3.dosPermissions && 16 & s3.dosPermissions && (s3.dir = true), s3.dir && (e3 = g2(e3)), s3.createFolders && (n3 = _2(e3)) && b2.call(this, n3, true);
+        var a3 = "string" === i3 && false === s3.binary && false === s3.base64;
+        r3 && void 0 !== r3.binary || (s3.binary = !a3), (t3 instanceof c2 && 0 === t3.uncompressedSize || s3.dir || !t3 || 0 === t3.length) && (s3.base64 = false, s3.binary = true, t3 = "", s3.compression = "STORE", i3 = "string");
+        var o3 = null;
+        o3 = t3 instanceof c2 || t3 instanceof l2 ? t3 : p2.isNode && p2.isStream(t3) ? new m2(e3, t3) : u2.prepareContent(e3, t3, s3.binary, s3.optimizedBinaryString, s3.base64);
+        var h3 = new d2(e3, o3, s3);
+        this.files[e3] = h3;
+      }
+      var i2 = e2("./utf8"), u2 = e2("./utils"), l2 = e2("./stream/GenericWorker"), a2 = e2("./stream/StreamHelper"), f2 = e2("./defaults"), c2 = e2("./compressedObject"), d2 = e2("./zipObject"), o2 = e2("./generate"), p2 = e2("./nodejsUtils"), m2 = e2("./nodejs/NodejsStreamInputAdapter"), _2 = function(e3) {
+        "/" === e3.slice(-1) && (e3 = e3.substring(0, e3.length - 1));
+        var t3 = e3.lastIndexOf("/");
+        return 0 < t3 ? e3.substring(0, t3) : "";
+      }, g2 = function(e3) {
+        return "/" !== e3.slice(-1) && (e3 += "/"), e3;
+      }, b2 = function(e3, t3) {
+        return t3 = void 0 !== t3 ? t3 : f2.createFolders, e3 = g2(e3), this.files[e3] || s2.call(this, e3, null, { dir: true, createFolders: t3 }), this.files[e3];
+      };
+      function h2(e3) {
+        return "[object RegExp]" === Object.prototype.toString.call(e3);
+      }
+      var n2 = { load: function() {
+        throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.");
+      }, forEach: function(e3) {
+        var t3, r3, n3;
+        for (t3 in this.files)
+          n3 = this.files[t3], (r3 = t3.slice(this.root.length, t3.length)) && t3.slice(0, this.root.length) === this.root && e3(r3, n3);
+      }, filter: function(r3) {
+        var n3 = [];
+        return this.forEach(function(e3, t3) {
+          r3(e3, t3) && n3.push(t3);
+        }), n3;
+      }, file: function(e3, t3, r3) {
+        if (1 !== arguments.length)
+          return e3 = this.root + e3, s2.call(this, e3, t3, r3), this;
+        if (h2(e3)) {
+          var n3 = e3;
+          return this.filter(function(e4, t4) {
+            return !t4.dir && n3.test(e4);
+          });
+        }
+        var i3 = this.files[this.root + e3];
+        return i3 && !i3.dir ? i3 : null;
+      }, folder: function(r3) {
+        if (!r3)
+          return this;
+        if (h2(r3))
+          return this.filter(function(e4, t4) {
+            return t4.dir && r3.test(e4);
+          });
+        var e3 = this.root + r3, t3 = b2.call(this, e3), n3 = this.clone();
+        return n3.root = t3.name, n3;
+      }, remove: function(r3) {
+        r3 = this.root + r3;
+        var e3 = this.files[r3];
+        if (e3 || ("/" !== r3.slice(-1) && (r3 += "/"), e3 = this.files[r3]), e3 && !e3.dir)
+          delete this.files[r3];
+        else
+          for (var t3 = this.filter(function(e4, t4) {
+            return t4.name.slice(0, r3.length) === r3;
+          }), n3 = 0; n3 < t3.length; n3++)
+            delete this.files[t3[n3].name];
+        return this;
+      }, generate: function() {
+        throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.");
+      }, generateInternalStream: function(e3) {
+        var t3, r3 = {};
+        try {
+          if ((r3 = u2.extend(e3 || {}, { streamFiles: false, compression: "STORE", compressionOptions: null, type: "", platform: "DOS", comment: null, mimeType: "application/zip", encodeFileName: i2.utf8encode })).type = r3.type.toLowerCase(), r3.compression = r3.compression.toUpperCase(), "binarystring" === r3.type && (r3.type = "string"), !r3.type)
+            throw new Error("No output type specified.");
+          u2.checkSupport(r3.type), "darwin" !== r3.platform && "freebsd" !== r3.platform && "linux" !== r3.platform && "sunos" !== r3.platform || (r3.platform = "UNIX"), "win32" === r3.platform && (r3.platform = "DOS");
+          var n3 = r3.comment || this.comment || "";
+          t3 = o2.generateWorker(this, r3, n3);
+        } catch (e4) {
+          (t3 = new l2("error")).error(e4);
+        }
+        return new a2(t3, r3.type || "string", r3.mimeType);
+      }, generateAsync: function(e3, t3) {
+        return this.generateInternalStream(e3).accumulate(t3);
+      }, generateNodeStream: function(e3, t3) {
+        return (e3 = e3 || {}).type || (e3.type = "nodebuffer"), this.generateInternalStream(e3).toNodejsStream(t3);
+      } };
+      t2.exports = n2;
+    }, { "./compressedObject": 2, "./defaults": 5, "./generate": 9, "./nodejs/NodejsStreamInputAdapter": 12, "./nodejsUtils": 14, "./stream/GenericWorker": 28, "./stream/StreamHelper": 29, "./utf8": 31, "./utils": 32, "./zipObject": 35 }], 16: [function(e2, t2, r2) {
+      t2.exports = e2("stream");
+    }, { stream: void 0 }], 17: [function(e2, t2, r2) {
+      var n2 = e2("./DataReader");
+      function i2(e3) {
+        n2.call(this, e3);
+        for (var t3 = 0; t3 < this.data.length; t3++)
+          e3[t3] = 255 & e3[t3];
+      }
+      e2("../utils").inherits(i2, n2), i2.prototype.byteAt = function(e3) {
+        return this.data[this.zero + e3];
+      }, i2.prototype.lastIndexOfSignature = function(e3) {
+        for (var t3 = e3.charCodeAt(0), r3 = e3.charCodeAt(1), n3 = e3.charCodeAt(2), i3 = e3.charCodeAt(3), s2 = this.length - 4; 0 <= s2; --s2)
+          if (this.data[s2] === t3 && this.data[s2 + 1] === r3 && this.data[s2 + 2] === n3 && this.data[s2 + 3] === i3)
+            return s2 - this.zero;
+        return -1;
+      }, i2.prototype.readAndCheckSignature = function(e3) {
+        var t3 = e3.charCodeAt(0), r3 = e3.charCodeAt(1), n3 = e3.charCodeAt(2), i3 = e3.charCodeAt(3), s2 = this.readData(4);
+        return t3 === s2[0] && r3 === s2[1] && n3 === s2[2] && i3 === s2[3];
+      }, i2.prototype.readData = function(e3) {
+        if (this.checkOffset(e3), 0 === e3)
+          return [];
+        var t3 = this.data.slice(this.zero + this.index, this.zero + this.index + e3);
+        return this.index += e3, t3;
+      }, t2.exports = i2;
+    }, { "../utils": 32, "./DataReader": 18 }], 18: [function(e2, t2, r2) {
+      var n2 = e2("../utils");
+      function i2(e3) {
+        this.data = e3, this.length = e3.length, this.index = 0, this.zero = 0;
+      }
+      i2.prototype = { checkOffset: function(e3) {
+        this.checkIndex(this.index + e3);
+      }, checkIndex: function(e3) {
+        if (this.length < this.zero + e3 || e3 < 0)
+          throw new Error("End of data reached (data length = " + this.length + ", asked index = " + e3 + "). Corrupted zip ?");
+      }, setIndex: function(e3) {
+        this.checkIndex(e3), this.index = e3;
+      }, skip: function(e3) {
+        this.setIndex(this.index + e3);
+      }, byteAt: function() {
+      }, readInt: function(e3) {
+        var t3, r3 = 0;
+        for (this.checkOffset(e3), t3 = this.index + e3 - 1; t3 >= this.index; t3--)
+          r3 = (r3 << 8) + this.byteAt(t3);
+        return this.index += e3, r3;
+      }, readString: function(e3) {
+        return n2.transformTo("string", this.readData(e3));
+      }, readData: function() {
+      }, lastIndexOfSignature: function() {
+      }, readAndCheckSignature: function() {
+      }, readDate: function() {
+        var e3 = this.readInt(4);
+        return new Date(Date.UTC(1980 + (e3 >> 25 & 127), (e3 >> 21 & 15) - 1, e3 >> 16 & 31, e3 >> 11 & 31, e3 >> 5 & 63, (31 & e3) << 1));
+      } }, t2.exports = i2;
+    }, { "../utils": 32 }], 19: [function(e2, t2, r2) {
+      var n2 = e2("./Uint8ArrayReader");
+      function i2(e3) {
+        n2.call(this, e3);
+      }
+      e2("../utils").inherits(i2, n2), i2.prototype.readData = function(e3) {
+        this.checkOffset(e3);
+        var t3 = this.data.slice(this.zero + this.index, this.zero + this.index + e3);
+        return this.index += e3, t3;
+      }, t2.exports = i2;
+    }, { "../utils": 32, "./Uint8ArrayReader": 21 }], 20: [function(e2, t2, r2) {
+      var n2 = e2("./DataReader");
+      function i2(e3) {
+        n2.call(this, e3);
+      }
+      e2("../utils").inherits(i2, n2), i2.prototype.byteAt = function(e3) {
+        return this.data.charCodeAt(this.zero + e3);
+      }, i2.prototype.lastIndexOfSignature = function(e3) {
+        return this.data.lastIndexOf(e3) - this.zero;
+      }, i2.prototype.readAndCheckSignature = function(e3) {
+        return e3 === this.readData(4);
+      }, i2.prototype.readData = function(e3) {
+        this.checkOffset(e3);
+        var t3 = this.data.slice(this.zero + this.index, this.zero + this.index + e3);
+        return this.index += e3, t3;
+      }, t2.exports = i2;
+    }, { "../utils": 32, "./DataReader": 18 }], 21: [function(e2, t2, r2) {
+      var n2 = e2("./ArrayReader");
+      function i2(e3) {
+        n2.call(this, e3);
+      }
+      e2("../utils").inherits(i2, n2), i2.prototype.readData = function(e3) {
+        if (this.checkOffset(e3), 0 === e3)
+          return new Uint8Array(0);
+        var t3 = this.data.subarray(this.zero + this.index, this.zero + this.index + e3);
+        return this.index += e3, t3;
+      }, t2.exports = i2;
+    }, { "../utils": 32, "./ArrayReader": 17 }], 22: [function(e2, t2, r2) {
+      var n2 = e2("../utils"), i2 = e2("../support"), s2 = e2("./ArrayReader"), a2 = e2("./StringReader"), o2 = e2("./NodeBufferReader"), h2 = e2("./Uint8ArrayReader");
+      t2.exports = function(e3) {
+        var t3 = n2.getTypeOf(e3);
+        return n2.checkSupport(t3), "string" !== t3 || i2.uint8array ? "nodebuffer" === t3 ? new o2(e3) : i2.uint8array ? new h2(n2.transformTo("uint8array", e3)) : new s2(n2.transformTo("array", e3)) : new a2(e3);
+      };
+    }, { "../support": 30, "../utils": 32, "./ArrayReader": 17, "./NodeBufferReader": 19, "./StringReader": 20, "./Uint8ArrayReader": 21 }], 23: [function(e2, t2, r2) {
+      r2.LOCAL_FILE_HEADER = "PK", r2.CENTRAL_FILE_HEADER = "PK", r2.CENTRAL_DIRECTORY_END = "PK", r2.ZIP64_CENTRAL_DIRECTORY_LOCATOR = "PK\x07", r2.ZIP64_CENTRAL_DIRECTORY_END = "PK", r2.DATA_DESCRIPTOR = "PK\x07\b";
+    }, {}], 24: [function(e2, t2, r2) {
+      var n2 = e2("./GenericWorker"), i2 = e2("../utils");
+      function s2(e3) {
+        n2.call(this, "ConvertWorker to " + e3), this.destType = e3;
+      }
+      i2.inherits(s2, n2), s2.prototype.processChunk = function(e3) {
+        this.push({ data: i2.transformTo(this.destType, e3.data), meta: e3.meta });
+      }, t2.exports = s2;
+    }, { "../utils": 32, "./GenericWorker": 28 }], 25: [function(e2, t2, r2) {
+      var n2 = e2("./GenericWorker"), i2 = e2("../crc32");
+      function s2() {
+        n2.call(this, "Crc32Probe"), this.withStreamInfo("crc32", 0);
+      }
+      e2("../utils").inherits(s2, n2), s2.prototype.processChunk = function(e3) {
+        this.streamInfo.crc32 = i2(e3.data, this.streamInfo.crc32 || 0), this.push(e3);
+      }, t2.exports = s2;
+    }, { "../crc32": 4, "../utils": 32, "./GenericWorker": 28 }], 26: [function(e2, t2, r2) {
+      var n2 = e2("../utils"), i2 = e2("./GenericWorker");
+      function s2(e3) {
+        i2.call(this, "DataLengthProbe for " + e3), this.propName = e3, this.withStreamInfo(e3, 0);
+      }
+      n2.inherits(s2, i2), s2.prototype.processChunk = function(e3) {
+        if (e3) {
+          var t3 = this.streamInfo[this.propName] || 0;
+          this.streamInfo[this.propName] = t3 + e3.data.length;
+        }
+        i2.prototype.processChunk.call(this, e3);
+      }, t2.exports = s2;
+    }, { "../utils": 32, "./GenericWorker": 28 }], 27: [function(e2, t2, r2) {
+      var n2 = e2("../utils"), i2 = e2("./GenericWorker");
+      function s2(e3) {
+        i2.call(this, "DataWorker");
+        var t3 = this;
+        this.dataIsReady = false, this.index = 0, this.max = 0, this.data = null, this.type = "", this._tickScheduled = false, e3.then(function(e4) {
+          t3.dataIsReady = true, t3.data = e4, t3.max = e4 && e4.length || 0, t3.type = n2.getTypeOf(e4), t3.isPaused || t3._tickAndRepeat();
+        }, function(e4) {
+          t3.error(e4);
+        });
+      }
+      n2.inherits(s2, i2), s2.prototype.cleanUp = function() {
+        i2.prototype.cleanUp.call(this), this.data = null;
+      }, s2.prototype.resume = function() {
+        return !!i2.prototype.resume.call(this) && (!this._tickScheduled && this.dataIsReady && (this._tickScheduled = true, n2.delay(this._tickAndRepeat, [], this)), true);
+      }, s2.prototype._tickAndRepeat = function() {
+        this._tickScheduled = false, this.isPaused || this.isFinished || (this._tick(), this.isFinished || (n2.delay(this._tickAndRepeat, [], this), this._tickScheduled = true));
+      }, s2.prototype._tick = function() {
+        if (this.isPaused || this.isFinished)
+          return false;
+        var e3 = null, t3 = Math.min(this.max, this.index + 16384);
+        if (this.index >= this.max)
+          return this.end();
+        switch (this.type) {
+          case "string":
+            e3 = this.data.substring(this.index, t3);
+            break;
+          case "uint8array":
+            e3 = this.data.subarray(this.index, t3);
+            break;
+          case "array":
+          case "nodebuffer":
+            e3 = this.data.slice(this.index, t3);
+        }
+        return this.index = t3, this.push({ data: e3, meta: { percent: this.max ? this.index / this.max * 100 : 0 } });
+      }, t2.exports = s2;
+    }, { "../utils": 32, "./GenericWorker": 28 }], 28: [function(e2, t2, r2) {
+      function n2(e3) {
+        this.name = e3 || "default", this.streamInfo = {}, this.generatedError = null, this.extraStreamInfo = {}, this.isPaused = true, this.isFinished = false, this.isLocked = false, this._listeners = { data: [], end: [], error: [] }, this.previous = null;
+      }
+      n2.prototype = { push: function(e3) {
+        this.emit("data", e3);
+      }, end: function() {
+        if (this.isFinished)
+          return false;
+        this.flush();
+        try {
+          this.emit("end"), this.cleanUp(), this.isFinished = true;
+        } catch (e3) {
+          this.emit("error", e3);
+        }
+        return true;
+      }, error: function(e3) {
+        return !this.isFinished && (this.isPaused ? this.generatedError = e3 : (this.isFinished = true, this.emit("error", e3), this.previous && this.previous.error(e3), this.cleanUp()), true);
+      }, on: function(e3, t3) {
+        return this._listeners[e3].push(t3), this;
+      }, cleanUp: function() {
+        this.streamInfo = this.generatedError = this.extraStreamInfo = null, this._listeners = [];
+      }, emit: function(e3, t3) {
+        if (this._listeners[e3])
+          for (var r3 = 0; r3 < this._listeners[e3].length; r3++)
+            this._listeners[e3][r3].call(this, t3);
+      }, pipe: function(e3) {
+        return e3.registerPrevious(this);
+      }, registerPrevious: function(e3) {
+        if (this.isLocked)
+          throw new Error("The stream '" + this + "' has already been used.");
+        this.streamInfo = e3.streamInfo, this.mergeStreamInfo(), this.previous = e3;
+        var t3 = this;
+        return e3.on("data", function(e4) {
+          t3.processChunk(e4);
+        }), e3.on("end", function() {
+          t3.end();
+        }), e3.on("error", function(e4) {
+          t3.error(e4);
+        }), this;
+      }, pause: function() {
+        return !this.isPaused && !this.isFinished && (this.isPaused = true, this.previous && this.previous.pause(), true);
+      }, resume: function() {
+        if (!this.isPaused || this.isFinished)
+          return false;
+        var e3 = this.isPaused = false;
+        return this.generatedError && (this.error(this.generatedError), e3 = true), this.previous && this.previous.resume(), !e3;
+      }, flush: function() {
+      }, processChunk: function(e3) {
+        this.push(e3);
+      }, withStreamInfo: function(e3, t3) {
+        return this.extraStreamInfo[e3] = t3, this.mergeStreamInfo(), this;
+      }, mergeStreamInfo: function() {
+        for (var e3 in this.extraStreamInfo)
+          Object.prototype.hasOwnProperty.call(this.extraStreamInfo, e3) && (this.streamInfo[e3] = this.extraStreamInfo[e3]);
+      }, lock: function() {
+        if (this.isLocked)
+          throw new Error("The stream '" + this + "' has already been used.");
+        this.isLocked = true, this.previous && this.previous.lock();
+      }, toString: function() {
+        var e3 = "Worker " + this.name;
+        return this.previous ? this.previous + " -> " + e3 : e3;
+      } }, t2.exports = n2;
+    }, {}], 29: [function(e2, t2, r2) {
+      var h2 = e2("../utils"), i2 = e2("./ConvertWorker"), s2 = e2("./GenericWorker"), u2 = e2("../base64"), n2 = e2("../support"), a2 = e2("../external"), o2 = null;
+      if (n2.nodestream)
+        try {
+          o2 = e2("../nodejs/NodejsStreamOutputAdapter");
+        } catch (e3) {
+        }
+      function l2(e3, o3) {
+        return new a2.Promise(function(t3, r3) {
+          var n3 = [], i3 = e3._internalType, s3 = e3._outputType, a3 = e3._mimeType;
+          e3.on("data", function(e4, t4) {
+            n3.push(e4), o3 && o3(t4);
+          }).on("error", function(e4) {
+            n3 = [], r3(e4);
+          }).on("end", function() {
+            try {
+              var e4 = function(e5, t4, r4) {
+                switch (e5) {
+                  case "blob":
+                    return h2.newBlob(h2.transformTo("arraybuffer", t4), r4);
+                  case "base64":
+                    return u2.encode(t4);
+                  default:
+                    return h2.transformTo(e5, t4);
+                }
+              }(s3, function(e5, t4) {
+                var r4, n4 = 0, i4 = null, s4 = 0;
+                for (r4 = 0; r4 < t4.length; r4++)
+                  s4 += t4[r4].length;
+                switch (e5) {
+                  case "string":
+                    return t4.join("");
+                  case "array":
+                    return Array.prototype.concat.apply([], t4);
+                  case "uint8array":
+                    for (i4 = new Uint8Array(s4), r4 = 0; r4 < t4.length; r4++)
+                      i4.set(t4[r4], n4), n4 += t4[r4].length;
+                    return i4;
+                  case "nodebuffer":
+                    return Buffer.concat(t4);
+                  default:
+                    throw new Error("concat : unsupported type '" + e5 + "'");
+                }
+              }(i3, n3), a3);
+              t3(e4);
+            } catch (e5) {
+              r3(e5);
+            }
+            n3 = [];
+          }).resume();
+        });
+      }
+      function f2(e3, t3, r3) {
+        var n3 = t3;
+        switch (t3) {
+          case "blob":
+          case "arraybuffer":
+            n3 = "uint8array";
+            break;
+          case "base64":
+            n3 = "string";
+        }
+        try {
+          this._internalType = n3, this._outputType = t3, this._mimeType = r3, h2.checkSupport(n3), this._worker = e3.pipe(new i2(n3)), e3.lock();
+        } catch (e4) {
+          this._worker = new s2("error"), this._worker.error(e4);
+        }
+      }
+      f2.prototype = { accumulate: function(e3) {
+        return l2(this, e3);
+      }, on: function(e3, t3) {
+        var r3 = this;
+        return "data" === e3 ? this._worker.on(e3, function(e4) {
+          t3.call(r3, e4.data, e4.meta);
+        }) : this._worker.on(e3, function() {
+          h2.delay(t3, arguments, r3);
+        }), this;
+      }, resume: function() {
+        return h2.delay(this._worker.resume, [], this._worker), this;
+      }, pause: function() {
+        return this._worker.pause(), this;
+      }, toNodejsStream: function(e3) {
+        if (h2.checkSupport("nodestream"), "nodebuffer" !== this._outputType)
+          throw new Error(this._outputType + " is not supported by this method");
+        return new o2(this, { objectMode: "nodebuffer" !== this._outputType }, e3);
+      } }, t2.exports = f2;
+    }, { "../base64": 1, "../external": 6, "../nodejs/NodejsStreamOutputAdapter": 13, "../support": 30, "../utils": 32, "./ConvertWorker": 24, "./GenericWorker": 28 }], 30: [function(e2, t2, r2) {
+      if (r2.base64 = true, r2.array = true, r2.string = true, r2.arraybuffer = "undefined" != typeof ArrayBuffer && "undefined" != typeof Uint8Array, r2.nodebuffer = "undefined" != typeof Buffer, r2.uint8array = "undefined" != typeof Uint8Array, "undefined" == typeof ArrayBuffer)
+        r2.blob = false;
+      else {
+        var n2 = new ArrayBuffer(0);
+        try {
+          r2.blob = 0 === new Blob([n2], { type: "application/zip" }).size;
+        } catch (e3) {
+          try {
+            var i2 = new (self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder || self.MSBlobBuilder)();
+            i2.append(n2), r2.blob = 0 === i2.getBlob("application/zip").size;
+          } catch (e4) {
+            r2.blob = false;
+          }
+        }
+      }
+      try {
+        r2.nodestream = !!e2("readable-stream").Readable;
+      } catch (e3) {
+        r2.nodestream = false;
+      }
+    }, { "readable-stream": 16 }], 31: [function(e2, t2, s2) {
+      for (var o2 = e2("./utils"), h2 = e2("./support"), r2 = e2("./nodejsUtils"), n2 = e2("./stream/GenericWorker"), u2 = new Array(256), i2 = 0; i2 < 256; i2++)
+        u2[i2] = 252 <= i2 ? 6 : 248 <= i2 ? 5 : 240 <= i2 ? 4 : 224 <= i2 ? 3 : 192 <= i2 ? 2 : 1;
+      u2[254] = u2[254] = 1;
+      function a2() {
+        n2.call(this, "utf-8 decode"), this.leftOver = null;
+      }
+      function l2() {
+        n2.call(this, "utf-8 encode");
+      }
+      s2.utf8encode = function(e3) {
+        return h2.nodebuffer ? r2.newBufferFrom(e3, "utf-8") : function(e4) {
+          var t3, r3, n3, i3, s3, a3 = e4.length, o3 = 0;
+          for (i3 = 0; i3 < a3; i3++)
+            55296 == (64512 & (r3 = e4.charCodeAt(i3))) && i3 + 1 < a3 && 56320 == (64512 & (n3 = e4.charCodeAt(i3 + 1))) && (r3 = 65536 + (r3 - 55296 << 10) + (n3 - 56320), i3++), o3 += r3 < 128 ? 1 : r3 < 2048 ? 2 : r3 < 65536 ? 3 : 4;
+          for (t3 = h2.uint8array ? new Uint8Array(o3) : new Array(o3), i3 = s3 = 0; s3 < o3; i3++)
+            55296 == (64512 & (r3 = e4.charCodeAt(i3))) && i3 + 1 < a3 && 56320 == (64512 & (n3 = e4.charCodeAt(i3 + 1))) && (r3 = 65536 + (r3 - 55296 << 10) + (n3 - 56320), i3++), r3 < 128 ? t3[s3++] = r3 : (r3 < 2048 ? t3[s3++] = 192 | r3 >>> 6 : (r3 < 65536 ? t3[s3++] = 224 | r3 >>> 12 : (t3[s3++] = 240 | r3 >>> 18, t3[s3++] = 128 | r3 >>> 12 & 63), t3[s3++] = 128 | r3 >>> 6 & 63), t3[s3++] = 128 | 63 & r3);
+          return t3;
+        }(e3);
+      }, s2.utf8decode = function(e3) {
+        return h2.nodebuffer ? o2.transformTo("nodebuffer", e3).toString("utf-8") : function(e4) {
+          var t3, r3, n3, i3, s3 = e4.length, a3 = new Array(2 * s3);
+          for (t3 = r3 = 0; t3 < s3; )
+            if ((n3 = e4[t3++]) < 128)
+              a3[r3++] = n3;
+            else if (4 < (i3 = u2[n3]))
+              a3[r3++] = 65533, t3 += i3 - 1;
+            else {
+              for (n3 &= 2 === i3 ? 31 : 3 === i3 ? 15 : 7; 1 < i3 && t3 < s3; )
+                n3 = n3 << 6 | 63 & e4[t3++], i3--;
+              1 < i3 ? a3[r3++] = 65533 : n3 < 65536 ? a3[r3++] = n3 : (n3 -= 65536, a3[r3++] = 55296 | n3 >> 10 & 1023, a3[r3++] = 56320 | 1023 & n3);
+            }
+          return a3.length !== r3 && (a3.subarray ? a3 = a3.subarray(0, r3) : a3.length = r3), o2.applyFromCharCode(a3);
+        }(e3 = o2.transformTo(h2.uint8array ? "uint8array" : "array", e3));
+      }, o2.inherits(a2, n2), a2.prototype.processChunk = function(e3) {
+        var t3 = o2.transformTo(h2.uint8array ? "uint8array" : "array", e3.data);
+        if (this.leftOver && this.leftOver.length) {
+          if (h2.uint8array) {
+            var r3 = t3;
+            (t3 = new Uint8Array(r3.length + this.leftOver.length)).set(this.leftOver, 0), t3.set(r3, this.leftOver.length);
+          } else
+            t3 = this.leftOver.concat(t3);
+          this.leftOver = null;
+        }
+        var n3 = function(e4, t4) {
+          var r4;
+          for ((t4 = t4 || e4.length) > e4.length && (t4 = e4.length), r4 = t4 - 1; 0 <= r4 && 128 == (192 & e4[r4]); )
+            r4--;
+          return r4 < 0 ? t4 : 0 === r4 ? t4 : r4 + u2[e4[r4]] > t4 ? r4 : t4;
+        }(t3), i3 = t3;
+        n3 !== t3.length && (h2.uint8array ? (i3 = t3.subarray(0, n3), this.leftOver = t3.subarray(n3, t3.length)) : (i3 = t3.slice(0, n3), this.leftOver = t3.slice(n3, t3.length))), this.push({ data: s2.utf8decode(i3), meta: e3.meta });
+      }, a2.prototype.flush = function() {
+        this.leftOver && this.leftOver.length && (this.push({ data: s2.utf8decode(this.leftOver), meta: {} }), this.leftOver = null);
+      }, s2.Utf8DecodeWorker = a2, o2.inherits(l2, n2), l2.prototype.processChunk = function(e3) {
+        this.push({ data: s2.utf8encode(e3.data), meta: e3.meta });
+      }, s2.Utf8EncodeWorker = l2;
+    }, { "./nodejsUtils": 14, "./stream/GenericWorker": 28, "./support": 30, "./utils": 32 }], 32: [function(e2, t2, a2) {
+      var o2 = e2("./support"), h2 = e2("./base64"), r2 = e2("./nodejsUtils"), u2 = e2("./external");
+      function n2(e3) {
+        return e3;
+      }
+      function l2(e3, t3) {
+        for (var r3 = 0; r3 < e3.length; ++r3)
+          t3[r3] = 255 & e3.charCodeAt(r3);
+        return t3;
+      }
+      e2("setimmediate"), a2.newBlob = function(t3, r3) {
+        a2.checkSupport("blob");
+        try {
+          return new Blob([t3], { type: r3 });
+        } catch (e3) {
+          try {
+            var n3 = new (self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder || self.MSBlobBuilder)();
+            return n3.append(t3), n3.getBlob(r3);
+          } catch (e4) {
+            throw new Error("Bug : can't construct the Blob.");
+          }
+        }
+      };
+      var i2 = { stringifyByChunk: function(e3, t3, r3) {
+        var n3 = [], i3 = 0, s3 = e3.length;
+        if (s3 <= r3)
+          return String.fromCharCode.apply(null, e3);
+        for (; i3 < s3; )
+          "array" === t3 || "nodebuffer" === t3 ? n3.push(String.fromCharCode.apply(null, e3.slice(i3, Math.min(i3 + r3, s3)))) : n3.push(String.fromCharCode.apply(null, e3.subarray(i3, Math.min(i3 + r3, s3)))), i3 += r3;
+        return n3.join("");
+      }, stringifyByChar: function(e3) {
+        for (var t3 = "", r3 = 0; r3 < e3.length; r3++)
+          t3 += String.fromCharCode(e3[r3]);
+        return t3;
+      }, applyCanBeUsed: { uint8array: function() {
+        try {
+          return o2.uint8array && 1 === String.fromCharCode.apply(null, new Uint8Array(1)).length;
+        } catch (e3) {
+          return false;
+        }
+      }(), nodebuffer: function() {
+        try {
+          return o2.nodebuffer && 1 === String.fromCharCode.apply(null, r2.allocBuffer(1)).length;
+        } catch (e3) {
+          return false;
+        }
+      }() } };
+      function s2(e3) {
+        var t3 = 65536, r3 = a2.getTypeOf(e3), n3 = true;
+        if ("uint8array" === r3 ? n3 = i2.applyCanBeUsed.uint8array : "nodebuffer" === r3 && (n3 = i2.applyCanBeUsed.nodebuffer), n3)
+          for (; 1 < t3; )
+            try {
+              return i2.stringifyByChunk(e3, r3, t3);
+            } catch (e4) {
+              t3 = Math.floor(t3 / 2);
+            }
+        return i2.stringifyByChar(e3);
+      }
+      function f2(e3, t3) {
+        for (var r3 = 0; r3 < e3.length; r3++)
+          t3[r3] = e3[r3];
+        return t3;
+      }
+      a2.applyFromCharCode = s2;
+      var c2 = {};
+      c2.string = { string: n2, array: function(e3) {
+        return l2(e3, new Array(e3.length));
+      }, arraybuffer: function(e3) {
+        return c2.string.uint8array(e3).buffer;
+      }, uint8array: function(e3) {
+        return l2(e3, new Uint8Array(e3.length));
+      }, nodebuffer: function(e3) {
+        return l2(e3, r2.allocBuffer(e3.length));
+      } }, c2.array = { string: s2, array: n2, arraybuffer: function(e3) {
+        return new Uint8Array(e3).buffer;
+      }, uint8array: function(e3) {
+        return new Uint8Array(e3);
+      }, nodebuffer: function(e3) {
+        return r2.newBufferFrom(e3);
+      } }, c2.arraybuffer = { string: function(e3) {
+        return s2(new Uint8Array(e3));
+      }, array: function(e3) {
+        return f2(new Uint8Array(e3), new Array(e3.byteLength));
+      }, arraybuffer: n2, uint8array: function(e3) {
+        return new Uint8Array(e3);
+      }, nodebuffer: function(e3) {
+        return r2.newBufferFrom(new Uint8Array(e3));
+      } }, c2.uint8array = { string: s2, array: function(e3) {
+        return f2(e3, new Array(e3.length));
+      }, arraybuffer: function(e3) {
+        return e3.buffer;
+      }, uint8array: n2, nodebuffer: function(e3) {
+        return r2.newBufferFrom(e3);
+      } }, c2.nodebuffer = { string: s2, array: function(e3) {
+        return f2(e3, new Array(e3.length));
+      }, arraybuffer: function(e3) {
+        return c2.nodebuffer.uint8array(e3).buffer;
+      }, uint8array: function(e3) {
+        return f2(e3, new Uint8Array(e3.length));
+      }, nodebuffer: n2 }, a2.transformTo = function(e3, t3) {
+        if (t3 = t3 || "", !e3)
+          return t3;
+        a2.checkSupport(e3);
+        var r3 = a2.getTypeOf(t3);
+        return c2[r3][e3](t3);
+      }, a2.resolve = function(e3) {
+        for (var t3 = e3.split("/"), r3 = [], n3 = 0; n3 < t3.length; n3++) {
+          var i3 = t3[n3];
+          "." === i3 || "" === i3 && 0 !== n3 && n3 !== t3.length - 1 || (".." === i3 ? r3.pop() : r3.push(i3));
+        }
+        return r3.join("/");
+      }, a2.getTypeOf = function(e3) {
+        return "string" == typeof e3 ? "string" : "[object Array]" === Object.prototype.toString.call(e3) ? "array" : o2.nodebuffer && r2.isBuffer(e3) ? "nodebuffer" : o2.uint8array && e3 instanceof Uint8Array ? "uint8array" : o2.arraybuffer && e3 instanceof ArrayBuffer ? "arraybuffer" : void 0;
+      }, a2.checkSupport = function(e3) {
+        if (!o2[e3.toLowerCase()])
+          throw new Error(e3 + " is not supported by this platform");
+      }, a2.MAX_VALUE_16BITS = 65535, a2.MAX_VALUE_32BITS = -1, a2.pretty = function(e3) {
+        var t3, r3, n3 = "";
+        for (r3 = 0; r3 < (e3 || "").length; r3++)
+          n3 += "\\x" + ((t3 = e3.charCodeAt(r3)) < 16 ? "0" : "") + t3.toString(16).toUpperCase();
+        return n3;
+      }, a2.delay = function(e3, t3, r3) {
+        setImmediate(function() {
+          e3.apply(r3 || null, t3 || []);
+        });
+      }, a2.inherits = function(e3, t3) {
+        function r3() {
+        }
+        r3.prototype = t3.prototype, e3.prototype = new r3();
+      }, a2.extend = function() {
+        var e3, t3, r3 = {};
+        for (e3 = 0; e3 < arguments.length; e3++)
+          for (t3 in arguments[e3])
+            Object.prototype.hasOwnProperty.call(arguments[e3], t3) && void 0 === r3[t3] && (r3[t3] = arguments[e3][t3]);
+        return r3;
+      }, a2.prepareContent = function(r3, e3, n3, i3, s3) {
+        return u2.Promise.resolve(e3).then(function(n4) {
+          return o2.blob && (n4 instanceof Blob || -1 !== ["[object File]", "[object Blob]"].indexOf(Object.prototype.toString.call(n4))) && "undefined" != typeof FileReader ? new u2.Promise(function(t3, r4) {
+            var e4 = new FileReader();
+            e4.onload = function(e5) {
+              t3(e5.target.result);
+            }, e4.onerror = function(e5) {
+              r4(e5.target.error);
+            }, e4.readAsArrayBuffer(n4);
+          }) : n4;
+        }).then(function(e4) {
+          var t3 = a2.getTypeOf(e4);
+          return t3 ? ("arraybuffer" === t3 ? e4 = a2.transformTo("uint8array", e4) : "string" === t3 && (s3 ? e4 = h2.decode(e4) : n3 && true !== i3 && (e4 = function(e5) {
+            return l2(e5, o2.uint8array ? new Uint8Array(e5.length) : new Array(e5.length));
+          }(e4))), e4) : u2.Promise.reject(new Error("Can't read the data of '" + r3 + "'. Is it in a supported JavaScript type (String, Blob, ArrayBuffer, etc) ?"));
+        });
+      };
+    }, { "./base64": 1, "./external": 6, "./nodejsUtils": 14, "./support": 30, setimmediate: 54 }], 33: [function(e2, t2, r2) {
+      var n2 = e2("./reader/readerFor"), i2 = e2("./utils"), s2 = e2("./signature"), a2 = e2("./zipEntry"), o2 = e2("./support");
+      function h2(e3) {
+        this.files = [], this.loadOptions = e3;
+      }
+      h2.prototype = { checkSignature: function(e3) {
+        if (!this.reader.readAndCheckSignature(e3)) {
+          this.reader.index -= 4;
+          var t3 = this.reader.readString(4);
+          throw new Error("Corrupted zip or bug: unexpected signature (" + i2.pretty(t3) + ", expected " + i2.pretty(e3) + ")");
+        }
+      }, isSignature: function(e3, t3) {
+        var r3 = this.reader.index;
+        this.reader.setIndex(e3);
+        var n3 = this.reader.readString(4) === t3;
+        return this.reader.setIndex(r3), n3;
+      }, readBlockEndOfCentral: function() {
+        this.diskNumber = this.reader.readInt(2), this.diskWithCentralDirStart = this.reader.readInt(2), this.centralDirRecordsOnThisDisk = this.reader.readInt(2), this.centralDirRecords = this.reader.readInt(2), this.centralDirSize = this.reader.readInt(4), this.centralDirOffset = this.reader.readInt(4), this.zipCommentLength = this.reader.readInt(2);
+        var e3 = this.reader.readData(this.zipCommentLength), t3 = o2.uint8array ? "uint8array" : "array", r3 = i2.transformTo(t3, e3);
+        this.zipComment = this.loadOptions.decodeFileName(r3);
+      }, readBlockZip64EndOfCentral: function() {
+        this.zip64EndOfCentralSize = this.reader.readInt(8), this.reader.skip(4), this.diskNumber = this.reader.readInt(4), this.diskWithCentralDirStart = this.reader.readInt(4), this.centralDirRecordsOnThisDisk = this.reader.readInt(8), this.centralDirRecords = this.reader.readInt(8), this.centralDirSize = this.reader.readInt(8), this.centralDirOffset = this.reader.readInt(8), this.zip64ExtensibleData = {};
+        for (var e3, t3, r3, n3 = this.zip64EndOfCentralSize - 44; 0 < n3; )
+          e3 = this.reader.readInt(2), t3 = this.reader.readInt(4), r3 = this.reader.readData(t3), this.zip64ExtensibleData[e3] = { id: e3, length: t3, value: r3 };
+      }, readBlockZip64EndOfCentralLocator: function() {
+        if (this.diskWithZip64CentralDirStart = this.reader.readInt(4), this.relativeOffsetEndOfZip64CentralDir = this.reader.readInt(8), this.disksCount = this.reader.readInt(4), 1 < this.disksCount)
+          throw new Error("Multi-volumes zip are not supported");
+      }, readLocalFiles: function() {
+        var e3, t3;
+        for (e3 = 0; e3 < this.files.length; e3++)
+          t3 = this.files[e3], this.reader.setIndex(t3.localHeaderOffset), this.checkSignature(s2.LOCAL_FILE_HEADER), t3.readLocalPart(this.reader), t3.handleUTF8(), t3.processAttributes();
+      }, readCentralDir: function() {
+        var e3;
+        for (this.reader.setIndex(this.centralDirOffset); this.reader.readAndCheckSignature(s2.CENTRAL_FILE_HEADER); )
+          (e3 = new a2({ zip64: this.zip64 }, this.loadOptions)).readCentralPart(this.reader), this.files.push(e3);
+        if (this.centralDirRecords !== this.files.length && 0 !== this.centralDirRecords && 0 === this.files.length)
+          throw new Error("Corrupted zip or bug: expected " + this.centralDirRecords + " records in central dir, got " + this.files.length);
+      }, readEndOfCentral: function() {
+        var e3 = this.reader.lastIndexOfSignature(s2.CENTRAL_DIRECTORY_END);
+        if (e3 < 0)
+          throw !this.isSignature(0, s2.LOCAL_FILE_HEADER) ? new Error("Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html") : new Error("Corrupted zip: can't find end of central directory");
+        this.reader.setIndex(e3);
+        var t3 = e3;
+        if (this.checkSignature(s2.CENTRAL_DIRECTORY_END), this.readBlockEndOfCentral(), this.diskNumber === i2.MAX_VALUE_16BITS || this.diskWithCentralDirStart === i2.MAX_VALUE_16BITS || this.centralDirRecordsOnThisDisk === i2.MAX_VALUE_16BITS || this.centralDirRecords === i2.MAX_VALUE_16BITS || this.centralDirSize === i2.MAX_VALUE_32BITS || this.centralDirOffset === i2.MAX_VALUE_32BITS) {
+          if (this.zip64 = true, (e3 = this.reader.lastIndexOfSignature(s2.ZIP64_CENTRAL_DIRECTORY_LOCATOR)) < 0)
+            throw new Error("Corrupted zip: can't find the ZIP64 end of central directory locator");
+          if (this.reader.setIndex(e3), this.checkSignature(s2.ZIP64_CENTRAL_DIRECTORY_LOCATOR), this.readBlockZip64EndOfCentralLocator(), !this.isSignature(this.relativeOffsetEndOfZip64CentralDir, s2.ZIP64_CENTRAL_DIRECTORY_END) && (this.relativeOffsetEndOfZip64CentralDir = this.reader.lastIndexOfSignature(s2.ZIP64_CENTRAL_DIRECTORY_END), this.relativeOffsetEndOfZip64CentralDir < 0))
+            throw new Error("Corrupted zip: can't find the ZIP64 end of central directory");
+          this.reader.setIndex(this.relativeOffsetEndOfZip64CentralDir), this.checkSignature(s2.ZIP64_CENTRAL_DIRECTORY_END), this.readBlockZip64EndOfCentral();
+        }
+        var r3 = this.centralDirOffset + this.centralDirSize;
+        this.zip64 && (r3 += 20, r3 += 12 + this.zip64EndOfCentralSize);
+        var n3 = t3 - r3;
+        if (0 < n3)
+          this.isSignature(t3, s2.CENTRAL_FILE_HEADER) || (this.reader.zero = n3);
+        else if (n3 < 0)
+          throw new Error("Corrupted zip: missing " + Math.abs(n3) + " bytes.");
+      }, prepareReader: function(e3) {
+        this.reader = n2(e3);
+      }, load: function(e3) {
+        this.prepareReader(e3), this.readEndOfCentral(), this.readCentralDir(), this.readLocalFiles();
+      } }, t2.exports = h2;
+    }, { "./reader/readerFor": 22, "./signature": 23, "./support": 30, "./utils": 32, "./zipEntry": 34 }], 34: [function(e2, t2, r2) {
+      var n2 = e2("./reader/readerFor"), s2 = e2("./utils"), i2 = e2("./compressedObject"), a2 = e2("./crc32"), o2 = e2("./utf8"), h2 = e2("./compressions"), u2 = e2("./support");
+      function l2(e3, t3) {
+        this.options = e3, this.loadOptions = t3;
+      }
+      l2.prototype = { isEncrypted: function() {
+        return 1 == (1 & this.bitFlag);
+      }, useUTF8: function() {
+        return 2048 == (2048 & this.bitFlag);
+      }, readLocalPart: function(e3) {
+        var t3, r3;
+        if (e3.skip(22), this.fileNameLength = e3.readInt(2), r3 = e3.readInt(2), this.fileName = e3.readData(this.fileNameLength), e3.skip(r3), -1 === this.compressedSize || -1 === this.uncompressedSize)
+          throw new Error("Bug or corrupted zip : didn't get enough information from the central directory (compressedSize === -1 || uncompressedSize === -1)");
+        if (null === (t3 = function(e4) {
+          for (var t4 in h2)
+            if (Object.prototype.hasOwnProperty.call(h2, t4) && h2[t4].magic === e4)
+              return h2[t4];
+          return null;
+        }(this.compressionMethod)))
+          throw new Error("Corrupted zip : compression " + s2.pretty(this.compressionMethod) + " unknown (inner file : " + s2.transformTo("string", this.fileName) + ")");
+        this.decompressed = new i2(this.compressedSize, this.uncompressedSize, this.crc32, t3, e3.readData(this.compressedSize));
+      }, readCentralPart: function(e3) {
+        this.versionMadeBy = e3.readInt(2), e3.skip(2), this.bitFlag = e3.readInt(2), this.compressionMethod = e3.readString(2), this.date = e3.readDate(), this.crc32 = e3.readInt(4), this.compressedSize = e3.readInt(4), this.uncompressedSize = e3.readInt(4);
+        var t3 = e3.readInt(2);
+        if (this.extraFieldsLength = e3.readInt(2), this.fileCommentLength = e3.readInt(2), this.diskNumberStart = e3.readInt(2), this.internalFileAttributes = e3.readInt(2), this.externalFileAttributes = e3.readInt(4), this.localHeaderOffset = e3.readInt(4), this.isEncrypted())
+          throw new Error("Encrypted zip are not supported");
+        e3.skip(t3), this.readExtraFields(e3), this.parseZIP64ExtraField(e3), this.fileComment = e3.readData(this.fileCommentLength);
+      }, processAttributes: function() {
+        this.unixPermissions = null, this.dosPermissions = null;
+        var e3 = this.versionMadeBy >> 8;
+        this.dir = !!(16 & this.externalFileAttributes), 0 == e3 && (this.dosPermissions = 63 & this.externalFileAttributes), 3 == e3 && (this.unixPermissions = this.externalFileAttributes >> 16 & 65535), this.dir || "/" !== this.fileNameStr.slice(-1) || (this.dir = true);
+      }, parseZIP64ExtraField: function() {
+        if (this.extraFields[1]) {
+          var e3 = n2(this.extraFields[1].value);
+          this.uncompressedSize === s2.MAX_VALUE_32BITS && (this.uncompressedSize = e3.readInt(8)), this.compressedSize === s2.MAX_VALUE_32BITS && (this.compressedSize = e3.readInt(8)), this.localHeaderOffset === s2.MAX_VALUE_32BITS && (this.localHeaderOffset = e3.readInt(8)), this.diskNumberStart === s2.MAX_VALUE_32BITS && (this.diskNumberStart = e3.readInt(4));
+        }
+      }, readExtraFields: function(e3) {
+        var t3, r3, n3, i3 = e3.index + this.extraFieldsLength;
+        for (this.extraFields || (this.extraFields = {}); e3.index + 4 < i3; )
+          t3 = e3.readInt(2), r3 = e3.readInt(2), n3 = e3.readData(r3), this.extraFields[t3] = { id: t3, length: r3, value: n3 };
+        e3.setIndex(i3);
+      }, handleUTF8: function() {
+        var e3 = u2.uint8array ? "uint8array" : "array";
+        if (this.useUTF8())
+          this.fileNameStr = o2.utf8decode(this.fileName), this.fileCommentStr = o2.utf8decode(this.fileComment);
+        else {
+          var t3 = this.findExtraFieldUnicodePath();
+          if (null !== t3)
+            this.fileNameStr = t3;
+          else {
+            var r3 = s2.transformTo(e3, this.fileName);
+            this.fileNameStr = this.loadOptions.decodeFileName(r3);
+          }
+          var n3 = this.findExtraFieldUnicodeComment();
+          if (null !== n3)
+            this.fileCommentStr = n3;
+          else {
+            var i3 = s2.transformTo(e3, this.fileComment);
+            this.fileCommentStr = this.loadOptions.decodeFileName(i3);
+          }
+        }
+      }, findExtraFieldUnicodePath: function() {
+        var e3 = this.extraFields[28789];
+        if (e3) {
+          var t3 = n2(e3.value);
+          return 1 !== t3.readInt(1) ? null : a2(this.fileName) !== t3.readInt(4) ? null : o2.utf8decode(t3.readData(e3.length - 5));
+        }
+        return null;
+      }, findExtraFieldUnicodeComment: function() {
+        var e3 = this.extraFields[25461];
+        if (e3) {
+          var t3 = n2(e3.value);
+          return 1 !== t3.readInt(1) ? null : a2(this.fileComment) !== t3.readInt(4) ? null : o2.utf8decode(t3.readData(e3.length - 5));
+        }
+        return null;
+      } }, t2.exports = l2;
+    }, { "./compressedObject": 2, "./compressions": 3, "./crc32": 4, "./reader/readerFor": 22, "./support": 30, "./utf8": 31, "./utils": 32 }], 35: [function(e2, t2, r2) {
+      function n2(e3, t3, r3) {
+        this.name = e3, this.dir = r3.dir, this.date = r3.date, this.comment = r3.comment, this.unixPermissions = r3.unixPermissions, this.dosPermissions = r3.dosPermissions, this._data = t3, this._dataBinary = r3.binary, this.options = { compression: r3.compression, compressionOptions: r3.compressionOptions };
+      }
+      var s2 = e2("./stream/StreamHelper"), i2 = e2("./stream/DataWorker"), a2 = e2("./utf8"), o2 = e2("./compressedObject"), h2 = e2("./stream/GenericWorker");
+      n2.prototype = { internalStream: function(e3) {
+        var t3 = null, r3 = "string";
+        try {
+          if (!e3)
+            throw new Error("No output type specified.");
+          var n3 = "string" === (r3 = e3.toLowerCase()) || "text" === r3;
+          "binarystring" !== r3 && "text" !== r3 || (r3 = "string"), t3 = this._decompressWorker();
+          var i3 = !this._dataBinary;
+          i3 && !n3 && (t3 = t3.pipe(new a2.Utf8EncodeWorker())), !i3 && n3 && (t3 = t3.pipe(new a2.Utf8DecodeWorker()));
+        } catch (e4) {
+          (t3 = new h2("error")).error(e4);
+        }
+        return new s2(t3, r3, "");
+      }, async: function(e3, t3) {
+        return this.internalStream(e3).accumulate(t3);
+      }, nodeStream: function(e3, t3) {
+        return this.internalStream(e3 || "nodebuffer").toNodejsStream(t3);
+      }, _compressWorker: function(e3, t3) {
+        if (this._data instanceof o2 && this._data.compression.magic === e3.magic)
+          return this._data.getCompressedWorker();
+        var r3 = this._decompressWorker();
+        return this._dataBinary || (r3 = r3.pipe(new a2.Utf8EncodeWorker())), o2.createWorkerFrom(r3, e3, t3);
+      }, _decompressWorker: function() {
+        return this._data instanceof o2 ? this._data.getContentWorker() : this._data instanceof h2 ? this._data : new i2(this._data);
+      } };
+      for (var u2 = ["asText", "asBinary", "asNodeBuffer", "asUint8Array", "asArrayBuffer"], l2 = function() {
+        throw new Error("This method has been removed in JSZip 3.0, please check the upgrade guide.");
+      }, f2 = 0; f2 < u2.length; f2++)
+        n2.prototype[u2[f2]] = l2;
+      t2.exports = n2;
+    }, { "./compressedObject": 2, "./stream/DataWorker": 27, "./stream/GenericWorker": 28, "./stream/StreamHelper": 29, "./utf8": 31 }], 36: [function(e2, l2, t2) {
+      (function(t3) {
+        var r2, n2, e3 = t3.MutationObserver || t3.WebKitMutationObserver;
+        if (e3) {
+          var i2 = 0, s2 = new e3(u2), a2 = t3.document.createTextNode("");
+          s2.observe(a2, { characterData: true }), r2 = function() {
+            a2.data = i2 = ++i2 % 2;
+          };
+        } else if (t3.setImmediate || void 0 === t3.MessageChannel)
+          r2 = "document" in t3 && "onreadystatechange" in t3.document.createElement("script") ? function() {
+            var e4 = t3.document.createElement("script");
+            e4.onreadystatechange = function() {
+              u2(), e4.onreadystatechange = null, e4.parentNode.removeChild(e4), e4 = null;
+            }, t3.document.documentElement.appendChild(e4);
+          } : function() {
+            setTimeout(u2, 0);
+          };
+        else {
+          var o2 = new t3.MessageChannel();
+          o2.port1.onmessage = u2, r2 = function() {
+            o2.port2.postMessage(0);
+          };
+        }
+        var h2 = [];
+        function u2() {
+          var e4, t4;
+          n2 = true;
+          for (var r3 = h2.length; r3; ) {
+            for (t4 = h2, h2 = [], e4 = -1; ++e4 < r3; )
+              t4[e4]();
+            r3 = h2.length;
+          }
+          n2 = false;
+        }
+        l2.exports = function(e4) {
+          1 !== h2.push(e4) || n2 || r2();
+        };
+      }).call(this, "undefined" != typeof commonjsGlobal ? commonjsGlobal : "undefined" != typeof self ? self : "undefined" != typeof window ? window : {});
+    }, {}], 37: [function(e2, t2, r2) {
+      var i2 = e2("immediate");
+      function u2() {
+      }
+      var l2 = {}, s2 = ["REJECTED"], a2 = ["FULFILLED"], n2 = ["PENDING"];
+      function o2(e3) {
+        if ("function" != typeof e3)
+          throw new TypeError("resolver must be a function");
+        this.state = n2, this.queue = [], this.outcome = void 0, e3 !== u2 && d2(this, e3);
+      }
+      function h2(e3, t3, r3) {
+        this.promise = e3, "function" == typeof t3 && (this.onFulfilled = t3, this.callFulfilled = this.otherCallFulfilled), "function" == typeof r3 && (this.onRejected = r3, this.callRejected = this.otherCallRejected);
+      }
+      function f2(t3, r3, n3) {
+        i2(function() {
+          var e3;
+          try {
+            e3 = r3(n3);
+          } catch (e4) {
+            return l2.reject(t3, e4);
+          }
+          e3 === t3 ? l2.reject(t3, new TypeError("Cannot resolve promise with itself")) : l2.resolve(t3, e3);
+        });
+      }
+      function c2(e3) {
+        var t3 = e3 && e3.then;
+        if (e3 && ("object" == typeof e3 || "function" == typeof e3) && "function" == typeof t3)
+          return function() {
+            t3.apply(e3, arguments);
+          };
+      }
+      function d2(t3, e3) {
+        var r3 = false;
+        function n3(e4) {
+          r3 || (r3 = true, l2.reject(t3, e4));
+        }
+        function i3(e4) {
+          r3 || (r3 = true, l2.resolve(t3, e4));
+        }
+        var s3 = p2(function() {
+          e3(i3, n3);
+        });
+        "error" === s3.status && n3(s3.value);
+      }
+      function p2(e3, t3) {
+        var r3 = {};
+        try {
+          r3.value = e3(t3), r3.status = "success";
+        } catch (e4) {
+          r3.status = "error", r3.value = e4;
+        }
+        return r3;
+      }
+      (t2.exports = o2).prototype.finally = function(t3) {
+        if ("function" != typeof t3)
+          return this;
+        var r3 = this.constructor;
+        return this.then(function(e3) {
+          return r3.resolve(t3()).then(function() {
+            return e3;
+          });
+        }, function(e3) {
+          return r3.resolve(t3()).then(function() {
+            throw e3;
+          });
+        });
+      }, o2.prototype.catch = function(e3) {
+        return this.then(null, e3);
+      }, o2.prototype.then = function(e3, t3) {
+        if ("function" != typeof e3 && this.state === a2 || "function" != typeof t3 && this.state === s2)
+          return this;
+        var r3 = new this.constructor(u2);
+        this.state !== n2 ? f2(r3, this.state === a2 ? e3 : t3, this.outcome) : this.queue.push(new h2(r3, e3, t3));
+        return r3;
+      }, h2.prototype.callFulfilled = function(e3) {
+        l2.resolve(this.promise, e3);
+      }, h2.prototype.otherCallFulfilled = function(e3) {
+        f2(this.promise, this.onFulfilled, e3);
+      }, h2.prototype.callRejected = function(e3) {
+        l2.reject(this.promise, e3);
+      }, h2.prototype.otherCallRejected = function(e3) {
+        f2(this.promise, this.onRejected, e3);
+      }, l2.resolve = function(e3, t3) {
+        var r3 = p2(c2, t3);
+        if ("error" === r3.status)
+          return l2.reject(e3, r3.value);
+        var n3 = r3.value;
+        if (n3)
+          d2(e3, n3);
+        else {
+          e3.state = a2, e3.outcome = t3;
+          for (var i3 = -1, s3 = e3.queue.length; ++i3 < s3; )
+            e3.queue[i3].callFulfilled(t3);
+        }
+        return e3;
+      }, l2.reject = function(e3, t3) {
+        e3.state = s2, e3.outcome = t3;
+        for (var r3 = -1, n3 = e3.queue.length; ++r3 < n3; )
+          e3.queue[r3].callRejected(t3);
+        return e3;
+      }, o2.resolve = function(e3) {
+        if (e3 instanceof this)
+          return e3;
+        return l2.resolve(new this(u2), e3);
+      }, o2.reject = function(e3) {
+        var t3 = new this(u2);
+        return l2.reject(t3, e3);
+      }, o2.all = function(e3) {
+        var r3 = this;
+        if ("[object Array]" !== Object.prototype.toString.call(e3))
+          return this.reject(new TypeError("must be an array"));
+        var n3 = e3.length, i3 = false;
+        if (!n3)
+          return this.resolve([]);
+        var s3 = new Array(n3), a3 = 0, t3 = -1, o3 = new this(u2);
+        for (; ++t3 < n3; )
+          h3(e3[t3], t3);
+        return o3;
+        function h3(e4, t4) {
+          r3.resolve(e4).then(function(e5) {
+            s3[t4] = e5, ++a3 !== n3 || i3 || (i3 = true, l2.resolve(o3, s3));
+          }, function(e5) {
+            i3 || (i3 = true, l2.reject(o3, e5));
+          });
+        }
+      }, o2.race = function(e3) {
+        var t3 = this;
+        if ("[object Array]" !== Object.prototype.toString.call(e3))
+          return this.reject(new TypeError("must be an array"));
+        var r3 = e3.length, n3 = false;
+        if (!r3)
+          return this.resolve([]);
+        var i3 = -1, s3 = new this(u2);
+        for (; ++i3 < r3; )
+          a3 = e3[i3], t3.resolve(a3).then(function(e4) {
+            n3 || (n3 = true, l2.resolve(s3, e4));
+          }, function(e4) {
+            n3 || (n3 = true, l2.reject(s3, e4));
+          });
+        var a3;
+        return s3;
+      };
+    }, { immediate: 36 }], 38: [function(e2, t2, r2) {
+      var n2 = {};
+      (0, e2("./lib/utils/common").assign)(n2, e2("./lib/deflate"), e2("./lib/inflate"), e2("./lib/zlib/constants")), t2.exports = n2;
+    }, { "./lib/deflate": 39, "./lib/inflate": 40, "./lib/utils/common": 41, "./lib/zlib/constants": 44 }], 39: [function(e2, t2, r2) {
+      var a2 = e2("./zlib/deflate"), o2 = e2("./utils/common"), h2 = e2("./utils/strings"), i2 = e2("./zlib/messages"), s2 = e2("./zlib/zstream"), u2 = Object.prototype.toString, l2 = 0, f2 = -1, c2 = 0, d2 = 8;
+      function p2(e3) {
+        if (!(this instanceof p2))
+          return new p2(e3);
+        this.options = o2.assign({ level: f2, method: d2, chunkSize: 16384, windowBits: 15, memLevel: 8, strategy: c2, to: "" }, e3 || {});
+        var t3 = this.options;
+        t3.raw && 0 < t3.windowBits ? t3.windowBits = -t3.windowBits : t3.gzip && 0 < t3.windowBits && t3.windowBits < 16 && (t3.windowBits += 16), this.err = 0, this.msg = "", this.ended = false, this.chunks = [], this.strm = new s2(), this.strm.avail_out = 0;
+        var r3 = a2.deflateInit2(this.strm, t3.level, t3.method, t3.windowBits, t3.memLevel, t3.strategy);
+        if (r3 !== l2)
+          throw new Error(i2[r3]);
+        if (t3.header && a2.deflateSetHeader(this.strm, t3.header), t3.dictionary) {
+          var n3;
+          if (n3 = "string" == typeof t3.dictionary ? h2.string2buf(t3.dictionary) : "[object ArrayBuffer]" === u2.call(t3.dictionary) ? new Uint8Array(t3.dictionary) : t3.dictionary, (r3 = a2.deflateSetDictionary(this.strm, n3)) !== l2)
+            throw new Error(i2[r3]);
+          this._dict_set = true;
+        }
+      }
+      function n2(e3, t3) {
+        var r3 = new p2(t3);
+        if (r3.push(e3, true), r3.err)
+          throw r3.msg || i2[r3.err];
+        return r3.result;
+      }
+      p2.prototype.push = function(e3, t3) {
+        var r3, n3, i3 = this.strm, s3 = this.options.chunkSize;
+        if (this.ended)
+          return false;
+        n3 = t3 === ~~t3 ? t3 : true === t3 ? 4 : 0, "string" == typeof e3 ? i3.input = h2.string2buf(e3) : "[object ArrayBuffer]" === u2.call(e3) ? i3.input = new Uint8Array(e3) : i3.input = e3, i3.next_in = 0, i3.avail_in = i3.input.length;
+        do {
+          if (0 === i3.avail_out && (i3.output = new o2.Buf8(s3), i3.next_out = 0, i3.avail_out = s3), 1 !== (r3 = a2.deflate(i3, n3)) && r3 !== l2)
+            return this.onEnd(r3), !(this.ended = true);
+          0 !== i3.avail_out && (0 !== i3.avail_in || 4 !== n3 && 2 !== n3) || ("string" === this.options.to ? this.onData(h2.buf2binstring(o2.shrinkBuf(i3.output, i3.next_out))) : this.onData(o2.shrinkBuf(i3.output, i3.next_out)));
+        } while ((0 < i3.avail_in || 0 === i3.avail_out) && 1 !== r3);
+        return 4 === n3 ? (r3 = a2.deflateEnd(this.strm), this.onEnd(r3), this.ended = true, r3 === l2) : 2 !== n3 || (this.onEnd(l2), !(i3.avail_out = 0));
+      }, p2.prototype.onData = function(e3) {
+        this.chunks.push(e3);
+      }, p2.prototype.onEnd = function(e3) {
+        e3 === l2 && ("string" === this.options.to ? this.result = this.chunks.join("") : this.result = o2.flattenChunks(this.chunks)), this.chunks = [], this.err = e3, this.msg = this.strm.msg;
+      }, r2.Deflate = p2, r2.deflate = n2, r2.deflateRaw = function(e3, t3) {
+        return (t3 = t3 || {}).raw = true, n2(e3, t3);
+      }, r2.gzip = function(e3, t3) {
+        return (t3 = t3 || {}).gzip = true, n2(e3, t3);
+      };
+    }, { "./utils/common": 41, "./utils/strings": 42, "./zlib/deflate": 46, "./zlib/messages": 51, "./zlib/zstream": 53 }], 40: [function(e2, t2, r2) {
+      var c2 = e2("./zlib/inflate"), d2 = e2("./utils/common"), p2 = e2("./utils/strings"), m2 = e2("./zlib/constants"), n2 = e2("./zlib/messages"), i2 = e2("./zlib/zstream"), s2 = e2("./zlib/gzheader"), _2 = Object.prototype.toString;
+      function a2(e3) {
+        if (!(this instanceof a2))
+          return new a2(e3);
+        this.options = d2.assign({ chunkSize: 16384, windowBits: 0, to: "" }, e3 || {});
+        var t3 = this.options;
+        t3.raw && 0 <= t3.windowBits && t3.windowBits < 16 && (t3.windowBits = -t3.windowBits, 0 === t3.windowBits && (t3.windowBits = -15)), !(0 <= t3.windowBits && t3.windowBits < 16) || e3 && e3.windowBits || (t3.windowBits += 32), 15 < t3.windowBits && t3.windowBits < 48 && 0 == (15 & t3.windowBits) && (t3.windowBits |= 15), this.err = 0, this.msg = "", this.ended = false, this.chunks = [], this.strm = new i2(), this.strm.avail_out = 0;
+        var r3 = c2.inflateInit2(this.strm, t3.windowBits);
+        if (r3 !== m2.Z_OK)
+          throw new Error(n2[r3]);
+        this.header = new s2(), c2.inflateGetHeader(this.strm, this.header);
+      }
+      function o2(e3, t3) {
+        var r3 = new a2(t3);
+        if (r3.push(e3, true), r3.err)
+          throw r3.msg || n2[r3.err];
+        return r3.result;
+      }
+      a2.prototype.push = function(e3, t3) {
+        var r3, n3, i3, s3, a3, o3, h2 = this.strm, u2 = this.options.chunkSize, l2 = this.options.dictionary, f2 = false;
+        if (this.ended)
+          return false;
+        n3 = t3 === ~~t3 ? t3 : true === t3 ? m2.Z_FINISH : m2.Z_NO_FLUSH, "string" == typeof e3 ? h2.input = p2.binstring2buf(e3) : "[object ArrayBuffer]" === _2.call(e3) ? h2.input = new Uint8Array(e3) : h2.input = e3, h2.next_in = 0, h2.avail_in = h2.input.length;
+        do {
+          if (0 === h2.avail_out && (h2.output = new d2.Buf8(u2), h2.next_out = 0, h2.avail_out = u2), (r3 = c2.inflate(h2, m2.Z_NO_FLUSH)) === m2.Z_NEED_DICT && l2 && (o3 = "string" == typeof l2 ? p2.string2buf(l2) : "[object ArrayBuffer]" === _2.call(l2) ? new Uint8Array(l2) : l2, r3 = c2.inflateSetDictionary(this.strm, o3)), r3 === m2.Z_BUF_ERROR && true === f2 && (r3 = m2.Z_OK, f2 = false), r3 !== m2.Z_STREAM_END && r3 !== m2.Z_OK)
+            return this.onEnd(r3), !(this.ended = true);
+          h2.next_out && (0 !== h2.avail_out && r3 !== m2.Z_STREAM_END && (0 !== h2.avail_in || n3 !== m2.Z_FINISH && n3 !== m2.Z_SYNC_FLUSH) || ("string" === this.options.to ? (i3 = p2.utf8border(h2.output, h2.next_out), s3 = h2.next_out - i3, a3 = p2.buf2string(h2.output, i3), h2.next_out = s3, h2.avail_out = u2 - s3, s3 && d2.arraySet(h2.output, h2.output, i3, s3, 0), this.onData(a3)) : this.onData(d2.shrinkBuf(h2.output, h2.next_out)))), 0 === h2.avail_in && 0 === h2.avail_out && (f2 = true);
+        } while ((0 < h2.avail_in || 0 === h2.avail_out) && r3 !== m2.Z_STREAM_END);
+        return r3 === m2.Z_STREAM_END && (n3 = m2.Z_FINISH), n3 === m2.Z_FINISH ? (r3 = c2.inflateEnd(this.strm), this.onEnd(r3), this.ended = true, r3 === m2.Z_OK) : n3 !== m2.Z_SYNC_FLUSH || (this.onEnd(m2.Z_OK), !(h2.avail_out = 0));
+      }, a2.prototype.onData = function(e3) {
+        this.chunks.push(e3);
+      }, a2.prototype.onEnd = function(e3) {
+        e3 === m2.Z_OK && ("string" === this.options.to ? this.result = this.chunks.join("") : this.result = d2.flattenChunks(this.chunks)), this.chunks = [], this.err = e3, this.msg = this.strm.msg;
+      }, r2.Inflate = a2, r2.inflate = o2, r2.inflateRaw = function(e3, t3) {
+        return (t3 = t3 || {}).raw = true, o2(e3, t3);
+      }, r2.ungzip = o2;
+    }, { "./utils/common": 41, "./utils/strings": 42, "./zlib/constants": 44, "./zlib/gzheader": 47, "./zlib/inflate": 49, "./zlib/messages": 51, "./zlib/zstream": 53 }], 41: [function(e2, t2, r2) {
+      var n2 = "undefined" != typeof Uint8Array && "undefined" != typeof Uint16Array && "undefined" != typeof Int32Array;
+      r2.assign = function(e3) {
+        for (var t3 = Array.prototype.slice.call(arguments, 1); t3.length; ) {
+          var r3 = t3.shift();
+          if (r3) {
+            if ("object" != typeof r3)
+              throw new TypeError(r3 + "must be non-object");
+            for (var n3 in r3)
+              r3.hasOwnProperty(n3) && (e3[n3] = r3[n3]);
+          }
+        }
+        return e3;
+      }, r2.shrinkBuf = function(e3, t3) {
+        return e3.length === t3 ? e3 : e3.subarray ? e3.subarray(0, t3) : (e3.length = t3, e3);
+      };
+      var i2 = { arraySet: function(e3, t3, r3, n3, i3) {
+        if (t3.subarray && e3.subarray)
+          e3.set(t3.subarray(r3, r3 + n3), i3);
+        else
+          for (var s3 = 0; s3 < n3; s3++)
+            e3[i3 + s3] = t3[r3 + s3];
+      }, flattenChunks: function(e3) {
+        var t3, r3, n3, i3, s3, a2;
+        for (t3 = n3 = 0, r3 = e3.length; t3 < r3; t3++)
+          n3 += e3[t3].length;
+        for (a2 = new Uint8Array(n3), t3 = i3 = 0, r3 = e3.length; t3 < r3; t3++)
+          s3 = e3[t3], a2.set(s3, i3), i3 += s3.length;
+        return a2;
+      } }, s2 = { arraySet: function(e3, t3, r3, n3, i3) {
+        for (var s3 = 0; s3 < n3; s3++)
+          e3[i3 + s3] = t3[r3 + s3];
+      }, flattenChunks: function(e3) {
+        return [].concat.apply([], e3);
+      } };
+      r2.setTyped = function(e3) {
+        e3 ? (r2.Buf8 = Uint8Array, r2.Buf16 = Uint16Array, r2.Buf32 = Int32Array, r2.assign(r2, i2)) : (r2.Buf8 = Array, r2.Buf16 = Array, r2.Buf32 = Array, r2.assign(r2, s2));
+      }, r2.setTyped(n2);
+    }, {}], 42: [function(e2, t2, r2) {
+      var h2 = e2("./common"), i2 = true, s2 = true;
+      try {
+        String.fromCharCode.apply(null, [0]);
+      } catch (e3) {
+        i2 = false;
+      }
+      try {
+        String.fromCharCode.apply(null, new Uint8Array(1));
+      } catch (e3) {
+        s2 = false;
+      }
+      for (var u2 = new h2.Buf8(256), n2 = 0; n2 < 256; n2++)
+        u2[n2] = 252 <= n2 ? 6 : 248 <= n2 ? 5 : 240 <= n2 ? 4 : 224 <= n2 ? 3 : 192 <= n2 ? 2 : 1;
+      function l2(e3, t3) {
+        if (t3 < 65537 && (e3.subarray && s2 || !e3.subarray && i2))
+          return String.fromCharCode.apply(null, h2.shrinkBuf(e3, t3));
+        for (var r3 = "", n3 = 0; n3 < t3; n3++)
+          r3 += String.fromCharCode(e3[n3]);
+        return r3;
+      }
+      u2[254] = u2[254] = 1, r2.string2buf = function(e3) {
+        var t3, r3, n3, i3, s3, a2 = e3.length, o2 = 0;
+        for (i3 = 0; i3 < a2; i3++)
+          55296 == (64512 & (r3 = e3.charCodeAt(i3))) && i3 + 1 < a2 && 56320 == (64512 & (n3 = e3.charCodeAt(i3 + 1))) && (r3 = 65536 + (r3 - 55296 << 10) + (n3 - 56320), i3++), o2 += r3 < 128 ? 1 : r3 < 2048 ? 2 : r3 < 65536 ? 3 : 4;
+        for (t3 = new h2.Buf8(o2), i3 = s3 = 0; s3 < o2; i3++)
+          55296 == (64512 & (r3 = e3.charCodeAt(i3))) && i3 + 1 < a2 && 56320 == (64512 & (n3 = e3.charCodeAt(i3 + 1))) && (r3 = 65536 + (r3 - 55296 << 10) + (n3 - 56320), i3++), r3 < 128 ? t3[s3++] = r3 : (r3 < 2048 ? t3[s3++] = 192 | r3 >>> 6 : (r3 < 65536 ? t3[s3++] = 224 | r3 >>> 12 : (t3[s3++] = 240 | r3 >>> 18, t3[s3++] = 128 | r3 >>> 12 & 63), t3[s3++] = 128 | r3 >>> 6 & 63), t3[s3++] = 128 | 63 & r3);
+        return t3;
+      }, r2.buf2binstring = function(e3) {
+        return l2(e3, e3.length);
+      }, r2.binstring2buf = function(e3) {
+        for (var t3 = new h2.Buf8(e3.length), r3 = 0, n3 = t3.length; r3 < n3; r3++)
+          t3[r3] = e3.charCodeAt(r3);
+        return t3;
+      }, r2.buf2string = function(e3, t3) {
+        var r3, n3, i3, s3, a2 = t3 || e3.length, o2 = new Array(2 * a2);
+        for (r3 = n3 = 0; r3 < a2; )
+          if ((i3 = e3[r3++]) < 128)
+            o2[n3++] = i3;
+          else if (4 < (s3 = u2[i3]))
+            o2[n3++] = 65533, r3 += s3 - 1;
+          else {
+            for (i3 &= 2 === s3 ? 31 : 3 === s3 ? 15 : 7; 1 < s3 && r3 < a2; )
+              i3 = i3 << 6 | 63 & e3[r3++], s3--;
+            1 < s3 ? o2[n3++] = 65533 : i3 < 65536 ? o2[n3++] = i3 : (i3 -= 65536, o2[n3++] = 55296 | i3 >> 10 & 1023, o2[n3++] = 56320 | 1023 & i3);
+          }
+        return l2(o2, n3);
+      }, r2.utf8border = function(e3, t3) {
+        var r3;
+        for ((t3 = t3 || e3.length) > e3.length && (t3 = e3.length), r3 = t3 - 1; 0 <= r3 && 128 == (192 & e3[r3]); )
+          r3--;
+        return r3 < 0 ? t3 : 0 === r3 ? t3 : r3 + u2[e3[r3]] > t3 ? r3 : t3;
+      };
+    }, { "./common": 41 }], 43: [function(e2, t2, r2) {
+      t2.exports = function(e3, t3, r3, n2) {
+        for (var i2 = 65535 & e3 | 0, s2 = e3 >>> 16 & 65535 | 0, a2 = 0; 0 !== r3; ) {
+          for (r3 -= a2 = 2e3 < r3 ? 2e3 : r3; s2 = s2 + (i2 = i2 + t3[n2++] | 0) | 0, --a2; )
+            ;
+          i2 %= 65521, s2 %= 65521;
+        }
+        return i2 | s2 << 16 | 0;
+      };
+    }, {}], 44: [function(e2, t2, r2) {
+      t2.exports = { Z_NO_FLUSH: 0, Z_PARTIAL_FLUSH: 1, Z_SYNC_FLUSH: 2, Z_FULL_FLUSH: 3, Z_FINISH: 4, Z_BLOCK: 5, Z_TREES: 6, Z_OK: 0, Z_STREAM_END: 1, Z_NEED_DICT: 2, Z_ERRNO: -1, Z_STREAM_ERROR: -2, Z_DATA_ERROR: -3, Z_BUF_ERROR: -5, Z_NO_COMPRESSION: 0, Z_BEST_SPEED: 1, Z_BEST_COMPRESSION: 9, Z_DEFAULT_COMPRESSION: -1, Z_FILTERED: 1, Z_HUFFMAN_ONLY: 2, Z_RLE: 3, Z_FIXED: 4, Z_DEFAULT_STRATEGY: 0, Z_BINARY: 0, Z_TEXT: 1, Z_UNKNOWN: 2, Z_DEFLATED: 8 };
+    }, {}], 45: [function(e2, t2, r2) {
+      var o2 = function() {
+        for (var e3, t3 = [], r3 = 0; r3 < 256; r3++) {
+          e3 = r3;
+          for (var n2 = 0; n2 < 8; n2++)
+            e3 = 1 & e3 ? 3988292384 ^ e3 >>> 1 : e3 >>> 1;
+          t3[r3] = e3;
+        }
+        return t3;
+      }();
+      t2.exports = function(e3, t3, r3, n2) {
+        var i2 = o2, s2 = n2 + r3;
+        e3 ^= -1;
+        for (var a2 = n2; a2 < s2; a2++)
+          e3 = e3 >>> 8 ^ i2[255 & (e3 ^ t3[a2])];
+        return -1 ^ e3;
+      };
+    }, {}], 46: [function(e2, t2, r2) {
+      var h2, c2 = e2("../utils/common"), u2 = e2("./trees"), d2 = e2("./adler32"), p2 = e2("./crc32"), n2 = e2("./messages"), l2 = 0, f2 = 4, m2 = 0, _2 = -2, g2 = -1, b2 = 4, i2 = 2, v2 = 8, y2 = 9, s2 = 286, a2 = 30, o2 = 19, w2 = 2 * s2 + 1, k2 = 15, x2 = 3, S2 = 258, z2 = S2 + x2 + 1, C2 = 42, E2 = 113, A2 = 1, I2 = 2, O2 = 3, B2 = 4;
+      function R2(e3, t3) {
+        return e3.msg = n2[t3], t3;
+      }
+      function T2(e3) {
+        return (e3 << 1) - (4 < e3 ? 9 : 0);
+      }
+      function D2(e3) {
+        for (var t3 = e3.length; 0 <= --t3; )
+          e3[t3] = 0;
+      }
+      function F2(e3) {
+        var t3 = e3.state, r3 = t3.pending;
+        r3 > e3.avail_out && (r3 = e3.avail_out), 0 !== r3 && (c2.arraySet(e3.output, t3.pending_buf, t3.pending_out, r3, e3.next_out), e3.next_out += r3, t3.pending_out += r3, e3.total_out += r3, e3.avail_out -= r3, t3.pending -= r3, 0 === t3.pending && (t3.pending_out = 0));
+      }
+      function N2(e3, t3) {
+        u2._tr_flush_block(e3, 0 <= e3.block_start ? e3.block_start : -1, e3.strstart - e3.block_start, t3), e3.block_start = e3.strstart, F2(e3.strm);
+      }
+      function U2(e3, t3) {
+        e3.pending_buf[e3.pending++] = t3;
+      }
+      function P2(e3, t3) {
+        e3.pending_buf[e3.pending++] = t3 >>> 8 & 255, e3.pending_buf[e3.pending++] = 255 & t3;
+      }
+      function L2(e3, t3) {
+        var r3, n3, i3 = e3.max_chain_length, s3 = e3.strstart, a3 = e3.prev_length, o3 = e3.nice_match, h3 = e3.strstart > e3.w_size - z2 ? e3.strstart - (e3.w_size - z2) : 0, u3 = e3.window, l3 = e3.w_mask, f3 = e3.prev, c3 = e3.strstart + S2, d3 = u3[s3 + a3 - 1], p3 = u3[s3 + a3];
+        e3.prev_length >= e3.good_match && (i3 >>= 2), o3 > e3.lookahead && (o3 = e3.lookahead);
+        do {
+          if (u3[(r3 = t3) + a3] === p3 && u3[r3 + a3 - 1] === d3 && u3[r3] === u3[s3] && u3[++r3] === u3[s3 + 1]) {
+            s3 += 2, r3++;
+            do {
+            } while (u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && u3[++s3] === u3[++r3] && s3 < c3);
+            if (n3 = S2 - (c3 - s3), s3 = c3 - S2, a3 < n3) {
+              if (e3.match_start = t3, o3 <= (a3 = n3))
+                break;
+              d3 = u3[s3 + a3 - 1], p3 = u3[s3 + a3];
+            }
+          }
+        } while ((t3 = f3[t3 & l3]) > h3 && 0 != --i3);
+        return a3 <= e3.lookahead ? a3 : e3.lookahead;
+      }
+      function j2(e3) {
+        var t3, r3, n3, i3, s3, a3, o3, h3, u3, l3, f3 = e3.w_size;
+        do {
+          if (i3 = e3.window_size - e3.lookahead - e3.strstart, e3.strstart >= f3 + (f3 - z2)) {
+            for (c2.arraySet(e3.window, e3.window, f3, f3, 0), e3.match_start -= f3, e3.strstart -= f3, e3.block_start -= f3, t3 = r3 = e3.hash_size; n3 = e3.head[--t3], e3.head[t3] = f3 <= n3 ? n3 - f3 : 0, --r3; )
+              ;
+            for (t3 = r3 = f3; n3 = e3.prev[--t3], e3.prev[t3] = f3 <= n3 ? n3 - f3 : 0, --r3; )
+              ;
+            i3 += f3;
+          }
+          if (0 === e3.strm.avail_in)
+            break;
+          if (a3 = e3.strm, o3 = e3.window, h3 = e3.strstart + e3.lookahead, u3 = i3, l3 = void 0, l3 = a3.avail_in, u3 < l3 && (l3 = u3), r3 = 0 === l3 ? 0 : (a3.avail_in -= l3, c2.arraySet(o3, a3.input, a3.next_in, l3, h3), 1 === a3.state.wrap ? a3.adler = d2(a3.adler, o3, l3, h3) : 2 === a3.state.wrap && (a3.adler = p2(a3.adler, o3, l3, h3)), a3.next_in += l3, a3.total_in += l3, l3), e3.lookahead += r3, e3.lookahead + e3.insert >= x2)
+            for (s3 = e3.strstart - e3.insert, e3.ins_h = e3.window[s3], e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[s3 + 1]) & e3.hash_mask; e3.insert && (e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[s3 + x2 - 1]) & e3.hash_mask, e3.prev[s3 & e3.w_mask] = e3.head[e3.ins_h], e3.head[e3.ins_h] = s3, s3++, e3.insert--, !(e3.lookahead + e3.insert < x2)); )
+              ;
+        } while (e3.lookahead < z2 && 0 !== e3.strm.avail_in);
+      }
+      function Z2(e3, t3) {
+        for (var r3, n3; ; ) {
+          if (e3.lookahead < z2) {
+            if (j2(e3), e3.lookahead < z2 && t3 === l2)
+              return A2;
+            if (0 === e3.lookahead)
+              break;
+          }
+          if (r3 = 0, e3.lookahead >= x2 && (e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[e3.strstart + x2 - 1]) & e3.hash_mask, r3 = e3.prev[e3.strstart & e3.w_mask] = e3.head[e3.ins_h], e3.head[e3.ins_h] = e3.strstart), 0 !== r3 && e3.strstart - r3 <= e3.w_size - z2 && (e3.match_length = L2(e3, r3)), e3.match_length >= x2)
+            if (n3 = u2._tr_tally(e3, e3.strstart - e3.match_start, e3.match_length - x2), e3.lookahead -= e3.match_length, e3.match_length <= e3.max_lazy_match && e3.lookahead >= x2) {
+              for (e3.match_length--; e3.strstart++, e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[e3.strstart + x2 - 1]) & e3.hash_mask, r3 = e3.prev[e3.strstart & e3.w_mask] = e3.head[e3.ins_h], e3.head[e3.ins_h] = e3.strstart, 0 != --e3.match_length; )
+                ;
+              e3.strstart++;
+            } else
+              e3.strstart += e3.match_length, e3.match_length = 0, e3.ins_h = e3.window[e3.strstart], e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[e3.strstart + 1]) & e3.hash_mask;
+          else
+            n3 = u2._tr_tally(e3, 0, e3.window[e3.strstart]), e3.lookahead--, e3.strstart++;
+          if (n3 && (N2(e3, false), 0 === e3.strm.avail_out))
+            return A2;
+        }
+        return e3.insert = e3.strstart < x2 - 1 ? e3.strstart : x2 - 1, t3 === f2 ? (N2(e3, true), 0 === e3.strm.avail_out ? O2 : B2) : e3.last_lit && (N2(e3, false), 0 === e3.strm.avail_out) ? A2 : I2;
+      }
+      function W2(e3, t3) {
+        for (var r3, n3, i3; ; ) {
+          if (e3.lookahead < z2) {
+            if (j2(e3), e3.lookahead < z2 && t3 === l2)
+              return A2;
+            if (0 === e3.lookahead)
+              break;
+          }
+          if (r3 = 0, e3.lookahead >= x2 && (e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[e3.strstart + x2 - 1]) & e3.hash_mask, r3 = e3.prev[e3.strstart & e3.w_mask] = e3.head[e3.ins_h], e3.head[e3.ins_h] = e3.strstart), e3.prev_length = e3.match_length, e3.prev_match = e3.match_start, e3.match_length = x2 - 1, 0 !== r3 && e3.prev_length < e3.max_lazy_match && e3.strstart - r3 <= e3.w_size - z2 && (e3.match_length = L2(e3, r3), e3.match_length <= 5 && (1 === e3.strategy || e3.match_length === x2 && 4096 < e3.strstart - e3.match_start) && (e3.match_length = x2 - 1)), e3.prev_length >= x2 && e3.match_length <= e3.prev_length) {
+            for (i3 = e3.strstart + e3.lookahead - x2, n3 = u2._tr_tally(e3, e3.strstart - 1 - e3.prev_match, e3.prev_length - x2), e3.lookahead -= e3.prev_length - 1, e3.prev_length -= 2; ++e3.strstart <= i3 && (e3.ins_h = (e3.ins_h << e3.hash_shift ^ e3.window[e3.strstart + x2 - 1]) & e3.hash_mask, r3 = e3.prev[e3.strstart & e3.w_mask] = e3.head[e3.ins_h], e3.head[e3.ins_h] = e3.strstart), 0 != --e3.prev_length; )
+              ;
+            if (e3.match_available = 0, e3.match_length = x2 - 1, e3.strstart++, n3 && (N2(e3, false), 0 === e3.strm.avail_out))
+              return A2;
+          } else if (e3.match_available) {
+            if ((n3 = u2._tr_tally(e3, 0, e3.window[e3.strstart - 1])) && N2(e3, false), e3.strstart++, e3.lookahead--, 0 === e3.strm.avail_out)
+              return A2;
+          } else
+            e3.match_available = 1, e3.strstart++, e3.lookahead--;
+        }
+        return e3.match_available && (n3 = u2._tr_tally(e3, 0, e3.window[e3.strstart - 1]), e3.match_available = 0), e3.insert = e3.strstart < x2 - 1 ? e3.strstart : x2 - 1, t3 === f2 ? (N2(e3, true), 0 === e3.strm.avail_out ? O2 : B2) : e3.last_lit && (N2(e3, false), 0 === e3.strm.avail_out) ? A2 : I2;
+      }
+      function M2(e3, t3, r3, n3, i3) {
+        this.good_length = e3, this.max_lazy = t3, this.nice_length = r3, this.max_chain = n3, this.func = i3;
+      }
+      function H2() {
+        this.strm = null, this.status = 0, this.pending_buf = null, this.pending_buf_size = 0, this.pending_out = 0, this.pending = 0, this.wrap = 0, this.gzhead = null, this.gzindex = 0, this.method = v2, this.last_flush = -1, this.w_size = 0, this.w_bits = 0, this.w_mask = 0, this.window = null, this.window_size = 0, this.prev = null, this.head = null, this.ins_h = 0, this.hash_size = 0, this.hash_bits = 0, this.hash_mask = 0, this.hash_shift = 0, this.block_start = 0, this.match_length = 0, this.prev_match = 0, this.match_available = 0, this.strstart = 0, this.match_start = 0, this.lookahead = 0, this.prev_length = 0, this.max_chain_length = 0, this.max_lazy_match = 0, this.level = 0, this.strategy = 0, this.good_match = 0, this.nice_match = 0, this.dyn_ltree = new c2.Buf16(2 * w2), this.dyn_dtree = new c2.Buf16(2 * (2 * a2 + 1)), this.bl_tree = new c2.Buf16(2 * (2 * o2 + 1)), D2(this.dyn_ltree), D2(this.dyn_dtree), D2(this.bl_tree), this.l_desc = null, this.d_desc = null, this.bl_desc = null, this.bl_count = new c2.Buf16(k2 + 1), this.heap = new c2.Buf16(2 * s2 + 1), D2(this.heap), this.heap_len = 0, this.heap_max = 0, this.depth = new c2.Buf16(2 * s2 + 1), D2(this.depth), this.l_buf = 0, this.lit_bufsize = 0, this.last_lit = 0, this.d_buf = 0, this.opt_len = 0, this.static_len = 0, this.matches = 0, this.insert = 0, this.bi_buf = 0, this.bi_valid = 0;
+      }
+      function G2(e3) {
+        var t3;
+        return e3 && e3.state ? (e3.total_in = e3.total_out = 0, e3.data_type = i2, (t3 = e3.state).pending = 0, t3.pending_out = 0, t3.wrap < 0 && (t3.wrap = -t3.wrap), t3.status = t3.wrap ? C2 : E2, e3.adler = 2 === t3.wrap ? 0 : 1, t3.last_flush = l2, u2._tr_init(t3), m2) : R2(e3, _2);
+      }
+      function K2(e3) {
+        var t3 = G2(e3);
+        return t3 === m2 && function(e4) {
+          e4.window_size = 2 * e4.w_size, D2(e4.head), e4.max_lazy_match = h2[e4.level].max_lazy, e4.good_match = h2[e4.level].good_length, e4.nice_match = h2[e4.level].nice_length, e4.max_chain_length = h2[e4.level].max_chain, e4.strstart = 0, e4.block_start = 0, e4.lookahead = 0, e4.insert = 0, e4.match_length = e4.prev_length = x2 - 1, e4.match_available = 0, e4.ins_h = 0;
+        }(e3.state), t3;
+      }
+      function Y2(e3, t3, r3, n3, i3, s3) {
+        if (!e3)
+          return _2;
+        var a3 = 1;
+        if (t3 === g2 && (t3 = 6), n3 < 0 ? (a3 = 0, n3 = -n3) : 15 < n3 && (a3 = 2, n3 -= 16), i3 < 1 || y2 < i3 || r3 !== v2 || n3 < 8 || 15 < n3 || t3 < 0 || 9 < t3 || s3 < 0 || b2 < s3)
+          return R2(e3, _2);
+        8 === n3 && (n3 = 9);
+        var o3 = new H2();
+        return (e3.state = o3).strm = e3, o3.wrap = a3, o3.gzhead = null, o3.w_bits = n3, o3.w_size = 1 << o3.w_bits, o3.w_mask = o3.w_size - 1, o3.hash_bits = i3 + 7, o3.hash_size = 1 << o3.hash_bits, o3.hash_mask = o3.hash_size - 1, o3.hash_shift = ~~((o3.hash_bits + x2 - 1) / x2), o3.window = new c2.Buf8(2 * o3.w_size), o3.head = new c2.Buf16(o3.hash_size), o3.prev = new c2.Buf16(o3.w_size), o3.lit_bufsize = 1 << i3 + 6, o3.pending_buf_size = 4 * o3.lit_bufsize, o3.pending_buf = new c2.Buf8(o3.pending_buf_size), o3.d_buf = 1 * o3.lit_bufsize, o3.l_buf = 3 * o3.lit_bufsize, o3.level = t3, o3.strategy = s3, o3.method = r3, K2(e3);
+      }
+      h2 = [new M2(0, 0, 0, 0, function(e3, t3) {
+        var r3 = 65535;
+        for (r3 > e3.pending_buf_size - 5 && (r3 = e3.pending_buf_size - 5); ; ) {
+          if (e3.lookahead <= 1) {
+            if (j2(e3), 0 === e3.lookahead && t3 === l2)
+              return A2;
+            if (0 === e3.lookahead)
+              break;
+          }
+          e3.strstart += e3.lookahead, e3.lookahead = 0;
+          var n3 = e3.block_start + r3;
+          if ((0 === e3.strstart || e3.strstart >= n3) && (e3.lookahead = e3.strstart - n3, e3.strstart = n3, N2(e3, false), 0 === e3.strm.avail_out))
+            return A2;
+          if (e3.strstart - e3.block_start >= e3.w_size - z2 && (N2(e3, false), 0 === e3.strm.avail_out))
+            return A2;
+        }
+        return e3.insert = 0, t3 === f2 ? (N2(e3, true), 0 === e3.strm.avail_out ? O2 : B2) : (e3.strstart > e3.block_start && (N2(e3, false), e3.strm.avail_out), A2);
+      }), new M2(4, 4, 8, 4, Z2), new M2(4, 5, 16, 8, Z2), new M2(4, 6, 32, 32, Z2), new M2(4, 4, 16, 16, W2), new M2(8, 16, 32, 32, W2), new M2(8, 16, 128, 128, W2), new M2(8, 32, 128, 256, W2), new M2(32, 128, 258, 1024, W2), new M2(32, 258, 258, 4096, W2)], r2.deflateInit = function(e3, t3) {
+        return Y2(e3, t3, v2, 15, 8, 0);
+      }, r2.deflateInit2 = Y2, r2.deflateReset = K2, r2.deflateResetKeep = G2, r2.deflateSetHeader = function(e3, t3) {
+        return e3 && e3.state ? 2 !== e3.state.wrap ? _2 : (e3.state.gzhead = t3, m2) : _2;
+      }, r2.deflate = function(e3, t3) {
+        var r3, n3, i3, s3;
+        if (!e3 || !e3.state || 5 < t3 || t3 < 0)
+          return e3 ? R2(e3, _2) : _2;
+        if (n3 = e3.state, !e3.output || !e3.input && 0 !== e3.avail_in || 666 === n3.status && t3 !== f2)
+          return R2(e3, 0 === e3.avail_out ? -5 : _2);
+        if (n3.strm = e3, r3 = n3.last_flush, n3.last_flush = t3, n3.status === C2)
+          if (2 === n3.wrap)
+            e3.adler = 0, U2(n3, 31), U2(n3, 139), U2(n3, 8), n3.gzhead ? (U2(n3, (n3.gzhead.text ? 1 : 0) + (n3.gzhead.hcrc ? 2 : 0) + (n3.gzhead.extra ? 4 : 0) + (n3.gzhead.name ? 8 : 0) + (n3.gzhead.comment ? 16 : 0)), U2(n3, 255 & n3.gzhead.time), U2(n3, n3.gzhead.time >> 8 & 255), U2(n3, n3.gzhead.time >> 16 & 255), U2(n3, n3.gzhead.time >> 24 & 255), U2(n3, 9 === n3.level ? 2 : 2 <= n3.strategy || n3.level < 2 ? 4 : 0), U2(n3, 255 & n3.gzhead.os), n3.gzhead.extra && n3.gzhead.extra.length && (U2(n3, 255 & n3.gzhead.extra.length), U2(n3, n3.gzhead.extra.length >> 8 & 255)), n3.gzhead.hcrc && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending, 0)), n3.gzindex = 0, n3.status = 69) : (U2(n3, 0), U2(n3, 0), U2(n3, 0), U2(n3, 0), U2(n3, 0), U2(n3, 9 === n3.level ? 2 : 2 <= n3.strategy || n3.level < 2 ? 4 : 0), U2(n3, 3), n3.status = E2);
+          else {
+            var a3 = v2 + (n3.w_bits - 8 << 4) << 8;
+            a3 |= (2 <= n3.strategy || n3.level < 2 ? 0 : n3.level < 6 ? 1 : 6 === n3.level ? 2 : 3) << 6, 0 !== n3.strstart && (a3 |= 32), a3 += 31 - a3 % 31, n3.status = E2, P2(n3, a3), 0 !== n3.strstart && (P2(n3, e3.adler >>> 16), P2(n3, 65535 & e3.adler)), e3.adler = 1;
+          }
+        if (69 === n3.status)
+          if (n3.gzhead.extra) {
+            for (i3 = n3.pending; n3.gzindex < (65535 & n3.gzhead.extra.length) && (n3.pending !== n3.pending_buf_size || (n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), F2(e3), i3 = n3.pending, n3.pending !== n3.pending_buf_size)); )
+              U2(n3, 255 & n3.gzhead.extra[n3.gzindex]), n3.gzindex++;
+            n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), n3.gzindex === n3.gzhead.extra.length && (n3.gzindex = 0, n3.status = 73);
+          } else
+            n3.status = 73;
+        if (73 === n3.status)
+          if (n3.gzhead.name) {
+            i3 = n3.pending;
+            do {
+              if (n3.pending === n3.pending_buf_size && (n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), F2(e3), i3 = n3.pending, n3.pending === n3.pending_buf_size)) {
+                s3 = 1;
+                break;
+              }
+              s3 = n3.gzindex < n3.gzhead.name.length ? 255 & n3.gzhead.name.charCodeAt(n3.gzindex++) : 0, U2(n3, s3);
+            } while (0 !== s3);
+            n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), 0 === s3 && (n3.gzindex = 0, n3.status = 91);
+          } else
+            n3.status = 91;
+        if (91 === n3.status)
+          if (n3.gzhead.comment) {
+            i3 = n3.pending;
+            do {
+              if (n3.pending === n3.pending_buf_size && (n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), F2(e3), i3 = n3.pending, n3.pending === n3.pending_buf_size)) {
+                s3 = 1;
+                break;
+              }
+              s3 = n3.gzindex < n3.gzhead.comment.length ? 255 & n3.gzhead.comment.charCodeAt(n3.gzindex++) : 0, U2(n3, s3);
+            } while (0 !== s3);
+            n3.gzhead.hcrc && n3.pending > i3 && (e3.adler = p2(e3.adler, n3.pending_buf, n3.pending - i3, i3)), 0 === s3 && (n3.status = 103);
+          } else
+            n3.status = 103;
+        if (103 === n3.status && (n3.gzhead.hcrc ? (n3.pending + 2 > n3.pending_buf_size && F2(e3), n3.pending + 2 <= n3.pending_buf_size && (U2(n3, 255 & e3.adler), U2(n3, e3.adler >> 8 & 255), e3.adler = 0, n3.status = E2)) : n3.status = E2), 0 !== n3.pending) {
+          if (F2(e3), 0 === e3.avail_out)
+            return n3.last_flush = -1, m2;
+        } else if (0 === e3.avail_in && T2(t3) <= T2(r3) && t3 !== f2)
+          return R2(e3, -5);
+        if (666 === n3.status && 0 !== e3.avail_in)
+          return R2(e3, -5);
+        if (0 !== e3.avail_in || 0 !== n3.lookahead || t3 !== l2 && 666 !== n3.status) {
+          var o3 = 2 === n3.strategy ? function(e4, t4) {
+            for (var r4; ; ) {
+              if (0 === e4.lookahead && (j2(e4), 0 === e4.lookahead)) {
+                if (t4 === l2)
+                  return A2;
+                break;
+              }
+              if (e4.match_length = 0, r4 = u2._tr_tally(e4, 0, e4.window[e4.strstart]), e4.lookahead--, e4.strstart++, r4 && (N2(e4, false), 0 === e4.strm.avail_out))
+                return A2;
+            }
+            return e4.insert = 0, t4 === f2 ? (N2(e4, true), 0 === e4.strm.avail_out ? O2 : B2) : e4.last_lit && (N2(e4, false), 0 === e4.strm.avail_out) ? A2 : I2;
+          }(n3, t3) : 3 === n3.strategy ? function(e4, t4) {
+            for (var r4, n4, i4, s4, a4 = e4.window; ; ) {
+              if (e4.lookahead <= S2) {
+                if (j2(e4), e4.lookahead <= S2 && t4 === l2)
+                  return A2;
+                if (0 === e4.lookahead)
+                  break;
+              }
+              if (e4.match_length = 0, e4.lookahead >= x2 && 0 < e4.strstart && (n4 = a4[i4 = e4.strstart - 1]) === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4]) {
+                s4 = e4.strstart + S2;
+                do {
+                } while (n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && n4 === a4[++i4] && i4 < s4);
+                e4.match_length = S2 - (s4 - i4), e4.match_length > e4.lookahead && (e4.match_length = e4.lookahead);
+              }
+              if (e4.match_length >= x2 ? (r4 = u2._tr_tally(e4, 1, e4.match_length - x2), e4.lookahead -= e4.match_length, e4.strstart += e4.match_length, e4.match_length = 0) : (r4 = u2._tr_tally(e4, 0, e4.window[e4.strstart]), e4.lookahead--, e4.strstart++), r4 && (N2(e4, false), 0 === e4.strm.avail_out))
+                return A2;
+            }
+            return e4.insert = 0, t4 === f2 ? (N2(e4, true), 0 === e4.strm.avail_out ? O2 : B2) : e4.last_lit && (N2(e4, false), 0 === e4.strm.avail_out) ? A2 : I2;
+          }(n3, t3) : h2[n3.level].func(n3, t3);
+          if (o3 !== O2 && o3 !== B2 || (n3.status = 666), o3 === A2 || o3 === O2)
+            return 0 === e3.avail_out && (n3.last_flush = -1), m2;
+          if (o3 === I2 && (1 === t3 ? u2._tr_align(n3) : 5 !== t3 && (u2._tr_stored_block(n3, 0, 0, false), 3 === t3 && (D2(n3.head), 0 === n3.lookahead && (n3.strstart = 0, n3.block_start = 0, n3.insert = 0))), F2(e3), 0 === e3.avail_out))
+            return n3.last_flush = -1, m2;
+        }
+        return t3 !== f2 ? m2 : n3.wrap <= 0 ? 1 : (2 === n3.wrap ? (U2(n3, 255 & e3.adler), U2(n3, e3.adler >> 8 & 255), U2(n3, e3.adler >> 16 & 255), U2(n3, e3.adler >> 24 & 255), U2(n3, 255 & e3.total_in), U2(n3, e3.total_in >> 8 & 255), U2(n3, e3.total_in >> 16 & 255), U2(n3, e3.total_in >> 24 & 255)) : (P2(n3, e3.adler >>> 16), P2(n3, 65535 & e3.adler)), F2(e3), 0 < n3.wrap && (n3.wrap = -n3.wrap), 0 !== n3.pending ? m2 : 1);
+      }, r2.deflateEnd = function(e3) {
+        var t3;
+        return e3 && e3.state ? (t3 = e3.state.status) !== C2 && 69 !== t3 && 73 !== t3 && 91 !== t3 && 103 !== t3 && t3 !== E2 && 666 !== t3 ? R2(e3, _2) : (e3.state = null, t3 === E2 ? R2(e3, -3) : m2) : _2;
+      }, r2.deflateSetDictionary = function(e3, t3) {
+        var r3, n3, i3, s3, a3, o3, h3, u3, l3 = t3.length;
+        if (!e3 || !e3.state)
+          return _2;
+        if (2 === (s3 = (r3 = e3.state).wrap) || 1 === s3 && r3.status !== C2 || r3.lookahead)
+          return _2;
+        for (1 === s3 && (e3.adler = d2(e3.adler, t3, l3, 0)), r3.wrap = 0, l3 >= r3.w_size && (0 === s3 && (D2(r3.head), r3.strstart = 0, r3.block_start = 0, r3.insert = 0), u3 = new c2.Buf8(r3.w_size), c2.arraySet(u3, t3, l3 - r3.w_size, r3.w_size, 0), t3 = u3, l3 = r3.w_size), a3 = e3.avail_in, o3 = e3.next_in, h3 = e3.input, e3.avail_in = l3, e3.next_in = 0, e3.input = t3, j2(r3); r3.lookahead >= x2; ) {
+          for (n3 = r3.strstart, i3 = r3.lookahead - (x2 - 1); r3.ins_h = (r3.ins_h << r3.hash_shift ^ r3.window[n3 + x2 - 1]) & r3.hash_mask, r3.prev[n3 & r3.w_mask] = r3.head[r3.ins_h], r3.head[r3.ins_h] = n3, n3++, --i3; )
+            ;
+          r3.strstart = n3, r3.lookahead = x2 - 1, j2(r3);
+        }
+        return r3.strstart += r3.lookahead, r3.block_start = r3.strstart, r3.insert = r3.lookahead, r3.lookahead = 0, r3.match_length = r3.prev_length = x2 - 1, r3.match_available = 0, e3.next_in = o3, e3.input = h3, e3.avail_in = a3, r3.wrap = s3, m2;
+      }, r2.deflateInfo = "pako deflate (from Nodeca project)";
+    }, { "../utils/common": 41, "./adler32": 43, "./crc32": 45, "./messages": 51, "./trees": 52 }], 47: [function(e2, t2, r2) {
+      t2.exports = function() {
+        this.text = 0, this.time = 0, this.xflags = 0, this.os = 0, this.extra = null, this.extra_len = 0, this.name = "", this.comment = "", this.hcrc = 0, this.done = false;
+      };
+    }, {}], 48: [function(e2, t2, r2) {
+      t2.exports = function(e3, t3) {
+        var r3, n2, i2, s2, a2, o2, h2, u2, l2, f2, c2, d2, p2, m2, _2, g2, b2, v2, y2, w2, k2, x2, S2, z2, C2;
+        r3 = e3.state, n2 = e3.next_in, z2 = e3.input, i2 = n2 + (e3.avail_in - 5), s2 = e3.next_out, C2 = e3.output, a2 = s2 - (t3 - e3.avail_out), o2 = s2 + (e3.avail_out - 257), h2 = r3.dmax, u2 = r3.wsize, l2 = r3.whave, f2 = r3.wnext, c2 = r3.window, d2 = r3.hold, p2 = r3.bits, m2 = r3.lencode, _2 = r3.distcode, g2 = (1 << r3.lenbits) - 1, b2 = (1 << r3.distbits) - 1;
+        e:
+          do {
+            p2 < 15 && (d2 += z2[n2++] << p2, p2 += 8, d2 += z2[n2++] << p2, p2 += 8), v2 = m2[d2 & g2];
+            t:
+              for (; ; ) {
+                if (d2 >>>= y2 = v2 >>> 24, p2 -= y2, 0 === (y2 = v2 >>> 16 & 255))
+                  C2[s2++] = 65535 & v2;
+                else {
+                  if (!(16 & y2)) {
+                    if (0 == (64 & y2)) {
+                      v2 = m2[(65535 & v2) + (d2 & (1 << y2) - 1)];
+                      continue t;
+                    }
+                    if (32 & y2) {
+                      r3.mode = 12;
+                      break e;
+                    }
+                    e3.msg = "invalid literal/length code", r3.mode = 30;
+                    break e;
+                  }
+                  w2 = 65535 & v2, (y2 &= 15) && (p2 < y2 && (d2 += z2[n2++] << p2, p2 += 8), w2 += d2 & (1 << y2) - 1, d2 >>>= y2, p2 -= y2), p2 < 15 && (d2 += z2[n2++] << p2, p2 += 8, d2 += z2[n2++] << p2, p2 += 8), v2 = _2[d2 & b2];
+                  r:
+                    for (; ; ) {
+                      if (d2 >>>= y2 = v2 >>> 24, p2 -= y2, !(16 & (y2 = v2 >>> 16 & 255))) {
+                        if (0 == (64 & y2)) {
+                          v2 = _2[(65535 & v2) + (d2 & (1 << y2) - 1)];
+                          continue r;
+                        }
+                        e3.msg = "invalid distance code", r3.mode = 30;
+                        break e;
+                      }
+                      if (k2 = 65535 & v2, p2 < (y2 &= 15) && (d2 += z2[n2++] << p2, (p2 += 8) < y2 && (d2 += z2[n2++] << p2, p2 += 8)), h2 < (k2 += d2 & (1 << y2) - 1)) {
+                        e3.msg = "invalid distance too far back", r3.mode = 30;
+                        break e;
+                      }
+                      if (d2 >>>= y2, p2 -= y2, (y2 = s2 - a2) < k2) {
+                        if (l2 < (y2 = k2 - y2) && r3.sane) {
+                          e3.msg = "invalid distance too far back", r3.mode = 30;
+                          break e;
+                        }
+                        if (S2 = c2, (x2 = 0) === f2) {
+                          if (x2 += u2 - y2, y2 < w2) {
+                            for (w2 -= y2; C2[s2++] = c2[x2++], --y2; )
+                              ;
+                            x2 = s2 - k2, S2 = C2;
+                          }
+                        } else if (f2 < y2) {
+                          if (x2 += u2 + f2 - y2, (y2 -= f2) < w2) {
+                            for (w2 -= y2; C2[s2++] = c2[x2++], --y2; )
+                              ;
+                            if (x2 = 0, f2 < w2) {
+                              for (w2 -= y2 = f2; C2[s2++] = c2[x2++], --y2; )
+                                ;
+                              x2 = s2 - k2, S2 = C2;
+                            }
+                          }
+                        } else if (x2 += f2 - y2, y2 < w2) {
+                          for (w2 -= y2; C2[s2++] = c2[x2++], --y2; )
+                            ;
+                          x2 = s2 - k2, S2 = C2;
+                        }
+                        for (; 2 < w2; )
+                          C2[s2++] = S2[x2++], C2[s2++] = S2[x2++], C2[s2++] = S2[x2++], w2 -= 3;
+                        w2 && (C2[s2++] = S2[x2++], 1 < w2 && (C2[s2++] = S2[x2++]));
+                      } else {
+                        for (x2 = s2 - k2; C2[s2++] = C2[x2++], C2[s2++] = C2[x2++], C2[s2++] = C2[x2++], 2 < (w2 -= 3); )
+                          ;
+                        w2 && (C2[s2++] = C2[x2++], 1 < w2 && (C2[s2++] = C2[x2++]));
+                      }
+                      break;
+                    }
+                }
+                break;
+              }
+          } while (n2 < i2 && s2 < o2);
+        n2 -= w2 = p2 >> 3, d2 &= (1 << (p2 -= w2 << 3)) - 1, e3.next_in = n2, e3.next_out = s2, e3.avail_in = n2 < i2 ? i2 - n2 + 5 : 5 - (n2 - i2), e3.avail_out = s2 < o2 ? o2 - s2 + 257 : 257 - (s2 - o2), r3.hold = d2, r3.bits = p2;
+      };
+    }, {}], 49: [function(e2, t2, r2) {
+      var I2 = e2("../utils/common"), O2 = e2("./adler32"), B2 = e2("./crc32"), R2 = e2("./inffast"), T2 = e2("./inftrees"), D2 = 1, F2 = 2, N2 = 0, U2 = -2, P2 = 1, n2 = 852, i2 = 592;
+      function L2(e3) {
+        return (e3 >>> 24 & 255) + (e3 >>> 8 & 65280) + ((65280 & e3) << 8) + ((255 & e3) << 24);
+      }
+      function s2() {
+        this.mode = 0, this.last = false, this.wrap = 0, this.havedict = false, this.flags = 0, this.dmax = 0, this.check = 0, this.total = 0, this.head = null, this.wbits = 0, this.wsize = 0, this.whave = 0, this.wnext = 0, this.window = null, this.hold = 0, this.bits = 0, this.length = 0, this.offset = 0, this.extra = 0, this.lencode = null, this.distcode = null, this.lenbits = 0, this.distbits = 0, this.ncode = 0, this.nlen = 0, this.ndist = 0, this.have = 0, this.next = null, this.lens = new I2.Buf16(320), this.work = new I2.Buf16(288), this.lendyn = null, this.distdyn = null, this.sane = 0, this.back = 0, this.was = 0;
+      }
+      function a2(e3) {
+        var t3;
+        return e3 && e3.state ? (t3 = e3.state, e3.total_in = e3.total_out = t3.total = 0, e3.msg = "", t3.wrap && (e3.adler = 1 & t3.wrap), t3.mode = P2, t3.last = 0, t3.havedict = 0, t3.dmax = 32768, t3.head = null, t3.hold = 0, t3.bits = 0, t3.lencode = t3.lendyn = new I2.Buf32(n2), t3.distcode = t3.distdyn = new I2.Buf32(i2), t3.sane = 1, t3.back = -1, N2) : U2;
+      }
+      function o2(e3) {
+        var t3;
+        return e3 && e3.state ? ((t3 = e3.state).wsize = 0, t3.whave = 0, t3.wnext = 0, a2(e3)) : U2;
+      }
+      function h2(e3, t3) {
+        var r3, n3;
+        return e3 && e3.state ? (n3 = e3.state, t3 < 0 ? (r3 = 0, t3 = -t3) : (r3 = 1 + (t3 >> 4), t3 < 48 && (t3 &= 15)), t3 && (t3 < 8 || 15 < t3) ? U2 : (null !== n3.window && n3.wbits !== t3 && (n3.window = null), n3.wrap = r3, n3.wbits = t3, o2(e3))) : U2;
+      }
+      function u2(e3, t3) {
+        var r3, n3;
+        return e3 ? (n3 = new s2(), (e3.state = n3).window = null, (r3 = h2(e3, t3)) !== N2 && (e3.state = null), r3) : U2;
+      }
+      var l2, f2, c2 = true;
+      function j2(e3) {
+        if (c2) {
+          var t3;
+          for (l2 = new I2.Buf32(512), f2 = new I2.Buf32(32), t3 = 0; t3 < 144; )
+            e3.lens[t3++] = 8;
+          for (; t3 < 256; )
+            e3.lens[t3++] = 9;
+          for (; t3 < 280; )
+            e3.lens[t3++] = 7;
+          for (; t3 < 288; )
+            e3.lens[t3++] = 8;
+          for (T2(D2, e3.lens, 0, 288, l2, 0, e3.work, { bits: 9 }), t3 = 0; t3 < 32; )
+            e3.lens[t3++] = 5;
+          T2(F2, e3.lens, 0, 32, f2, 0, e3.work, { bits: 5 }), c2 = false;
+        }
+        e3.lencode = l2, e3.lenbits = 9, e3.distcode = f2, e3.distbits = 5;
+      }
+      function Z2(e3, t3, r3, n3) {
+        var i3, s3 = e3.state;
+        return null === s3.window && (s3.wsize = 1 << s3.wbits, s3.wnext = 0, s3.whave = 0, s3.window = new I2.Buf8(s3.wsize)), n3 >= s3.wsize ? (I2.arraySet(s3.window, t3, r3 - s3.wsize, s3.wsize, 0), s3.wnext = 0, s3.whave = s3.wsize) : (n3 < (i3 = s3.wsize - s3.wnext) && (i3 = n3), I2.arraySet(s3.window, t3, r3 - n3, i3, s3.wnext), (n3 -= i3) ? (I2.arraySet(s3.window, t3, r3 - n3, n3, 0), s3.wnext = n3, s3.whave = s3.wsize) : (s3.wnext += i3, s3.wnext === s3.wsize && (s3.wnext = 0), s3.whave < s3.wsize && (s3.whave += i3))), 0;
+      }
+      r2.inflateReset = o2, r2.inflateReset2 = h2, r2.inflateResetKeep = a2, r2.inflateInit = function(e3) {
+        return u2(e3, 15);
+      }, r2.inflateInit2 = u2, r2.inflate = function(e3, t3) {
+        var r3, n3, i3, s3, a3, o3, h3, u3, l3, f3, c3, d2, p2, m2, _2, g2, b2, v2, y2, w2, k2, x2, S2, z2, C2 = 0, E2 = new I2.Buf8(4), A2 = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
+        if (!e3 || !e3.state || !e3.output || !e3.input && 0 !== e3.avail_in)
+          return U2;
+        12 === (r3 = e3.state).mode && (r3.mode = 13), a3 = e3.next_out, i3 = e3.output, h3 = e3.avail_out, s3 = e3.next_in, n3 = e3.input, o3 = e3.avail_in, u3 = r3.hold, l3 = r3.bits, f3 = o3, c3 = h3, x2 = N2;
+        e:
+          for (; ; )
+            switch (r3.mode) {
+              case P2:
+                if (0 === r3.wrap) {
+                  r3.mode = 13;
+                  break;
+                }
+                for (; l3 < 16; ) {
+                  if (0 === o3)
+                    break e;
+                  o3--, u3 += n3[s3++] << l3, l3 += 8;
+                }
+                if (2 & r3.wrap && 35615 === u3) {
+                  E2[r3.check = 0] = 255 & u3, E2[1] = u3 >>> 8 & 255, r3.check = B2(r3.check, E2, 2, 0), l3 = u3 = 0, r3.mode = 2;
+                  break;
+                }
+                if (r3.flags = 0, r3.head && (r3.head.done = false), !(1 & r3.wrap) || (((255 & u3) << 8) + (u3 >> 8)) % 31) {
+                  e3.msg = "incorrect header check", r3.mode = 30;
+                  break;
+                }
+                if (8 != (15 & u3)) {
+                  e3.msg = "unknown compression method", r3.mode = 30;
+                  break;
+                }
+                if (l3 -= 4, k2 = 8 + (15 & (u3 >>>= 4)), 0 === r3.wbits)
+                  r3.wbits = k2;
+                else if (k2 > r3.wbits) {
+                  e3.msg = "invalid window size", r3.mode = 30;
+                  break;
+                }
+                r3.dmax = 1 << k2, e3.adler = r3.check = 1, r3.mode = 512 & u3 ? 10 : 12, l3 = u3 = 0;
+                break;
+              case 2:
+                for (; l3 < 16; ) {
+                  if (0 === o3)
+                    break e;
+                  o3--, u3 += n3[s3++] << l3, l3 += 8;
+                }
+                if (r3.flags = u3, 8 != (255 & r3.flags)) {
+                  e3.msg = "unknown compression method", r3.mode = 30;
+                  break;
+                }
+                if (57344 & r3.flags) {
+                  e3.msg = "unknown header flags set", r3.mode = 30;
+                  break;
+                }
+                r3.head && (r3.head.text = u3 >> 8 & 1), 512 & r3.flags && (E2[0] = 255 & u3, E2[1] = u3 >>> 8 & 255, r3.check = B2(r3.check, E2, 2, 0)), l3 = u3 = 0, r3.mode = 3;
+              case 3:
+                for (; l3 < 32; ) {
+                  if (0 === o3)
+                    break e;
+                  o3--, u3 += n3[s3++] << l3, l3 += 8;
+                }
+                r3.head && (r3.head.time = u3), 512 & r3.flags && (E2[0] = 255 & u3, E2[1] = u3 >>> 8 & 255, E2[2] = u3 >>> 16 & 255, E2[3] = u3 >>> 24 & 255, r3.check = B2(r3.check, E2, 4, 0)), l3 = u3 = 0, r3.mode = 4;
+              case 4:
+                for (; l3 < 16; ) {
+                  if (0 === o3)
+                    break e;
+                  o3--, u3 += n3[s3++] << l3, l3 += 8;
+                }
+                r3.head && (r3.head.xflags = 255 & u3, r3.head.os = u3 >> 8), 512 & r3.flags && (E2[0] = 255 & u3, E2[1] = u3 >>> 8 & 255, r3.check = B2(r3.check, E2, 2, 0)), l3 = u3 = 0, r3.mode = 5;
+              case 5:
+                if (1024 & r3.flags) {
+                  for (; l3 < 16; ) {
+                    if (0 === o3)
+                      break e;
+                    o3--, u3 += n3[s3++] << l3, l3 += 8;
+                  }
+                  r3.length = u3, r3.head && (r3.head.extra_len = u3), 512 & r3.flags && (E2[0] = 255 & u3, E2[1] = u3 >>> 8 & 255, r3.check = B2(r3.check, E2, 2, 0)), l3 = u3 = 0;
+                } else
+                  r3.head && (r3.head.extra = null);
+                r3.mode = 6;
+              case 6:
+                if (1024 & r3.flags && (o3 < (d2 = r3.length) && (d2 = o3), d2 && (r3.head && (k2 = r3.head.extra_len - r3.length, r3.head.extra || (r3.head.extra = new Array(r3.head.extra_len)), I2.arraySet(r3.head.extra, n3, s3, d2, k2)), 512 & r3.flags && (r3.check = B2(r3.check, n3, d2, s3)), o3 -= d2, s3 += d2, r3.length -= d2), r3.length))
+                  break e;
+                r3.length = 0, r3.mode = 7;
+              case 7:
+                if (2048 & r3.flags) {
+                  if (0 === o3)
+                    break e;
+                  for (d2 = 0; k2 = n3[s3 + d2++], r3.head && k2 && r3.length < 65536 && (r3.head.name += String.fromCharCode(k2)), k2 && d2 < o3; )
+                    ;
+                  if (512 & r3.flags && (r3.check = B2(r3.check, n3, d2, s3)), o3 -= d2, s3 += d2, k2)
+                    break e;
+                } else
+                  r3.head && (r3.head.name = null);
+                r3.length = 0, r3.mode = 8;
+              case 8:
+                if (4096 & r3.flags) {
+                  if (0 === o3)
+                    break e;
+                  for (d2 = 0; k2 = n3[s3 + d2++], r3.head && k2 && r3.length < 65536 && (r3.head.comment += String.fromCharCode(k2)), k2 && d2 < o3; )
+                    ;
+                  if (512 & r3.flags && (r3.check = B2(r3.check, n3, d2, s3)), o3 -= d2, s3 += d2, k2)
+                    break e;
+                } else
+                  r3.head && (r3.head.comment = null);
+                r3.mode = 9;
+              case 9:
+                if (512 & r3.flags) {
+                  for (; l3 < 16; ) {
+                    if (0 === o3)
+                      break e;
+                    o3--, u3 += n3[s3++] << l3, l3 += 8;
+                  }
+                  if (u3 !== (65535 & r3.check)) {
+                    e3.msg = "header crc mismatch", r3.mode = 30;
+                    break;
+                  }
+                  l3 = u3 = 0;
+                }
+                r3.head && (r3.head.hcrc = r3.flags >> 9 & 1, r3.head.done = true), e3.adler = r3.check = 0, r3.mode = 12;
+                break;
+              case 10:
+                for (; l3 < 32; ) {
+                  if (0 === o3)
+                    break e;
+                  o3--, u3 += n3[s3++] << l3, l3 += 8;
+                }
+                e3.adler = r3.check = L2(u3), l3 = u3 = 0, r3.mode = 11;
+              case 11:
+                if (0 === r3.havedict)
+                  return e3.next_out = a3, e3.avail_out = h3, e3.next_in = s3, e3.avail_in = o3, r3.hold = u3, r3.bits = l3, 2;
+                e3.adler = r3.check = 1, r3.mode = 12;
+              case 12:
+                if (5 === t3 || 6 === t3)
+                  break e;
+              case 13:
+                if (r3.last) {
+                  u3 >>>= 7 & l3, l3 -= 7 & l3, r3.mode = 27;
+                  break;
+                }
+                for (; l3 < 3; ) {
+                  if (0 === o3)
+                    break e;
+                  o3--, u3 += n3[s3++] << l3, l3 += 8;
+                }
+                switch (r3.last = 1 & u3, l3 -= 1, 3 & (u3 >>>= 1)) {
+                  case 0:
+                    r3.mode = 14;
+                    break;
+                  case 1:
+                    if (j2(r3), r3.mode = 20, 6 !== t3)
+                      break;
+                    u3 >>>= 2, l3 -= 2;
+                    break e;
+                  case 2:
+                    r3.mode = 17;
+                    break;
+                  case 3:
+                    e3.msg = "invalid block type", r3.mode = 30;
+                }
+                u3 >>>= 2, l3 -= 2;
+                break;
+              case 14:
+                for (u3 >>>= 7 & l3, l3 -= 7 & l3; l3 < 32; ) {
+                  if (0 === o3)
+                    break e;
+                  o3--, u3 += n3[s3++] << l3, l3 += 8;
+                }
+                if ((65535 & u3) != (u3 >>> 16 ^ 65535)) {
+                  e3.msg = "invalid stored block lengths", r3.mode = 30;
+                  break;
+                }
+                if (r3.length = 65535 & u3, l3 = u3 = 0, r3.mode = 15, 6 === t3)
+                  break e;
+              case 15:
+                r3.mode = 16;
+              case 16:
+                if (d2 = r3.length) {
+                  if (o3 < d2 && (d2 = o3), h3 < d2 && (d2 = h3), 0 === d2)
+                    break e;
+                  I2.arraySet(i3, n3, s3, d2, a3), o3 -= d2, s3 += d2, h3 -= d2, a3 += d2, r3.length -= d2;
+                  break;
+                }
+                r3.mode = 12;
+                break;
+              case 17:
+                for (; l3 < 14; ) {
+                  if (0 === o3)
+                    break e;
+                  o3--, u3 += n3[s3++] << l3, l3 += 8;
+                }
+                if (r3.nlen = 257 + (31 & u3), u3 >>>= 5, l3 -= 5, r3.ndist = 1 + (31 & u3), u3 >>>= 5, l3 -= 5, r3.ncode = 4 + (15 & u3), u3 >>>= 4, l3 -= 4, 286 < r3.nlen || 30 < r3.ndist) {
+                  e3.msg = "too many length or distance symbols", r3.mode = 30;
+                  break;
+                }
+                r3.have = 0, r3.mode = 18;
+              case 18:
+                for (; r3.have < r3.ncode; ) {
+                  for (; l3 < 3; ) {
+                    if (0 === o3)
+                      break e;
+                    o3--, u3 += n3[s3++] << l3, l3 += 8;
+                  }
+                  r3.lens[A2[r3.have++]] = 7 & u3, u3 >>>= 3, l3 -= 3;
+                }
+                for (; r3.have < 19; )
+                  r3.lens[A2[r3.have++]] = 0;
+                if (r3.lencode = r3.lendyn, r3.lenbits = 7, S2 = { bits: r3.lenbits }, x2 = T2(0, r3.lens, 0, 19, r3.lencode, 0, r3.work, S2), r3.lenbits = S2.bits, x2) {
+                  e3.msg = "invalid code lengths set", r3.mode = 30;
+                  break;
+                }
+                r3.have = 0, r3.mode = 19;
+              case 19:
+                for (; r3.have < r3.nlen + r3.ndist; ) {
+                  for (; g2 = (C2 = r3.lencode[u3 & (1 << r3.lenbits) - 1]) >>> 16 & 255, b2 = 65535 & C2, !((_2 = C2 >>> 24) <= l3); ) {
+                    if (0 === o3)
+                      break e;
+                    o3--, u3 += n3[s3++] << l3, l3 += 8;
+                  }
+                  if (b2 < 16)
+                    u3 >>>= _2, l3 -= _2, r3.lens[r3.have++] = b2;
+                  else {
+                    if (16 === b2) {
+                      for (z2 = _2 + 2; l3 < z2; ) {
+                        if (0 === o3)
+                          break e;
+                        o3--, u3 += n3[s3++] << l3, l3 += 8;
+                      }
+                      if (u3 >>>= _2, l3 -= _2, 0 === r3.have) {
+                        e3.msg = "invalid bit length repeat", r3.mode = 30;
+                        break;
+                      }
+                      k2 = r3.lens[r3.have - 1], d2 = 3 + (3 & u3), u3 >>>= 2, l3 -= 2;
+                    } else if (17 === b2) {
+                      for (z2 = _2 + 3; l3 < z2; ) {
+                        if (0 === o3)
+                          break e;
+                        o3--, u3 += n3[s3++] << l3, l3 += 8;
+                      }
+                      l3 -= _2, k2 = 0, d2 = 3 + (7 & (u3 >>>= _2)), u3 >>>= 3, l3 -= 3;
+                    } else {
+                      for (z2 = _2 + 7; l3 < z2; ) {
+                        if (0 === o3)
+                          break e;
+                        o3--, u3 += n3[s3++] << l3, l3 += 8;
+                      }
+                      l3 -= _2, k2 = 0, d2 = 11 + (127 & (u3 >>>= _2)), u3 >>>= 7, l3 -= 7;
+                    }
+                    if (r3.have + d2 > r3.nlen + r3.ndist) {
+                      e3.msg = "invalid bit length repeat", r3.mode = 30;
+                      break;
+                    }
+                    for (; d2--; )
+                      r3.lens[r3.have++] = k2;
+                  }
+                }
+                if (30 === r3.mode)
+                  break;
+                if (0 === r3.lens[256]) {
+                  e3.msg = "invalid code -- missing end-of-block", r3.mode = 30;
+                  break;
+                }
+                if (r3.lenbits = 9, S2 = { bits: r3.lenbits }, x2 = T2(D2, r3.lens, 0, r3.nlen, r3.lencode, 0, r3.work, S2), r3.lenbits = S2.bits, x2) {
+                  e3.msg = "invalid literal/lengths set", r3.mode = 30;
+                  break;
+                }
+                if (r3.distbits = 6, r3.distcode = r3.distdyn, S2 = { bits: r3.distbits }, x2 = T2(F2, r3.lens, r3.nlen, r3.ndist, r3.distcode, 0, r3.work, S2), r3.distbits = S2.bits, x2) {
+                  e3.msg = "invalid distances set", r3.mode = 30;
+                  break;
+                }
+                if (r3.mode = 20, 6 === t3)
+                  break e;
+              case 20:
+                r3.mode = 21;
+              case 21:
+                if (6 <= o3 && 258 <= h3) {
+                  e3.next_out = a3, e3.avail_out = h3, e3.next_in = s3, e3.avail_in = o3, r3.hold = u3, r3.bits = l3, R2(e3, c3), a3 = e3.next_out, i3 = e3.output, h3 = e3.avail_out, s3 = e3.next_in, n3 = e3.input, o3 = e3.avail_in, u3 = r3.hold, l3 = r3.bits, 12 === r3.mode && (r3.back = -1);
+                  break;
+                }
+                for (r3.back = 0; g2 = (C2 = r3.lencode[u3 & (1 << r3.lenbits) - 1]) >>> 16 & 255, b2 = 65535 & C2, !((_2 = C2 >>> 24) <= l3); ) {
+                  if (0 === o3)
+                    break e;
+                  o3--, u3 += n3[s3++] << l3, l3 += 8;
+                }
+                if (g2 && 0 == (240 & g2)) {
+                  for (v2 = _2, y2 = g2, w2 = b2; g2 = (C2 = r3.lencode[w2 + ((u3 & (1 << v2 + y2) - 1) >> v2)]) >>> 16 & 255, b2 = 65535 & C2, !(v2 + (_2 = C2 >>> 24) <= l3); ) {
+                    if (0 === o3)
+                      break e;
+                    o3--, u3 += n3[s3++] << l3, l3 += 8;
+                  }
+                  u3 >>>= v2, l3 -= v2, r3.back += v2;
+                }
+                if (u3 >>>= _2, l3 -= _2, r3.back += _2, r3.length = b2, 0 === g2) {
+                  r3.mode = 26;
+                  break;
+                }
+                if (32 & g2) {
+                  r3.back = -1, r3.mode = 12;
+                  break;
+                }
+                if (64 & g2) {
+                  e3.msg = "invalid literal/length code", r3.mode = 30;
+                  break;
+                }
+                r3.extra = 15 & g2, r3.mode = 22;
+              case 22:
+                if (r3.extra) {
+                  for (z2 = r3.extra; l3 < z2; ) {
+                    if (0 === o3)
+                      break e;
+                    o3--, u3 += n3[s3++] << l3, l3 += 8;
+                  }
+                  r3.length += u3 & (1 << r3.extra) - 1, u3 >>>= r3.extra, l3 -= r3.extra, r3.back += r3.extra;
+                }
+                r3.was = r3.length, r3.mode = 23;
+              case 23:
+                for (; g2 = (C2 = r3.distcode[u3 & (1 << r3.distbits) - 1]) >>> 16 & 255, b2 = 65535 & C2, !((_2 = C2 >>> 24) <= l3); ) {
+                  if (0 === o3)
+                    break e;
+                  o3--, u3 += n3[s3++] << l3, l3 += 8;
+                }
+                if (0 == (240 & g2)) {
+                  for (v2 = _2, y2 = g2, w2 = b2; g2 = (C2 = r3.distcode[w2 + ((u3 & (1 << v2 + y2) - 1) >> v2)]) >>> 16 & 255, b2 = 65535 & C2, !(v2 + (_2 = C2 >>> 24) <= l3); ) {
+                    if (0 === o3)
+                      break e;
+                    o3--, u3 += n3[s3++] << l3, l3 += 8;
+                  }
+                  u3 >>>= v2, l3 -= v2, r3.back += v2;
+                }
+                if (u3 >>>= _2, l3 -= _2, r3.back += _2, 64 & g2) {
+                  e3.msg = "invalid distance code", r3.mode = 30;
+                  break;
+                }
+                r3.offset = b2, r3.extra = 15 & g2, r3.mode = 24;
+              case 24:
+                if (r3.extra) {
+                  for (z2 = r3.extra; l3 < z2; ) {
+                    if (0 === o3)
+                      break e;
+                    o3--, u3 += n3[s3++] << l3, l3 += 8;
+                  }
+                  r3.offset += u3 & (1 << r3.extra) - 1, u3 >>>= r3.extra, l3 -= r3.extra, r3.back += r3.extra;
+                }
+                if (r3.offset > r3.dmax) {
+                  e3.msg = "invalid distance too far back", r3.mode = 30;
+                  break;
+                }
+                r3.mode = 25;
+              case 25:
+                if (0 === h3)
+                  break e;
+                if (d2 = c3 - h3, r3.offset > d2) {
+                  if ((d2 = r3.offset - d2) > r3.whave && r3.sane) {
+                    e3.msg = "invalid distance too far back", r3.mode = 30;
+                    break;
+                  }
+                  p2 = d2 > r3.wnext ? (d2 -= r3.wnext, r3.wsize - d2) : r3.wnext - d2, d2 > r3.length && (d2 = r3.length), m2 = r3.window;
+                } else
+                  m2 = i3, p2 = a3 - r3.offset, d2 = r3.length;
+                for (h3 < d2 && (d2 = h3), h3 -= d2, r3.length -= d2; i3[a3++] = m2[p2++], --d2; )
+                  ;
+                0 === r3.length && (r3.mode = 21);
+                break;
+              case 26:
+                if (0 === h3)
+                  break e;
+                i3[a3++] = r3.length, h3--, r3.mode = 21;
+                break;
+              case 27:
+                if (r3.wrap) {
+                  for (; l3 < 32; ) {
+                    if (0 === o3)
+                      break e;
+                    o3--, u3 |= n3[s3++] << l3, l3 += 8;
+                  }
+                  if (c3 -= h3, e3.total_out += c3, r3.total += c3, c3 && (e3.adler = r3.check = r3.flags ? B2(r3.check, i3, c3, a3 - c3) : O2(r3.check, i3, c3, a3 - c3)), c3 = h3, (r3.flags ? u3 : L2(u3)) !== r3.check) {
+                    e3.msg = "incorrect data check", r3.mode = 30;
+                    break;
+                  }
+                  l3 = u3 = 0;
+                }
+                r3.mode = 28;
+              case 28:
+                if (r3.wrap && r3.flags) {
+                  for (; l3 < 32; ) {
+                    if (0 === o3)
+                      break e;
+                    o3--, u3 += n3[s3++] << l3, l3 += 8;
+                  }
+                  if (u3 !== (4294967295 & r3.total)) {
+                    e3.msg = "incorrect length check", r3.mode = 30;
+                    break;
+                  }
+                  l3 = u3 = 0;
+                }
+                r3.mode = 29;
+              case 29:
+                x2 = 1;
+                break e;
+              case 30:
+                x2 = -3;
+                break e;
+              case 31:
+                return -4;
+              case 32:
+              default:
+                return U2;
+            }
+        return e3.next_out = a3, e3.avail_out = h3, e3.next_in = s3, e3.avail_in = o3, r3.hold = u3, r3.bits = l3, (r3.wsize || c3 !== e3.avail_out && r3.mode < 30 && (r3.mode < 27 || 4 !== t3)) && Z2(e3, e3.output, e3.next_out, c3 - e3.avail_out) ? (r3.mode = 31, -4) : (f3 -= e3.avail_in, c3 -= e3.avail_out, e3.total_in += f3, e3.total_out += c3, r3.total += c3, r3.wrap && c3 && (e3.adler = r3.check = r3.flags ? B2(r3.check, i3, c3, e3.next_out - c3) : O2(r3.check, i3, c3, e3.next_out - c3)), e3.data_type = r3.bits + (r3.last ? 64 : 0) + (12 === r3.mode ? 128 : 0) + (20 === r3.mode || 15 === r3.mode ? 256 : 0), (0 == f3 && 0 === c3 || 4 === t3) && x2 === N2 && (x2 = -5), x2);
+      }, r2.inflateEnd = function(e3) {
+        if (!e3 || !e3.state)
+          return U2;
+        var t3 = e3.state;
+        return t3.window && (t3.window = null), e3.state = null, N2;
+      }, r2.inflateGetHeader = function(e3, t3) {
+        var r3;
+        return e3 && e3.state ? 0 == (2 & (r3 = e3.state).wrap) ? U2 : ((r3.head = t3).done = false, N2) : U2;
+      }, r2.inflateSetDictionary = function(e3, t3) {
+        var r3, n3 = t3.length;
+        return e3 && e3.state ? 0 !== (r3 = e3.state).wrap && 11 !== r3.mode ? U2 : 11 === r3.mode && O2(1, t3, n3, 0) !== r3.check ? -3 : Z2(e3, t3, n3, n3) ? (r3.mode = 31, -4) : (r3.havedict = 1, N2) : U2;
+      }, r2.inflateInfo = "pako inflate (from Nodeca project)";
+    }, { "../utils/common": 41, "./adler32": 43, "./crc32": 45, "./inffast": 48, "./inftrees": 50 }], 50: [function(e2, t2, r2) {
+      var D2 = e2("../utils/common"), F2 = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 0, 0], N2 = [16, 16, 16, 16, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 16, 72, 78], U2 = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577, 0, 0], P2 = [16, 16, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26, 26, 27, 27, 28, 28, 29, 29, 64, 64];
+      t2.exports = function(e3, t3, r3, n2, i2, s2, a2, o2) {
+        var h2, u2, l2, f2, c2, d2, p2, m2, _2, g2 = o2.bits, b2 = 0, v2 = 0, y2 = 0, w2 = 0, k2 = 0, x2 = 0, S2 = 0, z2 = 0, C2 = 0, E2 = 0, A2 = null, I2 = 0, O2 = new D2.Buf16(16), B2 = new D2.Buf16(16), R2 = null, T2 = 0;
+        for (b2 = 0; b2 <= 15; b2++)
+          O2[b2] = 0;
+        for (v2 = 0; v2 < n2; v2++)
+          O2[t3[r3 + v2]]++;
+        for (k2 = g2, w2 = 15; 1 <= w2 && 0 === O2[w2]; w2--)
+          ;
+        if (w2 < k2 && (k2 = w2), 0 === w2)
+          return i2[s2++] = 20971520, i2[s2++] = 20971520, o2.bits = 1, 0;
+        for (y2 = 1; y2 < w2 && 0 === O2[y2]; y2++)
+          ;
+        for (k2 < y2 && (k2 = y2), b2 = z2 = 1; b2 <= 15; b2++)
+          if (z2 <<= 1, (z2 -= O2[b2]) < 0)
+            return -1;
+        if (0 < z2 && (0 === e3 || 1 !== w2))
+          return -1;
+        for (B2[1] = 0, b2 = 1; b2 < 15; b2++)
+          B2[b2 + 1] = B2[b2] + O2[b2];
+        for (v2 = 0; v2 < n2; v2++)
+          0 !== t3[r3 + v2] && (a2[B2[t3[r3 + v2]]++] = v2);
+        if (d2 = 0 === e3 ? (A2 = R2 = a2, 19) : 1 === e3 ? (A2 = F2, I2 -= 257, R2 = N2, T2 -= 257, 256) : (A2 = U2, R2 = P2, -1), b2 = y2, c2 = s2, S2 = v2 = E2 = 0, l2 = -1, f2 = (C2 = 1 << (x2 = k2)) - 1, 1 === e3 && 852 < C2 || 2 === e3 && 592 < C2)
+          return 1;
+        for (; ; ) {
+          for (p2 = b2 - S2, _2 = a2[v2] < d2 ? (m2 = 0, a2[v2]) : a2[v2] > d2 ? (m2 = R2[T2 + a2[v2]], A2[I2 + a2[v2]]) : (m2 = 96, 0), h2 = 1 << b2 - S2, y2 = u2 = 1 << x2; i2[c2 + (E2 >> S2) + (u2 -= h2)] = p2 << 24 | m2 << 16 | _2 | 0, 0 !== u2; )
+            ;
+          for (h2 = 1 << b2 - 1; E2 & h2; )
+            h2 >>= 1;
+          if (0 !== h2 ? (E2 &= h2 - 1, E2 += h2) : E2 = 0, v2++, 0 == --O2[b2]) {
+            if (b2 === w2)
+              break;
+            b2 = t3[r3 + a2[v2]];
+          }
+          if (k2 < b2 && (E2 & f2) !== l2) {
+            for (0 === S2 && (S2 = k2), c2 += y2, z2 = 1 << (x2 = b2 - S2); x2 + S2 < w2 && !((z2 -= O2[x2 + S2]) <= 0); )
+              x2++, z2 <<= 1;
+            if (C2 += 1 << x2, 1 === e3 && 852 < C2 || 2 === e3 && 592 < C2)
+              return 1;
+            i2[l2 = E2 & f2] = k2 << 24 | x2 << 16 | c2 - s2 | 0;
+          }
+        }
+        return 0 !== E2 && (i2[c2 + E2] = b2 - S2 << 24 | 64 << 16 | 0), o2.bits = k2, 0;
+      };
+    }, { "../utils/common": 41 }], 51: [function(e2, t2, r2) {
+      t2.exports = { 2: "need dictionary", 1: "stream end", 0: "", "-1": "file error", "-2": "stream error", "-3": "data error", "-4": "insufficient memory", "-5": "buffer error", "-6": "incompatible version" };
+    }, {}], 52: [function(e2, t2, r2) {
+      var i2 = e2("../utils/common"), o2 = 0, h2 = 1;
+      function n2(e3) {
+        for (var t3 = e3.length; 0 <= --t3; )
+          e3[t3] = 0;
+      }
+      var s2 = 0, a2 = 29, u2 = 256, l2 = u2 + 1 + a2, f2 = 30, c2 = 19, _2 = 2 * l2 + 1, g2 = 15, d2 = 16, p2 = 7, m2 = 256, b2 = 16, v2 = 17, y2 = 18, w2 = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0], k2 = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13], x2 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 7], S2 = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15], z2 = new Array(2 * (l2 + 2));
+      n2(z2);
+      var C2 = new Array(2 * f2);
+      n2(C2);
+      var E2 = new Array(512);
+      n2(E2);
+      var A2 = new Array(256);
+      n2(A2);
+      var I2 = new Array(a2);
+      n2(I2);
+      var O2, B2, R2, T2 = new Array(f2);
+      function D2(e3, t3, r3, n3, i3) {
+        this.static_tree = e3, this.extra_bits = t3, this.extra_base = r3, this.elems = n3, this.max_length = i3, this.has_stree = e3 && e3.length;
+      }
+      function F2(e3, t3) {
+        this.dyn_tree = e3, this.max_code = 0, this.stat_desc = t3;
+      }
+      function N2(e3) {
+        return e3 < 256 ? E2[e3] : E2[256 + (e3 >>> 7)];
+      }
+      function U2(e3, t3) {
+        e3.pending_buf[e3.pending++] = 255 & t3, e3.pending_buf[e3.pending++] = t3 >>> 8 & 255;
+      }
+      function P2(e3, t3, r3) {
+        e3.bi_valid > d2 - r3 ? (e3.bi_buf |= t3 << e3.bi_valid & 65535, U2(e3, e3.bi_buf), e3.bi_buf = t3 >> d2 - e3.bi_valid, e3.bi_valid += r3 - d2) : (e3.bi_buf |= t3 << e3.bi_valid & 65535, e3.bi_valid += r3);
+      }
+      function L2(e3, t3, r3) {
+        P2(e3, r3[2 * t3], r3[2 * t3 + 1]);
+      }
+      function j2(e3, t3) {
+        for (var r3 = 0; r3 |= 1 & e3, e3 >>>= 1, r3 <<= 1, 0 < --t3; )
+          ;
+        return r3 >>> 1;
+      }
+      function Z2(e3, t3, r3) {
+        var n3, i3, s3 = new Array(g2 + 1), a3 = 0;
+        for (n3 = 1; n3 <= g2; n3++)
+          s3[n3] = a3 = a3 + r3[n3 - 1] << 1;
+        for (i3 = 0; i3 <= t3; i3++) {
+          var o3 = e3[2 * i3 + 1];
+          0 !== o3 && (e3[2 * i3] = j2(s3[o3]++, o3));
+        }
+      }
+      function W2(e3) {
+        var t3;
+        for (t3 = 0; t3 < l2; t3++)
+          e3.dyn_ltree[2 * t3] = 0;
+        for (t3 = 0; t3 < f2; t3++)
+          e3.dyn_dtree[2 * t3] = 0;
+        for (t3 = 0; t3 < c2; t3++)
+          e3.bl_tree[2 * t3] = 0;
+        e3.dyn_ltree[2 * m2] = 1, e3.opt_len = e3.static_len = 0, e3.last_lit = e3.matches = 0;
+      }
+      function M2(e3) {
+        8 < e3.bi_valid ? U2(e3, e3.bi_buf) : 0 < e3.bi_valid && (e3.pending_buf[e3.pending++] = e3.bi_buf), e3.bi_buf = 0, e3.bi_valid = 0;
+      }
+      function H2(e3, t3, r3, n3) {
+        var i3 = 2 * t3, s3 = 2 * r3;
+        return e3[i3] < e3[s3] || e3[i3] === e3[s3] && n3[t3] <= n3[r3];
+      }
+      function G2(e3, t3, r3) {
+        for (var n3 = e3.heap[r3], i3 = r3 << 1; i3 <= e3.heap_len && (i3 < e3.heap_len && H2(t3, e3.heap[i3 + 1], e3.heap[i3], e3.depth) && i3++, !H2(t3, n3, e3.heap[i3], e3.depth)); )
+          e3.heap[r3] = e3.heap[i3], r3 = i3, i3 <<= 1;
+        e3.heap[r3] = n3;
+      }
+      function K2(e3, t3, r3) {
+        var n3, i3, s3, a3, o3 = 0;
+        if (0 !== e3.last_lit)
+          for (; n3 = e3.pending_buf[e3.d_buf + 2 * o3] << 8 | e3.pending_buf[e3.d_buf + 2 * o3 + 1], i3 = e3.pending_buf[e3.l_buf + o3], o3++, 0 === n3 ? L2(e3, i3, t3) : (L2(e3, (s3 = A2[i3]) + u2 + 1, t3), 0 !== (a3 = w2[s3]) && P2(e3, i3 -= I2[s3], a3), L2(e3, s3 = N2(--n3), r3), 0 !== (a3 = k2[s3]) && P2(e3, n3 -= T2[s3], a3)), o3 < e3.last_lit; )
+            ;
+        L2(e3, m2, t3);
+      }
+      function Y2(e3, t3) {
+        var r3, n3, i3, s3 = t3.dyn_tree, a3 = t3.stat_desc.static_tree, o3 = t3.stat_desc.has_stree, h3 = t3.stat_desc.elems, u3 = -1;
+        for (e3.heap_len = 0, e3.heap_max = _2, r3 = 0; r3 < h3; r3++)
+          0 !== s3[2 * r3] ? (e3.heap[++e3.heap_len] = u3 = r3, e3.depth[r3] = 0) : s3[2 * r3 + 1] = 0;
+        for (; e3.heap_len < 2; )
+          s3[2 * (i3 = e3.heap[++e3.heap_len] = u3 < 2 ? ++u3 : 0)] = 1, e3.depth[i3] = 0, e3.opt_len--, o3 && (e3.static_len -= a3[2 * i3 + 1]);
+        for (t3.max_code = u3, r3 = e3.heap_len >> 1; 1 <= r3; r3--)
+          G2(e3, s3, r3);
+        for (i3 = h3; r3 = e3.heap[1], e3.heap[1] = e3.heap[e3.heap_len--], G2(e3, s3, 1), n3 = e3.heap[1], e3.heap[--e3.heap_max] = r3, e3.heap[--e3.heap_max] = n3, s3[2 * i3] = s3[2 * r3] + s3[2 * n3], e3.depth[i3] = (e3.depth[r3] >= e3.depth[n3] ? e3.depth[r3] : e3.depth[n3]) + 1, s3[2 * r3 + 1] = s3[2 * n3 + 1] = i3, e3.heap[1] = i3++, G2(e3, s3, 1), 2 <= e3.heap_len; )
+          ;
+        e3.heap[--e3.heap_max] = e3.heap[1], function(e4, t4) {
+          var r4, n4, i4, s4, a4, o4, h4 = t4.dyn_tree, u4 = t4.max_code, l3 = t4.stat_desc.static_tree, f3 = t4.stat_desc.has_stree, c3 = t4.stat_desc.extra_bits, d3 = t4.stat_desc.extra_base, p3 = t4.stat_desc.max_length, m3 = 0;
+          for (s4 = 0; s4 <= g2; s4++)
+            e4.bl_count[s4] = 0;
+          for (h4[2 * e4.heap[e4.heap_max] + 1] = 0, r4 = e4.heap_max + 1; r4 < _2; r4++)
+            p3 < (s4 = h4[2 * h4[2 * (n4 = e4.heap[r4]) + 1] + 1] + 1) && (s4 = p3, m3++), h4[2 * n4 + 1] = s4, u4 < n4 || (e4.bl_count[s4]++, a4 = 0, d3 <= n4 && (a4 = c3[n4 - d3]), o4 = h4[2 * n4], e4.opt_len += o4 * (s4 + a4), f3 && (e4.static_len += o4 * (l3[2 * n4 + 1] + a4)));
+          if (0 !== m3) {
+            do {
+              for (s4 = p3 - 1; 0 === e4.bl_count[s4]; )
+                s4--;
+              e4.bl_count[s4]--, e4.bl_count[s4 + 1] += 2, e4.bl_count[p3]--, m3 -= 2;
+            } while (0 < m3);
+            for (s4 = p3; 0 !== s4; s4--)
+              for (n4 = e4.bl_count[s4]; 0 !== n4; )
+                u4 < (i4 = e4.heap[--r4]) || (h4[2 * i4 + 1] !== s4 && (e4.opt_len += (s4 - h4[2 * i4 + 1]) * h4[2 * i4], h4[2 * i4 + 1] = s4), n4--);
+          }
+        }(e3, t3), Z2(s3, u3, e3.bl_count);
+      }
+      function X2(e3, t3, r3) {
+        var n3, i3, s3 = -1, a3 = t3[1], o3 = 0, h3 = 7, u3 = 4;
+        for (0 === a3 && (h3 = 138, u3 = 3), t3[2 * (r3 + 1) + 1] = 65535, n3 = 0; n3 <= r3; n3++)
+          i3 = a3, a3 = t3[2 * (n3 + 1) + 1], ++o3 < h3 && i3 === a3 || (o3 < u3 ? e3.bl_tree[2 * i3] += o3 : 0 !== i3 ? (i3 !== s3 && e3.bl_tree[2 * i3]++, e3.bl_tree[2 * b2]++) : o3 <= 10 ? e3.bl_tree[2 * v2]++ : e3.bl_tree[2 * y2]++, s3 = i3, u3 = (o3 = 0) === a3 ? (h3 = 138, 3) : i3 === a3 ? (h3 = 6, 3) : (h3 = 7, 4));
+      }
+      function V2(e3, t3, r3) {
+        var n3, i3, s3 = -1, a3 = t3[1], o3 = 0, h3 = 7, u3 = 4;
+        for (0 === a3 && (h3 = 138, u3 = 3), n3 = 0; n3 <= r3; n3++)
+          if (i3 = a3, a3 = t3[2 * (n3 + 1) + 1], !(++o3 < h3 && i3 === a3)) {
+            if (o3 < u3)
+              for (; L2(e3, i3, e3.bl_tree), 0 != --o3; )
+                ;
+            else
+              0 !== i3 ? (i3 !== s3 && (L2(e3, i3, e3.bl_tree), o3--), L2(e3, b2, e3.bl_tree), P2(e3, o3 - 3, 2)) : o3 <= 10 ? (L2(e3, v2, e3.bl_tree), P2(e3, o3 - 3, 3)) : (L2(e3, y2, e3.bl_tree), P2(e3, o3 - 11, 7));
+            s3 = i3, u3 = (o3 = 0) === a3 ? (h3 = 138, 3) : i3 === a3 ? (h3 = 6, 3) : (h3 = 7, 4);
+          }
+      }
+      n2(T2);
+      var q3 = false;
+      function J2(e3, t3, r3, n3) {
+        P2(e3, (s2 << 1) + (n3 ? 1 : 0), 3), function(e4, t4, r4, n4) {
+          M2(e4), n4 && (U2(e4, r4), U2(e4, ~r4)), i2.arraySet(e4.pending_buf, e4.window, t4, r4, e4.pending), e4.pending += r4;
+        }(e3, t3, r3, true);
+      }
+      r2._tr_init = function(e3) {
+        q3 || (function() {
+          var e4, t3, r3, n3, i3, s3 = new Array(g2 + 1);
+          for (n3 = r3 = 0; n3 < a2 - 1; n3++)
+            for (I2[n3] = r3, e4 = 0; e4 < 1 << w2[n3]; e4++)
+              A2[r3++] = n3;
+          for (A2[r3 - 1] = n3, n3 = i3 = 0; n3 < 16; n3++)
+            for (T2[n3] = i3, e4 = 0; e4 < 1 << k2[n3]; e4++)
+              E2[i3++] = n3;
+          for (i3 >>= 7; n3 < f2; n3++)
+            for (T2[n3] = i3 << 7, e4 = 0; e4 < 1 << k2[n3] - 7; e4++)
+              E2[256 + i3++] = n3;
+          for (t3 = 0; t3 <= g2; t3++)
+            s3[t3] = 0;
+          for (e4 = 0; e4 <= 143; )
+            z2[2 * e4 + 1] = 8, e4++, s3[8]++;
+          for (; e4 <= 255; )
+            z2[2 * e4 + 1] = 9, e4++, s3[9]++;
+          for (; e4 <= 279; )
+            z2[2 * e4 + 1] = 7, e4++, s3[7]++;
+          for (; e4 <= 287; )
+            z2[2 * e4 + 1] = 8, e4++, s3[8]++;
+          for (Z2(z2, l2 + 1, s3), e4 = 0; e4 < f2; e4++)
+            C2[2 * e4 + 1] = 5, C2[2 * e4] = j2(e4, 5);
+          O2 = new D2(z2, w2, u2 + 1, l2, g2), B2 = new D2(C2, k2, 0, f2, g2), R2 = new D2(new Array(0), x2, 0, c2, p2);
+        }(), q3 = true), e3.l_desc = new F2(e3.dyn_ltree, O2), e3.d_desc = new F2(e3.dyn_dtree, B2), e3.bl_desc = new F2(e3.bl_tree, R2), e3.bi_buf = 0, e3.bi_valid = 0, W2(e3);
+      }, r2._tr_stored_block = J2, r2._tr_flush_block = function(e3, t3, r3, n3) {
+        var i3, s3, a3 = 0;
+        0 < e3.level ? (2 === e3.strm.data_type && (e3.strm.data_type = function(e4) {
+          var t4, r4 = 4093624447;
+          for (t4 = 0; t4 <= 31; t4++, r4 >>>= 1)
+            if (1 & r4 && 0 !== e4.dyn_ltree[2 * t4])
+              return o2;
+          if (0 !== e4.dyn_ltree[18] || 0 !== e4.dyn_ltree[20] || 0 !== e4.dyn_ltree[26])
+            return h2;
+          for (t4 = 32; t4 < u2; t4++)
+            if (0 !== e4.dyn_ltree[2 * t4])
+              return h2;
+          return o2;
+        }(e3)), Y2(e3, e3.l_desc), Y2(e3, e3.d_desc), a3 = function(e4) {
+          var t4;
+          for (X2(e4, e4.dyn_ltree, e4.l_desc.max_code), X2(e4, e4.dyn_dtree, e4.d_desc.max_code), Y2(e4, e4.bl_desc), t4 = c2 - 1; 3 <= t4 && 0 === e4.bl_tree[2 * S2[t4] + 1]; t4--)
+            ;
+          return e4.opt_len += 3 * (t4 + 1) + 5 + 5 + 4, t4;
+        }(e3), i3 = e3.opt_len + 3 + 7 >>> 3, (s3 = e3.static_len + 3 + 7 >>> 3) <= i3 && (i3 = s3)) : i3 = s3 = r3 + 5, r3 + 4 <= i3 && -1 !== t3 ? J2(e3, t3, r3, n3) : 4 === e3.strategy || s3 === i3 ? (P2(e3, 2 + (n3 ? 1 : 0), 3), K2(e3, z2, C2)) : (P2(e3, 4 + (n3 ? 1 : 0), 3), function(e4, t4, r4, n4) {
+          var i4;
+          for (P2(e4, t4 - 257, 5), P2(e4, r4 - 1, 5), P2(e4, n4 - 4, 4), i4 = 0; i4 < n4; i4++)
+            P2(e4, e4.bl_tree[2 * S2[i4] + 1], 3);
+          V2(e4, e4.dyn_ltree, t4 - 1), V2(e4, e4.dyn_dtree, r4 - 1);
+        }(e3, e3.l_desc.max_code + 1, e3.d_desc.max_code + 1, a3 + 1), K2(e3, e3.dyn_ltree, e3.dyn_dtree)), W2(e3), n3 && M2(e3);
+      }, r2._tr_tally = function(e3, t3, r3) {
+        return e3.pending_buf[e3.d_buf + 2 * e3.last_lit] = t3 >>> 8 & 255, e3.pending_buf[e3.d_buf + 2 * e3.last_lit + 1] = 255 & t3, e3.pending_buf[e3.l_buf + e3.last_lit] = 255 & r3, e3.last_lit++, 0 === t3 ? e3.dyn_ltree[2 * r3]++ : (e3.matches++, t3--, e3.dyn_ltree[2 * (A2[r3] + u2 + 1)]++, e3.dyn_dtree[2 * N2(t3)]++), e3.last_lit === e3.lit_bufsize - 1;
+      }, r2._tr_align = function(e3) {
+        P2(e3, 2, 3), L2(e3, m2, z2), function(e4) {
+          16 === e4.bi_valid ? (U2(e4, e4.bi_buf), e4.bi_buf = 0, e4.bi_valid = 0) : 8 <= e4.bi_valid && (e4.pending_buf[e4.pending++] = 255 & e4.bi_buf, e4.bi_buf >>= 8, e4.bi_valid -= 8);
+        }(e3);
+      };
+    }, { "../utils/common": 41 }], 53: [function(e2, t2, r2) {
+      t2.exports = function() {
+        this.input = null, this.next_in = 0, this.avail_in = 0, this.total_in = 0, this.output = null, this.next_out = 0, this.avail_out = 0, this.total_out = 0, this.msg = "", this.state = null, this.data_type = 2, this.adler = 0;
+      };
+    }, {}], 54: [function(e2, t2, r2) {
+      (function(e3) {
+        !function(r3, n2) {
+          if (!r3.setImmediate) {
+            var i2, s2, t3, a2, o2 = 1, h2 = {}, u2 = false, l2 = r3.document, e4 = Object.getPrototypeOf && Object.getPrototypeOf(r3);
+            e4 = e4 && e4.setTimeout ? e4 : r3, i2 = "[object process]" === {}.toString.call(r3.process) ? function(e5) {
+              process.nextTick(function() {
+                c2(e5);
+              });
+            } : function() {
+              if (r3.postMessage && !r3.importScripts) {
+                var e5 = true, t4 = r3.onmessage;
+                return r3.onmessage = function() {
+                  e5 = false;
+                }, r3.postMessage("", "*"), r3.onmessage = t4, e5;
+              }
+            }() ? (a2 = "setImmediate$" + Math.random() + "$", r3.addEventListener ? r3.addEventListener("message", d2, false) : r3.attachEvent("onmessage", d2), function(e5) {
+              r3.postMessage(a2 + e5, "*");
+            }) : r3.MessageChannel ? ((t3 = new MessageChannel()).port1.onmessage = function(e5) {
+              c2(e5.data);
+            }, function(e5) {
+              t3.port2.postMessage(e5);
+            }) : l2 && "onreadystatechange" in l2.createElement("script") ? (s2 = l2.documentElement, function(e5) {
+              var t4 = l2.createElement("script");
+              t4.onreadystatechange = function() {
+                c2(e5), t4.onreadystatechange = null, s2.removeChild(t4), t4 = null;
+              }, s2.appendChild(t4);
+            }) : function(e5) {
+              setTimeout(c2, 0, e5);
+            }, e4.setImmediate = function(e5) {
+              "function" != typeof e5 && (e5 = new Function("" + e5));
+              for (var t4 = new Array(arguments.length - 1), r4 = 0; r4 < t4.length; r4++)
+                t4[r4] = arguments[r4 + 1];
+              var n3 = { callback: e5, args: t4 };
+              return h2[o2] = n3, i2(o2), o2++;
+            }, e4.clearImmediate = f2;
+          }
+          function f2(e5) {
+            delete h2[e5];
+          }
+          function c2(e5) {
+            if (u2)
+              setTimeout(c2, 0, e5);
+            else {
+              var t4 = h2[e5];
+              if (t4) {
+                u2 = true;
+                try {
+                  !function(e6) {
+                    var t5 = e6.callback, r4 = e6.args;
+                    switch (r4.length) {
+                      case 0:
+                        t5();
+                        break;
+                      case 1:
+                        t5(r4[0]);
+                        break;
+                      case 2:
+                        t5(r4[0], r4[1]);
+                        break;
+                      case 3:
+                        t5(r4[0], r4[1], r4[2]);
+                        break;
+                      default:
+                        t5.apply(n2, r4);
+                    }
+                  }(t4);
+                } finally {
+                  f2(e5), u2 = false;
+                }
+              }
+            }
+          }
+          function d2(e5) {
+            e5.source === r3 && "string" == typeof e5.data && 0 === e5.data.indexOf(a2) && c2(+e5.data.slice(a2.length));
+          }
+        }("undefined" == typeof self ? void 0 === e3 ? this : e3 : self);
+      }).call(this, "undefined" != typeof commonjsGlobal ? commonjsGlobal : "undefined" != typeof self ? self : "undefined" != typeof window ? window : {});
+    }, {}] }, {}, [10])(10);
+  });
+})(jszip_min);
+var jszip_minExports = jszip_min.exports;
+const JsZip = /* @__PURE__ */ getDefaultExportFromCjs(jszip_minExports);
+var FileSaver_min = { exports: {} };
+(function(module, exports) {
+  (function(a2, b2) {
+    b2();
+  })(commonjsGlobal, function() {
+    function b2(a3, b3) {
+      return "undefined" == typeof b3 ? b3 = { autoBom: false } : "object" != typeof b3 && (console.warn("Deprecated: Expected third argument to be a object"), b3 = { autoBom: !b3 }), b3.autoBom && /^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a3.type) ? new Blob(["\uFEFF", a3], { type: a3.type }) : a3;
+    }
+    function c2(a3, b3, c3) {
+      var d3 = new XMLHttpRequest();
+      d3.open("GET", a3), d3.responseType = "blob", d3.onload = function() {
+        g2(d3.response, b3, c3);
+      }, d3.onerror = function() {
+        console.error("could not download file");
+      }, d3.send();
+    }
+    function d2(a3) {
+      var b3 = new XMLHttpRequest();
+      b3.open("HEAD", a3, false);
+      try {
+        b3.send();
+      } catch (a4) {
+      }
+      return 200 <= b3.status && 299 >= b3.status;
+    }
+    function e2(a3) {
+      try {
+        a3.dispatchEvent(new MouseEvent("click"));
+      } catch (c3) {
+        var b3 = document.createEvent("MouseEvents");
+        b3.initMouseEvent("click", true, true, window, 0, 0, 0, 80, 20, false, false, false, false, 0, null), a3.dispatchEvent(b3);
+      }
+    }
+    var f2 = "object" == typeof window && window.window === window ? window : "object" == typeof self && self.self === self ? self : "object" == typeof commonjsGlobal && commonjsGlobal.global === commonjsGlobal ? commonjsGlobal : void 0, a2 = f2.navigator && /Macintosh/.test(navigator.userAgent) && /AppleWebKit/.test(navigator.userAgent) && !/Safari/.test(navigator.userAgent), g2 = f2.saveAs || ("object" != typeof window || window !== f2 ? function() {
+    } : "download" in HTMLAnchorElement.prototype && !a2 ? function(b3, g3, h2) {
+      var i2 = f2.URL || f2.webkitURL, j2 = document.createElement("a");
+      g3 = g3 || b3.name || "download", j2.download = g3, j2.rel = "noopener", "string" == typeof b3 ? (j2.href = b3, j2.origin === location.origin ? e2(j2) : d2(j2.href) ? c2(b3, g3, h2) : e2(j2, j2.target = "_blank")) : (j2.href = i2.createObjectURL(b3), setTimeout(function() {
+        i2.revokeObjectURL(j2.href);
+      }, 4e4), setTimeout(function() {
+        e2(j2);
+      }, 0));
+    } : "msSaveOrOpenBlob" in navigator ? function(f3, g3, h2) {
+      if (g3 = g3 || f3.name || "download", "string" != typeof f3)
+        navigator.msSaveOrOpenBlob(b2(f3, h2), g3);
+      else if (d2(f3))
+        c2(f3, g3, h2);
+      else {
+        var i2 = document.createElement("a");
+        i2.href = f3, i2.target = "_blank", setTimeout(function() {
+          e2(i2);
+        });
+      }
+    } : function(b3, d3, e3, g3) {
+      if (g3 = g3 || open("", "_blank"), g3 && (g3.document.title = g3.document.body.innerText = "downloading..."), "string" == typeof b3)
+        return c2(b3, d3, e3);
+      var h2 = "application/octet-stream" === b3.type, i2 = /constructor/i.test(f2.HTMLElement) || f2.safari, j2 = /CriOS\/[\d]+/.test(navigator.userAgent);
+      if ((j2 || h2 && i2 || a2) && "undefined" != typeof FileReader) {
+        var k2 = new FileReader();
+        k2.onloadend = function() {
+          var a3 = k2.result;
+          a3 = j2 ? a3 : a3.replace(/^data:[^;]*;/, "data:attachment/file;"), g3 ? g3.location.href = a3 : location = a3, g3 = null;
+        }, k2.readAsDataURL(b3);
+      } else {
+        var l2 = f2.URL || f2.webkitURL, m2 = l2.createObjectURL(b3);
+        g3 ? g3.location = m2 : location.href = m2, g3 = null, setTimeout(function() {
+          l2.revokeObjectURL(m2);
+        }, 4e4);
+      }
+    });
+    f2.saveAs = g2.saveAs = g2, module.exports = g2;
+  });
+})(FileSaver_min);
+var FileSaver_minExports = FileSaver_min.exports;
+const FileSaver = /* @__PURE__ */ getDefaultExportFromCjs(FileSaver_minExports);
+const workerNodeTemplate = `import rclpy
+from rclpy.node import Node
+from std_msgs.msg import Int32
+from crazyflie_py import generate_trajectory
+import numpy as np
+from blocklyTranslations import *
+from types import SimpleNamespace
+from TimeHelper import TimeHelper  # TODO add to files downloaded
+
+Hz = 30
+
+class worker_node(Node):
+
+    def __init__(self, crazyflies, id=0, num_nodes=1):
+        """
+        id: a unique id between 0 and num_nodes corresponding to the thread number of this worker
+        num_nodes: number of nodes (threads) in total
+        """
+        super().__init__("worker_node_{}".format(id))
+        assert(isinstance(id, int))
+        self.id = id
+        self.num_nodes = num_nodes
+        self.crazyflies = crazyflies
+
+        self.timer = self.create_timer(1/Hz, self.timer_callback)
+        self.timeHelper = TimeHelper(self)
+        self.running = False
+        self.done = False
+    
+    def compute_trajectories(self):
+        """
+        Inject Trajectory computation code here...
+        """
+        trajectories = []
+        ### -----Insert Trajectories Here-------
+
+        return trajectories
+
+    def upload_trajectories(crazyflies, trajectories):
+        '''
+            Upload trajectories to crazyflies one by one
+        '''
+
+        for i, traj in enumerate(trajectories):
+            for cf in crazyflies:
+                cf.uploadTrajectory(traj, i, 0)
+
+    def start(self):
+        """
+            Start execution of blocks
+        """
+        trajectories = self.compute_trajectories()
+        self.upload_trajectories(trajectories)
+        self.execute_blocks()
+
+    def time(self):
+        return self.get_clock().now().nanoseconds / 1e9
+    
+    def execute_blocks(self):
+        """
+        Must be injected into...
+
+        Typical format should be:
+        
+        start_time = 0.0
+        self.timeHelper.sleepUntil(start_time)
+        takeoff(crazyflies, height=1.0, duration=2.0)
+
+        start_time = 5.0
+        self.wait_until(start_time)
+        land(crazyflies, height=0.0, duration=2.0)
+        
+        ...
+
+        Where a new start time is added for each block.
+        """
+        groupState = SimpleNamespace(crazyflies=self.crazyflies, timeHelper=self.timeHelper)
+        ### ---------Insert Execution Code Here------------
+        
+        self.done = True
+    
+    def timer_callback(self):
+        if not self.running:
+            self.start()
+            self.running = True`;
+const launcherNode = `import yaml
+from ament_index_python.packages import get_package_share_directory
+from crazyflie_py import Crazyswarm
+import rclpy
+import threading
+import time
+from rclpy.node import Node
+
+
+class crazyflie_node(Node):
+    def __init__(self, crazyswarm):
+        super().__init__("crazyswarm_node")
+        Hz = 20
+        self.crazyswarm = crazyswarm
+        self.timeHelper = crazyswarm.timeHelper
+        self.timer = self.create_timer(
+            1 / Hz,
+            self.timer_callback,
+        )
+
+    def timer_callback(self):
+        self.timeHelper.sleepForRate(50)
+# Inject Imports Here:
+
+def launch(nodes):
+    # Allocate extra threads because worker callbacks can block for long durations.
+    thread_count = max(8, len(nodes) * 2)
+    executor = rclpy.executors.MultiThreadedExecutor(num_threads=thread_count)
+
+    for node in nodes:
+        executor.add_node(node)
+    
+    thread = threading.Thread(target=executor.spin, daemon=True)
+    thread.start()
+    try:
+        while rclpy.ok():
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        pass
+    rclpy.shutdown()
+    thread.join()
+    
+
+def main():
+    # node_config_file = get_package_share_directory('crazyflie'), 'config', 'crazyflies.yaml'
+    
+    # Initialize swarm
+    swarm = Crazyswarm()
+    with open("cfs_ordering.yaml") as f:
+        ordering = yaml.safe_load(f) #TODO!!!
+        order = ordering['cfs']
+    
+    crazyflies = [swarm.allcfs.crazyfliesById[int(k)] for k in order]
+    counter = 0
+    nodes = []
+    cfs = []
+
+    #   -----------Insert Nodes Here----------- 
+
+    # nodes.append(crazyflie_node(swarm))
+    nodes.append(swarm.allcfs)
+    # Launch all nodes
+    return launch(nodes)
+
+if __name__ == '__main__':
+    main()
+`;
+const configure = `# Need to ask user which crazyflies they will use, and will tell them where to place them
+
+import yaml
+import copy
+import os, sys, stat
+
+# Load starting positions from blockly
+with open('starting_positions.yaml') as f:
+    starting_positions = yaml.safe_load(f)
+
+n_robots = len(starting_positions['positions'])
+
+print("You will need {} crazyflies".format(n_robots))
+print("Which crazyflies (by ID) will you use?")
+
+cfs = []
+for i in range(n_robots):
+    cf = input("crazyflie #{}: ".format(i + 1))
+    cfs.append(cf)
+
+    
+start_dict = {}
+for cf, pos in zip(cfs, starting_positions['positions']):
+    print("Place cf {} at location {}".format(cf, pos))
+    start_dict[cf] = pos #TODO: Ordering!
+
+# Make changes to local mycrazyflies.yaml
+with open(os.path.expanduser('~/ros2_ws/src/Brown-crazyswarm2/crazyflie/config/crazyflies.yaml'), 'r') as f:
+    all_crazyflies = yaml.safe_load(f)
+
+# TODO: All CFS have to be commented in...
+my_cfs = copy.deepcopy(all_crazyflies)
+for r in all_crazyflies['robots']:
+    id = r.strip('cf')
+    if id not in cfs:
+        del my_cfs['robots'][r]
+    else:
+        my_cfs['robots'][r]['enabled'] = True
+        my_cfs['robots'][r]['initial_position'] = start_dict[id]
+
+
+with open('my_crazyflies.yaml', 'w') as f:
+    yaml.dump(my_cfs, f)
+with open('cfs_ordering.yaml', 'w') as f:
+    yaml.dump({'cfs': cfs}, f)
+
+# Make commands for sim and non-sim launches
+with open('sim.sh', 'w') as f:
+    f.write('ros2 launch launch.py backend:=sim')
+    os.chmod('sim.sh', stat.S_IRWXU)
+with open('run.sh', 'w') as f:
+    f.write('ros2 launch launch.py')
+    os.chmod('run.sh', stat.S_IRWXU)`;
+const translations = `from collections import namedtuple
+from types import SimpleNamespace
+import numpy as np
+from PIL import ImageColor
+import rclpy
+import random
+import time
+from crazyflieLoggers import *
+import rowan
+from scipy.spatial.transform import Rotation as R
+
+import traceback
+
+Hz = 20
+
+
+def _safe_cf_position(cf, retries=50, retry_sleep=0.01):
+    """
+    Read Crazyflie position robustly while ROS pose callbacks are catching up.
+    """
+    last_error = None
+    for _ in range(retries):
+        try:
+            return cf.position()
+        except ValueError as e:
+            # Seen when pose cache is temporarily empty:
+            # "need at least one array to concatenate"
+            last_error = e
+            time.sleep(retry_sleep)
+    if last_error is not None:
+        raise last_error
+    return cf.position()
+
+###
+#  Landing/Takeoff commands
+###
+
+
+def takeoff(groupState, height=1.0, duration=2.0):
+    """Takeoff command, runs for every crazyflie in groupState
+
+    Args:
+        groupState GroupState: crazyflies and timehelper objects
+        height (float, optional): height to takeoff to. Defaults to 1.0.
+        duration (float, optional): duration of command. Defaults to 2.0.
+    """
+    timeHelper = groupState.timeHelper
+    crazyflies = groupState.crazyflies
+    for cf in crazyflies:
+        cf.takeoff(float(height), float(duration))
+    timeHelper.sleep(duration)
+
+
+def land(groupState, height=0.04, duration=2.0):
+    """Land command, runs for every crazyflie in groupState
+
+    Args:
+        groupState GroupState: crazyflies and timehelper objects
+        height (float, optional): height to land to. Defaults to 1.0.
+        duration (float, optional): duration of command. Defaults to 2.0.
+    """
+    timeHelper = groupState.timeHelper
+    crazyflies = groupState.crazyflies
+    for cf in crazyflies:
+        cf.land(float(height), float(duration))
+    timeHelper.sleep(duration)
+
+
+###
+#  Motion Primitive Commands
+###
+
+
+def goto_velocity(groupState, x, y, z, v, rel=False):
+    """goTo command at a given *average* velocity, runs for every crazyflie in groupState
+
+    Args:
+        groupState GroupState: crazyflies and timehelper objects
+        x float: Desired x position
+        y float: Desired y position
+        z float: Desired z position
+        v float: Desired average velocity
+        rel (bool, optional): Whether or not the command is relative or absolute. Defaults to False.
+    """
+    timeHelper = groupState.timeHelper
+    crazyflies = groupState.crazyflies
+    max_duration = 0
+    for cf in crazyflies:
+        # try:
+        #     if not isinstance(cf, CrazyflieSimLogger):
+        #         rclpy.spin_once(cf.node)
+        # except Exception:
+        #     cf.node.get_logger().error(traceback.format_exc())
+        #     pass
+        curr_pos = cf.position()
+        dist = np.linalg.norm(np.array(curr_pos) - np.array([x, y, z]))
+        duration = dist / v
+        cf.goTo((float(x), float(y), float(z)), 0, duration=duration, relative=rel)
+        max_duration = max(duration, max_duration)
+    timeHelper.sleep(max_duration)
+
+
+def goto_duration(groupState, x, y, z, duration, rel=False):
+    """goTo command at a given duration, runs for every crazyflie in groupState
+
+    Args:
+        groupState GroupState: crazyflies and timehelper objects
+        x float: Desired x position
+        y float: Desired y position
+        z float: Desired z position
+        duration float: duration of command
+        rel (bool, optional): Whether or not the command is relative or absolute. Defaults to False.
+    """
+    timeHelper = groupState.timeHelper
+    crazyflies = groupState.crazyflies
+    for cf in crazyflies:
+        cf.goTo((float(x), float(y), float(z)), 0, duration=duration, relative=rel)
+    timeHelper.sleep(duration)
+
+
+def goto_velocity_relative_position(groupState, x, y, z, v):
+    """goTo command with given average velocity and relative position
+
+    Args:
+        groupState GroupState: crazyflies and timehelper objects
+        x float: Desired x position
+        y float: Desired y position
+        z float: Desired z position
+        v float: average velocity
+    """
+    distance = np.linalg.norm((x, y, z))
+    time = distance / v
+    # time *= 2
+    crazyflies = groupState.crazyflies
+    timeHelper = groupState.timeHelper
+    for cf in crazyflies:
+        cf.goTo((float(x), float(y), float(z)), 0.0, time, relative=True)
+    timeHelper.sleep(time)
+
+
+def goto_duration_relative(groupState, x, y, z, duration):
+    goto_duration(groupState, x, y, z, duration, True)
+
+
+def move_direction(groupState, direction, distance, duration):
+    timeHelper = groupState.timeHelper
+    crazyflies = groupState.crazyflies
+    for cf in crazyflies:
+        pos = cf.getPosition()
+        if direction == "up":
+            cf.goTo((0, 0, distance), 0, duration, relative=True)
+        elif direction == "forward":
+            cf.goTo((distance, 0, 0), 0, duration=duration, relative=True)
+        elif direction == "backward":
+            cf.goTo((-distance, 0, 0), 0, duration=duration, relative=True)
+        elif direction == "down":
+            cf.goTo((0, 0, -distance), 0, duration, relative=True)
+    timeHelper.sleep(duration)
+    return duration
+
+
+def stop_and_hover(groupState, height=None):
+    crazyflies = groupState.crazyflies
+    for cf in crazyflies:
+        position = cf.position()
+        cf.goTo(position, 0, 1.0)
+
+
+###
+#  Low Level Commands...
+###
+def getPosition(cf):
+    return cf.position()
+
+
+# TODO: Enable low level commands...
+def cmdPosition(cf, pos):
+    cf.cmdPosition(pos)
+
+
+def enableHighLevelCommander(cf):
+    cf.notifySetpointsStop()
+
+
+###
+# Colors
+###
+
+
+def setLEDColorFromHex(groupState, hex):
+    # return
+    crazyflies = groupState.crazyflies
+    rgb = ImageColor.getcolor(hex, "RGB")
+    for cf in crazyflies:
+        cf.setLEDColor(*rgb)
+
+
+def setLEDColor(groupState, r, g, b):
+    # return
+    crazyflies = groupState.crazyflies
+    for cf in crazyflies:
+        cf.setLEDColor(r, g, b)
+
+
+def setRandomLEDColor(groupState):
+    # One random color for the whole group, like the simulator
+    setLEDColor(groupState, random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+
+###
+#  Trajectory commands...
+###
+def circle(groupState, radius, velocity, radians, direction):
+    crazyflies = groupState.crazyflies
+    timeHelper = groupState.timeHelper
+    clockwise = 1
+    if direction == "ccw":
+        clockwise = -1
+
+    # velocity is the speed along the circle (m/s), as in the simulator, so the turn rate depends on the radius
+    angular_velocity = velocity / radius
+
+    fx = lambda t: 0
+    fy = lambda t: radius * (np.cos(t * angular_velocity) - 1)
+    fz = lambda t: clockwise * radius * np.sin(t * angular_velocity)
+
+    timesteps = np.arange(0, radians / angular_velocity, 1 / Hz)
+
+    # start positions bumped up by 1 meter in z
+    initialPositions = [
+        (pos[0], pos[1], pos[2]) if len(pos) >= 3 else pos
+        for pos in (cf.position() for cf in crazyflies)
+    ]
+    for t in timesteps:
+        for initPos, cf in zip(initialPositions, crazyflies):
+            pos = np.array([fx(t), fy(t), fz(t)])
+            pos += np.array(initPos)
+            cf.cmdPosition(pos)
+        timeHelper.sleepForRate(Hz)
+
+    # for cf in crazyflies:
+    #     cf.notifySetpointsStop()
+
+
+# Names parametric expressions can use; same as the simulator (parametricScope in trajectories.ts)
+_parametric_names = {
+    "sin": np.sin, "cos": np.cos, "tan": np.tan, "asin": np.arcsin, "acos": np.arccos, "atan": np.arctan,
+    "atan2": np.arctan2, "sinh": np.sinh, "cosh": np.cosh, "tanh": np.tanh, "sqrt": np.sqrt, "abs": np.abs,
+    "exp": np.exp, "log": np.log, "pow": np.power, "floor": np.floor, "ceil": np.ceil, "min": min, "max": max,
+    "pi": np.pi, "e": np.e,
+}
+
+
+def _parametric_function(expression):
+    code = compile(expression, "<parametric>", "eval")
+    return lambda t: float(eval(code, {"__builtins__": {}}, {**_parametric_names, "t": t}))
+
+
+def parametric(groupState, x, y, z, start_t, end_t, duration):
+    """Flies the path (x(t), y(t), z(t)) for t from start_t to end_t over \`duration\` seconds, shifted so it starts
+    where each drone is. Streams positions like circle(), then hands control back to the high-level commander."""
+    crazyflies = groupState.crazyflies
+    timeHelper = groupState.timeHelper
+    functions = [_parametric_function(expression) for expression in (x, y, z)]
+    path_at = lambda t: np.array([f(t) for f in functions])
+    path_start = path_at(start_t)
+    initialPositions = [np.array(_safe_cf_position(cf), dtype=float) for cf in crazyflies]
+
+    for elapsed in list(np.arange(0, duration, 1 / Hz)) + [duration]:
+        offset = path_at(start_t + (end_t - start_t) * elapsed / duration) - path_start
+        for initPos, cf in zip(initialPositions, crazyflies):
+            cf.cmdPosition(initPos + offset)
+        timeHelper.sleepForRate(Hz)
+
+    # Like execute_commands: stop streaming, then hold the end position with the high-level commander
+    for initPos, cf in zip(initialPositions, crazyflies):
+        cf.notifySetpointsStop()
+        cf.goTo(initPos + path_at(end_t) - path_start, 0, 2.0)
+
+
+# Trajectory Modifiers...
+
+
+def negate(groupState, command):
+    originalGroupState = groupState
+    simCrazyflies = []
+    for cf in groupState.crazyflies:
+        # try:
+        #     if not isinstance(cf, CrazyflieSimLogger):
+        #         rclpy.spin_once(cf.node)
+        # except Exception:
+        #     cf.node.get_logger().error(traceback.format_exc())
+        simCrazyflies.append(CrazyflieSimLogger(cf.position()))
+    simTimeHelper = TimeHelperSimLogger()
+    simTimeHelper.currTime = originalGroupState.timeHelper.time()
+    groupState = SimpleNamespace(crazyflies=simCrazyflies, timeHelper=simTimeHelper)
+    # Execute Simulated Commands
+    command(groupState)
+    # Process commands to add startTime
+    setStartTimes(groupState)
+    # negate every command
+    for simcf, cf in zip(groupState.crazyflies, originalGroupState.crazyflies):
+        # try:
+        #     rclpy.spin_once(cf.node)
+        # except Exception:
+        #     cf.node.get_logger().error(traceback.format_exc())
+        #     print('negate2')
+        #     pass
+        initialPosition = cf.position()
+        for i, command in enumerate(simcf.commands):
+            cfCommand = command.command
+            if (
+                cfCommand == "goTo"
+                or cfCommand == "cmdPos"
+                or cfCommand == "takeoff"
+                or cfCommand == "land"
+            ):
+                # Negate the direction (Note, do not negate land...)
+                if command.relative == False:
+                    originalDestination = command.position
+                    # (Start - goal) gives, vector from start, so add back starting position for 2*start - goal
+                    negatedDestination = 2 * np.array(initialPosition) - np.array(
+                        originalDestination
+                    )
+                    simcf.commands[i].position = negatedDestination
+                    # print(negatedDestination, originalDestination, initialPosition)
+                else:
+                    originalDestination = command.position
+                    negatedDestination = -originalDestination
+                    simcf.commands[i].position = negatedDestination
+            else:
+                # Just run the original command, no need to alter anything
+                pass
+    execute_commands(groupState, originalGroupState)
+
+
+def rotate(groupState, command, x_rot, y_rot, z_rot):
+    simGroupState = simCommand(groupState, command)
+    while x_rot > np.pi:
+        x_rot -= 2 * np.pi
+    while y_rot > np.pi:
+        y_rot -= 2 * np.pi
+    while z_rot > 2 * np.pi:
+        z_rot -= 2 * np.pi
+    r = R.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=False)
+
+    for simcf, cf in zip(simGroupState.crazyflies, groupState.crazyflies):
+        # try:
+        #     if not isinstance(cf, CrazyflieSimLogger):
+        #         rclpy.spin_once(cf.node)
+        # except Exception:
+        #     cf.node.get_logger().error(traceback.format_exc())
+        initialPosition = cf.position()
+        for i, command in enumerate(simcf.commands):
+            cfCommand = command.command
+            if cfCommand == "goTo" or cfCommand == "cmdPos":
+                if command.relative == False:
+                    originalDestination = command.position
+                    directionVector = np.array(originalDestination) - np.array(
+                        initialPosition
+                    )
+                    rotatedVector = r.apply(directionVector)
+                    # rotQuat = rowan.from_euler(x_rot, y_rot, z_rot, convention='xyz')
+                    # rotatedVector = rowan.rotate(rotQuat, directionVector)
+                    newDestination = rotatedVector + initialPosition
+                    simcf.commands[i].position = newDestination
+                else:
+                    originalDestination = command.position
+                    directionVector = np.array(originalDestination)
+                    # rotQuat = rowan.from_euler(x_rot, y_rot, z_rot, convention='xyz')
+                    # rotatedVector = rowan.rotate(rotQuat, directionVector)
+                    rotatedVector = r.apply(directionVector)
+                    newDestination = rotatedVector
+                    simcf.commands[i].position = newDestination
+            else:
+                # Just run the original command, no need to alter anything
+                pass
+    execute_commands(simGroupState, groupState)
+
+
+def translate(groupState, command, x, y, z, speed=0.5):
+    """Runs command shifted by (x, y, z) meters.
+
+    The drones first fly to the shifted start in a straight line at \`speed\` m/s, so the shifted path doesn't begin
+    with a jump. The simulator does the same (TranslationTrajectory).
+    """
+    simGroupState = simCommand(groupState, command)
+    offset = np.array([x, y, z], dtype=float)
+    distance = float(np.linalg.norm(offset))
+    if distance > 0:
+        duration = distance / speed
+        for cf in groupState.crazyflies:
+            cf.goTo(np.array(_safe_cf_position(cf), dtype=float) + offset, 0, duration)
+        groupState.timeHelper.sleep(duration)
+
+    for simcf in simGroupState.crazyflies:
+        for recorded in simcf.commands:
+            if recorded.command in ("goTo", "cmdPos") and not recorded.relative:
+                recorded.position = np.array(recorded.position, dtype=float) + offset
+    execute_commands(simGroupState, groupState)
+
+def stretchTrajectory(
+    groupState, command, x_stretch, y_stretch, z_stretch, time_stretch
+):
+    simGroupState = simCommand(groupState, command)
+    for simcf, cf in zip(simGroupState.crazyflies, groupState.crazyflies):
+        # try:
+        #     if not isinstance(cf, CrazyflieSimLogger):
+        #         rclpy.spin_once(cf.node)
+        # except Exception:
+        #     cf.node.get_logger().error(traceback.format_exc())
+        initialPosition = cf.position()
+        for i, command in enumerate(simcf.commands):
+            cfCommand = command.command
+            if (
+                cfCommand == "goTo"
+                or cfCommand == "cmdPos"
+                or cfCommand == "takeoff"
+                or cfCommand == "land"
+            ):
+                if command.relative == False:
+                    originalDestination = command.position
+                    directionVector = np.array(originalDestination) - np.array(
+                        initialPosition
+                    )
+                    stretchedVector = np.multiply(
+                        directionVector, (x_stretch, y_stretch, z_stretch)
+                    )  # directionVector.multiply(np.array((x_stretch, y_stretch, z_stretch)))
+                    newDestination = stretchedVector + initialPosition
+                    simcf.commands[i].position = newDestination
+                    simcf.commands[i].duration *= time_stretch
+                else:
+                    originalDestination = command.position
+                    directionVector = np.array(initialPosition) - np.array(
+                        originalDestination
+                    )
+                    newDestination = np.multiply(
+                        directionVector, (x_stretch, y_stretch, z_stretch)
+                    )
+                    simcf.commands[i].position = newDestination
+                    simcf.commands[i].duration *= time_stretch
+            else:
+                # Just run the original command, no need to alter anything
+                pass
+    execute_commands(simGroupState, groupState)
+
+
+def simCommand(originalGroupState, command):
+    simCrazyflies = []
+    for cf in originalGroupState.crazyflies:
+        # try:
+        #     if not isinstance(cf, CrazyflieSimLogger):
+        #         rclpy.spin_once(cf.node)
+        # except Exception:
+        #     cf.node.get_logger().error(traceback.format_exc())
+        simCrazyflies.append(CrazyflieSimLogger(_safe_cf_position(cf)))
+    simTimeHelper1 = TimeHelperSimLogger()
+    simTimeHelper1.currTime = originalGroupState.timeHelper.time()
+    simGroupState = SimpleNamespace(crazyflies=simCrazyflies, timeHelper=simTimeHelper1)
+    # Execute Simulated Commands
+    command(simGroupState)
+
+    # Reset position
+    for cf in simGroupState.crazyflies:
+        cf.currPosition = cf.initialPosition
+
+    setStartTimes(simGroupState)
+    return simGroupState
+
+
+def addTrajectories(groupState, command1, command2):
+    groupState1 = simCommand(groupState, command1)
+    groupState2 = simCommand(groupState, command2)
+
+    # Convert any goTo commands to LL Commands
+    convertToLL(groupState1)
+    convertToLL(groupState2)
+    groupState1.crazyflies[0].commands[0].startTime = 0
+    for i, command in enumerate(groupState1.crazyflies[0].commands):
+        if i > 0:
+            command.startTime = (
+                groupState1.crazyflies[0].commands[i - 1].startTime
+                + groupState1.crazyflies[0].commands[i - 1].duration
+            )
+
+    groupState2.crazyflies[0].commands[0].startTime = 0
+    for i, command in enumerate(groupState2.crazyflies[0].commands):
+        if i > 0:
+            command.startTime = (
+                groupState2.crazyflies[0].commands[i - 1].startTime
+                + groupState2.crazyflies[0].commands[i - 1].duration
+            )
+
+    # Get duration of latest non-notify setpoints stop command
+    if groupState1.crazyflies[0].commands[-1].command == "notifySetpointsStop":
+        finalCommand1 = -2
+    else:
+        finalCommand1 = -1
+    if groupState2.crazyflies[0].commands[-1].command == "notifySetpointsStop":
+        finalCommand2 = -2
+    else:
+        finalCommand2 = -1
+
+    # Get duration of each command
+    duration1 = (
+        groupState1.crazyflies[0].commands[finalCommand1].startTime
+        + groupState1.crazyflies[0].commands[finalCommand1].duration
+        - groupState1.crazyflies[0].commands[1].startTime
+    )
+    duration2 = (
+        groupState2.crazyflies[0].commands[finalCommand2].startTime
+        + groupState2.crazyflies[0].commands[finalCommand2].duration
+        - groupState2.crazyflies[0].commands[1].startTime
+    )
+
+    # if abs(duration1) > 1e9:
+    #     duration1 /= 1e9
+    duration1 = abs(duration1)
+    # if abs(duration2) > 1e9:
+    #     duration2 /= 1e9
+    duration2 = abs(duration2)
+    if duration1 > duration2:
+        # Command 1 is longer, scale 2 appropriately
+        command_duration = duration1
+        scaling_factor = duration1 / duration2
+        print("Scale", scaling_factor)
+        start_time = groupState2.crazyflies[0].commands[0].startTime
+        for cf in groupState2.crazyflies:
+            for command in cf.commands:
+                command.startTime *= scaling_factor
+                command.duration *= scaling_factor
+                command.startTime -= start_time
+                command.startTime = abs(command.startTime)
+                if abs(command.startTime) > 1e9:
+                    command.startTime /= 1e9
+
+    else:
+        # Command 2 is longer, scale 1 appropriately
+        command_duration = duration2
+        scaling_factor = duration2 / duration1
+        groupState1.crazyflies[0].commands[0].startTime = 0
+        for cf in groupState1.crazyflies:
+            for i, command in enumerate(cf.commands):
+                command.startTime *= scaling_factor
+                command.duration *= scaling_factor
+                if i > 0:
+                    command.startTime = (
+                        cf.commands[i - 1].startTime + cf.commands[i - 1].duration
+                    )
+                command.startTime = abs(command.startTime)
+                # if abs(command.startTime) > 1e9:
+                #     command.startTime /= 1e9
+
+        groupState2.crazyflies[0].commands[0].startTime = 0
+        for cf in groupState2.crazyflies:
+            for i, command in enumerate(cf.commands):
+                if i > 0:
+                    command.startTime = (
+                        cf.commands[i - 1].startTime + cf.commands[i - 1].duration
+                    )
+                command.startTime = abs(command.startTime)
+                # if abs(command.startTime) > 1e9:
+                #     command.startTime /= 1e9
+
+    # TODO: Convert to 20Hz
+
+    # New commands for group1
+    # for cf in groupState1.crazyflies:
+    #     new_commands = []
+    #     counter = 0
+    #     for t in np.arange(0, max(duration1, duration2), 0.05):
+    #         curr_command = cf.commands[counter]
+    #         if t == curr_command.startTime:
+
+    # take list of commands, gather positions, and interpolate/extrapolate
+    # Should be same duration and length, so just add...
+    for cf1, cf2, realCf in zip(
+        groupState1.crazyflies, groupState2.crazyflies, groupState.crazyflies
+    ):
+        initial_position = np.array(_safe_cf_position(realCf))
+        i1 = i2 = 0
+        new_commands = []
+        total_time = 0
+
+        cf1_start_time = cf1.commands[0].startTime
+        cf2_start_time = cf2.commands[0].startTime
+
+        while i1 < len(cf1.commands) or i2 < len(cf2.commands):
+            cmd1 = cf1.commands[i1] if i1 < len(cf1.commands) else None
+            cmd2 = cf2.commands[i2] if i2 < len(cf2.commands) else None
+
+            if cmd1 and (not cmd2 or cmd1.startTime <= cmd2.startTime):
+                if cmd1.startTime <= total_time:
+                    new_cmd = cmd1  # Use the original command object
+                    if new_cmd.command == "cmdPos":
+                        if not cmd2:
+                            cmd2 = Command(
+                                "",
+                                "",
+                                cf2.commands[min(i2, len(cf2.commands) - 1)].position,
+                            )
+                        new_cmd.position = np.array(new_cmd.position) + (
+                            np.array(cmd2.position) - initial_position
+                        )
+                    new_commands.append(new_cmd)
+                    total_time = max(total_time, cmd1.startTime + cmd1.duration)
+                    i1 += 1
+                else:
+                    total_time += 0.05  # Increment time if no command is ready
+            elif cmd2:
+                if cmd2.startTime <= total_time:
+                    new_cmd = cmd2  # Use the original command object
+                    if new_cmd.command == "cmdPos":
+                        cmd1 = Command(
+                            "",
+                            "",
+                            cf1.commands[min(i1, len(cf1.commands) - 1)].position,
+                        )
+                        new_cmd.position = np.array(new_cmd.position) + (
+                            np.array(cmd1.position) - initial_position
+                        )
+                    new_commands.append(new_cmd)
+                    total_time = max(total_time, cmd2.startTime + cmd2.duration)
+                    i2 += 1
+                else:
+                    total_time += 0.05  # Increment time if no command is ready
+            else:
+                break  # Both command lists are exhausted
+            print(new_commands[-1].position)
+    print(new_commands)
+    cf1.commands = new_commands  # Replace cf1's commands with the new commands
+    execute_commands(groupState1, groupState)
+
+
+def goToPolynomial(T, p, v, a, p2, v2, a2):
+    poly = [0] * 8
+
+    # Taken from crazyflie Firmware Library
+    T2 = T * T
+    T3 = T2 * T
+    T4 = T3 * T
+    T5 = T4 * T
+    T6 = T5 * T
+    T7 = T6 * T
+    poly[0] = p
+    poly[1] = v
+    poly[2] = a / 2
+    poly[3] = 0
+    poly[4] = -(
+        5 * (14 * p - 14 * p2 + 8 * T * v + 6 * T * v2 + 2 * T2 * a - T2 * a2)
+    ) / (2 * T4)
+    poly[5] = (
+        84 * p - 84 * p2 + 45 * T * v + 39 * T * v2 + 10 * T2 * a - 7 * T2 * a2
+    ) / T5
+    poly[6] = -(
+        140 * p - 140 * p2 + 72 * T * v + 68 * T * v2 + 15 * T2 * a - 13 * T2 * a2
+    ) / (2 * T6)
+    poly[7] = (2 * (10 * p - 10 * p2 + 5 * T * v + 5 * T * v2 + T2 * a - T2 * a2)) / T7
+    return lambda t: sum([poly[i] * t**i for i in range(len(poly))])
+
+
+def convertToLL(groupState):
+    # Convert high level command to series of low level commands
+    # Typically, this is converting a goTo command to cmdPos using a 7-Degree polynomial
+    for cf in groupState.crazyflies:
+        # TODO: Change to correct initialPosition!
+        simCF = CrazyflieSimLogger(cf.initialPosition)
+        currPosition = simCF.position()
+        new_commands = []
+        for command in cf.commands:
+            if (
+                command.command == "goTo"
+                or command.command == "land"
+                or command.command == "takeoff"
+            ):
+                startTime = command.startTime
+                # Convert to Polynomial
+                if command.relative == True:
+                    goal = np.array(command.position) + np.array(currPosition)
+                else:
+                    goal = command.position
+                fx = goToPolynomial(
+                    command.duration, currPosition[0], 0, 0, goal[0], 0, 0
+                )
+                fy = goToPolynomial(
+                    command.duration, currPosition[1], 0, 0, goal[1], 0, 0
+                )
+                fz = goToPolynomial(
+                    command.duration, currPosition[2], 0, 0, goal[2], 0, 0
+                )
+
+                timesteps = np.arange(0, command.duration, 1 / Hz)
+                commands = [
+                    Command(
+                        "cmdPos",
+                        t + startTime,
+                        (fx(t), fy(t), fz(t)),
+                        0,
+                        1 / Hz,
+                        relative=False,
+                    )
+                    for t in timesteps
+                ]
+                new_commands.extend(commands)
+            else:
+                new_commands.append(command)
+        cf.commands = new_commands
+
+
+def subtractTrajectories(groupState, command1, command2):
+    pass
+
+
+def execute_commands(simGroupState, originalGroupState):
+    # Note, assumes all crazyflies in group are issued similar commands (all are told goTo)
+    # Assumes first command is to be executed immediately
+    # If not the case, different groups should be used
+    commandsForSingleCF = simGroupState.crazyflies[0].commands
+    highLevel = True
+    for i, command in enumerate(commandsForSingleCF):
+        if highLevel and command.command == "cmdPos":
+            highLevel = False
+        if not highLevel and command.command != "cmdPos":
+            highLevel = True
+            # for realCF in originalGroupState.crazyflies:
+            #     realCF.notifySetpointsStop()
+            # realCF.goTo(realCF.position(), 0, 0.5)
+        for simCF, realCF in zip(
+            simGroupState.crazyflies, originalGroupState.crazyflies
+        ):
+            execute_single_command(simCF.commands[i], realCF)
+        originalGroupState.timeHelper.sleep(command.duration)
+    if not highLevel:
+        for realCF in originalGroupState.crazyflies:
+            realCF.notifySetpointsStop()
+        # originalGroupState.timeHelper.sleep(0.1)
+        for realCF in originalGroupState.crazyflies:
+            realCF.goTo(realCF.position(), 0, 2.00)
+            # realCF.setLEDColor(0, 0, 0.5)
+
+
+def execute_single_command(command, crazyflie):
+    if command.command == "goTo":
+        crazyflie.goTo(
+            command.position, command.yaw, command.duration, command.relative
+        )
+    elif command.command == "cmdPos":
+        # print(command.position)
+        crazyflie.cmdPosition(command.position)
+    elif command.command == "takeoff":
+        crazyflie.takeoff(command.height, command.duration)
+    elif command.command == "land":
+        crazyflie.land(command.height, command.duration)
+    elif command.command == "setLEDColor":
+        crazyflie.setLEDColor(*command.color)
+    elif command.command == "position":
+        pass
+    elif command.command == "notifySetpointsStop":
+        crazyflie.notifySetpointsStop()
+        pass
+`;
+const launchServer = `import os
+import yaml
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch_ros.actions import Node
+from launch.conditions import LaunchConfigurationEquals
+from launch.conditions import LaunchConfigurationNotEquals
+from launch.substitutions import LaunchConfiguration, PythonExpression
+
+
+def generate_launch_description():
+    # load crazyflies
+    crazyflies_yaml = 'my_crazyflies.yaml'
+
+    with open(crazyflies_yaml, 'r') as ymlfile:
+        crazyflies = yaml.safe_load(ymlfile)
+
+    # server params
+    server_yaml = os.path.join(
+        get_package_share_directory('crazyflie'),
+        'config',
+        'server.yaml')
+
+    with open(server_yaml, 'r') as ymlfile:
+        server_yaml_contents = yaml.safe_load(ymlfile)
+
+    server_params = [crazyflies] + [server_yaml_contents["/crazyflie_server"]["ros__parameters"]]
+
+    # construct motion_capture_configuration
+    motion_capture_yaml = os.path.join(
+        get_package_share_directory('crazyflie'),
+        'config',
+        'motion_capture.yaml')
+
+    with open(motion_capture_yaml, 'r') as ymlfile:
+        motion_capture = yaml.safe_load(ymlfile)
+
+    motion_capture_params = motion_capture["/motion_capture_tracking"]["ros__parameters"]
+    motion_capture_params["rigid_bodies"] = dict()
+    for key, value in crazyflies["robots"].items():
+        type = crazyflies["robot_types"][value["type"]]
+        if value["enabled"] and type["motion_capture"]["enabled"]:
+            motion_capture_params["rigid_bodies"][key] =  {
+                    "initial_position": value["initial_position"],
+                    "marker": type["motion_capture"]["marker"],
+                    "dynamics": type["motion_capture"]["dynamics"],
+                }
+
+    # copy relevent settings to server params
+    server_params[1]["poses_qos_deadline"] = motion_capture_params["topics"]["poses"]["qos"]["deadline"]
+
+    # teleop params
+    teleop_params = os.path.join(
+        get_package_share_directory('crazyflie'),
+        'config',
+        'teleop.yaml')
+
+
+    return LaunchDescription([
+        DeclareLaunchArgument('backend', default_value='cpp'),
+        DeclareLaunchArgument('debug', default_value='False'),
+        Node(
+            package='motion_capture_tracking',
+            executable='motion_capture_tracking_node',
+            condition=LaunchConfigurationNotEquals('backend','sim'),
+            name='motion_capture_tracking',
+            output='screen',
+            parameters=[motion_capture_params]
+        ),
+        Node(
+            package='crazyflie',
+            executable='teleop',
+            name='teleop',
+            remappings=[
+                ('emergency', 'all/emergency'),
+                ('takeoff', 'cf6/takeoff'),
+                ('land', 'cf6/land'),
+                ('cmd_vel_legacy', 'cf6/cmd_vel_legacy'),
+                ('cmd_full_state', 'cf6/cmd_full_state'),
+                ('notify_setpoints_stop', 'cf6/notify_setpoints_stop'),
+            ],
+            parameters=[teleop_params]
+        ),
+        Node(
+            package='joy',
+            executable='joy_node',
+            name='joy_node' # by default id=0
+        ),
+        Node(
+            package='crazyflie',
+            executable='crazyflie_server.py',
+            condition=LaunchConfigurationEquals('backend','cflib'),
+            name='crazyflie_server',
+            output='screen',
+            parameters=server_params
+        ),
+        Node(
+            package='crazyflie',
+            executable='crazyflie_server',
+            condition=LaunchConfigurationEquals('backend','cpp'),
+            name='crazyflie_server',
+            output='screen',
+            parameters=server_params,
+            prefix=PythonExpression(['"xterm -e gdb -ex run --args" if ', LaunchConfiguration('debug'), ' else ""']),
+        ),
+        Node(
+            package='crazyflie_sim',
+            executable='crazyflie_server',
+            condition=LaunchConfigurationEquals('backend','sim'),
+            name='crazyflie_server',
+            output='screen',
+            emulate_tty=True,
+            parameters=server_params
+        ),
+        Node(
+            package='rviz2',
+            namespace='',
+            executable='rviz2',
+            name='rviz2',
+            arguments=['-d' + os.path.join(get_package_share_directory('crazyflie'), 'config', 'config.rviz')],
+            parameters=[{
+                "use_sim_time": True,
+            }]
+        ),
+    ])
+`;
+const timeHelper = 'import rclpy\nimport time\n\nclass TimeHelper:\n\n    def __init__(self, node):\n        self.node = node\n        # self.rosRate = None\n        self.rateHz = None\n        self.nextTime = None\n        self.zeroTime = self.time()\n        # self.visualizer = visNull.VisNull()\n\n    def time(self):\n        """Return current time in seconds."""\n        return self.node.get_clock().now().nanoseconds / 1e9\n\n    def sleep(self, duration):\n        """Sleeps for the provided duration in seconds."""\n        start = self.time()\n        end = start + duration\n        while self.time() < end:\n            time.sleep(0.001)\n            # rclpy.spin_once(self.node, timeout_sec=0)\n\n    def sleepForRate(self, rateHz):\n        """Sleep so that, if called in a loop, executes at specified rate."""\n        # Note: The following ROS 2 construct cannot easily be used, because in ROS 2\n        #       there is no implicit threading anymore. Thus, the rosRate.sleep() call\n        #       is blocking. Instead, we simulate the rate behavior ourselves.\n        # if self.rosRate is None or self.rateHz != rateHz:\n        #     self.rosRate = self.node.create_rate(rateHz)\n        #     self.rateHz = rateHz\n        # self.rosRate.sleep()\n        if self.nextTime is None or self.rateHz != rateHz:\n            self.rateHz = rateHz\n            self.nextTime = self.time() + 1.0 / rateHz\n        while self.time() < self.nextTime:\n            time.sleep(0.001)\n            # rclpy.spin_once(self.node, timeout_sec=0)\n        self.nextTime += 1.0 / rateHz\n\n    def sleepUntil(self, end_time):\n        while self.time() - self.zeroTime < end_time:\n            time.sleep(0.001)\n            # rclpy.spin_once(self.node, timeout_sec=0)\n\n    def isShutdown(self):\n        """Return True if the script should abort, e.g. from Ctrl-C."""\n        return not rclpy.ok()\n';
+const crazyflieLoggers = `
+from typing import Any, Collection
+from dataclasses import dataclass
+from rclpy.node import Node
+import string 
+import random
+
+Hz = 20
+
+###
+#   Logger Classes
+###
+
+@dataclass
+class Command:
+    """A Data class to contain information about commands.
+    Used by simulated crazyflies to keep track of simulated commands
+    """    
+    command: Any = None
+    startTime: float = 0.0
+    position: Collection = (0, 0, 0)
+    yaw: float = 0
+    duration: float = 0
+    relative: bool = False
+    height: float = 0
+    color: Collection = (0, 0, 0)
+
+def generate_id():
+    """Generate a random ID number for unique node names
+
+    Returns:
+        string: unique (probably) id
+    """    
+    return ''.join(random.choice(string.ascii_lowercase) for _ in range(5))
+
+def setStartTimes(groupState):
+    """Set the appropriate start times for every command a simulated crazyflie ran (with a simulated timeHelper)
+
+    Args:
+        groupState : current (simulated) groupState (crazyflies and timehelper)
+    """    
+    # Takes simCF and simTimeHelper and adds start time to cf commands
+    simTimeHelper = groupState.timeHelper
+    simCFs = groupState.crazyflies
+
+    assert([len(cf.commands) == len(simTimeHelper.times) for cf in simCFs])
+
+    for cf in simCFs:
+        for (command, time) in zip(cf.commands, simTimeHelper.times):
+            command.startTime = time
+
+class CrazyflieSimLogger:
+    """ 
+    Crazyflie Logging class used instead of a standard Crazyflie object
+    when commands should *not* be executed. For example, when all commands
+    will be rotated or negated.
+    """    
+    
+    def __init__(self, initial_position):
+        """
+        Args:
+            initial_position [float, float ,float]: starting position of Crazyflie at time of construction
+        """        
+        self.node = Node('logger' + generate_id())
+        self.commands = []
+        self.initialPosition = initial_position
+        self.currPosition = initial_position
+
+    def goTo(self, pos, yaw, duration, relative=False):
+        """Simulate a goTo command
+
+        Args:
+            pos [float, float, float]: Desired destination of command
+            yaw float: Desired yaw
+            duration float: length of time of command
+            relative (bool, optional): Whether pos and yaw are relative to the starting position. Defaults to False.
+        """
+        goToCommand = Command(command='goTo', position=pos, yaw=yaw, relative=relative, duration=duration)
+        self.commands.append(goToCommand)
+        self.currPosition = pos
+    
+    def cmdPosition(self, pos):
+        """Simulate cmdPos (low level command)
+
+        Args:
+            pos [float, float, float]: desired position
+        """        
+        cmdPosCommand = Command(command='cmdPos', position=pos, duration=1/Hz)
+        self.commands.append(cmdPosCommand)
+        self.currPosition = pos
+    
+    def setLEDColor(self, r, g, b):
+        """Simulate setLEDColor 
+        If all parameters are <1, then float representations are assumed (color is given in the range [0, 1])
+        If not, then an 8 bit representation is assumed (color is given in the range [0, 255])
+
+        Args:
+            r float: red
+            g float: green
+            b float: blue
+        """        
+        colorCommand = Command(command='setLEDColor', color=(r, g, b))
+        self.currPosition.append(colorCommand)
+    
+    def takeoff(self, height, duration):
+        """Simulate takeoff command
+
+        Args:
+            height float: Desired height
+            duration float: duration of command
+        """        
+        takeoffCommand = Command(command='takeoff', height=height, duration=duration)
+        self.commands.append(takeoffCommand)
+        self.currPosition[2] = height # Just set Z to height
+
+    def land(self, height, duration):
+        """Simulate land command
+
+        Args:
+            height float: Desired height
+            duration float: duration of command
+        """
+        landCommand = Command(command='land', height=height, duration=duration)
+        self.commands.append(landCommand)
+        self.currPosition[2] = height
+
+    def position(self):
+        """get Position
+
+        Returns:
+            [float, float, float]: current position
+        """        
+        return self.currPosition
+
+    def notifySetpointsStop(self):
+        """Switch to high level mode
+        """        
+        # Just check mode in Evaluate phase
+        self.commands.append(Command(command='notifySetpointsStop'))
+
+class TimeHelperSimLogger:
+    """A simulated timer class to go with CrazyflieSimLogger
+    Does not actually sleep, but logs sleep durations to be used by a non-sim time helper
+    """    
+    def __init__(self):
+        self.times = []
+        self.currTime = 0
+
+    def time(self):
+        """Get current time of timehelper (in seconds)
+
+        Returns:
+            float: current time in seconds
+        """        
+        return self.currTime
+
+    def sleep(self, duration):
+        """sleep for a given duration (simulated)
+
+        Args:
+            duration float: duration of sleep
+        """        
+        self.times.append(self.currTime)
+        self.currTime += duration
+    
+    def sleepForRate(self, Hz):
+        """Simulate sleep for a specified rate (sleep for 1/Hz)
+
+        Args:
+            Hz float: rate to sleep at
+        """        
+        self.times.append(self.currTime)
+        self.currTime += 1/Hz
+    
+    def sleepUntil(self, time):
+        """Sleep until a specified time (in seconds)
+
+        Args:
+            time float: time to sleep until (in seconds)
+        """        
+        self.times.append(self.currTime)
+        self.currTime = time`;
+const readmeText = "1. Download and unzip zip files into a folder of your choosing (without another project in it)\n2. Open a terminal in that folder location (you can right click in file explorer and open terminal or navigate to your folder on the command line)\n3. You will need two terminal tabs total, you can open a new one with ctrl+shift+t.\n4. Find the correct number of (working) crazyflies for your project.\n5. Run ```python3 configure.py``` and follow the prompts, entering in the appropriate crazyflie IDs.\n6. Place the crazyflies out in the flight space, making sure the correct crazyflies are in the correct locations and oriented correctly.\n6. run ```ros2 launch launch.py``` in your first terminal. RViz should come up. Confirm that it shows what you are expecting and all crazyflies connect.\n7. In a new terminal tab, run ```python3 launch_nodes.py```. This will launch the ROS nodes for each group (with robots and blocks) in your webapp.";
+const extractLineNumber = (text, toMatch) => {
+  const index2 = text.indexOf(toMatch);
+  return text.substring(0, index2).split("\n").length;
+};
+const exportToROS = async (projectState, fileName) => {
+  const execBlocksLine = extractLineNumber(workerNodeTemplate, "---------Insert Execution Code Here------------");
+  let launcherNodeLine = extractLineNumber(launcherNode, "-----------Insert Nodes Here-----------");
+  var mainNode = launcherNode.split("\n");
+  var numGroups = 0;
+  const zip = JsZip();
+  const allRobots = projectState.robots;
+  const robotIndexMap = {};
+  Object.keys(allRobots).forEach((id2, index2) => {
+    robotIndexMap[id2] = index2;
+  });
+  const groups = projectState.timelineState.groups;
+  for (let groupName in groups) {
+    const groupState2 = projectState.timelineState.groups[groupName];
+    const robots2 = Object.values(groupState2.robots);
+    const robotIndices = [];
+    if (robots2.length === 0) {
+      continue;
+    }
+    numGroups += 1;
+    for (let r2 in robots2) {
+      const state2 = robots2[r2];
+      const index2 = robotIndexMap[state2.id];
+      robotIndices.push(index2);
+    }
+    var pythonBlocks = "";
+    if (Object.keys(groupState2.items).length === 0) {
+      continue;
+    }
+    const sortedItems = Object.entries(groupState2.items).sort((a2, b2) => {
+      return a2[1].startTime - b2[1].startTime;
+    });
+    for (let [block, blockState] of sortedItems) {
+      const startTime = blockState.startTime;
+      const pythonCode = projectState.blocks[blockState.blockId].python;
+      pythonBlocks += "        # Block Name: " + projectState.blocks[blockState.blockId].name + "\n";
+      pythonBlocks += `        start_time = ${startTime}
+`;
+      pythonBlocks += "        self.timeHelper.sleepUntil(start_time)\n";
+      var pythonLines = pythonCode.split("\n");
+      for (var i2 = 0; i2 < pythonLines.length - 1; i2++) {
+        pythonBlocks += `        ${pythonLines[i2]}
+`;
+      }
+    }
+    var workerNode = workerNodeTemplate.split("\n");
+    workerNode.splice(execBlocksLine, 0, pythonBlocks);
+    var launcherText = `    import ${groupName}_node
+`;
+    launcherText += "    cfs = []\n";
+    for (const r2 of robotIndices) {
+      if (r2 === void 0) {
+        continue;
+      }
+      launcherText += `    cfs.append(crazyflies[${r2}])
+`;
+    }
+    launcherText += `    nodes.append(${groupName}_node.worker_node(cfs, len(nodes), ${numGroups}))
+`;
+    launcherText += `
+`;
+    mainNode.splice(launcherNodeLine, 0, launcherText);
+    launcherNodeLine += 1;
+    const workerNodeFile = new Blob([workerNode.join("\n")], { type: "text/plain" });
+    zip.file(`${groupName}_node.py`, workerNodeFile);
+  }
+  const launcherFile = new Blob([mainNode.join("\n")], { type: "text/plain" });
+  const configureFile = new Blob([configure], { type: "text/plain" });
+  const loggersFile = new Blob([crazyflieLoggers], { type: "text/plain" });
+  const readmeFile = new Blob([readmeText], { type: "text/plain" });
+  var startingPositions = "positions:\n";
+  for (const robot in projectState.robots) {
+    var pos = [0, 0, 0];
+    if (projectState.robots[robot] != void 0)
+      pos = projectState.robots[robot].startingPosition;
+    startingPositions += `    - [${pos[0]}, ${pos[1]}, ${pos[2]}]
+`;
+  }
+  const startingPosFile = new Blob([startingPositions], { type: "text/plain" });
+  zip.file("starting_positions.yaml", startingPosFile);
+  zip.file("configure.py", configureFile);
+  zip.file("launch_nodes.py", launcherFile);
+  zip.file("TimeHelper.py", timeHelper);
+  zip.file("crazyflieLoggers.py", loggersFile);
+  zip.file("Readme.md", readmeFile);
+  const translationsFile = new Blob([translations], { type: "text/plain" });
+  zip.file("blocklyTranslations.py", translationsFile);
+  const launchFile = new Blob([launchServer], { type: "text/plain" });
+  zip.file("launch.py", launchFile);
+  const zipFile = await zip.generateAsync({ type: "blob" });
+  FileSaver.saveAs(zipFile, `${projectState.projectName}.zip`);
+};
+const saveProjectToFile = (projectState, fileName = void 0) => {
+  const projectStateJson = JSON.stringify(projectState);
+  fileName = fileName ?? projectState.projectName.replaceAll(" ", "") + ".robart";
+  saveToFile(fileName, projectStateJson);
+};
+const loadProjectFromFile = (fileContents) => {
+  var _a3;
+  const projectState = JSON.parse(fileContents);
+  if (typeof (projectState == null ? void 0 : projectState.blocks) !== "object" || typeof projectState.robots !== "object" || typeof ((_a3 = projectState.timelineState) == null ? void 0 : _a3.groups) !== "object") {
+    throw new Error("This file is not a Robart project.");
+  }
+  return projectState;
+};
+const exportROS = (projectState, fileName) => {
+  exportToROS(projectState);
+};
+var src$1 = {};
+var src = {};
+Object.defineProperty(src, "__esModule", { value: true });
+class LinkedList {
+  constructor(...values) {
+    this._head = this._tail = null;
+    this._length = 0;
+    if (values.length > 0) {
+      values.forEach((value) => {
+        this.append(value);
+      });
+    }
+  }
+  *iterator() {
+    let currentItem = this._head;
+    while (currentItem) {
+      yield currentItem.value;
+      currentItem = currentItem.next;
+    }
+  }
+  [Symbol.iterator]() {
+    return this.iterator();
+  }
+  get head() {
+    return this._head ? this._head.value : null;
+  }
+  get tail() {
+    return this._tail ? this._tail.value : null;
+  }
+  get length() {
+    return this._length;
+  }
+  // Adds the element at a specific position inside the linked list
+  insert(val, previousItem, checkDuplicates = false) {
+    if (checkDuplicates && this.isDuplicate(val)) {
+      return false;
+    }
+    let newItem = new LinkedListItem(val);
+    let currentItem = this._head;
+    if (!currentItem) {
+      return false;
+    } else {
+      while (true) {
+        if (currentItem.value === previousItem) {
+          newItem.next = currentItem.next;
+          newItem.prev = currentItem;
+          currentItem.next = newItem;
+          if (newItem.next) {
+            newItem.next.prev = newItem;
+          } else {
+            this._tail = newItem;
+          }
+          this._length++;
+          return true;
+        } else {
+          if (currentItem.next) {
+            currentItem = currentItem.next;
+          } else {
+            return false;
+          }
+        }
+      }
+    }
+  }
+  // Adds the element at the end of the linked list
+  append(val, checkDuplicates = false) {
+    if (checkDuplicates && this.isDuplicate(val)) {
+      return false;
+    }
+    let newItem = new LinkedListItem(val);
+    if (!this._tail) {
+      this._head = this._tail = newItem;
+    } else {
+      this._tail.next = newItem;
+      newItem.prev = this._tail;
+      this._tail = newItem;
+    }
+    this._length++;
+    return true;
+  }
+  // Add the element at the beginning of the linked list
+  prepend(val, checkDuplicates = false) {
+    if (checkDuplicates && this.isDuplicate(val)) {
+      return false;
+    }
+    let newItem = new LinkedListItem(val);
+    if (!this._head) {
+      this._head = this._tail = newItem;
+    } else {
+      newItem.next = this._head;
+      this._head.prev = newItem;
+      this._head = newItem;
+    }
+    this._length++;
+    return true;
+  }
+  remove(val) {
+    let currentItem = this._head;
+    if (!currentItem) {
+      return;
+    }
+    if (currentItem.value === val) {
+      this._head = currentItem.next;
+      this._head.prev = null;
+      currentItem.next = currentItem.prev = null;
+      this._length--;
+      return currentItem.value;
+    } else {
+      while (true) {
+        if (currentItem.value === val) {
+          if (currentItem.next) {
+            currentItem.prev.next = currentItem.next;
+            currentItem.next.prev = currentItem.prev;
+            currentItem.next = currentItem.prev = null;
+          } else {
+            currentItem.prev.next = null;
+            this._tail = currentItem.prev;
+            currentItem.next = currentItem.prev = null;
+          }
+          this._length--;
+          return currentItem.value;
+        } else {
+          if (currentItem.next) {
+            currentItem = currentItem.next;
+          } else {
+            return;
+          }
+        }
+      }
+    }
+  }
+  removeHead() {
+    let currentItem = this._head;
+    if (!currentItem) {
+      return;
+    }
+    if (!this._head.next) {
+      this._head = null;
+      this._tail = null;
+    } else {
+      this._head.next.prev = null;
+      this._head = this._head.next;
+      currentItem.next = currentItem.prev = null;
+    }
+    this._length--;
+    return currentItem.value;
+  }
+  removeTail() {
+    let currentItem = this._tail;
+    if (!currentItem) {
+      return;
+    }
+    if (!this._tail.prev) {
+      this._head = null;
+      this._tail = null;
+    } else {
+      this._tail.prev.next = null;
+      this._tail = this._tail.prev;
+      currentItem.next = currentItem.prev = null;
+    }
+    this._length--;
+    return currentItem.value;
+  }
+  first(num) {
+    let iter = this.iterator();
+    let result = [];
+    let n2 = Math.min(num, this.length);
+    for (let i2 = 0; i2 < n2; i2++) {
+      let val = iter.next();
+      result.push(val.value);
+    }
+    return result;
+  }
+  toArray() {
+    return [...this];
+  }
+  isDuplicate(val) {
+    let set2 = new Set(this.toArray());
+    return set2.has(val);
+  }
+}
+src.LinkedList = LinkedList;
+class LinkedListItem {
+  constructor(val) {
+    this.value = val;
+    this.next = null;
+    this.prev = null;
+  }
+}
+src.LinkedListItem = LinkedListItem;
+Object.defineProperty(src$1, "__esModule", { value: true });
+const linked_list_typescript_1 = src;
+class Queue extends linked_list_typescript_1.LinkedList {
+  constructor(...values) {
+    super(...values);
+  }
+  get front() {
+    return this.head;
+  }
+  enqueue(val) {
+    this.append(val);
+  }
+  dequeue() {
+    return this.removeHead();
+  }
+}
+var Queue_1 = src$1.Queue = Queue;
 const toRadians = (degrees) => {
   return degrees / 180 * Math.PI;
 };
@@ -74397,8 +74578,8 @@ const moveCircleVel = (groupState2, radius, velocity, degrees, direction) => {
 const dummy$1 = (groupState2) => {
   let trajectories = /* @__PURE__ */ new Map();
   groupState2.robotIDs.forEach((robotId2) => {
-    let trajectory = new NullTrajectory();
-    trajectories.set(robotId2, trajectory);
+    let trajectory2 = new NullTrajectory();
+    trajectories.set(robotId2, trajectory2);
   });
   return [0.1, new NullTrajectory()];
 };
@@ -74406,8 +74587,8 @@ const componentTraj = (groupState2, [durX, trajX], [durY, trajY], [durZ, trajZ])
   let duration2 = Math.max(durX, durY, durZ);
   let trajectories = /* @__PURE__ */ new Map();
   groupState2.robotIDs.forEach((robotId2) => {
-    let trajectory = new ComponentTrajectory(duration2, durX, trajX.get(robotId2), durY, trajY.get(robotId2), durZ, trajZ.get(robotId2));
-    trajectories.set(robotId2, trajectory);
+    let trajectory2 = new ComponentTrajectory(duration2, durX, trajX.get(robotId2), durY, trajY.get(robotId2), durZ, trajZ.get(robotId2));
+    trajectories.set(robotId2, trajectory2);
   });
   return [duration2, trajectories];
 };
@@ -74426,19 +74607,16 @@ const moveCircleArcVel = (groupState2, radius, velocity, degreesStart, degreesEn
   const robots2 = useSimulator.getState().robots;
   groupState2.robotIDs.forEach((robotId2) => {
     const initPos = robots2[robotId2].pos;
-    let trajectory = new CircleTrajectory(duration2, initPos, radius, ["Y", "Z"], arcAngle * Math.PI / 180, true, degreesStart, degreesEnd);
-    trajectories.set(robotId2, trajectory);
+    let trajectory2 = new CircleTrajectory(duration2, initPos, radius, ["Y", "Z"], arcAngle * Math.PI / 180, true, degreesStart, degreesEnd);
+    trajectories.set(robotId2, trajectory2);
   });
   return [duration2, trajectories];
 };
-const makeParametricTrajectory = (groupState2, x2, y2, z2, yaw, startTime, endTime, timeScaling) => {
+const makeParametricTrajectory = (groupState2, x2, y2, z2, startT, endT, duration2) => {
   const robots2 = useSimulator.getState().robots;
-  let trajectories = /* @__PURE__ */ new Map();
-  let duration2 = (endTime - startTime) * timeScaling;
+  const trajectories = /* @__PURE__ */ new Map();
   groupState2.robotIDs.forEach((robotId2) => {
-    const initPos = robots2[robotId2].pos;
-    let trajectory = new ParametricTrajectory(initPos, x2, y2, z2, yaw, startTime, endTime, timeScaling);
-    trajectories.set(robotId2, trajectory);
+    trajectories.set(robotId2, new ParametricTrajectory(robots2[robotId2].pos, x2, y2, z2, startT, endT, duration2));
   });
   return [duration2, trajectories];
 };
@@ -74449,8 +74627,8 @@ const negateTrajectory = (groupState2, [duration2, originalTrajectory]) => {
     const initPos = robots2[robotId2].pos;
     let originalTrajectoryValue = originalTrajectory.get(robotId2);
     if (originalTrajectoryValue) {
-      let trajectory = new NegateTrajectory(initPos, originalTrajectoryValue);
-      trajectories.set(robotId2, trajectory);
+      let trajectory2 = new NegateTrajectory(initPos, originalTrajectoryValue);
+      trajectories.set(robotId2, trajectory2);
     }
   });
   return [duration2, trajectories];
@@ -74463,8 +74641,8 @@ const addTrajectories = (groupState2, [firstDuration, firstTrajectory], [secondD
     let firstTrajectoryForRobot = firstTrajectory.get(robotId2);
     let secondTrajectoryForRobot = secondTrajectory.get(robotId2);
     if (firstTrajectoryForRobot && secondTrajectoryForRobot) {
-      let trajectory = new AddTrajectories(initPos, firstTrajectoryForRobot, secondTrajectoryForRobot, add2);
-      trajectories.set(robotId2, trajectory);
+      let trajectory2 = new AddTrajectories(initPos, firstTrajectoryForRobot, secondTrajectoryForRobot, add2);
+      trajectories.set(robotId2, trajectory2);
     }
   });
   return [Math.max(firstDuration, secondDuration), trajectories];
@@ -74475,8 +74653,8 @@ const stretchTrajectory = (groupState2, [duration2, traj], xStretch, yStretch, z
   groupState2.robotIDs.forEach((robotId2) => {
     let originalTrajectory = traj.get(robotId2);
     if (originalTrajectory) {
-      let trajectory = new StretchTrajectory(robots2[robotId2].pos, originalTrajectory, xStretch, yStretch, zStretch, tStretch);
-      trajectories.set(robotId2, trajectory);
+      let trajectory2 = new StretchTrajectory(robots2[robotId2].pos, originalTrajectory, xStretch, yStretch, zStretch, tStretch);
+      trajectories.set(robotId2, trajectory2);
     }
   });
   return [duration2 * tStretch, trajectories];
@@ -74488,11 +74666,25 @@ const rotateTrajectory = (groupState2, [duration2, traj], xRotation, yRotation, 
     let originalTrajectory = traj.get(robotId2);
     if (originalTrajectory) {
       const initialPosition = robots2[robotId2].pos;
-      let trajectory = new RotationTrajectory(initialPosition, originalTrajectory, xRotation, yRotation, zRotation);
-      trajectories.set(robotId2, trajectory);
+      let trajectory2 = new RotationTrajectory(initialPosition, originalTrajectory, xRotation, yRotation, zRotation);
+      trajectories.set(robotId2, trajectory2);
     }
   });
   return [duration2, trajectories];
+};
+const translateTrajectory = (groupState2, [duration2, traj], x2, y2, z2) => {
+  const trajectories = /* @__PURE__ */ new Map();
+  const robots2 = useSimulator.getState().robots;
+  let totalDuration = duration2;
+  groupState2.robotIDs.forEach((robotId2) => {
+    const originalTrajectory = traj.get(robotId2);
+    if (originalTrajectory) {
+      const trajectory2 = new TranslationTrajectory(robots2[robotId2].pos, originalTrajectory, new Vector3(x2, y2, z2));
+      trajectories.set(robotId2, trajectory2);
+      totalDuration = trajectory2.duration;
+    }
+  });
+  return [totalDuration, trajectories];
 };
 const SIM = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
@@ -74511,7 +74703,8 @@ const SIM = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty(
   setColor,
   stretchTrajectory,
   takeoff,
-  toRadians
+  toRadians,
+  translateTrajectory
 }, Symbol.toStringTag, { value: "Module" }));
 const useCrazyflieConstraintState = create$2()(
   subscribeWithSelector(
@@ -74559,6 +74752,7 @@ const useCrazyflieConstraintState = create$2()(
               warnings.push({
                 time: positions[i2].timestep,
                 repr: "robot " + robotName + " has violated a velocity constraint at time " + positions[i2].timestep.toFixed(2) + ". It was travelling at " + velocity.toFixed(2) + " m/s.\n",
+                short: `${robotName} too fast (${velocity.toFixed(1)} m/s)`,
                 violationType: "velocity",
                 robotId: id2
               });
@@ -74592,6 +74786,7 @@ const useCrazyflieConstraintState = create$2()(
                 warnings.push({
                   time: history2[i2].timestep,
                   repr: "robot " + robotName + " has violated a workspace constraint at time " + history2[i2].timestep.toFixed(2) + ". Its position was " + currentPosition.x.toFixed(2) + ", " + currentPosition.y.toFixed(2) + ", " + currentPosition.z.toFixed(2) + "\n",
+                  short: `${robotName} outside the work area`,
                   violationType: "workspace",
                   robotId: id2
                 });
@@ -74615,6 +74810,9 @@ const defaultSimulatorState = {
   status: "STOPPED",
   renderBoundingBoxes: true,
   showCoordinates: false,
+  plannedPaths: {},
+  timedWarnings: [],
+  showPaths: true,
   trajectoryQueue: new Queue_1(),
   trajectoryMarkers: [],
   markerFrequency: 0.25,
@@ -74626,6 +74824,7 @@ const pendingItems = [];
 const runningItemIds = {};
 let itemEndTimes = {};
 const blockLengthCache = /* @__PURE__ */ new Map();
+const pathSampleInterval = 0.1;
 const maxShowLength = 10 * 60;
 const isFinished = (robots2) => pendingItems.length === 0 && Object.values(robots2).every((robot) => {
   var _a3;
@@ -74638,25 +74837,14 @@ const useSimulator = create$2()(
       get().measureShowLength();
       set({ status: "RUNNING", lastStepTime: performance.now() });
     },
+    // Warnings come from measuring the whole show (measureShowLength), not from what has played so far
     pause: () => {
-      const warnings = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots));
-      let reprs = warnings == null ? void 0 : warnings.map((warning) => {
-        return warning.repr;
-      });
-      useRobartState.getState();
-      useRobartState.setState({ warnings: reprs ?? [] });
       set({ status: "PAUSED" });
     },
     resume: () => {
       set({ status: "RUNNING", lastStepTime: performance.now() });
     },
     halt: () => {
-      const warnings = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots));
-      let reprs = warnings == null ? void 0 : warnings.map((warning) => {
-        return warning.repr;
-      });
-      useRobartState.getState();
-      useRobartState.setState({ warnings: reprs ?? [] });
       set({ status: "STOPPED" });
       get().cancelSimulation();
     },
@@ -74699,8 +74887,14 @@ const useSimulator = create$2()(
           if (robots[robotId].trajectoryQueue.length > 0) {
             const next = robots[robotId].trajectoryQueue.dequeue();
             runningItemIds[robotId] = next.itemId;
-            [duration, newTraj] = eval(next.line);
-            get().updateTrajectory(robotId, newTraj.get(robotId), duration);
+            try {
+              [duration, newTraj] = eval(next.line);
+              const trajectory = newTraj.get(robotId);
+              if (trajectory)
+                get().updateTrajectory(robotId, trajectory, duration);
+            } catch (error) {
+              console.warn("Skipped a block command that failed:", next.line, error);
+            }
           } else {
             get().updateTrajectory(robotId, new NullTrajectory(), -1);
           }
@@ -74709,8 +74903,14 @@ const useSimulator = create$2()(
           let duration = 0;
           const next = robots[robotId].trajectoryQueue.dequeue();
           runningItemIds[robotId] = next.itemId;
-          [duration, newTraj] = eval(next.line);
-          get().updateTrajectory(robotId, newTraj.get(robotId), duration);
+          try {
+            [duration, newTraj] = eval(next.line);
+            const trajectory = newTraj.get(robotId);
+            if (trajectory)
+              get().updateTrajectory(robotId, trajectory, duration);
+          } catch (error) {
+            console.warn("Skipped a block command that failed:", next.line, error);
+          }
         }
         if (((_a3 = get().robots[robotId]) == null ? void 0 : _a3.trajectory.duration) === void 0 || get().robots[robotId].trajectory.duration <= 0) {
           return;
@@ -74763,9 +74963,23 @@ const useSimulator = create$2()(
     },
     measureShowLength: () => {
       get().executeSimulation(0);
+      const plannedPaths = {};
+      const recordPositions = () => {
+        Object.values(get().robots).forEach((robot) => {
+          var _a3;
+          (plannedPaths[_a3 = robot.id] ?? (plannedPaths[_a3] = [])).push(robot.pos.clone());
+        });
+      };
+      recordPositions();
+      let nextSampleTime = pathSampleInterval;
       while (!isFinished(get().robots) && get().time < maxShowLength) {
         get().advance(1 / fps);
+        if (get().time >= nextSampleTime) {
+          recordPositions();
+          nextSampleTime += pathSampleInterval;
+        }
       }
+      recordPositions();
       const endTime = get().time;
       const { groups } = useRobartState.getState().timelineState;
       const durations = {};
@@ -74775,6 +74989,7 @@ const useSimulator = create$2()(
             durations[item.id] = Math.max(0.1, itemEndTimes[item.id] - item.startTime);
         });
       });
+      const constraintWarnings = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots)) ?? [];
       const blockLengths = {};
       Object.values(useRobartState.getState().blocks).forEach((block) => {
         if (!blockLengthCache.has(block.javaScript))
@@ -74782,7 +74997,12 @@ const useSimulator = create$2()(
         blockLengths[block.id] = blockLengthCache.get(block.javaScript);
       });
       get().executeSimulation(0);
-      set({ endTime });
+      set({
+        endTime,
+        plannedPaths,
+        timedWarnings: constraintWarnings.map((warning) => ({ time: warning.time, short: warning.short, full: warning.repr }))
+      });
+      useRobartState.setState({ warnings: constraintWarnings.map((warning) => warning.repr) });
       useRobartState.getState().setMeasuredDurations(durations, blockLengths);
     },
     measureBlockLength: (javaScript) => {
@@ -74802,9 +75022,13 @@ const useSimulator = create$2()(
     toggleCoordinates: () => {
       set({ showCoordinates: !get().showCoordinates });
     },
+    togglePaths: () => {
+      set({ showPaths: !get().showPaths });
+    },
     setRobots: (robots2) => {
       const simRobots = {};
-      const bboxSize = new Vector3(0.2, 0.2, 0.35);
+      const [boxX, boxY, boxZ] = useRobartState.getState().boundingBoxSize ?? defaultBoundingBoxSize;
+      const bboxSize = new Vector3(boxX / 2, boxY / 2, boxZ / 2);
       Object.values(robots2).forEach((robot) => {
         const position = new Vector3(robot.startingPosition[0], robot.startingPosition[1], robot.startingPosition[2]);
         simRobots[robot.id] = {
@@ -74841,11 +75065,11 @@ const useSimulator = create$2()(
           return otherRobotId !== robotId2 && otherRobot.boundingBox && thisRobot.boundingBox && thisRobot.boundingBox.intersectsBox(otherRobot.boundingBox);
       });
     },
-    updateTrajectory: (robotId2, trajectory, duration2) => {
+    updateTrajectory: (robotId2, trajectory2, duration2) => {
       set((state2) => {
         if (state2.robots[robotId2] !== void 0)
           state2.robots[robotId2].timeAlongTrajectory = 0;
-        state2.robots[robotId2].trajectory = trajectory;
+        state2.robots[robotId2].trajectory = trajectory2;
         state2.robots[robotId2].trajectoryDuration = duration2;
         state2.robots[robotId2].trajectoryStartTime = state2.time;
       });
@@ -74860,10 +75084,10 @@ const useSimulator = create$2()(
       const trajectories = get().trajectories.get(robotId2);
       var mostRecentTime = 0;
       var mostRecentTraj = void 0;
-      trajectories == null ? void 0 : trajectories.forEach((trajectory) => {
-        if (trajectory.startTime - time2 < 0 && trajectory.startTime > mostRecentTime) {
-          mostRecentTime = trajectory.startTime;
-          mostRecentTraj = trajectory.trajectory;
+      trajectories == null ? void 0 : trajectories.forEach((trajectory2) => {
+        if (trajectory2.startTime - time2 < 0 && trajectory2.startTime > mostRecentTime) {
+          mostRecentTime = trajectory2.startTime;
+          mostRecentTraj = trajectory2.trajectory;
         }
       });
       return [mostRecentTraj, mostRecentTime];
@@ -74885,8 +75109,8 @@ const useSimulator = create$2()(
     },
     robotCircle: (robotId2, radius = 1, axes2 = ["Y", "Z"], radians = 2 * Math.PI, clockwise = false, duration2 = 1) => {
       const robot = get().robots[robotId2];
-      const trajectory = new CircleTrajectory(duration2, robot.pos, radius, axes2, radians, clockwise);
-      return trajectory;
+      const trajectory2 = new CircleTrajectory(duration2, robot.pos, radius, axes2, radians, clockwise);
+      return trajectory2;
     },
     executeSimulation: (startTime) => {
       const timeline = useRobartState.getState().timelineState;
@@ -74918,7 +75142,7 @@ const useSimulator = create$2()(
       pendingItems.length = 0;
     },
     reset: () => {
-      set({ status: "STOPPED", endTime: 0 });
+      set({ status: "STOPPED", endTime: 0, plannedPaths: {}, timedWarnings: [] });
       get().executeSimulation(0);
       get().cancelSimulation();
     }
@@ -74992,6 +75216,7 @@ const migrateGroups = (state2) => {
   }
   return { ...state2, timelineState: { ...state2.timelineState, groups }, notices };
 };
+const defaultBoundingBoxSize = [0.4, 0.4, 0.7];
 const firstDrone = { id: uuid$2(), name: "CF 1", type: "crazyflie", startingPosition: [0, 0, 0] };
 const firstGroup = { ...newGroup("Group 1", {}), robots: { [firstDrone.id]: firstDrone } };
 const defaultRobartState = {
@@ -75014,7 +75239,8 @@ const defaultRobartState = {
   version: ROBART_VERSION,
   robots: { [firstDrone.id]: firstDrone },
   warnings: [],
-  notices: []
+  notices: [],
+  boundingBoxSize: defaultBoundingBoxSize
 };
 function* startingPositionGenerator() {
   let i2 = 0;
@@ -75037,7 +75263,7 @@ const useRobartState = create$2()(
           ...defaultRobartState,
           loadProject: (file) => {
             const newState = migrateGroups(loadProjectFromFile(file));
-            set2(newState);
+            set2({ ...newState, boundingBoxSize: newState.boundingBoxSize ?? defaultBoundingBoxSize });
             useSimulator.getState().reset();
           },
           saveProject: (fileName) => {
@@ -75048,7 +75274,8 @@ const useRobartState = create$2()(
               timelineState: get2().timelineState,
               version: ROBART_VERSION,
               robots: get2().robots,
-              warnings: get2().warnings
+              warnings: get2().warnings,
+              boundingBoxSize: get2().boundingBoxSize
             };
             saveProjectToFile(state2, fileName);
           },
@@ -75128,6 +75355,15 @@ const useRobartState = create$2()(
               delete state2.timelineState.groups[fromGroupId].items[itemId];
               state2.timelineState.groups[toGroupId].items[itemId] = item;
             });
+          },
+          toggleGroupCollapsed: (groupId) => {
+            set2((state2) => {
+              const group = state2.timelineState.groups[groupId];
+              group.collapsed = !group.collapsed;
+            });
+          },
+          setBoundingBoxSize: (size) => {
+            set2({ boundingBoxSize: size });
           },
           setTimelineScale: (scale) => {
             set2((state2) => {
@@ -75319,6 +75555,5976 @@ useRobartState.subscribe(
   (robots2) => {
     useSimulator.getState().setRobots(robots2);
   }
+);
+var defaultTheme$3 = {};
+var cloneDeep$1 = {};
+(function(exports) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  Object.defineProperty(exports, "cloneDeep", {
+    enumerable: true,
+    get: () => cloneDeep2
+  });
+  function cloneDeep2(value) {
+    if (Array.isArray(value)) {
+      return value.map((child) => cloneDeep2(child));
+    }
+    if (typeof value === "object" && value !== null) {
+      return Object.fromEntries(Object.entries(value).map(([k2, v2]) => [
+        k2,
+        cloneDeep2(v2)
+      ]));
+    }
+    return value;
+  }
+})(cloneDeep$1);
+var defaultConfig_stub = {
+  content: [],
+  presets: [],
+  darkMode: "media",
+  // or 'class'
+  theme: {
+    accentColor: ({ theme: theme2 }) => ({
+      ...theme2("colors"),
+      auto: "auto"
+    }),
+    animation: {
+      none: "none",
+      spin: "spin 1s linear infinite",
+      ping: "ping 1s cubic-bezier(0, 0, 0.2, 1) infinite",
+      pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+      bounce: "bounce 1s infinite"
+    },
+    aria: {
+      checked: 'checked="true"',
+      disabled: 'disabled="true"',
+      expanded: 'expanded="true"',
+      hidden: 'hidden="true"',
+      pressed: 'pressed="true"',
+      readonly: 'readonly="true"',
+      required: 'required="true"',
+      selected: 'selected="true"'
+    },
+    aspectRatio: {
+      auto: "auto",
+      square: "1 / 1",
+      video: "16 / 9"
+    },
+    backdropBlur: ({ theme: theme2 }) => theme2("blur"),
+    backdropBrightness: ({ theme: theme2 }) => theme2("brightness"),
+    backdropContrast: ({ theme: theme2 }) => theme2("contrast"),
+    backdropGrayscale: ({ theme: theme2 }) => theme2("grayscale"),
+    backdropHueRotate: ({ theme: theme2 }) => theme2("hueRotate"),
+    backdropInvert: ({ theme: theme2 }) => theme2("invert"),
+    backdropOpacity: ({ theme: theme2 }) => theme2("opacity"),
+    backdropSaturate: ({ theme: theme2 }) => theme2("saturate"),
+    backdropSepia: ({ theme: theme2 }) => theme2("sepia"),
+    backgroundColor: ({ theme: theme2 }) => theme2("colors"),
+    backgroundImage: {
+      none: "none",
+      "gradient-to-t": "linear-gradient(to top, var(--tw-gradient-stops))",
+      "gradient-to-tr": "linear-gradient(to top right, var(--tw-gradient-stops))",
+      "gradient-to-r": "linear-gradient(to right, var(--tw-gradient-stops))",
+      "gradient-to-br": "linear-gradient(to bottom right, var(--tw-gradient-stops))",
+      "gradient-to-b": "linear-gradient(to bottom, var(--tw-gradient-stops))",
+      "gradient-to-bl": "linear-gradient(to bottom left, var(--tw-gradient-stops))",
+      "gradient-to-l": "linear-gradient(to left, var(--tw-gradient-stops))",
+      "gradient-to-tl": "linear-gradient(to top left, var(--tw-gradient-stops))"
+    },
+    backgroundOpacity: ({ theme: theme2 }) => theme2("opacity"),
+    backgroundPosition: {
+      bottom: "bottom",
+      center: "center",
+      left: "left",
+      "left-bottom": "left bottom",
+      "left-top": "left top",
+      right: "right",
+      "right-bottom": "right bottom",
+      "right-top": "right top",
+      top: "top"
+    },
+    backgroundSize: {
+      auto: "auto",
+      cover: "cover",
+      contain: "contain"
+    },
+    blur: {
+      0: "0",
+      none: "0",
+      sm: "4px",
+      DEFAULT: "8px",
+      md: "12px",
+      lg: "16px",
+      xl: "24px",
+      "2xl": "40px",
+      "3xl": "64px"
+    },
+    borderColor: ({ theme: theme2 }) => ({
+      ...theme2("colors"),
+      DEFAULT: theme2("colors.gray.200", "currentColor")
+    }),
+    borderOpacity: ({ theme: theme2 }) => theme2("opacity"),
+    borderRadius: {
+      none: "0px",
+      sm: "0.125rem",
+      DEFAULT: "0.25rem",
+      md: "0.375rem",
+      lg: "0.5rem",
+      xl: "0.75rem",
+      "2xl": "1rem",
+      "3xl": "1.5rem",
+      full: "9999px"
+    },
+    borderSpacing: ({ theme: theme2 }) => ({
+      ...theme2("spacing")
+    }),
+    borderWidth: {
+      DEFAULT: "1px",
+      0: "0px",
+      2: "2px",
+      4: "4px",
+      8: "8px"
+    },
+    boxShadow: {
+      sm: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      DEFAULT: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+      md: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+      lg: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+      xl: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+      "2xl": "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+      inner: "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)",
+      none: "none"
+    },
+    boxShadowColor: ({ theme: theme2 }) => theme2("colors"),
+    brightness: {
+      0: "0",
+      50: ".5",
+      75: ".75",
+      90: ".9",
+      95: ".95",
+      100: "1",
+      105: "1.05",
+      110: "1.1",
+      125: "1.25",
+      150: "1.5",
+      200: "2"
+    },
+    caretColor: ({ theme: theme2 }) => theme2("colors"),
+    colors: ({ colors }) => ({
+      inherit: colors.inherit,
+      current: colors.current,
+      transparent: colors.transparent,
+      black: colors.black,
+      white: colors.white,
+      slate: colors.slate,
+      gray: colors.gray,
+      zinc: colors.zinc,
+      neutral: colors.neutral,
+      stone: colors.stone,
+      red: colors.red,
+      orange: colors.orange,
+      amber: colors.amber,
+      yellow: colors.yellow,
+      lime: colors.lime,
+      green: colors.green,
+      emerald: colors.emerald,
+      teal: colors.teal,
+      cyan: colors.cyan,
+      sky: colors.sky,
+      blue: colors.blue,
+      indigo: colors.indigo,
+      violet: colors.violet,
+      purple: colors.purple,
+      fuchsia: colors.fuchsia,
+      pink: colors.pink,
+      rose: colors.rose
+    }),
+    columns: {
+      auto: "auto",
+      1: "1",
+      2: "2",
+      3: "3",
+      4: "4",
+      5: "5",
+      6: "6",
+      7: "7",
+      8: "8",
+      9: "9",
+      10: "10",
+      11: "11",
+      12: "12",
+      "3xs": "16rem",
+      "2xs": "18rem",
+      xs: "20rem",
+      sm: "24rem",
+      md: "28rem",
+      lg: "32rem",
+      xl: "36rem",
+      "2xl": "42rem",
+      "3xl": "48rem",
+      "4xl": "56rem",
+      "5xl": "64rem",
+      "6xl": "72rem",
+      "7xl": "80rem"
+    },
+    container: {},
+    content: {
+      none: "none"
+    },
+    contrast: {
+      0: "0",
+      50: ".5",
+      75: ".75",
+      100: "1",
+      125: "1.25",
+      150: "1.5",
+      200: "2"
+    },
+    cursor: {
+      auto: "auto",
+      default: "default",
+      pointer: "pointer",
+      wait: "wait",
+      text: "text",
+      move: "move",
+      help: "help",
+      "not-allowed": "not-allowed",
+      none: "none",
+      "context-menu": "context-menu",
+      progress: "progress",
+      cell: "cell",
+      crosshair: "crosshair",
+      "vertical-text": "vertical-text",
+      alias: "alias",
+      copy: "copy",
+      "no-drop": "no-drop",
+      grab: "grab",
+      grabbing: "grabbing",
+      "all-scroll": "all-scroll",
+      "col-resize": "col-resize",
+      "row-resize": "row-resize",
+      "n-resize": "n-resize",
+      "e-resize": "e-resize",
+      "s-resize": "s-resize",
+      "w-resize": "w-resize",
+      "ne-resize": "ne-resize",
+      "nw-resize": "nw-resize",
+      "se-resize": "se-resize",
+      "sw-resize": "sw-resize",
+      "ew-resize": "ew-resize",
+      "ns-resize": "ns-resize",
+      "nesw-resize": "nesw-resize",
+      "nwse-resize": "nwse-resize",
+      "zoom-in": "zoom-in",
+      "zoom-out": "zoom-out"
+    },
+    divideColor: ({ theme: theme2 }) => theme2("borderColor"),
+    divideOpacity: ({ theme: theme2 }) => theme2("borderOpacity"),
+    divideWidth: ({ theme: theme2 }) => theme2("borderWidth"),
+    dropShadow: {
+      sm: "0 1px 1px rgb(0 0 0 / 0.05)",
+      DEFAULT: ["0 1px 2px rgb(0 0 0 / 0.1)", "0 1px 1px rgb(0 0 0 / 0.06)"],
+      md: ["0 4px 3px rgb(0 0 0 / 0.07)", "0 2px 2px rgb(0 0 0 / 0.06)"],
+      lg: ["0 10px 8px rgb(0 0 0 / 0.04)", "0 4px 3px rgb(0 0 0 / 0.1)"],
+      xl: ["0 20px 13px rgb(0 0 0 / 0.03)", "0 8px 5px rgb(0 0 0 / 0.08)"],
+      "2xl": "0 25px 25px rgb(0 0 0 / 0.15)",
+      none: "0 0 #0000"
+    },
+    fill: ({ theme: theme2 }) => ({
+      none: "none",
+      ...theme2("colors")
+    }),
+    flex: {
+      1: "1 1 0%",
+      auto: "1 1 auto",
+      initial: "0 1 auto",
+      none: "none"
+    },
+    flexBasis: ({ theme: theme2 }) => ({
+      auto: "auto",
+      ...theme2("spacing"),
+      "1/2": "50%",
+      "1/3": "33.333333%",
+      "2/3": "66.666667%",
+      "1/4": "25%",
+      "2/4": "50%",
+      "3/4": "75%",
+      "1/5": "20%",
+      "2/5": "40%",
+      "3/5": "60%",
+      "4/5": "80%",
+      "1/6": "16.666667%",
+      "2/6": "33.333333%",
+      "3/6": "50%",
+      "4/6": "66.666667%",
+      "5/6": "83.333333%",
+      "1/12": "8.333333%",
+      "2/12": "16.666667%",
+      "3/12": "25%",
+      "4/12": "33.333333%",
+      "5/12": "41.666667%",
+      "6/12": "50%",
+      "7/12": "58.333333%",
+      "8/12": "66.666667%",
+      "9/12": "75%",
+      "10/12": "83.333333%",
+      "11/12": "91.666667%",
+      full: "100%"
+    }),
+    flexGrow: {
+      0: "0",
+      DEFAULT: "1"
+    },
+    flexShrink: {
+      0: "0",
+      DEFAULT: "1"
+    },
+    fontFamily: {
+      sans: [
+        "ui-sans-serif",
+        "system-ui",
+        "-apple-system",
+        "BlinkMacSystemFont",
+        '"Segoe UI"',
+        "Roboto",
+        '"Helvetica Neue"',
+        "Arial",
+        '"Noto Sans"',
+        "sans-serif",
+        '"Apple Color Emoji"',
+        '"Segoe UI Emoji"',
+        '"Segoe UI Symbol"',
+        '"Noto Color Emoji"'
+      ],
+      serif: ["ui-serif", "Georgia", "Cambria", '"Times New Roman"', "Times", "serif"],
+      mono: [
+        "ui-monospace",
+        "SFMono-Regular",
+        "Menlo",
+        "Monaco",
+        "Consolas",
+        '"Liberation Mono"',
+        '"Courier New"',
+        "monospace"
+      ]
+    },
+    fontSize: {
+      xs: ["0.75rem", { lineHeight: "1rem" }],
+      sm: ["0.875rem", { lineHeight: "1.25rem" }],
+      base: ["1rem", { lineHeight: "1.5rem" }],
+      lg: ["1.125rem", { lineHeight: "1.75rem" }],
+      xl: ["1.25rem", { lineHeight: "1.75rem" }],
+      "2xl": ["1.5rem", { lineHeight: "2rem" }],
+      "3xl": ["1.875rem", { lineHeight: "2.25rem" }],
+      "4xl": ["2.25rem", { lineHeight: "2.5rem" }],
+      "5xl": ["3rem", { lineHeight: "1" }],
+      "6xl": ["3.75rem", { lineHeight: "1" }],
+      "7xl": ["4.5rem", { lineHeight: "1" }],
+      "8xl": ["6rem", { lineHeight: "1" }],
+      "9xl": ["8rem", { lineHeight: "1" }]
+    },
+    fontWeight: {
+      thin: "100",
+      extralight: "200",
+      light: "300",
+      normal: "400",
+      medium: "500",
+      semibold: "600",
+      bold: "700",
+      extrabold: "800",
+      black: "900"
+    },
+    gap: ({ theme: theme2 }) => theme2("spacing"),
+    gradientColorStops: ({ theme: theme2 }) => theme2("colors"),
+    grayscale: {
+      0: "0",
+      DEFAULT: "100%"
+    },
+    gridAutoColumns: {
+      auto: "auto",
+      min: "min-content",
+      max: "max-content",
+      fr: "minmax(0, 1fr)"
+    },
+    gridAutoRows: {
+      auto: "auto",
+      min: "min-content",
+      max: "max-content",
+      fr: "minmax(0, 1fr)"
+    },
+    gridColumn: {
+      auto: "auto",
+      "span-1": "span 1 / span 1",
+      "span-2": "span 2 / span 2",
+      "span-3": "span 3 / span 3",
+      "span-4": "span 4 / span 4",
+      "span-5": "span 5 / span 5",
+      "span-6": "span 6 / span 6",
+      "span-7": "span 7 / span 7",
+      "span-8": "span 8 / span 8",
+      "span-9": "span 9 / span 9",
+      "span-10": "span 10 / span 10",
+      "span-11": "span 11 / span 11",
+      "span-12": "span 12 / span 12",
+      "span-full": "1 / -1"
+    },
+    gridColumnEnd: {
+      auto: "auto",
+      1: "1",
+      2: "2",
+      3: "3",
+      4: "4",
+      5: "5",
+      6: "6",
+      7: "7",
+      8: "8",
+      9: "9",
+      10: "10",
+      11: "11",
+      12: "12",
+      13: "13"
+    },
+    gridColumnStart: {
+      auto: "auto",
+      1: "1",
+      2: "2",
+      3: "3",
+      4: "4",
+      5: "5",
+      6: "6",
+      7: "7",
+      8: "8",
+      9: "9",
+      10: "10",
+      11: "11",
+      12: "12",
+      13: "13"
+    },
+    gridRow: {
+      auto: "auto",
+      "span-1": "span 1 / span 1",
+      "span-2": "span 2 / span 2",
+      "span-3": "span 3 / span 3",
+      "span-4": "span 4 / span 4",
+      "span-5": "span 5 / span 5",
+      "span-6": "span 6 / span 6",
+      "span-full": "1 / -1"
+    },
+    gridRowEnd: {
+      auto: "auto",
+      1: "1",
+      2: "2",
+      3: "3",
+      4: "4",
+      5: "5",
+      6: "6",
+      7: "7"
+    },
+    gridRowStart: {
+      auto: "auto",
+      1: "1",
+      2: "2",
+      3: "3",
+      4: "4",
+      5: "5",
+      6: "6",
+      7: "7"
+    },
+    gridTemplateColumns: {
+      none: "none",
+      1: "repeat(1, minmax(0, 1fr))",
+      2: "repeat(2, minmax(0, 1fr))",
+      3: "repeat(3, minmax(0, 1fr))",
+      4: "repeat(4, minmax(0, 1fr))",
+      5: "repeat(5, minmax(0, 1fr))",
+      6: "repeat(6, minmax(0, 1fr))",
+      7: "repeat(7, minmax(0, 1fr))",
+      8: "repeat(8, minmax(0, 1fr))",
+      9: "repeat(9, minmax(0, 1fr))",
+      10: "repeat(10, minmax(0, 1fr))",
+      11: "repeat(11, minmax(0, 1fr))",
+      12: "repeat(12, minmax(0, 1fr))"
+    },
+    gridTemplateRows: {
+      none: "none",
+      1: "repeat(1, minmax(0, 1fr))",
+      2: "repeat(2, minmax(0, 1fr))",
+      3: "repeat(3, minmax(0, 1fr))",
+      4: "repeat(4, minmax(0, 1fr))",
+      5: "repeat(5, minmax(0, 1fr))",
+      6: "repeat(6, minmax(0, 1fr))"
+    },
+    height: ({ theme: theme2 }) => ({
+      auto: "auto",
+      ...theme2("spacing"),
+      "1/2": "50%",
+      "1/3": "33.333333%",
+      "2/3": "66.666667%",
+      "1/4": "25%",
+      "2/4": "50%",
+      "3/4": "75%",
+      "1/5": "20%",
+      "2/5": "40%",
+      "3/5": "60%",
+      "4/5": "80%",
+      "1/6": "16.666667%",
+      "2/6": "33.333333%",
+      "3/6": "50%",
+      "4/6": "66.666667%",
+      "5/6": "83.333333%",
+      full: "100%",
+      screen: "100vh",
+      min: "min-content",
+      max: "max-content",
+      fit: "fit-content"
+    }),
+    hueRotate: {
+      0: "0deg",
+      15: "15deg",
+      30: "30deg",
+      60: "60deg",
+      90: "90deg",
+      180: "180deg"
+    },
+    inset: ({ theme: theme2 }) => ({
+      auto: "auto",
+      ...theme2("spacing"),
+      "1/2": "50%",
+      "1/3": "33.333333%",
+      "2/3": "66.666667%",
+      "1/4": "25%",
+      "2/4": "50%",
+      "3/4": "75%",
+      full: "100%"
+    }),
+    invert: {
+      0: "0",
+      DEFAULT: "100%"
+    },
+    keyframes: {
+      spin: {
+        to: {
+          transform: "rotate(360deg)"
+        }
+      },
+      ping: {
+        "75%, 100%": {
+          transform: "scale(2)",
+          opacity: "0"
+        }
+      },
+      pulse: {
+        "50%": {
+          opacity: ".5"
+        }
+      },
+      bounce: {
+        "0%, 100%": {
+          transform: "translateY(-25%)",
+          animationTimingFunction: "cubic-bezier(0.8,0,1,1)"
+        },
+        "50%": {
+          transform: "none",
+          animationTimingFunction: "cubic-bezier(0,0,0.2,1)"
+        }
+      }
+    },
+    letterSpacing: {
+      tighter: "-0.05em",
+      tight: "-0.025em",
+      normal: "0em",
+      wide: "0.025em",
+      wider: "0.05em",
+      widest: "0.1em"
+    },
+    lineHeight: {
+      none: "1",
+      tight: "1.25",
+      snug: "1.375",
+      normal: "1.5",
+      relaxed: "1.625",
+      loose: "2",
+      3: ".75rem",
+      4: "1rem",
+      5: "1.25rem",
+      6: "1.5rem",
+      7: "1.75rem",
+      8: "2rem",
+      9: "2.25rem",
+      10: "2.5rem"
+    },
+    listStyleType: {
+      none: "none",
+      disc: "disc",
+      decimal: "decimal"
+    },
+    margin: ({ theme: theme2 }) => ({
+      auto: "auto",
+      ...theme2("spacing")
+    }),
+    maxHeight: ({ theme: theme2 }) => ({
+      ...theme2("spacing"),
+      none: "none",
+      full: "100%",
+      screen: "100vh",
+      min: "min-content",
+      max: "max-content",
+      fit: "fit-content"
+    }),
+    maxWidth: ({ theme: theme2, breakpoints }) => ({
+      none: "none",
+      0: "0rem",
+      xs: "20rem",
+      sm: "24rem",
+      md: "28rem",
+      lg: "32rem",
+      xl: "36rem",
+      "2xl": "42rem",
+      "3xl": "48rem",
+      "4xl": "56rem",
+      "5xl": "64rem",
+      "6xl": "72rem",
+      "7xl": "80rem",
+      full: "100%",
+      min: "min-content",
+      max: "max-content",
+      fit: "fit-content",
+      prose: "65ch",
+      ...breakpoints(theme2("screens"))
+    }),
+    minHeight: {
+      0: "0px",
+      full: "100%",
+      screen: "100vh",
+      min: "min-content",
+      max: "max-content",
+      fit: "fit-content"
+    },
+    minWidth: {
+      0: "0px",
+      full: "100%",
+      min: "min-content",
+      max: "max-content",
+      fit: "fit-content"
+    },
+    objectPosition: {
+      bottom: "bottom",
+      center: "center",
+      left: "left",
+      "left-bottom": "left bottom",
+      "left-top": "left top",
+      right: "right",
+      "right-bottom": "right bottom",
+      "right-top": "right top",
+      top: "top"
+    },
+    opacity: {
+      0: "0",
+      5: "0.05",
+      10: "0.1",
+      20: "0.2",
+      25: "0.25",
+      30: "0.3",
+      40: "0.4",
+      50: "0.5",
+      60: "0.6",
+      70: "0.7",
+      75: "0.75",
+      80: "0.8",
+      90: "0.9",
+      95: "0.95",
+      100: "1"
+    },
+    order: {
+      first: "-9999",
+      last: "9999",
+      none: "0",
+      1: "1",
+      2: "2",
+      3: "3",
+      4: "4",
+      5: "5",
+      6: "6",
+      7: "7",
+      8: "8",
+      9: "9",
+      10: "10",
+      11: "11",
+      12: "12"
+    },
+    outlineColor: ({ theme: theme2 }) => theme2("colors"),
+    outlineOffset: {
+      0: "0px",
+      1: "1px",
+      2: "2px",
+      4: "4px",
+      8: "8px"
+    },
+    outlineWidth: {
+      0: "0px",
+      1: "1px",
+      2: "2px",
+      4: "4px",
+      8: "8px"
+    },
+    padding: ({ theme: theme2 }) => theme2("spacing"),
+    placeholderColor: ({ theme: theme2 }) => theme2("colors"),
+    placeholderOpacity: ({ theme: theme2 }) => theme2("opacity"),
+    ringColor: ({ theme: theme2 }) => ({
+      DEFAULT: theme2("colors.blue.500", "#3b82f6"),
+      ...theme2("colors")
+    }),
+    ringOffsetColor: ({ theme: theme2 }) => theme2("colors"),
+    ringOffsetWidth: {
+      0: "0px",
+      1: "1px",
+      2: "2px",
+      4: "4px",
+      8: "8px"
+    },
+    ringOpacity: ({ theme: theme2 }) => ({
+      DEFAULT: "0.5",
+      ...theme2("opacity")
+    }),
+    ringWidth: {
+      DEFAULT: "3px",
+      0: "0px",
+      1: "1px",
+      2: "2px",
+      4: "4px",
+      8: "8px"
+    },
+    rotate: {
+      0: "0deg",
+      1: "1deg",
+      2: "2deg",
+      3: "3deg",
+      6: "6deg",
+      12: "12deg",
+      45: "45deg",
+      90: "90deg",
+      180: "180deg"
+    },
+    saturate: {
+      0: "0",
+      50: ".5",
+      100: "1",
+      150: "1.5",
+      200: "2"
+    },
+    scale: {
+      0: "0",
+      50: ".5",
+      75: ".75",
+      90: ".9",
+      95: ".95",
+      100: "1",
+      105: "1.05",
+      110: "1.1",
+      125: "1.25",
+      150: "1.5"
+    },
+    screens: {
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1536px"
+    },
+    scrollMargin: ({ theme: theme2 }) => ({
+      ...theme2("spacing")
+    }),
+    scrollPadding: ({ theme: theme2 }) => theme2("spacing"),
+    sepia: {
+      0: "0",
+      DEFAULT: "100%"
+    },
+    skew: {
+      0: "0deg",
+      1: "1deg",
+      2: "2deg",
+      3: "3deg",
+      6: "6deg",
+      12: "12deg"
+    },
+    space: ({ theme: theme2 }) => ({
+      ...theme2("spacing")
+    }),
+    spacing: {
+      px: "1px",
+      0: "0px",
+      0.5: "0.125rem",
+      1: "0.25rem",
+      1.5: "0.375rem",
+      2: "0.5rem",
+      2.5: "0.625rem",
+      3: "0.75rem",
+      3.5: "0.875rem",
+      4: "1rem",
+      5: "1.25rem",
+      6: "1.5rem",
+      7: "1.75rem",
+      8: "2rem",
+      9: "2.25rem",
+      10: "2.5rem",
+      11: "2.75rem",
+      12: "3rem",
+      14: "3.5rem",
+      16: "4rem",
+      20: "5rem",
+      24: "6rem",
+      28: "7rem",
+      32: "8rem",
+      36: "9rem",
+      40: "10rem",
+      44: "11rem",
+      48: "12rem",
+      52: "13rem",
+      56: "14rem",
+      60: "15rem",
+      64: "16rem",
+      72: "18rem",
+      80: "20rem",
+      96: "24rem"
+    },
+    stroke: ({ theme: theme2 }) => ({
+      none: "none",
+      ...theme2("colors")
+    }),
+    strokeWidth: {
+      0: "0",
+      1: "1",
+      2: "2"
+    },
+    supports: {},
+    data: {},
+    textColor: ({ theme: theme2 }) => theme2("colors"),
+    textDecorationColor: ({ theme: theme2 }) => theme2("colors"),
+    textDecorationThickness: {
+      auto: "auto",
+      "from-font": "from-font",
+      0: "0px",
+      1: "1px",
+      2: "2px",
+      4: "4px",
+      8: "8px"
+    },
+    textIndent: ({ theme: theme2 }) => ({
+      ...theme2("spacing")
+    }),
+    textOpacity: ({ theme: theme2 }) => theme2("opacity"),
+    textUnderlineOffset: {
+      auto: "auto",
+      0: "0px",
+      1: "1px",
+      2: "2px",
+      4: "4px",
+      8: "8px"
+    },
+    transformOrigin: {
+      center: "center",
+      top: "top",
+      "top-right": "top right",
+      right: "right",
+      "bottom-right": "bottom right",
+      bottom: "bottom",
+      "bottom-left": "bottom left",
+      left: "left",
+      "top-left": "top left"
+    },
+    transitionDelay: {
+      75: "75ms",
+      100: "100ms",
+      150: "150ms",
+      200: "200ms",
+      300: "300ms",
+      500: "500ms",
+      700: "700ms",
+      1e3: "1000ms"
+    },
+    transitionDuration: {
+      DEFAULT: "150ms",
+      75: "75ms",
+      100: "100ms",
+      150: "150ms",
+      200: "200ms",
+      300: "300ms",
+      500: "500ms",
+      700: "700ms",
+      1e3: "1000ms"
+    },
+    transitionProperty: {
+      none: "none",
+      all: "all",
+      DEFAULT: "color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter",
+      colors: "color, background-color, border-color, text-decoration-color, fill, stroke",
+      opacity: "opacity",
+      shadow: "box-shadow",
+      transform: "transform"
+    },
+    transitionTimingFunction: {
+      DEFAULT: "cubic-bezier(0.4, 0, 0.2, 1)",
+      linear: "linear",
+      in: "cubic-bezier(0.4, 0, 1, 1)",
+      out: "cubic-bezier(0, 0, 0.2, 1)",
+      "in-out": "cubic-bezier(0.4, 0, 0.2, 1)"
+    },
+    translate: ({ theme: theme2 }) => ({
+      ...theme2("spacing"),
+      "1/2": "50%",
+      "1/3": "33.333333%",
+      "2/3": "66.666667%",
+      "1/4": "25%",
+      "2/4": "50%",
+      "3/4": "75%",
+      full: "100%"
+    }),
+    width: ({ theme: theme2 }) => ({
+      auto: "auto",
+      ...theme2("spacing"),
+      "1/2": "50%",
+      "1/3": "33.333333%",
+      "2/3": "66.666667%",
+      "1/4": "25%",
+      "2/4": "50%",
+      "3/4": "75%",
+      "1/5": "20%",
+      "2/5": "40%",
+      "3/5": "60%",
+      "4/5": "80%",
+      "1/6": "16.666667%",
+      "2/6": "33.333333%",
+      "3/6": "50%",
+      "4/6": "66.666667%",
+      "5/6": "83.333333%",
+      "1/12": "8.333333%",
+      "2/12": "16.666667%",
+      "3/12": "25%",
+      "4/12": "33.333333%",
+      "5/12": "41.666667%",
+      "6/12": "50%",
+      "7/12": "58.333333%",
+      "8/12": "66.666667%",
+      "9/12": "75%",
+      "10/12": "83.333333%",
+      "11/12": "91.666667%",
+      full: "100%",
+      screen: "100vw",
+      min: "min-content",
+      max: "max-content",
+      fit: "fit-content"
+    }),
+    willChange: {
+      auto: "auto",
+      scroll: "scroll-position",
+      contents: "contents",
+      transform: "transform"
+    },
+    zIndex: {
+      auto: "auto",
+      0: "0",
+      10: "10",
+      20: "20",
+      30: "30",
+      40: "40",
+      50: "50"
+    }
+  },
+  plugins: []
+};
+(function(exports) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  Object.defineProperty(exports, "default", {
+    enumerable: true,
+    get: () => _default2
+  });
+  const _cloneDeep = cloneDeep$1;
+  const _defaultConfigStub = /* @__PURE__ */ _interopRequireDefault(defaultConfig_stub);
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+  const _default2 = (0, _cloneDeep.cloneDeep)(_defaultConfigStub.default.theme);
+})(defaultTheme$3);
+let defaultTheme$1 = defaultTheme$3;
+var defaultTheme_1 = (defaultTheme$1.__esModule ? defaultTheme$1 : { default: defaultTheme$1 }).default;
+const defaultTheme$2 = /* @__PURE__ */ getDefaultExportFromCjs(defaultTheme_1);
+/**
+ * @license
+ * Copyright 2022 MIT
+ * SPDX-License-Identifier: Apache-2.0
+ */
+coreBrowserExports.WorkspaceSvg.prototype.getBlockDragSurface = function() {
+  return null;
+};
+/**
+ * @license
+ * Copyright 2022 MIT
+ * SPDX-License-Identifier: Apache-2.0
+ */
+const blockSelectionWeakMap = /* @__PURE__ */ new WeakMap();
+const inMultipleSelectionModeWeakMap = /* @__PURE__ */ new WeakMap();
+const BaseBlockDraggerWeakMap = /* @__PURE__ */ new WeakMap();
+const copyData = /* @__PURE__ */ new Set();
+const connectionDBList = [];
+let timestamp = 0;
+const hasSelectedParent = function(block, move = false) {
+  while (block) {
+    if (move) {
+      block = block.getParent();
+    } else {
+      block = block.getSurroundParent();
+    }
+    if (block && blockSelectionWeakMap.get(block.workspace).has(block.id)) {
+      return true;
+    }
+  }
+  return false;
+};
+const dataCopyToStorage = function() {
+  const storage = [];
+  copyData.forEach((data) => {
+    delete data["source"];
+    storage.push(data);
+  });
+  timestamp = Date.now();
+  localStorage.setItem("blocklyStashMulti", JSON.stringify(storage));
+  localStorage.setItem(
+    "blocklyStashConnection",
+    JSON.stringify(connectionDBList)
+  );
+  localStorage.setItem("blocklyStashTime", timestamp);
+};
+const dataCopyFromStorage = function() {
+  const storage = JSON.parse(localStorage.getItem("blocklyStashMulti"));
+  const connection = JSON.parse(localStorage.getItem("blocklyStashConnection"));
+  const time2 = localStorage.getItem("blocklyStashTime");
+  if (storage && parseInt(time2) > timestamp) {
+    timestamp = time2;
+    copyData.clear();
+    storage.forEach((data) => {
+      copyData.add(data);
+    });
+    connectionDBList.length = 0;
+    connection.forEach((data) => {
+      connectionDBList.push(data);
+    });
+  }
+};
+const blockNumGetFromStorage = function(useCopyPasteCrossTab) {
+  if (!useCopyPasteCrossTab) {
+    return copyData.size;
+  }
+  const storage = JSON.parse(localStorage.getItem("blocklyStashMulti"));
+  const time2 = localStorage.getItem("blocklyStashTime");
+  if (storage && parseInt(time2) > timestamp) {
+    return storage.length;
+  }
+  return copyData.size;
+};
+/**
+ * @license
+ * Copyright 2022 MIT
+ * SPDX-License-Identifier: Apache-2.0
+ */
+const registerCopy$1 = function(useCopyPasteCrossTab) {
+  const copyOptions = {
+    displayText: function(scope) {
+      let workableBlocksLength = 0;
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        if (copyOptions.check(block)) {
+          workableBlocksLength++;
+        }
+      });
+      if (workableBlocksLength <= 1) {
+        return coreBrowserExports.Msg["CROSS_TAB_COPY"] ? coreBrowserExports.Msg["CROSS_TAB_COPY"] : "Copy";
+      } else {
+        return coreBrowserExports.Msg["CROSS_TAB_COPY_X_BLOCKS"] ? coreBrowserExports.Msg["CROSS_TAB_COPY_X_BLOCKS"].replace(
+          "%1",
+          workableBlocksLength
+        ) : (coreBrowserExports.Msg["CROSS_TAB_COPY"] ? coreBrowserExports.Msg["CROSS_TAB_COPY"] : "Copy") + " (" + workableBlocksLength + ")";
+      }
+    },
+    preconditionFn: function(scope) {
+      const workspace = scope.block.workspace;
+      if (workspace.options.readOnly && !useCopyPasteCrossTab) {
+        return "hidden";
+      }
+      const selected = coreBrowserExports.common.getSelected();
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      if (!blockSelection.size) {
+        if (copyOptions.check(selected)) {
+          return "enabled";
+        } else {
+          return "disabled";
+        }
+      }
+      for (const id2 of blockSelection) {
+        const block = workspace.getBlockById(id2);
+        if (copyOptions.check(block)) {
+          return "enabled";
+        }
+      }
+      return "disabled";
+    },
+    check: function(block) {
+      return block && block.isDeletable() && block.isMovable() && !hasSelectedParent(block);
+    },
+    callback: function(scope) {
+      const workspace = scope.block.workspace;
+      copyData.clear();
+      workspace.hideChaff();
+      const blockList = [];
+      const apply = function(block) {
+        if (copyOptions.check(block)) {
+          copyData.add(block.toCopyData());
+          blockList.push(block.id);
+        }
+      };
+      const selected = coreBrowserExports.common.getSelected();
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      coreBrowserExports.Events.setGroup(true);
+      if (!blockSelection.size) {
+        apply(selected);
+      }
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        apply(block);
+      });
+      connectionDBList.length = 0;
+      blockList.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        const parentBlock = block.getParent();
+        if (parentBlock && blockList.indexOf(parentBlock.id) !== -1 && parentBlock.getNextBlock() === block) {
+          connectionDBList.push([
+            blockList.indexOf(parentBlock.id),
+            blockList.indexOf(block.id)
+          ]);
+        }
+      });
+      if (useCopyPasteCrossTab) {
+        dataCopyToStorage();
+      }
+      coreBrowserExports.Events.setGroup(false);
+      return true;
+    },
+    scopeType: coreBrowserExports.ContextMenuRegistry.ScopeType.BLOCK,
+    id: "blockCopyToStorage",
+    weight: 0
+  };
+  coreBrowserExports.ContextMenuRegistry.registry.register(copyOptions);
+};
+const registerDuplicate = function() {
+  const duplicateOption = {
+    displayText: function(scope) {
+      let workableBlocksLength = 0;
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        if (duplicateOption.check(block)) {
+          workableBlocksLength++;
+        }
+      });
+      if (workableBlocksLength <= 1) {
+        return coreBrowserExports.Msg["DUPLICATE_BLOCK"];
+      } else {
+        return coreBrowserExports.Msg["DUPLICATE_X_BLOCKS"] ? coreBrowserExports.Msg["DUPLICATE_X_BLOCKS"].replace(
+          "%1",
+          workableBlocksLength
+        ) : coreBrowserExports.Msg["DUPLICATE_BLOCK"] + " (" + workableBlocksLength + ")";
+      }
+    },
+    preconditionFn: function(scope) {
+      const block = scope.block;
+      if (!block.isInFlyout && block.isDeletable() && block.isMovable()) {
+        if (block.isDuplicatable()) {
+          return "enabled";
+        }
+        return "disabled";
+      }
+      return "hidden";
+    },
+    // Only duplicate-able blocks will be duplicated.
+    check: function(block) {
+      return block && duplicateOption.preconditionFn({ block }) === "enabled" && !hasSelectedParent(block);
+    },
+    callback: function(scope) {
+      const duplicatedBlocks = {};
+      const connectionDBList2 = [];
+      const apply = function(block) {
+        if (duplicateOption.check(block)) {
+          duplicatedBlocks[block.id] = coreBrowserExports.clipboard.duplicate(block);
+        }
+        block.pathObject.updateSelected(false);
+      };
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      coreBrowserExports.Events.setGroup(true);
+      if (!blockSelection.size) {
+        apply(scope.block);
+      }
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        apply(block);
+      });
+      blockSelection.clear();
+      for (const [id2, block] of Object.entries(duplicatedBlocks)) {
+        const origBlock = workspace.getBlockById(id2);
+        const origParentBlock = origBlock.getParent();
+        if (block.id) {
+          if (origParentBlock && origParentBlock.id in duplicatedBlocks && origParentBlock.getNextBlock() === origBlock) {
+            connectionDBList2.push([
+              duplicatedBlocks[origParentBlock.id].nextConnection,
+              block.previousConnection
+            ]);
+          }
+          blockSelection.add(block.id);
+          block.pathObject.updateSelected(true);
+        }
+      }
+      connectionDBList2.forEach(function(connectionDB) {
+        connectionDB[0].connect(connectionDB[1]);
+      });
+      coreBrowserExports.Events.setGroup(false);
+    },
+    scopeType: coreBrowserExports.ContextMenuRegistry.ScopeType.BLOCK,
+    id: "blockDuplicate",
+    weight: 1
+  };
+  coreBrowserExports.ContextMenuRegistry.registry.register(duplicateOption);
+};
+const registerComment = function() {
+  const commentOption = {
+    displayText: function(scope) {
+      let workableBlocksLength = 0;
+      const state2 = scope.block.getCommentIcon();
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        if (commentOption.check(block) && block.getCommentIcon() instanceof coreBrowserExports.Comment === state2 instanceof coreBrowserExports.Comment) {
+          workableBlocksLength++;
+        }
+      });
+      if (state2) {
+        if (workableBlocksLength <= 1) {
+          return coreBrowserExports.Msg["REMOVE_COMMENT"];
+        } else {
+          return coreBrowserExports.Msg["REMOVE_X_COMMENTS"] ? coreBrowserExports.Msg["REMOVE_X_COMMENTS"].replace(
+            "%1",
+            workableBlocksLength
+          ) : coreBrowserExports.Msg["REMOVE_COMMENT"] + " (" + workableBlocksLength + ")";
+        }
+      } else {
+        if (workableBlocksLength <= 1) {
+          return coreBrowserExports.Msg["ADD_COMMENT"];
+        } else {
+          return coreBrowserExports.Msg["ADD_X_COMMENTS"] ? coreBrowserExports.Msg["ADD_X_COMMENTS"].replace(
+            "%1",
+            workableBlocksLength
+          ) : coreBrowserExports.Msg["ADD_COMMENT"] + " (" + workableBlocksLength + ")";
+        }
+      }
+    },
+    preconditionFn: function(scope) {
+      const block = scope.block;
+      if (!coreBrowserExports.utils.userAgent.IE && !block.isInFlyout && block.workspace.options.comments && !block.isCollapsed() && block.isEditable()) {
+        return "enabled";
+      }
+      return "hidden";
+    },
+    check: function(block) {
+      return block && commentOption.preconditionFn({ block }) === "enabled";
+    },
+    callback: function(scope) {
+      const hasCommentIcon = scope.block.getCommentIcon();
+      const apply = function(block) {
+        if (commentOption.check(block)) {
+          if (hasCommentIcon) {
+            block.setCommentText(null);
+          } else {
+            block.setCommentText("");
+          }
+        }
+      };
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      coreBrowserExports.Events.setGroup(true);
+      if (!blockSelection.size) {
+        apply(scope.block);
+      }
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        apply(block);
+      });
+      coreBrowserExports.Events.setGroup(false);
+    },
+    scopeType: coreBrowserExports.ContextMenuRegistry.ScopeType.BLOCK,
+    id: "blockComment",
+    weight: 2
+  };
+  coreBrowserExports.ContextMenuRegistry.registry.register(commentOption);
+};
+const registerInline = function() {
+  const inlineOption = {
+    displayText: function(scope) {
+      let workableBlocksLength = 0;
+      const state2 = scope.block.getInputsInline();
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        if (inlineOption.check(block) && block.getInputsInline() === state2) {
+          workableBlocksLength++;
+        }
+      });
+      if (state2) {
+        if (workableBlocksLength <= 1) {
+          return coreBrowserExports.Msg["EXTERNAL_INPUTS"];
+        } else {
+          return coreBrowserExports.Msg["EXTERNAL_X_INPUTS"] ? coreBrowserExports.Msg["EXTERNAL_X_INPUTS"].replace(
+            "%1",
+            workableBlocksLength
+          ) : coreBrowserExports.Msg["EXTERNAL_INPUTS"] + " (" + workableBlocksLength + ")";
+        }
+      } else {
+        if (workableBlocksLength <= 1) {
+          return coreBrowserExports.Msg["INLINE_INPUTS"];
+        } else {
+          return coreBrowserExports.Msg["INLINE_X_INPUTS"] ? coreBrowserExports.Msg["INLINE_X_INPUTS"].replace(
+            "%1",
+            workableBlocksLength
+          ) : coreBrowserExports.Msg["INLINE_INPUTS"] + " (" + workableBlocksLength + ")";
+        }
+      }
+    },
+    preconditionFn: function(scope) {
+      const block = scope.block;
+      if (!block.isInFlyout && block.isMovable() && !block.isCollapsed()) {
+        for (let i2 = 1; i2 < block.inputList.length; i2++) {
+          if (block.inputList[i2 - 1].type !== coreBrowserExports.inputTypes.STATEMENT && block.inputList[i2].type !== coreBrowserExports.inputTypes.STATEMENT) {
+            return "enabled";
+          }
+        }
+      }
+      return "hidden";
+    },
+    check: function(block) {
+      return block && inlineOption.preconditionFn({ block }) === "enabled";
+    },
+    callback: function(scope) {
+      const state2 = !scope.block.getInputsInline();
+      const apply = function(block) {
+        if (inlineOption.check(block)) {
+          block.setInputsInline(state2);
+        }
+      };
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      coreBrowserExports.Events.setGroup(true);
+      if (!blockSelection.size) {
+        apply(scope.block);
+      }
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        apply(block);
+      });
+      coreBrowserExports.Events.setGroup(false);
+    },
+    scopeType: coreBrowserExports.ContextMenuRegistry.ScopeType.BLOCK,
+    id: "blockInline",
+    weight: 3
+  };
+  coreBrowserExports.ContextMenuRegistry.registry.register(inlineOption);
+};
+const registerCollapseExpandBlock = function() {
+  const collapseExpandOption = {
+    displayText: function(scope) {
+      let workableBlocksLength = 0;
+      const state2 = scope.block.isCollapsed();
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        if (collapseExpandOption.check(block) && block.isCollapsed() === state2) {
+          workableBlocksLength++;
+        }
+      });
+      if (state2) {
+        if (workableBlocksLength <= 1) {
+          return coreBrowserExports.Msg["EXPAND_BLOCK"];
+        } else {
+          return coreBrowserExports.Msg["EXPAND_X_BLOCKS"] ? coreBrowserExports.Msg["EXPAND_X_BLOCKS"].replace(
+            "%1",
+            workableBlocksLength
+          ) : coreBrowserExports.Msg["EXPAND_BLOCK"] + " (" + workableBlocksLength + ")";
+        }
+      } else {
+        if (workableBlocksLength <= 1) {
+          return coreBrowserExports.Msg["COLLAPSE_BLOCK"];
+        } else {
+          return coreBrowserExports.Msg["COLLAPSE_X_BLOCKS"] ? coreBrowserExports.Msg["COLLAPSE_X_BLOCKS"].replace(
+            "%1",
+            workableBlocksLength
+          ) : coreBrowserExports.Msg["COLLAPSE_BLOCK"] + " (" + workableBlocksLength + ")";
+        }
+      }
+    },
+    preconditionFn: function(scope) {
+      const block = scope.block;
+      if (!block.isInFlyout && block.isMovable() && block.workspace.options.collapse) {
+        return "enabled";
+      }
+      return "hidden";
+    },
+    check: function(block) {
+      return block && collapseExpandOption.preconditionFn({ block }) === "enabled" && (!hasSelectedParent(block) || block.isCollapsed());
+    },
+    callback: function(scope) {
+      const state2 = !scope.block.isCollapsed();
+      const apply = function(block) {
+        if (collapseExpandOption.check(block)) {
+          block.setCollapsed(state2);
+        }
+      };
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      coreBrowserExports.Events.setGroup(true);
+      if (!blockSelection.size) {
+        apply(scope.block);
+      }
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        apply(block);
+      });
+      coreBrowserExports.Events.setGroup(false);
+    },
+    scopeType: coreBrowserExports.ContextMenuRegistry.ScopeType.BLOCK,
+    id: "blockCollapseExpand",
+    weight: 4
+  };
+  coreBrowserExports.ContextMenuRegistry.registry.register(collapseExpandOption);
+};
+const registerDisable = function() {
+  const disableOption = {
+    displayText: function(scope) {
+      let workableBlocksLength = 0;
+      const state2 = scope.block.isEnabled();
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        if (disableOption.check(block) && block.isEnabled() === state2) {
+          workableBlocksLength++;
+        }
+      });
+      if (state2) {
+        if (workableBlocksLength <= 1) {
+          return coreBrowserExports.Msg["DISABLE_BLOCK"];
+        } else {
+          return coreBrowserExports.Msg["DISABLE_X_BLOCKS"] ? coreBrowserExports.Msg["DISABLE_X_BLOCKS"].replace(
+            "%1",
+            workableBlocksLength
+          ) : coreBrowserExports.Msg["DISABLE_BLOCK"] + " (" + workableBlocksLength + ")";
+        }
+      } else {
+        if (workableBlocksLength <= 1) {
+          return coreBrowserExports.Msg["ENABLE_BLOCK"];
+        } else {
+          return coreBrowserExports.Msg["ENABLE_X_BLOCKS"] ? coreBrowserExports.Msg["ENABLE_X_BLOCKS"].replace(
+            "%1",
+            workableBlocksLength
+          ) : coreBrowserExports.Msg["ENABLE_BLOCK"] + " (" + workableBlocksLength + ")";
+        }
+      }
+    },
+    preconditionFn: function(scope) {
+      const block = scope.block;
+      if (!block.isInFlyout && block.workspace.options.disable && block.isEditable()) {
+        if (block.getInheritedDisabled()) {
+          return "disabled";
+        }
+        return "enabled";
+      }
+      return "hidden";
+    },
+    check: function(block) {
+      return block && disableOption.preconditionFn({ block }) === "enabled" && (!hasSelectedParent(block) || !block.isEnabled());
+    },
+    callback: function(scope) {
+      const state2 = !scope.block.isEnabled();
+      const apply = function(block) {
+        if (disableOption.check(block)) {
+          block.setEnabled(state2);
+        }
+      };
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      coreBrowserExports.Events.setGroup(true);
+      if (!blockSelection.size) {
+        apply(scope.block);
+      }
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        apply(block);
+      });
+      coreBrowserExports.Events.setGroup(false);
+    },
+    scopeType: coreBrowserExports.ContextMenuRegistry.ScopeType.BLOCK,
+    id: "blockDisable",
+    weight: 5
+  };
+  coreBrowserExports.ContextMenuRegistry.registry.register(disableOption);
+};
+const registerDelete = function() {
+  const deleteOption = {
+    displayText: function(scope) {
+      let descendantCount = 0;
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        if (block && !hasSelectedParent(block)) {
+          descendantCount += block.getDescendants(false).length;
+          const nextBlock = block.getNextBlock();
+          if (nextBlock) {
+            descendantCount -= nextBlock.getDescendants(false).length;
+          }
+        }
+      });
+      return descendantCount === 1 ? coreBrowserExports.Msg["DELETE_BLOCK"] : coreBrowserExports.Msg["DELETE_X_BLOCKS"].replace("%1", String(descendantCount));
+    },
+    preconditionFn: function(scope) {
+      if (!scope.block.isInFlyout && scope.block.isDeletable()) {
+        return "enabled";
+      }
+      return "hidden";
+    },
+    check: function(block) {
+      return block && !block.workspace.isFlyout && deleteOption.preconditionFn({ block }) === "enabled" && !hasSelectedParent(block);
+    },
+    callback: function(scope) {
+      const apply = function(block) {
+        if (deleteOption.check(block)) {
+          block.workspace.hideChaff();
+          if (block.outputConnection) {
+            block.dispose(false, true);
+          } else {
+            block.dispose(true, true);
+          }
+        }
+      };
+      const workspace = scope.block.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      coreBrowserExports.Events.setGroup(true);
+      if (!blockSelection.size) {
+        apply(scope.block);
+      }
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        apply(block);
+      });
+      coreBrowserExports.Events.setGroup(false);
+    },
+    scopeType: coreBrowserExports.ContextMenuRegistry.ScopeType.BLOCK,
+    id: "blockDelete",
+    weight: 6
+  };
+  coreBrowserExports.ContextMenuRegistry.registry.register(deleteOption);
+};
+const registerPaste$1 = function(useCopyPasteCrossTab) {
+  const pasteOption = {
+    displayText: function() {
+      const workableBlocksLength = blockNumGetFromStorage(useCopyPasteCrossTab);
+      if (workableBlocksLength <= 1) {
+        return coreBrowserExports.Msg["CROSS_TAB_PASTE"] ? coreBrowserExports.Msg["CROSS_TAB_PASTE"] : "Paste";
+      } else {
+        return coreBrowserExports.Msg["CROSS_TAB_PASTE_X_BLOCKS"] ? coreBrowserExports.Msg["CROSS_TAB_PASTE_X_BLOCKS"].replace(
+          "%1",
+          workableBlocksLength
+        ) : (coreBrowserExports.Msg["CROSS_TAB_PASTE"] ? coreBrowserExports.Msg["CROSS_TAB_PASTE"] : "Paste") + " (" + workableBlocksLength + ")";
+      }
+    },
+    preconditionFn: function(scope) {
+      return scope.workspace.options.readOnly ? "hidden" : blockNumGetFromStorage(useCopyPasteCrossTab) < 1 ? "disabled" : "enabled";
+    },
+    callback: function(scope) {
+      let workspace = scope.workspace;
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      coreBrowserExports.Events.setGroup(true);
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        if (block) {
+          block.pathObject.updateSelected(false);
+        }
+      });
+      blockSelection.clear();
+      const blockList = [];
+      if (useCopyPasteCrossTab) {
+        dataCopyFromStorage();
+      }
+      copyData.forEach(function(data) {
+        if (data.source) {
+          workspace = data.source;
+        }
+        if (workspace.isFlyout) {
+          workspace = workspace.targetWorkspace;
+        }
+        if (data.typeCounts && workspace.isCapacityAvailable(data.typeCounts)) {
+          const block = workspace.paste(data.saveInfo);
+          blockList.push(block);
+          block.pathObject.updateSelected(true);
+          blockSelectionWeakMap.get(block.workspace).add(block.id);
+        }
+      });
+      connectionDBList.forEach(function(connectionDB) {
+        blockList[connectionDB[0]].nextConnection.connect(
+          blockList[connectionDB[1]].previousConnection
+        );
+      });
+      coreBrowserExports.Events.setGroup(false);
+      return true;
+    },
+    scopeType: coreBrowserExports.ContextMenuRegistry.ScopeType.WORKSPACE,
+    id: "blockPasteFromStorage",
+    weight: 0
+  };
+  coreBrowserExports.ContextMenuRegistry.registry.register(pasteOption);
+};
+const registerSelectAll = function() {
+  const selectAllOption = {
+    displayText: function() {
+      return "Select all Blocks";
+    },
+    preconditionFn: function(scope) {
+      return scope.workspace.getTopBlocks().some(
+        (b2) => selectAllOption.check(b2)
+      ) ? "enabled" : "disabled";
+    },
+    check: function(block) {
+      return block && (block.isDeletable() || block.isMovable()) && !block.isInsertionMarker();
+    },
+    callback: function(scope) {
+      const blockSelection = blockSelectionWeakMap.get(scope.workspace);
+      if (coreBrowserExports.getSelected() && !blockSelection.has(coreBrowserExports.getSelected().id)) {
+        coreBrowserExports.getSelected().pathObject.updateSelected(false);
+        coreBrowserExports.common.setSelected(null);
+      }
+      const blockList = [];
+      scope.workspace.getTopBlocks().forEach(function(block) {
+        if (selectAllOption.check(block)) {
+          blockList.push(block);
+          let nextBlock = block.getNextBlock();
+          while (nextBlock) {
+            blockList.push(nextBlock);
+            nextBlock = nextBlock.getNextBlock();
+          }
+        }
+      });
+      blockList.forEach(function(block) {
+        blockSelectionWeakMap.get(block.workspace).add(block.id);
+        if (!coreBrowserExports.common.getSelected()) {
+          coreBrowserExports.common.setSelected(block);
+        }
+        block.pathObject.updateSelected(true);
+      });
+    },
+    scopeType: coreBrowserExports.ContextMenuRegistry.ScopeType.WORKSPACE,
+    id: "workspaceSelectAll",
+    weight: 5
+  };
+  coreBrowserExports.ContextMenuRegistry.registry.register(selectAllOption);
+};
+const unregisterContextMenu = function() {
+  coreBrowserExports.ContextMenuRegistry.registry.unregister("blockDuplicate");
+  coreBrowserExports.ContextMenuRegistry.registry.unregister("blockComment");
+  coreBrowserExports.ContextMenuRegistry.registry.unregister("blockInline");
+  coreBrowserExports.ContextMenuRegistry.registry.unregister("blockCollapseExpand");
+  coreBrowserExports.ContextMenuRegistry.registry.unregister("blockDisable");
+  coreBrowserExports.ContextMenuRegistry.registry.unregister("blockDelete");
+};
+const registerOrigContextMenu = function() {
+  coreBrowserExports.ContextMenuItems.registerDuplicate();
+  coreBrowserExports.ContextMenuItems.registerComment();
+  coreBrowserExports.ContextMenuItems.registerInline();
+  coreBrowserExports.ContextMenuItems.registerCollapseExpandBlock();
+  coreBrowserExports.ContextMenuItems.registerDisable();
+  coreBrowserExports.ContextMenuItems.registerDelete();
+};
+const registerOurContextMenu = function(useCopyPasteMenu, useCopyPasteCrossTab) {
+  if (useCopyPasteMenu) {
+    registerCopy$1(useCopyPasteCrossTab);
+    registerPaste$1(useCopyPasteCrossTab);
+  }
+  registerDuplicate();
+  registerComment();
+  registerInline();
+  registerCollapseExpandBlock();
+  registerDisable();
+  registerDelete();
+  registerSelectAll();
+};
+/**
+ * @license
+ * Copyright 2022 MIT
+ * SPDX-License-Identifier: Apache-2.0
+ */
+const registerShortcutDelete = function() {
+  const deleteShortcut = {
+    name: coreBrowserExports.ShortcutItems.names.DELETE,
+    preconditionFn: function(workspace) {
+      if (workspace.options.readOnly || coreBrowserExports.Gesture.inProgress()) {
+        return false;
+      }
+      const selected = coreBrowserExports.common.getSelected();
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      if (!blockSelection.size) {
+        return deleteShortcut.check(selected);
+      }
+      for (const id2 of blockSelection) {
+        const block = workspace.getBlockById(id2);
+        if (deleteShortcut.check(block)) {
+          return true;
+        }
+      }
+      return false;
+    },
+    check: function(block) {
+      return block && block.isDeletable() && !block.workspace.isFlyout && !hasSelectedParent(block);
+    },
+    callback: function(workspace, e2) {
+      e2.preventDefault();
+      const apply = function(block) {
+        if (deleteShortcut.check(block)) {
+          block.workspace.hideChaff();
+          if (block.outputConnection) {
+            block.dispose(false, true);
+          } else {
+            block.dispose(true, true);
+          }
+        }
+      };
+      const selected = coreBrowserExports.common.getSelected();
+      coreBrowserExports.Events.setGroup(true);
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      if (!blockSelection.size) {
+        apply(selected);
+      }
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        apply(block);
+      });
+      coreBrowserExports.Events.setGroup(false);
+      return true;
+    }
+  };
+  coreBrowserExports.ShortcutRegistry.registry.register(deleteShortcut);
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(
+    coreBrowserExports.utils.KeyCodes.DELETE,
+    deleteShortcut.name
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(
+    coreBrowserExports.utils.KeyCodes.BACKSPACE,
+    deleteShortcut.name
+  );
+};
+const registerCopy = function(useCopyPasteCrossTab) {
+  const copyShortcut = {
+    name: coreBrowserExports.ShortcutItems.names.COPY,
+    preconditionFn: function(workspace) {
+      if (workspace.options.readOnly || coreBrowserExports.Gesture.inProgress()) {
+        return false;
+      }
+      const selected = coreBrowserExports.common.getSelected();
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      if (!blockSelection.size) {
+        return copyShortcut.check(selected);
+      }
+      for (const id2 of blockSelection) {
+        const block = workspace.getBlockById(id2);
+        if (copyShortcut.check(block)) {
+          return true;
+        }
+      }
+      return false;
+    },
+    check: function(block) {
+      return block && block.isDeletable() && block.isMovable() && !hasSelectedParent(block);
+    },
+    callback: function(workspace, e2) {
+      e2.preventDefault();
+      copyData.clear();
+      workspace.hideChaff();
+      const blockList = [];
+      const apply = function(block) {
+        if (copyShortcut.check(block)) {
+          copyData.add(block.toCopyData());
+          blockList.push(block.id);
+        }
+      };
+      const selected = coreBrowserExports.common.getSelected();
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      coreBrowserExports.Events.setGroup(true);
+      if (!blockSelection.size) {
+        apply(selected);
+      }
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        apply(block);
+      });
+      connectionDBList.length = 0;
+      blockList.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        const parentBlock = block.getParent();
+        if (parentBlock && blockList.indexOf(parentBlock.id) !== -1 && parentBlock.getNextBlock() === block) {
+          connectionDBList.push([
+            blockList.indexOf(parentBlock.id),
+            blockList.indexOf(block.id)
+          ]);
+        }
+      });
+      if (useCopyPasteCrossTab) {
+        dataCopyToStorage();
+      }
+      coreBrowserExports.Events.setGroup(false);
+      return true;
+    }
+  };
+  coreBrowserExports.ShortcutRegistry.registry.register(copyShortcut);
+  const ctrlC = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.C,
+    [coreBrowserExports.utils.KeyCodes.CTRL]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(
+    ctrlC,
+    coreBrowserExports.ShortcutItems.names.COPY
+  );
+  const altC = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.C,
+    [coreBrowserExports.utils.KeyCodes.ALT]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(
+    altC,
+    coreBrowserExports.ShortcutItems.names.COPY
+  );
+  const metaC = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.C,
+    [coreBrowserExports.utils.KeyCodes.META]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(
+    metaC,
+    coreBrowserExports.ShortcutItems.names.COPY
+  );
+};
+const registerCut = function(useCopyPasteCrossTab) {
+  const cutShortcut = {
+    name: coreBrowserExports.ShortcutItems.names.CUT,
+    preconditionFn: function(workspace) {
+      if (workspace.options.readOnly || coreBrowserExports.Gesture.inProgress()) {
+        return false;
+      }
+      const selected = coreBrowserExports.common.getSelected();
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      if (!blockSelection.size) {
+        return cutShortcut.check(selected);
+      }
+      for (const id2 of blockSelection) {
+        const block = workspace.getBlockById(id2);
+        if (cutShortcut.check(block)) {
+          return true;
+        }
+      }
+      return false;
+    },
+    check: function(block) {
+      return block && block.isDeletable() && block.isMovable() && !block.workspace.isFlyout && !hasSelectedParent(block);
+    },
+    callback: function(workspace) {
+      copyData.clear();
+      const blockList = [];
+      const apply = function(block) {
+        if (cutShortcut.check(block)) {
+          copyData.add(block.toCopyData());
+          blockList.push(block.id);
+        }
+      };
+      const applyDelete = function(block) {
+        if (!block)
+          return;
+        block.workspace.hideChaff();
+        if (block.outputConnection) {
+          block.dispose(false, true);
+        } else {
+          block.dispose(true, true);
+        }
+      };
+      const selected = coreBrowserExports.common.getSelected();
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      coreBrowserExports.Events.setGroup(true);
+      if (!blockSelection.size) {
+        apply(selected);
+      }
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        apply(block);
+      });
+      connectionDBList.length = 0;
+      blockList.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        const parentBlock = block.getParent();
+        if (parentBlock && blockList.indexOf(parentBlock.id) !== -1 && parentBlock.getNextBlock() === block) {
+          connectionDBList.push([
+            blockList.indexOf(parentBlock.id),
+            blockList.indexOf(block.id)
+          ]);
+        }
+      });
+      blockList.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        applyDelete(block);
+      });
+      if (useCopyPasteCrossTab) {
+        dataCopyToStorage();
+      }
+      coreBrowserExports.Events.setGroup(false);
+      return true;
+    }
+  };
+  coreBrowserExports.ShortcutRegistry.registry.register(cutShortcut);
+  const ctrlX = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.X,
+    [coreBrowserExports.utils.KeyCodes.CTRL]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(ctrlX, cutShortcut.name);
+  const altX = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.X,
+    [coreBrowserExports.utils.KeyCodes.ALT]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(altX, cutShortcut.name);
+  const metaX = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.X,
+    [coreBrowserExports.utils.KeyCodes.META]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(metaX, cutShortcut.name);
+};
+const registerPaste = function(useCopyPasteCrossTab) {
+  const pasteShortcut = {
+    name: coreBrowserExports.ShortcutItems.names.PASTE,
+    preconditionFn: function(workspace) {
+      return !workspace.options.readOnly && !coreBrowserExports.Gesture.inProgress();
+    },
+    callback: function(workspace) {
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      coreBrowserExports.Events.setGroup(true);
+      blockSelection.forEach(function(id2) {
+        const block = workspace.getBlockById(id2);
+        if (block) {
+          block.pathObject.updateSelected(false);
+        }
+      });
+      blockSelection.clear();
+      const blockList = [];
+      if (useCopyPasteCrossTab) {
+        dataCopyFromStorage();
+      }
+      copyData.forEach(function(data) {
+        if (data.source) {
+          workspace = data.source;
+        }
+        if (workspace.isFlyout) {
+          workspace = workspace.targetWorkspace;
+        }
+        if (data.typeCounts && workspace.isCapacityAvailable(data.typeCounts)) {
+          const block = workspace.paste(data.saveInfo);
+          blockList.push(block);
+          block.pathObject.updateSelected(true);
+          blockSelectionWeakMap.get(block.workspace).add(block.id);
+        }
+      });
+      connectionDBList.forEach(function(connectionDB) {
+        blockList[connectionDB[0]].nextConnection.connect(
+          blockList[connectionDB[1]].previousConnection
+        );
+      });
+      coreBrowserExports.Events.setGroup(false);
+      return true;
+    }
+  };
+  coreBrowserExports.ShortcutRegistry.registry.register(pasteShortcut);
+  const ctrlV = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.V,
+    [coreBrowserExports.utils.KeyCodes.CTRL]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(ctrlV, pasteShortcut.name);
+  const altV = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.V,
+    [coreBrowserExports.utils.KeyCodes.ALT]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(altV, pasteShortcut.name);
+  const metaV = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.V,
+    [coreBrowserExports.utils.KeyCodes.META]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(metaV, pasteShortcut.name);
+};
+const registeSelectAll = function() {
+  const selectAllShortcut = {
+    name: "selectall",
+    preconditionFn: function(workspace) {
+      return workspace.getTopBlocks().some(
+        (b2) => selectAllShortcut.check(b2)
+      ) ? true : false;
+    },
+    check: function(block) {
+      return block && (block.isDeletable() || block.isMovable()) && !block.isInsertionMarker();
+    },
+    callback: function(workspace, e2) {
+      e2.preventDefault();
+      const blockSelection = blockSelectionWeakMap.get(workspace);
+      if (coreBrowserExports.getSelected() && !blockSelection.has(coreBrowserExports.getSelected().id)) {
+        coreBrowserExports.getSelected().pathObject.updateSelected(false);
+        coreBrowserExports.common.setSelected(null);
+      }
+      const blockList = [];
+      workspace.getTopBlocks().forEach(function(block) {
+        if (selectAllShortcut.check(block)) {
+          blockList.push(block);
+          let nextBlock = block.getNextBlock();
+          while (nextBlock) {
+            blockList.push(nextBlock);
+            nextBlock = nextBlock.getNextBlock();
+          }
+        }
+      });
+      blockList.forEach(function(block) {
+        blockSelection.add(block.id);
+        if (!coreBrowserExports.common.getSelected()) {
+          coreBrowserExports.common.setSelected(block);
+        }
+        block.pathObject.updateSelected(true);
+      });
+      return true;
+    }
+  };
+  coreBrowserExports.ShortcutRegistry.registry.register(selectAllShortcut);
+  const ctrlA = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.A,
+    [coreBrowserExports.utils.KeyCodes.CTRL]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(
+    ctrlA,
+    selectAllShortcut.name
+  );
+  const altA = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.A,
+    [coreBrowserExports.utils.KeyCodes.ALT]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(
+    altA,
+    selectAllShortcut.name
+  );
+  const metaA = coreBrowserExports.ShortcutRegistry.registry.createSerializedKey(
+    coreBrowserExports.utils.KeyCodes.A,
+    [coreBrowserExports.utils.KeyCodes.META]
+  );
+  coreBrowserExports.ShortcutRegistry.registry.addKeyMapping(
+    metaA,
+    selectAllShortcut.name
+  );
+};
+const unregisterShortcut = function() {
+  coreBrowserExports.ShortcutRegistry.registry.unregister(
+    coreBrowserExports.ShortcutItems.names.DELETE
+  );
+  coreBrowserExports.ShortcutRegistry.registry.unregister(
+    coreBrowserExports.ShortcutItems.names.COPY
+  );
+  coreBrowserExports.ShortcutRegistry.registry.unregister(
+    coreBrowserExports.ShortcutItems.names.CUT
+  );
+  coreBrowserExports.ShortcutRegistry.registry.unregister(
+    coreBrowserExports.ShortcutItems.names.PASTE
+  );
+};
+const registerOrigShortcut = function() {
+  coreBrowserExports.ShortcutItems.registerDelete();
+  coreBrowserExports.ShortcutItems.registerCopy();
+  coreBrowserExports.ShortcutItems.registerCut();
+  coreBrowserExports.ShortcutItems.registerPaste();
+};
+const registerOurShortcut = function(useCopyPasteCrossTab) {
+  registerShortcutDelete();
+  registerCopy(useCopyPasteCrossTab);
+  registerCut(useCopyPasteCrossTab);
+  registerPaste(useCopyPasteCrossTab);
+  registeSelectAll();
+};
+var DragSelect$1 = { exports: {} };
+(function(module, exports) {
+  (function(global2, factory) {
+    module.exports = factory();
+  })(commonjsGlobal, function() {
+    function _iterableToArrayLimit2(arr, i2) {
+      var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"];
+      if (null != _i) {
+        var _s, _e2, _x2, _r, _arr = [], _n2 = true, _d = false;
+        try {
+          if (_x2 = (_i = _i.call(arr)).next, 0 === i2) {
+            if (Object(_i) !== _i)
+              return;
+            _n2 = false;
+          } else
+            for (; !(_n2 = (_s = _x2.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i2); _n2 = true)
+              ;
+        } catch (err) {
+          _d = true, _e2 = err;
+        } finally {
+          try {
+            if (!_n2 && null != _i.return && (_r = _i.return(), Object(_r) !== _r))
+              return;
+          } finally {
+            if (_d)
+              throw _e2;
+          }
+        }
+        return _arr;
+      }
+    }
+    function ownKeys2(object, enumerableOnly) {
+      var keys2 = Object.keys(object);
+      if (Object.getOwnPropertySymbols) {
+        var symbols = Object.getOwnPropertySymbols(object);
+        enumerableOnly && (symbols = symbols.filter(function(sym) {
+          return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+        })), keys2.push.apply(keys2, symbols);
+      }
+      return keys2;
+    }
+    function _objectSpread22(target2) {
+      for (var i2 = 1; i2 < arguments.length; i2++) {
+        var source = null != arguments[i2] ? arguments[i2] : {};
+        i2 % 2 ? ownKeys2(Object(source), true).forEach(function(key) {
+          _defineProperty2(target2, key, source[key]);
+        }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target2, Object.getOwnPropertyDescriptors(source)) : ownKeys2(Object(source)).forEach(function(key) {
+          Object.defineProperty(target2, key, Object.getOwnPropertyDescriptor(source, key));
+        });
+      }
+      return target2;
+    }
+    function _classCallCheck(instance, Constructor) {
+      if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+      }
+    }
+    function _defineProperties2(target2, props) {
+      for (var i2 = 0; i2 < props.length; i2++) {
+        var descriptor = props[i2];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ("value" in descriptor)
+          descriptor.writable = true;
+        Object.defineProperty(target2, _toPropertyKey2(descriptor.key), descriptor);
+      }
+    }
+    function _createClass2(Constructor, protoProps, staticProps) {
+      if (protoProps)
+        _defineProperties2(Constructor.prototype, protoProps);
+      if (staticProps)
+        _defineProperties2(Constructor, staticProps);
+      Object.defineProperty(Constructor, "prototype", {
+        writable: false
+      });
+      return Constructor;
+    }
+    function _defineProperty2(obj, key, value) {
+      key = _toPropertyKey2(key);
+      if (key in obj) {
+        Object.defineProperty(obj, key, {
+          value,
+          enumerable: true,
+          configurable: true,
+          writable: true
+        });
+      } else {
+        obj[key] = value;
+      }
+      return obj;
+    }
+    function _inherits(subClass, superClass) {
+      if (typeof superClass !== "function" && superClass !== null) {
+        throw new TypeError("Super expression must either be null or a function");
+      }
+      subClass.prototype = Object.create(superClass && superClass.prototype, {
+        constructor: {
+          value: subClass,
+          writable: true,
+          configurable: true
+        }
+      });
+      Object.defineProperty(subClass, "prototype", {
+        writable: false
+      });
+      if (superClass)
+        _setPrototypeOf(subClass, superClass);
+    }
+    function _getPrototypeOf(o2) {
+      _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf2(o3) {
+        return o3.__proto__ || Object.getPrototypeOf(o3);
+      };
+      return _getPrototypeOf(o2);
+    }
+    function _setPrototypeOf(o2, p2) {
+      _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf2(o3, p3) {
+        o3.__proto__ = p3;
+        return o3;
+      };
+      return _setPrototypeOf(o2, p2);
+    }
+    function _isNativeReflectConstruct() {
+      if (typeof Reflect === "undefined" || !Reflect.construct)
+        return false;
+      if (Reflect.construct.sham)
+        return false;
+      if (typeof Proxy === "function")
+        return true;
+      try {
+        Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+        }));
+        return true;
+      } catch (e2) {
+        return false;
+      }
+    }
+    function _construct(Parent, args, Class) {
+      if (_isNativeReflectConstruct()) {
+        _construct = Reflect.construct.bind();
+      } else {
+        _construct = function _construct2(Parent2, args2, Class2) {
+          var a2 = [null];
+          a2.push.apply(a2, args2);
+          var Constructor = Function.bind.apply(Parent2, a2);
+          var instance = new Constructor();
+          if (Class2)
+            _setPrototypeOf(instance, Class2.prototype);
+          return instance;
+        };
+      }
+      return _construct.apply(null, arguments);
+    }
+    function _isNativeFunction(fn2) {
+      return Function.toString.call(fn2).indexOf("[native code]") !== -1;
+    }
+    function _wrapNativeSuper(Class) {
+      var _cache = typeof Map === "function" ? /* @__PURE__ */ new Map() : void 0;
+      _wrapNativeSuper = function _wrapNativeSuper2(Class2) {
+        if (Class2 === null || !_isNativeFunction(Class2))
+          return Class2;
+        if (typeof Class2 !== "function") {
+          throw new TypeError("Super expression must either be null or a function");
+        }
+        if (typeof _cache !== "undefined") {
+          if (_cache.has(Class2))
+            return _cache.get(Class2);
+          _cache.set(Class2, Wrapper);
+        }
+        function Wrapper() {
+          return _construct(Class2, arguments, _getPrototypeOf(this).constructor);
+        }
+        Wrapper.prototype = Object.create(Class2.prototype, {
+          constructor: {
+            value: Wrapper,
+            enumerable: false,
+            writable: true,
+            configurable: true
+          }
+        });
+        return _setPrototypeOf(Wrapper, Class2);
+      };
+      return _wrapNativeSuper(Class);
+    }
+    function _assertThisInitialized(self2) {
+      if (self2 === void 0) {
+        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+      }
+      return self2;
+    }
+    function _possibleConstructorReturn(self2, call2) {
+      if (call2 && (typeof call2 === "object" || typeof call2 === "function")) {
+        return call2;
+      } else if (call2 !== void 0) {
+        throw new TypeError("Derived constructors may only return object or undefined");
+      }
+      return _assertThisInitialized(self2);
+    }
+    function _createSuper(Derived) {
+      var hasNativeReflectConstruct = _isNativeReflectConstruct();
+      return function _createSuperInternal() {
+        var Super = _getPrototypeOf(Derived), result;
+        if (hasNativeReflectConstruct) {
+          var NewTarget = _getPrototypeOf(this).constructor;
+          result = Reflect.construct(Super, arguments, NewTarget);
+        } else {
+          result = Super.apply(this, arguments);
+        }
+        return _possibleConstructorReturn(this, result);
+      };
+    }
+    function _superPropBase(object, property) {
+      while (!Object.prototype.hasOwnProperty.call(object, property)) {
+        object = _getPrototypeOf(object);
+        if (object === null)
+          break;
+      }
+      return object;
+    }
+    function _get() {
+      if (typeof Reflect !== "undefined" && Reflect.get) {
+        _get = Reflect.get.bind();
+      } else {
+        _get = function _get2(target2, property, receiver) {
+          var base2 = _superPropBase(target2, property);
+          if (!base2)
+            return;
+          var desc = Object.getOwnPropertyDescriptor(base2, property);
+          if (desc.get) {
+            return desc.get.call(arguments.length < 3 ? target2 : receiver);
+          }
+          return desc.value;
+        };
+      }
+      return _get.apply(this, arguments);
+    }
+    function _slicedToArray2(arr, i2) {
+      return _arrayWithHoles2(arr) || _iterableToArrayLimit2(arr, i2) || _unsupportedIterableToArray2(arr, i2) || _nonIterableRest2();
+    }
+    function _toConsumableArray2(arr) {
+      return _arrayWithoutHoles2(arr) || _iterableToArray2(arr) || _unsupportedIterableToArray2(arr) || _nonIterableSpread2();
+    }
+    function _arrayWithoutHoles2(arr) {
+      if (Array.isArray(arr))
+        return _arrayLikeToArray2(arr);
+    }
+    function _arrayWithHoles2(arr) {
+      if (Array.isArray(arr))
+        return arr;
+    }
+    function _iterableToArray2(iter) {
+      if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null)
+        return Array.from(iter);
+    }
+    function _unsupportedIterableToArray2(o2, minLen) {
+      if (!o2)
+        return;
+      if (typeof o2 === "string")
+        return _arrayLikeToArray2(o2, minLen);
+      var n2 = Object.prototype.toString.call(o2).slice(8, -1);
+      if (n2 === "Object" && o2.constructor)
+        n2 = o2.constructor.name;
+      if (n2 === "Map" || n2 === "Set")
+        return Array.from(o2);
+      if (n2 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n2))
+        return _arrayLikeToArray2(o2, minLen);
+    }
+    function _arrayLikeToArray2(arr, len) {
+      if (len == null || len > arr.length)
+        len = arr.length;
+      for (var i2 = 0, arr2 = new Array(len); i2 < len; i2++)
+        arr2[i2] = arr[i2];
+      return arr2;
+    }
+    function _nonIterableSpread2() {
+      throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    function _nonIterableRest2() {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    function _createForOfIteratorHelper(o2, allowArrayLike) {
+      var it2 = typeof Symbol !== "undefined" && o2[Symbol.iterator] || o2["@@iterator"];
+      if (!it2) {
+        if (Array.isArray(o2) || (it2 = _unsupportedIterableToArray2(o2)) || allowArrayLike && o2 && typeof o2.length === "number") {
+          if (it2)
+            o2 = it2;
+          var i2 = 0;
+          var F2 = function() {
+          };
+          return {
+            s: F2,
+            n: function() {
+              if (i2 >= o2.length)
+                return {
+                  done: true
+                };
+              return {
+                done: false,
+                value: o2[i2++]
+              };
+            },
+            e: function(e2) {
+              throw e2;
+            },
+            f: F2
+          };
+        }
+        throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+      }
+      var normalCompletion = true, didErr = false, err;
+      return {
+        s: function() {
+          it2 = it2.call(o2);
+        },
+        n: function() {
+          var step = it2.next();
+          normalCompletion = step.done;
+          return step;
+        },
+        e: function(e2) {
+          didErr = true;
+          err = e2;
+        },
+        f: function() {
+          try {
+            if (!normalCompletion && it2.return != null)
+              it2.return();
+          } finally {
+            if (didErr)
+              throw err;
+          }
+        }
+      };
+    }
+    function _toPrimitive2(input, hint) {
+      if (typeof input !== "object" || input === null)
+        return input;
+      var prim = input[Symbol.toPrimitive];
+      if (prim !== void 0) {
+        var res = prim.call(input, hint || "default");
+        if (typeof res !== "object")
+          return res;
+        throw new TypeError("@@toPrimitive must return a primitive value.");
+      }
+      return (hint === "string" ? String : Number)(input);
+    }
+    function _toPropertyKey2(arg) {
+      var key = _toPrimitive2(arg, "string");
+      return typeof key === "symbol" ? key : String(key);
+    }
+    var calc = function calc2(_ref, operator2, _ref2) {
+      var x1 = _ref.x, y1 = _ref.y;
+      var x2 = _ref2.x, y2 = _ref2.y;
+      var calculations = {
+        "+": {
+          x: x1 + x2,
+          y: y1 + y2
+        },
+        "-": {
+          x: x1 - x2,
+          y: y1 - y2
+        },
+        "*": {
+          x: x1 * x2,
+          y: y1 * y2
+        },
+        "/": {
+          x: x1 / x2,
+          y: y1 / y2
+        }
+      };
+      return calculations[operator2];
+    };
+    var rect2vect = function rect2vect2(rect) {
+      return {
+        x: rect.left,
+        y: rect.top
+      };
+    };
+    var vect2rect = function vect2rect2(vect) {
+      var dimension = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : 0;
+      return {
+        left: vect.x,
+        top: vect.y,
+        right: vect.x,
+        bottom: vect.y,
+        width: dimension,
+        height: dimension
+      };
+    };
+    var num2vect = function num2vect2(n2) {
+      return {
+        x: n2,
+        y: n2
+      };
+    };
+    var addModificationObservers = function(nodes, cb2) {
+      var callback = cb2;
+      window.addEventListener("resize", callback);
+      window.addEventListener("scroll", callback);
+      var observer = new MutationObserver(callback);
+      nodes.forEach(function(el2, i2) {
+        observer.observe(el2, {
+          childList: i2 !== 0,
+          attributes: true
+        });
+      });
+      var cleanup = function cleanup2() {
+        return removeModificationObservers(observer, callback);
+      };
+      return {
+        observer,
+        callback,
+        cleanup
+      };
+    };
+    var canScroll = function(area2) {
+      var scroll = getCurrentScroll(area2);
+      if (scroll.x || scroll.y)
+        return true;
+      if (area2 instanceof Document) {
+        if (area2.body)
+          return !!(area2.body.scrollTop = 1);
+        return !!(area2.documentElement.scrollTop = 1);
+      }
+      return !!(area2.scrollTop = 1);
+    };
+    var createSelectorAreaElement = function() {
+      var node = document.createElement("div");
+      node.style.position = "fixed";
+      node.style.overflow = "hidden";
+      node.style.pointerEvents = "none";
+      node.style.zIndex = "999999999999999999";
+      return node;
+    };
+    var createSelectorElement = function(customStyles) {
+      var selector = document.createElement("div");
+      selector.style.position = "absolute";
+      if (!customStyles) {
+        selector.style.background = "rgba(0, 175, 255, 0.2)";
+        selector.style.border = "1px solid rgba(0, 175, 255, 0.8)";
+        selector.style.display = "none";
+        selector.style.pointerEvents = "none";
+      }
+      return selector;
+    };
+    var debounce2 = function(func, wait) {
+      var timeout;
+      return function() {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+        var later = function later2() {
+          timeout = null;
+          func.apply(void 0, args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    };
+    var documentScroll = function() {
+      var _document$body, _document$documentEle, _document$body2, _document$documentEle2;
+      return {
+        y: ((_document$body = document.body) === null || _document$body === void 0 ? void 0 : _document$body.scrollTop) || ((_document$documentEle = document.documentElement) === null || _document$documentEle === void 0 ? void 0 : _document$documentEle.scrollTop) || 0,
+        x: ((_document$body2 = document.body) === null || _document$body2 === void 0 ? void 0 : _document$body2.scrollLeft) || ((_document$documentEle2 = document.documentElement) === null || _document$documentEle2 === void 0 ? void 0 : _document$documentEle2.scrollLeft) || 0
+      };
+    };
+    var getAllParentNodes = function(node) {
+      var traverse = function traverse2(toWatch) {
+        var _toWatch$index;
+        var index2 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : 0;
+        var parent = (_toWatch$index = toWatch[index2]) === null || _toWatch$index === void 0 ? void 0 : _toWatch$index.parentNode;
+        if (parent) {
+          toWatch.push(parent);
+          index2++;
+          return traverse2(toWatch, index2);
+        }
+        return toWatch;
+      };
+      return traverse([node]);
+    };
+    var getAreaRect = function(area2, zoom) {
+      if (area2 instanceof Document)
+        return {
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          width: window.innerWidth,
+          height: window.innerHeight
+        };
+      var rect = area2.getBoundingClientRect();
+      return {
+        top: rect.top,
+        left: rect.left,
+        bottom: rect.bottom,
+        right: rect.right,
+        width: (area2.clientWidth || rect.width) * zoom,
+        height: (area2.clientHeight || rect.height) * zoom
+      };
+    };
+    var getBoundingClientRect = function(elements, SelectableSet2) {
+      var rect = {
+        top: Number.POSITIVE_INFINITY,
+        left: Number.POSITIVE_INFINITY,
+        bottom: Number.NEGATIVE_INFINITY,
+        right: Number.NEGATIVE_INFINITY,
+        width: Number.NEGATIVE_INFINITY,
+        height: Number.NEGATIVE_INFINITY
+      };
+      toArray2(elements).forEach(function(element) {
+        var elementRect = SelectableSet2.getRect(element);
+        rect.top = Math.min(rect.top, elementRect.top);
+        rect.left = Math.min(rect.left, elementRect.left);
+        rect.bottom = Math.max(rect.bottom, elementRect.bottom);
+        rect.right = Math.max(rect.right, elementRect.right);
+      });
+      rect.height = rect.bottom - rect.top;
+      rect.width = rect.right - rect.left;
+      return rect;
+    };
+    var getCurrentScroll = function(area2) {
+      if (!area2 || area2 instanceof Document)
+        return documentScroll();
+      return {
+        x: area2.scrollLeft >= 0 ? area2.scrollLeft : documentScroll().x,
+        y: area2.scrollTop >= 0 ? area2.scrollTop : documentScroll().y
+      };
+    };
+    var getOverflowEdges = function(_ref) {
+      var elementRect = _ref.elementRect, containerRect = _ref.containerRect, _ref$tolerance = _ref.tolerance, tolerance = _ref$tolerance === void 0 ? {
+        x: 0,
+        y: 0
+      } : _ref$tolerance;
+      var edges = [];
+      if (elementRect.top - tolerance.y < containerRect.top)
+        edges.push("top");
+      if (elementRect.left - tolerance.x < containerRect.left)
+        edges.push("left");
+      if (elementRect.bottom + tolerance.y > containerRect.bottom)
+        edges.push("bottom");
+      if (elementRect.right + tolerance.y > containerRect.right)
+        edges.push("right");
+      return (
+        /** @type {DSEdges} */
+        edges
+      );
+    };
+    var getPointerPos = function(_ref) {
+      var event = _ref.event;
+      return {
+        x: event.clientX,
+        y: event.clientY
+      };
+    };
+    var getSelectorPosition = function(_ref) {
+      var scrollAmount = _ref.scrollAmount, initialPointerPos = _ref.initialPointerPos, pointerPos = _ref.pointerPos;
+      var selectorPos = {};
+      if (pointerPos.x > initialPointerPos.x - scrollAmount.x) {
+        selectorPos.left = initialPointerPos.x - scrollAmount.x;
+        selectorPos.width = pointerPos.x - initialPointerPos.x + scrollAmount.x;
+      } else {
+        selectorPos.left = pointerPos.x;
+        selectorPos.width = initialPointerPos.x - pointerPos.x - scrollAmount.x;
+      }
+      if (pointerPos.y > initialPointerPos.y - scrollAmount.y) {
+        selectorPos.top = initialPointerPos.y - scrollAmount.y;
+        selectorPos.height = pointerPos.y - initialPointerPos.y + scrollAmount.y;
+      } else {
+        selectorPos.top = pointerPos.y;
+        selectorPos.height = initialPointerPos.y - pointerPos.y - scrollAmount.y;
+      }
+      return selectorPos;
+    };
+    var getComputedTranslatePositions = function getComputedTranslatePositions2(element) {
+      var position = {
+        x: 0,
+        y: 0
+      };
+      var computed = window.getComputedStyle(element);
+      if (!computed.transform || computed.transform === "none")
+        return position;
+      if (computed.transform.indexOf("3d") >= 0) {
+        var _match = computed.transform.trim().match(/matrix3d\((.*?)\)/);
+        if (_match && _match.length) {
+          var _match$;
+          var values = (_match$ = _match[1]) === null || _match$ === void 0 ? void 0 : _match$.split(",");
+          position.x = parseInt(values[12]) || 0;
+          position.y = parseInt(values[13]) || 0;
+        }
+        return position;
+      }
+      var match = computed.transform.trim().match(/matrix\((.*?)\)/);
+      if (match && match.length) {
+        var _match$2;
+        var _values = (_match$2 = match[1]) === null || _match$2 === void 0 ? void 0 : _match$2.split(",");
+        position.x = parseInt(_values[4]) || 0;
+        position.y = parseInt(_values[5]) || 0;
+      }
+      return position;
+    };
+    var getTranslatedPositions = function getTranslatedPositions2(element) {
+      var transform = element.style.transform;
+      if (!transform || transform.indexOf("translate") < 0)
+        return getComputedTranslatePositions(element);
+      var position = {
+        x: 0,
+        y: 0
+      };
+      var match = transform.trim().match(/translate[3dD]*?\(.*?\)/);
+      if (match) {
+        var _match$3;
+        var split = (_match$3 = match[0]) === null || _match$3 === void 0 ? void 0 : _match$3.split("(");
+        if (split) {
+          var _split$;
+          var values = (_split$ = split[1]) === null || _split$ === void 0 ? void 0 : _split$.split(",");
+          position.x = parseInt(values[0]) || 0;
+          position.y = parseInt(values[1]) || 0;
+        }
+      }
+      if (!position.x && !position.x)
+        return getComputedTranslatePositions(element);
+      return position;
+    };
+    var getTopLeftPosition = function getTopLeftPosition2(element) {
+      var style = element.style;
+      var position = {
+        x: parseInt(style.left) || 0,
+        y: parseInt(style.top) || 0
+      };
+      if (!position.x && !position.x) {
+        var computed = window.getComputedStyle(element);
+        return {
+          x: parseInt(computed.left) || 0,
+          y: parseInt(computed.top) || 0
+        };
+      }
+      return position;
+    };
+    var getStylePosition = function(element, useTranslate) {
+      if (useTranslate)
+        return getTranslatedPositions(element);
+      return getTopLeftPosition(element);
+    };
+    var handleElementOverflow = function(_ref) {
+      var element = _ref.element, edges = _ref.edges, elementRect = _ref.elementRect, containerRect = _ref.containerRect, elementPos = _ref.elementPos, useTransform = _ref.useTransform;
+      if (edges.includes("top")) {
+        setStylePosition(element, {
+          y: elementPos.y + containerRect.top - elementRect.top,
+          x: elementPos.x
+        }, useTransform);
+      }
+      if (edges.includes("left")) {
+        setStylePosition(element, {
+          y: elementPos.y,
+          x: elementPos.x + containerRect.left - elementRect.left
+        }, useTransform);
+      }
+      if (edges.includes("bottom")) {
+        setStylePosition(element, {
+          y: elementPos.y + containerRect.bottom - elementRect.bottom,
+          x: elementPos.x
+        }, useTransform);
+      }
+      if (edges.includes("right")) {
+        setStylePosition(element, {
+          y: elementPos.y,
+          x: elementPos.x + containerRect.right - elementRect.right
+        }, useTransform);
+      }
+    };
+    var handleElementPositionAttribute = function(_ref) {
+      var computedStyle = _ref.computedStyle, node = _ref.node;
+      var position = computedStyle.position;
+      var isPositioned = position === "absolute" || position === "relative" || position === "fixed";
+      if (!(node instanceof Document) && !isPositioned)
+        node.style.position = "relative";
+    };
+    var handleKeyboardDragPosDifference = function(_ref) {
+      var shiftKey = _ref.shiftKey, keyboardDragSpeed = _ref.keyboardDragSpeed, zoom = _ref.zoom, key = _ref.key, dragKeys = _ref.dragKeys, scrollDiff = _ref.scrollDiff, canScroll2 = _ref.canScroll, scrollCallback = _ref.scrollCallback;
+      var posDirection = {
+        x: 0,
+        y: 0
+      };
+      var increase = shiftKey ? keyboardDragSpeed * 4 * zoom : keyboardDragSpeed * zoom;
+      if (dragKeys.left.includes(key)) {
+        posDirection.x = scrollDiff.x || -increase;
+        if (!shiftKey && !scrollDiff.x && canScroll2)
+          scrollCallback(["left"], keyboardDragSpeed);
+      }
+      if (dragKeys.right.includes(key)) {
+        posDirection.x = scrollDiff.x || increase;
+        if (!shiftKey && !scrollDiff.x && canScroll2)
+          scrollCallback(["right"], keyboardDragSpeed);
+      }
+      if (dragKeys.up.includes(key)) {
+        posDirection.y = scrollDiff.y || -increase;
+        if (!shiftKey && !scrollDiff.y && canScroll2)
+          scrollCallback(["top"], keyboardDragSpeed);
+      }
+      if (dragKeys.down.includes(key)) {
+        posDirection.y = scrollDiff.y || increase;
+        if (!shiftKey && !scrollDiff.y && canScroll2)
+          scrollCallback(["bottom"], keyboardDragSpeed);
+      }
+      return posDirection;
+    };
+    var handleSelection = function(_ref) {
+      var element = _ref.element, force = _ref.force, multiSelectionToggle = _ref.multiSelectionToggle, SelectedSet2 = _ref.SelectedSet, hoverClassName = _ref.hoverClassName;
+      if (element.classList.contains(hoverClassName) && !force)
+        return;
+      if (!SelectedSet2.has(element))
+        SelectedSet2.add(element);
+      else if (multiSelectionToggle)
+        SelectedSet2["delete"](element);
+      element.classList.add(hoverClassName);
+    };
+    var handleUnSelection = function(_ref) {
+      var element = _ref.element, force = _ref.force, SelectedSet2 = _ref.SelectedSet, PrevSelectedSet = _ref.PrevSelectedSet, hoverClassName = _ref.hoverClassName;
+      if (!element.classList.contains(hoverClassName) && !force)
+        return false;
+      var inSelection = SelectedSet2.has(element);
+      var inPrevSelection = PrevSelectedSet.has(element);
+      if (inSelection && !inPrevSelection)
+        SelectedSet2["delete"](element);
+      else if (!inSelection && inPrevSelection)
+        SelectedSet2.add(element);
+      element.classList.remove(hoverClassName);
+    };
+    var wrongTypeWarn = function wrongTypeWarn2(key, type, fallback) {
+      return console.warn('[DragSelect] TypeIssue: setting "'.concat(key, '" is not of type "').concat(type, '".'));
+    };
+    var hydrateHelper = function hydrateHelper2(key, value, withFallback, fallback) {
+      if (value === void 0)
+        return withFallback ? _defineProperty2({}, key, fallback) : {};
+      if (value === null)
+        return _defineProperty2({}, key, null);
+      var isAvailable = true;
+      var forceFallback = false;
+      var expectedString = typeof fallback === "string";
+      if (expectedString)
+        isAvailable = typeof value === "string" || value instanceof String;
+      if (expectedString && !isAvailable) {
+        forceFallback = true;
+        wrongTypeWarn(key, "string");
+      }
+      var expectedNumber = !Number.isNaN(fallback) && typeof fallback === "number";
+      if (expectedNumber)
+        isAvailable = !Number.isNaN(value) && typeof value === "number";
+      if (expectedNumber && !isAvailable) {
+        forceFallback = true;
+        wrongTypeWarn(key, "number");
+      }
+      var expectedObject = Object.prototype.toString.call(fallback) === "[object Object]";
+      if (expectedObject)
+        isAvailable = Object.prototype.toString.call(value) === "[object Object]";
+      if (expectedObject && !isAvailable) {
+        forceFallback = true;
+        wrongTypeWarn(key, "object");
+      }
+      var expectedBoolean = typeof fallback === "boolean";
+      if (expectedBoolean)
+        isAvailable = typeof value === "boolean";
+      if (expectedBoolean && !isAvailable) {
+        forceFallback = true;
+        wrongTypeWarn(key, "boolean");
+      }
+      var expectedArray = Array.isArray(fallback);
+      if (expectedArray)
+        isAvailable = Array.isArray(value);
+      if (expectedArray && !isAvailable) {
+        forceFallback = true;
+        wrongTypeWarn(key, "array");
+      }
+      var isFallback = forceFallback || withFallback;
+      if (key === "dragKeys" && isAvailable)
+        return _defineProperty2({}, key, Object.assign(fallback, value));
+      if (key === "dragKeys" && !isAvailable)
+        return isFallback ? _defineProperty2({}, key, fallback) : {};
+      if (key === "dropZones" && isAvailable && new Set(value.map(function(v2) {
+        return v2.id;
+      })).size !== value.length)
+        console.warn('[DragSelect] UniqueConstraintsIssue: setting "dropZones" contains duplicate ids.');
+      if (isAvailable)
+        return _defineProperty2({}, key, value);
+      if (isFallback)
+        return _defineProperty2({}, key, fallback);
+      return {};
+    };
+    var hydrateSettings = function(settings, withFallback) {
+      return _objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22(_objectSpread22({}, hydrateHelper("area", settings.area, withFallback, document)), hydrateHelper("selectables", settings.selectables, withFallback, null)), hydrateHelper("autoScrollSpeed", settings.autoScrollSpeed, withFallback, 5)), hydrateHelper("overflowTolerance", settings.overflowTolerance, withFallback, {
+        x: 25,
+        y: 25
+      })), hydrateHelper("zoom", settings.zoom, withFallback, 1)), hydrateHelper("customStyles", settings.customStyles, withFallback, false)), hydrateHelper("multiSelectMode", settings.multiSelectMode, withFallback, false)), hydrateHelper("multiSelectToggling", settings.multiSelectToggling, withFallback, true)), hydrateHelper("multiSelectKeys", settings.multiSelectKeys, withFallback, ["Control", "Shift", "Meta"])), hydrateHelper("selector", settings.selector, withFallback, null)), hydrateHelper("selectionThreshold", settings.selectionThreshold, withFallback, 0)), hydrateHelper("draggability", settings.draggability, withFallback, true)), hydrateHelper("immediateDrag", settings.immediateDrag, withFallback, true)), hydrateHelper("keyboardDrag", settings.keyboardDrag, withFallback, true)), hydrateHelper("dragKeys", settings.dragKeys, withFallback, {
+        up: ["ArrowUp"],
+        down: ["ArrowDown"],
+        left: ["ArrowLeft"],
+        right: ["ArrowRight"]
+      })), hydrateHelper("keyboardDragSpeed", settings.keyboardDragSpeed, withFallback, 10)), hydrateHelper("useTransform", settings.useTransform, withFallback, true)), hydrateHelper("refreshMemoryRate", settings.refreshMemoryRate, withFallback, 80)), hydrateHelper("dropZones", settings.dropZones, withFallback, [])), hydrateHelper("dropInsideThreshold", settings.dropInsideThreshold, withFallback, 1)), hydrateHelper("dropTargetThreshold", settings.dropTargetThreshold, withFallback, 0)), hydrateHelper("usePointerEvents", settings.usePointerEvents, withFallback, false)), hydrateHelper("hoverClass", settings.hoverClass, withFallback, "ds-hover")), hydrateHelper("selectableClass", settings.selectableClass, withFallback, "ds-selectable")), hydrateHelper("selectedClass", settings.selectedClass, withFallback, "ds-selected")), hydrateHelper("selectorClass", settings.selectorClass, withFallback, "ds-selector")), hydrateHelper("selectorAreaClass", settings.selectorAreaClass, withFallback, "ds-selector-area")), hydrateHelper("droppedTargetClass", settings.droppedTargetClass, withFallback, "ds-dropped-target")), hydrateHelper("droppedInsideClass", settings.droppedInsideClass, withFallback, "ds-dropped-inside")), hydrateHelper("droppableClass", settings.droppableClass, withFallback, "ds-droppable")), hydrateHelper("dropZoneClass", settings.dropZoneClass, withFallback, "ds-dropzone")), hydrateHelper("dropZoneReadyClass", settings.dropZoneReadyClass, withFallback, "ds-dropzone-ready")), hydrateHelper("dropZoneTargetClass", settings.dropZoneTargetClass, withFallback, "ds-dropzone-target")), hydrateHelper("dropZoneInsideClass", settings.dropZoneInsideClass, withFallback, "ds-dropzone-inside")), hydrateHelper("dragAsBlock", settings.dragAsBlock, withFallback, false));
+    };
+    var isCollision = function(el1, el2) {
+      var percent = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : 0;
+      var element1 = el1;
+      if (percent > 0) {
+        var widthPoint = (el1.right - el1.left) * percent;
+        var heightPoint = (el1.bottom - el1.top) * percent;
+        element1 = {
+          left: el1.left + widthPoint,
+          right: el1.right - widthPoint,
+          top: el1.top + heightPoint,
+          bottom: el1.bottom - heightPoint
+        };
+      }
+      if (element1.left < el2.right && // 1.
+      element1.right > el2.left && // 2.
+      element1.top < el2.bottom && // 3.
+      element1.bottom > el2.top)
+        return true;
+      return false;
+    };
+    var moveElement = function(_ref) {
+      var element = _ref.element, posDirection = _ref.posDirection, containerRect = _ref.containerRect, useTransform = _ref.useTransform;
+      var elementPos = getStylePosition(element, useTransform);
+      var newPos2 = calc(elementPos, "+", posDirection);
+      setStylePosition(element, newPos2, useTransform);
+      var elementRect = element.getBoundingClientRect();
+      var edges = getOverflowEdges({
+        elementRect,
+        containerRect
+      });
+      handleElementOverflow({
+        element,
+        edges,
+        elementRect,
+        containerRect,
+        elementPos: newPos2,
+        useTransform
+      });
+    };
+    var removeModificationObservers = function(modificationObserver, callback) {
+      window.removeEventListener("resize", callback);
+      window.removeEventListener("scroll", callback);
+      modificationObserver.disconnect();
+    };
+    var scrollElement = function(element, directions, multiplier) {
+      if (!directions.length)
+        return;
+      var docEl = document && document.documentElement && document.documentElement.scrollTop && document.documentElement;
+      var _element = element instanceof Document ? docEl || document.body : element;
+      var scrollTop = directions.includes("top") && _element.scrollTop > 0;
+      var scrollBot = directions.includes("bottom") && _element.scrollTop < _element.scrollHeight;
+      var scrollLeft = directions.includes("left") && _element.scrollLeft > 0;
+      var scrollRight = directions.includes("right") && _element.scrollLeft < _element.scrollWidth;
+      if (scrollTop)
+        _element.scrollTop -= 1 * multiplier;
+      if (scrollBot)
+        _element.scrollTop += 1 * multiplier;
+      if (scrollLeft)
+        _element.scrollLeft -= 1 * multiplier;
+      if (scrollRight)
+        _element.scrollLeft += 1 * multiplier;
+    };
+    var setStylePosition = function(element, values, useTranslate) {
+      if (useTranslate) {
+        var prevTransform = element.style.transform;
+        element.style.transform = "translate3d(".concat(values.x, "px,").concat(values.y, "px,1px) ").concat(prevTransform.replace(/translate.*?\)/g, ""));
+      } else {
+        element.style.left = "".concat(values.x, "px");
+        element.style.top = "".concat(values.y, "px");
+      }
+      return element;
+    };
+    var subscriberAliases = function(_ref) {
+      var subscribe = _ref.subscribe, publish = _ref.publish, Interaction2 = _ref.Interaction, SelectedSet2 = _ref.SelectedSet, DropZones2 = _ref.DropZones;
+      var mapping = {
+        "Selected:added": [{
+          name: "elementselect"
+        }],
+        "Selected:removed": [{
+          name: "elementunselect"
+        }],
+        "Area:scroll": [{
+          name: "autoscroll"
+        }],
+        // scroll_directions, scroll_multiplier
+        "Interaction:start": [{
+          name: "dragstart"
+        }],
+        // event, isDraggingKeyboard
+        "Interaction:update": [
+          // event, isDraggingKeyboard
+          {
+            name: "dragmove",
+            condition: function condition(data) {
+              return data.event;
+            }
+          }
+        ],
+        "Interaction:end": [
+          // event, isDraggingKeyboard
+          {
+            name: "callback",
+            extraData: function extraData() {
+              var target2 = DropZones2.getTarget();
+              return _objectSpread22({}, target2 ? {
+                dropTarget: target2.toObject()
+              } : {});
+            }
+          }
+        ]
+      };
+      var _loop = function _loop2() {
+        var _Object$entries$_i = _slicedToArray2(_Object$entries[_i], 2), sub_name = _Object$entries$_i[0], pubs = _Object$entries$_i[1];
+        ["pre", false].forEach(function(filler) {
+          return subscribe(filler ? "".concat(sub_name, ":").concat(filler) : sub_name, function(data) {
+            return pubs.forEach(function(pub) {
+              return (!pub.condition || pub.condition(data)) && publish(filler ? "".concat(filler).concat(pub.name) : pub.name, _objectSpread22(_objectSpread22({
+                items: SelectedSet2.elements,
+                isDragging: Interaction2.isDragging
+              }, data), pub.extraData ? pub.extraData(data) : {}));
+            });
+          });
+        });
+      };
+      for (var _i = 0, _Object$entries = Object.entries(mapping); _i < _Object$entries.length; _i++) {
+        _loop();
+      }
+    };
+    var toArray2 = function(items) {
+      if (!items)
+        return [];
+      if (!Array.isArray(items) && (items instanceof HTMLElement || items instanceof SVGElement))
+        return [items];
+      return _toConsumableArray2(new Set(_toConsumableArray2(items)));
+    };
+    var updateElementStylePos = function(element, pos) {
+      element.style.left = "".concat(pos.left, "px");
+      element.style.top = "".concat(pos.top, "px");
+      element.style.width = "".concat(pos.width, "px");
+      element.style.height = "".concat(pos.height, "px");
+    };
+    var Area = /* @__PURE__ */ function() {
+      function Area2(_ref) {
+        var _this = this;
+        var DS = _ref.DS;
+        _classCallCheck(this, Area2);
+        _defineProperty2(this, "DS", void 0);
+        _defineProperty2(this, "_observers", void 0);
+        _defineProperty2(this, "_node", void 0);
+        _defineProperty2(this, "_parentNodes", void 0);
+        _defineProperty2(this, "_computedStyle", void 0);
+        _defineProperty2(this, "_computedBorder", void 0);
+        _defineProperty2(this, "_rect", void 0);
+        _defineProperty2(this, "setArea", function(area2) {
+          _this.reset();
+          _this._node = area2;
+          handleElementPositionAttribute({
+            computedStyle: _this.computedStyle,
+            node: _this._node
+          });
+          setTimeout(function() {
+            _this.DS.PubSub.publish("Area:modified:pre", {
+              item: _this
+            });
+            _this.reset();
+            _this.DS.PubSub.publish("Area:modified", {
+              item: _this
+            });
+          });
+        });
+        _defineProperty2(this, "start", function() {
+          _this._observers = addModificationObservers(_this.parentNodes, debounce2(function(event) {
+            _this.DS.PubSub.publish("Area:modified:pre", {
+              event,
+              item: _this
+            });
+            _this.reset();
+            _this.DS.PubSub.publish("Area:modified", {
+              event,
+              item: _this
+            });
+          }, 60));
+        });
+        _defineProperty2(this, "reset", function() {
+          _this._computedStyle = void 0;
+          _this._rect = void 0;
+          _this._computedBorder = void 0;
+          _this._parentNodes = void 0;
+        });
+        _defineProperty2(this, "stop", function() {
+          _this._observers.cleanup();
+          _this.reset();
+        });
+        _defineProperty2(this, "scroll", function(directions, multiplier) {
+          var data = {
+            scroll_directions: directions,
+            scroll_multiplier: multiplier
+          };
+          _this.DS.PubSub.publish("Area:scroll:pre", data);
+          scrollElement(_this._node, directions, multiplier);
+          _this.DS.PubSub.publish("Area:scroll", data);
+        });
+        this.DS = DS;
+        this.setArea(this.DS.stores.SettingsStore.s.area);
+        this.DS.PubSub.subscribe("Settings:updated:area", function(_ref2) {
+          var settings = _ref2.settings;
+          _this.setArea(settings.area);
+        });
+        this.DS.PubSub.subscribe("Interaction:init", this.start);
+        this.DS.PubSub.subscribe("Interaction:end", this.reset);
+      }
+      _createClass2(Area2, [{
+        key: "HTMLNode",
+        get: (
+          /// ///////////////////////////////////////////////////////////////////////////////////
+          // Node Getters
+          function get2() {
+            return (
+              /** @type {DSArea} */
+              this._node
+            );
+          }
+        )
+        /**
+         * The computed border from the element (caches result)
+         * @type {{top:number,bottom:number,left:number,right:number}}
+         */
+      }, {
+        key: "computedBorder",
+        get: function get2() {
+          if (this._computedBorder)
+            return this._computedBorder;
+          return {
+            top: parseInt(this.computedStyle.borderTopWidth),
+            bottom: parseInt(this.computedStyle.borderBottomWidth),
+            left: parseInt(this.computedStyle.borderLeftWidth),
+            right: parseInt(this.computedStyle.borderRightWidth)
+          };
+        }
+        /**
+         * The computed styles from the element (caches result)
+         * @type {CSSStyleDeclaration}
+         */
+      }, {
+        key: "computedStyle",
+        get: function get2() {
+          if (this._computedStyle)
+            return this._computedStyle;
+          if (this.HTMLNode instanceof Document)
+            return this._computedStyle = window.getComputedStyle(this.HTMLNode.body || this.HTMLNode.documentElement);
+          return this._computedStyle = window.getComputedStyle(this.HTMLNode);
+        }
+        /**
+         * The element rect (caches result) (without scrollbar or borders)
+         * @type {DSBoundingRect}
+         */
+      }, {
+        key: "rect",
+        get: function get2() {
+          if (this._rect)
+            return this._rect;
+          return this._rect = getAreaRect(this.HTMLNode, this.DS.stores.SettingsStore.s.zoom);
+        }
+      }, {
+        key: "parentNodes",
+        get: function get2() {
+          if (this._parentNodes)
+            return this._parentNodes;
+          return this._parentNodes = getAllParentNodes(this.HTMLNode);
+        }
+      }]);
+      return Area2;
+    }();
+    var Drag = /* @__PURE__ */ function() {
+      function Drag2(_ref) {
+        var _this = this;
+        var DS = _ref.DS;
+        _classCallCheck(this, Drag2);
+        _defineProperty2(this, "_prevCursorPos", void 0);
+        _defineProperty2(this, "_prevScrollPos", void 0);
+        _defineProperty2(this, "_elements", []);
+        _defineProperty2(this, "_dragKeys", void 0);
+        _defineProperty2(this, "_dragKeysFlat", []);
+        _defineProperty2(this, "_selectionRect", void 0);
+        _defineProperty2(this, "assignDragkeys", function() {
+          _this._dragKeys = {
+            up: _this.DS.stores.SettingsStore.s.dragKeys.up.map(function(k2) {
+              return k2.toLowerCase();
+            }),
+            down: _this.DS.stores.SettingsStore.s.dragKeys.down.map(function(k2) {
+              return k2.toLowerCase();
+            }),
+            left: _this.DS.stores.SettingsStore.s.dragKeys.left.map(function(k2) {
+              return k2.toLowerCase();
+            }),
+            right: _this.DS.stores.SettingsStore.s.dragKeys.right.map(function(k2) {
+              return k2.toLowerCase();
+            })
+          };
+          _this._dragKeysFlat = [].concat(_toConsumableArray2(_this._dragKeys.up), _toConsumableArray2(_this._dragKeys.down), _toConsumableArray2(_this._dragKeys.left), _toConsumableArray2(_this._dragKeys.right));
+        });
+        _defineProperty2(this, "keyboardDrag", function(_ref2) {
+          var event = _ref2.event, key = _ref2.key;
+          var _key = key.toLowerCase();
+          if (!_this.DS.stores.SettingsStore.s.keyboardDrag || !_this._dragKeysFlat.includes(_key) || !_this.DS.SelectedSet.size || !_this.DS.stores.SettingsStore.s.draggability || _this.DS["continue"])
+            return;
+          var publishData = {
+            event,
+            isDragging: true,
+            isDraggingKeyboard: true
+          };
+          _this.DS.publish(["Interaction:start:pre", "Interaction:start"], publishData);
+          _this._elements = _this.DS.getSelection();
+          if (_this.DS.stores.SettingsStore.s.dragAsBlock)
+            _this._selectionRect = getBoundingClientRect(_this._elements, _this.DS.SelectableSet);
+          _this.handleZIndex(true);
+          var posDirection = handleKeyboardDragPosDifference({
+            shiftKey: _this.DS.stores.KeyStore.currentValues.includes("shift"),
+            keyboardDragSpeed: _this.DS.stores.SettingsStore.s.keyboardDragSpeed,
+            zoom: _this.DS.stores.SettingsStore.s.zoom,
+            key: _key,
+            scrollCallback: _this.DS.Area.scroll,
+            scrollDiff: _this._scrollDiff,
+            canScroll: _this.DS.stores.ScrollStore.canScroll,
+            dragKeys: _this._dragKeys
+          });
+          if (_this.DS.stores.SettingsStore.s.dragAsBlock)
+            posDirection = _this.limitDirection(posDirection);
+          _this._elements.forEach(function(element) {
+            return moveElement({
+              element,
+              posDirection,
+              containerRect: _this.DS.SelectorArea.rect,
+              useTransform: _this.DS.stores.SettingsStore.s.useTransform
+            });
+          });
+          _this.DS.publish(["Interaction:update:pre", "Interaction:update"], publishData);
+        });
+        _defineProperty2(this, "keyboardEnd", function(_ref3) {
+          var event = _ref3.event, key = _ref3.key;
+          var _key = key.toLowerCase();
+          if (!_this.DS.stores.SettingsStore.s.keyboardDrag || !_this._dragKeysFlat.includes(_key) || !_this.DS.SelectedSet.size || !_this.DS.stores.SettingsStore.s.draggability)
+            return;
+          var publishData = {
+            event,
+            isDragging: _this.DS.stores.SettingsStore.s.draggability,
+            isDraggingKeyboard: true
+          };
+          _this.DS.publish(["Interaction:end:pre", "Interaction:end"], publishData);
+        });
+        _defineProperty2(this, "start", function(_ref4) {
+          var isDragging = _ref4.isDragging, isDraggingKeyboard = _ref4.isDraggingKeyboard;
+          if (!isDragging || isDraggingKeyboard)
+            return;
+          _this._prevCursorPos = null;
+          _this._prevScrollPos = null;
+          _this._elements = _this.DS.getSelection();
+          if (_this.DS.stores.SettingsStore.s.dragAsBlock)
+            _this._selectionRect = getBoundingClientRect(_this._elements, _this.DS.SelectableSet);
+          _this.handleZIndex(true);
+        });
+        _defineProperty2(this, "stop", function(evt) {
+          if (evt !== null && evt !== void 0 && evt.isKeyboard)
+            return;
+          _this._prevCursorPos = null;
+          _this._prevScrollPos = null;
+          _this.handleZIndex(false);
+          _this._elements = [];
+        });
+        _defineProperty2(this, "update", function(_ref5) {
+          var isDragging = _ref5.isDragging, isDraggingKeyboard = _ref5.isDraggingKeyboard;
+          if (!isDragging || !_this._elements.length || isDraggingKeyboard || _this.DS["continue"])
+            return;
+          var posDirection = calc(_this._cursorDiff, "+", _this._scrollDiff);
+          if (_this.DS.stores.SettingsStore.s.dragAsBlock)
+            posDirection = _this.limitDirection(posDirection);
+          _this._elements.forEach(function(element) {
+            return moveElement({
+              element,
+              posDirection,
+              containerRect: _this.DS.SelectorArea.rect,
+              useTransform: _this.DS.stores.SettingsStore.s.useTransform
+            });
+          });
+        });
+        _defineProperty2(this, "limitDirection", function(direction) {
+          var containerRect = _this.DS.SelectorArea.rect;
+          var scrollAmount = _this.DS.stores.ScrollStore.scrollAmount;
+          var delta = {
+            top: containerRect.top - _this._selectionRect.top + scrollAmount.y,
+            left: containerRect.left - _this._selectionRect.left + scrollAmount.x,
+            bottom: containerRect.bottom - _this._selectionRect.bottom + scrollAmount.y,
+            right: containerRect.right - _this._selectionRect.right + scrollAmount.x
+          };
+          if (direction.x === 0 && direction.y === 0)
+            return direction;
+          if (direction.y < 0)
+            direction.y = Math.max(direction.y, delta.top);
+          if (direction.x < 0)
+            direction.x = Math.max(direction.x, delta.left);
+          if (direction.y > 0)
+            direction.y = Math.min(direction.y, delta.bottom);
+          if (direction.x > 0)
+            direction.x = Math.min(direction.x, delta.right);
+          _this._selectionRect.top += direction.y;
+          _this._selectionRect.bottom += direction.y;
+          _this._selectionRect.left += direction.x;
+          _this._selectionRect.right += direction.x;
+          return direction;
+        });
+        _defineProperty2(this, "handleZIndex", function(add2) {
+          _this._elements.forEach(function(element) {
+            return element.style.zIndex = "".concat((parseInt(element.style.zIndex) || 0) + add2 ? 9999 : -9998);
+          });
+        });
+        this.DS = DS;
+        this.DS.subscribe("Settings:updated:dragKeys", this.assignDragkeys);
+        this.assignDragkeys();
+        this.DS.subscribe("Interaction:start", this.start);
+        this.DS.subscribe("Interaction:end", this.stop);
+        this.DS.subscribe("Interaction:update", this.update);
+        this.DS.subscribe("KeyStore:down", this.keyboardDrag);
+        this.DS.subscribe("KeyStore:up", this.keyboardEnd);
+      }
+      _createClass2(Drag2, [{
+        key: "_cursorDiff",
+        get: function get2() {
+          var currentPointerVal = this.DS.stores.PointerStore.currentVal;
+          var cursorDiff = this._prevCursorPos ? calc(currentPointerVal, "-", this._prevCursorPos) : {
+            x: 0,
+            y: 0
+          };
+          this._prevCursorPos = currentPointerVal;
+          return cursorDiff;
+        }
+      }, {
+        key: "_scrollDiff",
+        get: function get2() {
+          var currentScrollVal = this.DS.stores.ScrollStore.currentVal;
+          var scrollDiff = this._prevScrollPos ? calc(currentScrollVal, "-", this._prevScrollPos) : {
+            x: 0,
+            y: 0
+          };
+          this._prevScrollPos = currentScrollVal;
+          return scrollDiff;
+        }
+      }]);
+      return Drag2;
+    }();
+    var DropZone = /* @__PURE__ */ function() {
+      function DropZone2(_ref) {
+        var _this = this;
+        var DS = _ref.DS, id2 = _ref.id, element = _ref.element, droppables = _ref.droppables;
+        _classCallCheck(this, DropZone2);
+        _defineProperty2(this, "id", void 0);
+        _defineProperty2(this, "element", void 0);
+        _defineProperty2(this, "_droppables", void 0);
+        _defineProperty2(this, "_rect", void 0);
+        _defineProperty2(this, "_observers", void 0);
+        _defineProperty2(this, "_timeout", void 0);
+        _defineProperty2(this, "_itemsDropped", []);
+        _defineProperty2(this, "_itemsInside", void 0);
+        _defineProperty2(this, "setReadyClasses", function(action) {
+          if (_this.isDestroyed)
+            return;
+          var selectedEls = _this.droppables.filter(function(el2) {
+            return _this.DS.SelectedSet.has(el2);
+          });
+          if (!selectedEls.length)
+            return;
+          selectedEls.forEach(function(item) {
+            item.classList[action]("".concat(_this.Settings.droppableClass));
+            item.classList[action]("".concat(_this.Settings.droppableClass, "-").concat(_this.id));
+          });
+          _this.element.classList[action]("".concat(_this.Settings.dropZoneReadyClass));
+        });
+        _defineProperty2(this, "handleNoDrop", function() {
+          var _this$_itemsDropped;
+          if (_this.isDestroyed)
+            return;
+          _this.DS.SelectedSet.forEach(function(item) {
+            item.classList.remove(_this.Settings.droppedTargetClass);
+            item.classList.remove("".concat(_this.Settings.droppedTargetClass, "-").concat(_this.id));
+          });
+          _this._itemsDropped = _this._itemsDropped.filter(function(item) {
+            return !_this.DS.SelectedSet.has(item);
+          });
+          if (!((_this$_itemsDropped = _this._itemsDropped) !== null && _this$_itemsDropped !== void 0 && _this$_itemsDropped.length))
+            _this.element.classList.remove("".concat(_this.Settings.dropZoneTargetClass));
+        });
+        _defineProperty2(this, "handleDrop", function() {
+          var _this$droppables, _this$_itemsDropped2, _this$_itemsDropped3;
+          if (_this.isDestroyed)
+            return;
+          _this._itemsDropped = _toConsumableArray2(new Set([].concat(_toConsumableArray2(_this._itemsDropped), _toConsumableArray2((_this$droppables = _this.droppables) === null || _this$droppables === void 0 ? void 0 : _this$droppables.filter(function(item) {
+            return _this.DS.SelectedSet.has(item);
+          })))));
+          (_this$_itemsDropped2 = _this._itemsDropped) === null || _this$_itemsDropped2 === void 0 ? void 0 : _this$_itemsDropped2.forEach(function(item) {
+            item.classList.add("".concat(_this.Settings.droppedTargetClass));
+            item.classList.add("".concat(_this.Settings.droppedTargetClass, "-").concat(_this.id));
+          });
+          if ((_this$_itemsDropped3 = _this._itemsDropped) !== null && _this$_itemsDropped3 !== void 0 && _this$_itemsDropped3.length)
+            _this.element.classList.add("".concat(_this.Settings.dropZoneTargetClass));
+        });
+        _defineProperty2(this, "handleItemsInsideClasses", function() {
+          var isAnyInside = false;
+          _this.droppables.forEach(function(item) {
+            if (_this.itemsInside.includes(item)) {
+              item.classList.add("".concat(_this.Settings.droppedInsideClass));
+              item.classList.add("".concat(_this.Settings.droppedInsideClass, "-").concat(_this.id));
+              isAnyInside = true;
+            } else {
+              item.classList.remove("".concat(_this.Settings.droppedInsideClass, "-").concat(_this.id));
+              if (!item.className.includes("".concat(_this.Settings.droppedInsideClass, "-")))
+                item.classList.remove("".concat(_this.Settings.droppedInsideClass));
+            }
+          });
+          if (isAnyInside)
+            _this.element.classList.add("".concat(_this.Settings.dropZoneInsideClass));
+          else
+            _this.element.classList.remove("".concat(_this.Settings.dropZoneInsideClass));
+        });
+        _defineProperty2(this, "start", function(_ref2) {
+          var isDragging = _ref2.isDragging;
+          if (!isDragging || _this.isDestroyed)
+            return;
+          _this.setReadyClasses("add");
+        });
+        _defineProperty2(this, "stop", function(_ref3) {
+          var isDragging = _ref3.isDragging;
+          if (!isDragging || _this.isDestroyed)
+            return;
+          _this.setReadyClasses("remove");
+          _this.handleItemsInsideClasses();
+        });
+        _defineProperty2(this, "toObject", function() {
+          return {
+            id: _this.id,
+            element: _this.element,
+            droppables: _this.droppables,
+            itemsDropped: _this.itemsDropped,
+            itemsInside: _this.itemsInside
+          };
+        });
+        this.DS = DS;
+        this.Settings = DS.stores.SettingsStore.s;
+        this.id = id2;
+        this.element = element;
+        if (droppables)
+          this.droppables = toArray2(droppables);
+        this.element.classList.add("".concat(this.Settings.dropZoneClass));
+        this.DS.subscribe("Settings:updated:dropZoneClass", function(_ref4) {
+          var settings = _ref4.settings;
+          if (!_this.element)
+            return;
+          _this.element.classList.remove(settings["dropZoneClass:pre"]);
+          _this.element.classList.add(settings.dropZoneClass);
+        });
+        this._observers = addModificationObservers(this.parentNodes, debounce2(function() {
+          return _this._rect = null;
+        }, this.Settings.refreshMemoryRate));
+        this.DS.subscribe("Interaction:start", this.start);
+        this.DS.subscribe("Interaction:end", this.stop);
+      }
+      _createClass2(DropZone2, [{
+        key: "destroy",
+        value: function destroy() {
+          var _this2 = this;
+          this._observers.cleanup();
+          this.element.classList.remove("".concat(this.Settings.dropZoneClass));
+          this.element.classList.remove("".concat(this.Settings.dropZoneTargetClass));
+          this.element.classList.remove("".concat(this.Settings.dropZoneReadyClass));
+          this.droppables.forEach(function(item) {
+            item.classList.remove("".concat(_this2.Settings.droppedTargetClass));
+            item.classList.remove("".concat(_this2.Settings.droppedTargetClass, "-").concat(_this2.id));
+            item.classList.remove("".concat(_this2.Settings.droppableClass));
+            item.classList.remove("".concat(_this2.Settings.droppableClass, "-").concat(_this2.id));
+          });
+          this.DS.unsubscribe("Interaction:start", this.start);
+          this.DS.unsubscribe("Interaction:end", this.stop);
+          this.element = null;
+          this.droppables = null;
+          this.id = null;
+          this._itemsDropped = null;
+          this._itemsInside = null;
+          this.isDestroyed = true;
+        }
+        /**
+         * @returns {DSDropZone}
+         */
+      }, {
+        key: "rect",
+        get: function get2() {
+          if (this.isDestroyed)
+            return null;
+          if (this._rect)
+            return this._rect;
+          return this._rect = this.element.getBoundingClientRect();
+        }
+      }, {
+        key: "itemsDropped",
+        get: function get2() {
+          if (this.isDestroyed)
+            return null;
+          return this._itemsDropped;
+        }
+      }, {
+        key: "itemsInside",
+        get: function get2() {
+          var _this3 = this;
+          if (this.isDestroyed)
+            return null;
+          if (this._itemsInside)
+            return this._itemsInside;
+          this._itemsInside = this.droppables.flatMap(function(item) {
+            if (isCollision(_this3.DS.SelectableSet.rects.get(item), _this3.rect, _this3.Settings.dropInsideThreshold))
+              return [item];
+            return [];
+          });
+          if (this._timeout)
+            clearTimeout(this._timeout);
+          this._timeout = setTimeout(function() {
+            return _this3._itemsInside = null;
+          }, this.Settings.refreshMemoryRate);
+          return this._itemsInside;
+        }
+      }, {
+        key: "parentNodes",
+        get: function get2() {
+          if (this._parentNodes)
+            return this._parentNodes;
+          return this._parentNodes = getAllParentNodes(this.element);
+        }
+      }, {
+        key: "droppables",
+        get: function get2() {
+          if (this._droppables)
+            return this._droppables;
+          return this.DS.SelectableSet.elements;
+        },
+        set: function set2(value) {
+          this._droppables = value;
+        }
+      }]);
+      return DropZone2;
+    }();
+    var DropZones = /* @__PURE__ */ _createClass2(
+      /**
+       * Get the drop zone by the zone element
+       * @type {Map<DSElement, DropZone>}
+       * @private
+       */
+      /**
+       * Get the drop zone by the zone id
+       * @type {Map<string, DropZone>}
+       * @private
+       */
+      /**
+       * Get the drop zones by one zone item
+       * @type {Map<DSElement,DropZone[]>}
+       * @private
+       */
+      /**
+       * Get the drop zones by one zone item
+       * @type {DropZone[]}
+       * @private
+       */
+      /**
+       * @constructor Drag
+       * @param {{DS:DragSelect}} obj
+       * @ignore
+       */
+      function DropZones2(_ref) {
+        var _this = this;
+        var DS = _ref.DS;
+        _classCallCheck(this, DropZones2);
+        _defineProperty2(this, "_zoneByElement", /* @__PURE__ */ new Map());
+        _defineProperty2(this, "_zoneById", /* @__PURE__ */ new Map());
+        _defineProperty2(this, "_zonesByDroppable", /* @__PURE__ */ new Map());
+        _defineProperty2(this, "_zones", void 0);
+        _defineProperty2(this, "setDropZones", function(_ref2) {
+          var dropZones = _ref2.dropZones;
+          if (!dropZones)
+            return;
+          if (_this._zones)
+            _this._zones.forEach(function(zone) {
+              return zone.destroy();
+            });
+          _this._zones = dropZones.map(function(zone) {
+            return new DropZone(_objectSpread22({
+              DS: _this.DS
+            }, zone));
+          });
+          _this._zones.forEach(function(zone) {
+            _this._zoneByElement.set(zone.element, zone);
+            _this._zoneById.set(zone.id, zone);
+            zone.droppables.forEach(function(droppable) {
+              var zones = _this._zonesByDroppable.get(droppable);
+              if (!(zones !== null && zones !== void 0 && zones.length))
+                return _this._zonesByDroppable.set(droppable, [zone]);
+              _this._zonesByDroppable.set(droppable, _toConsumableArray2(new Set([].concat(_toConsumableArray2(zones), [zone]))));
+            });
+          });
+        });
+        _defineProperty2(this, "_handleDrop", function(target2) {
+          _this._zones.forEach(function(zone) {
+            if (zone === target2)
+              return;
+            zone.handleNoDrop();
+          });
+          if (!target2)
+            return;
+          target2.handleDrop();
+        });
+        _defineProperty2(this, "_getZoneByElementsFromPoint", function(elements, _ref3) {
+          var x2 = _ref3.x, y2 = _ref3.y;
+          for (var i2 = 0, il2 = elements.length; i2 < il2; i2++) {
+            var zone = _this._zoneByElement.get(elements[i2]);
+            if (zone && isCollision(zone.rect, {
+              left: x2,
+              right: x2,
+              top: y2,
+              bottom: y2
+            }, Math.min(_this.Settings.dropTargetThreshold, 0.5))) {
+              return zone;
+            }
+          }
+        });
+        _defineProperty2(this, "stop", function(_ref4) {
+          var isDragging = _ref4.isDragging;
+          if (!isDragging)
+            return;
+          var target2 = _this.getTarget();
+          _this._handleDrop(target2);
+        });
+        _defineProperty2(this, "getItemsDroppedById", function(zoneId) {
+          var zone = _this._zoneById.get(zoneId);
+          if (!zone)
+            return console.warn("[DragSelect] No zone found (id: ".concat(zoneId, ")"));
+          return zone.itemsDropped;
+        });
+        _defineProperty2(this, "getItemsInsideById", function(zoneId, addClasses) {
+          var zone = _this._zoneById.get(zoneId);
+          if (!zone)
+            return console.warn("[DragSelect] No zone found (id: ".concat(zoneId, ")"));
+          var itemsInside = zone.itemsInside;
+          if (addClasses)
+            zone.handleItemsInsideClasses();
+          return itemsInside;
+        });
+        _defineProperty2(this, "getTarget", function(coordinates) {
+          var _this$_zones;
+          if (!((_this$_zones = _this._zones) !== null && _this$_zones !== void 0 && _this$_zones.length))
+            return;
+          var x2 = (coordinates === null || coordinates === void 0 ? void 0 : coordinates.x) || _this.DS.stores.PointerStore.currentVal.x;
+          var y2 = (coordinates === null || coordinates === void 0 ? void 0 : coordinates.y) || _this.DS.stores.PointerStore.currentVal.y;
+          var elements = document.elementsFromPoint(x2, y2);
+          return _this._getZoneByElementsFromPoint(
+            /** @type {DSElements} */
+            elements,
+            {
+              x: x2,
+              y: y2
+            }
+          );
+        });
+        this.DS = DS;
+        this.Settings = DS.stores.SettingsStore.s;
+        this.DS.subscribe("Settings:updated:dropZones", function(_ref5) {
+          var settings = _ref5.settings;
+          return _this.setDropZones(settings);
+        });
+        this.setDropZones({
+          dropZones: (
+            /** @type {DSDropZone[]} */
+            this.DS.stores.SettingsStore.s.dropZones
+          )
+        });
+        this.DS.subscribe("Interaction:end", this.stop);
+      }
+      /**
+       * @param {Object} obj
+       * @param {DSDropZone[]} [obj.dropZones]
+       */
+    );
+    var Interaction = /* @__PURE__ */ function() {
+      function Interaction2(_ref) {
+        var _this = this;
+        var DS = _ref.DS;
+        _classCallCheck(this, Interaction2);
+        _defineProperty2(this, "isInteracting", void 0);
+        _defineProperty2(this, "isDragging", void 0);
+        _defineProperty2(this, "init", function() {
+          return _this.DS.publish("Interaction:init:pre", {});
+        });
+        _defineProperty2(this, "_init", function() {
+          _this.stop();
+          if (_this.Settings.usePointerEvents)
+            _this.DS.Area.HTMLNode.addEventListener("pointerdown", _this.start, {
+              passive: false
+            });
+          else
+            _this.DS.Area.HTMLNode.addEventListener("mousedown", _this.start);
+          _this.DS.Area.HTMLNode.addEventListener("touchstart", _this.start, {
+            passive: false
+          });
+          _this.DS.publish("Interaction:init", {});
+        });
+        _defineProperty2(this, "start", function(event) {
+          return _this.DS.publish("Interaction:start:pre", {
+            event,
+            isDragging: _this.isDragging
+          });
+        });
+        _defineProperty2(this, "_start", function(event) {
+          if (event.type === "touchstart")
+            event.preventDefault();
+          if (!_this._canInteract(event))
+            return;
+          _this.isInteracting = true;
+          _this.isDragging = _this.isDragEvent(event);
+          _this.DS.publish("Interaction:start", {
+            event,
+            isDragging: _this.isDragging
+          });
+          if (_this.Settings.usePointerEvents) {
+            document.addEventListener("pointerup", _this.reset);
+            document.addEventListener("pointercancel", _this.reset);
+          } else
+            document.addEventListener("mouseup", _this.reset);
+          document.addEventListener("touchend", _this.reset);
+        });
+        _defineProperty2(this, "isDragEvent", function(event) {
+          var clickedElement = (
+            /** @type {Element} */
+            event.target.closest(".".concat(_this.Settings.selectableClass))
+          );
+          if (!_this.Settings.draggability || _this.DS.stores.KeyStore.isMultiSelectKeyPressed(event) || !clickedElement)
+            return false;
+          if (_this.Settings.immediateDrag) {
+            if (!_this.DS.SelectedSet.size)
+              _this.DS.SelectedSet.add(
+                /** @type {DSElement} */
+                clickedElement
+              );
+            else if (!_this.DS.SelectedSet.has(clickedElement)) {
+              _this.DS.SelectedSet.clear();
+              _this.DS.SelectedSet.add(
+                /** @type {DSElement} */
+                clickedElement
+              );
+            }
+          }
+          if (_this.DS.SelectedSet.has(clickedElement))
+            return true;
+          return false;
+        });
+        _defineProperty2(this, "onClick", function(_ref2) {
+          var event = _ref2.event;
+          if (!_this._canInteract(event))
+            return;
+          if (event.detail > 0)
+            return;
+          var _this$DS = _this.DS, _this$DS$stores = _this$DS.stores, PointerStore2 = _this$DS$stores.PointerStore, KeyStore2 = _this$DS$stores.KeyStore, SelectableSet2 = _this$DS.SelectableSet, SelectedSet2 = _this$DS.SelectedSet;
+          PointerStore2.start(event);
+          var node = (
+            /** @type {any} */
+            event.target
+          );
+          if (!SelectableSet2.has(node))
+            return;
+          if (!KeyStore2.isMultiSelectKeyPressed(event))
+            SelectedSet2.clear();
+          SelectedSet2.toggle(node);
+          _this.reset();
+        });
+        _defineProperty2(this, "stop", function() {
+          var area2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : _this.DS.Area.HTMLNode;
+          _this.isInteracting = false;
+          _this.isDragging = false;
+          if (_this.Settings.usePointerEvents) {
+            area2.removeEventListener("pointerdown", _this.start, {
+              // @ts-ignore
+              passive: false
+            });
+            document.removeEventListener("pointerup", _this.reset);
+            document.removeEventListener("pointercancel", _this.reset);
+          } else {
+            area2.removeEventListener("mousedown", _this.start);
+            document.removeEventListener("mouseup", _this.reset);
+          }
+          area2.removeEventListener("touchstart", _this.start, {
+            // @ts-ignore
+            passive: false
+          });
+          document.removeEventListener("touchend", _this.reset);
+        });
+        _defineProperty2(this, "update", function(_ref3) {
+          var event = _ref3.event, scroll_directions = _ref3.scroll_directions, scroll_multiplier = _ref3.scroll_multiplier;
+          if (_this.isInteracting)
+            _this.DS.publish(["Interaction:update:pre", "Interaction:update"], {
+              event,
+              scroll_directions,
+              scroll_multiplier,
+              isDragging: _this.isDragging
+            });
+        });
+        _defineProperty2(this, "reset", function(event) {
+          return _this.DS.publish("Interaction:end:pre", {
+            event,
+            isDragging: _this.isDragging
+          });
+        });
+        _defineProperty2(this, "_reset", function(event) {
+          var isDragging = _this.isDragging;
+          _this.stop();
+          _this.init();
+          _this.DS.publish("Interaction:end", {
+            event,
+            isDragging
+          });
+        });
+        this.DS = DS;
+        this.Settings = DS.stores.SettingsStore.s;
+        this.DS.subscribe("Settings:updated:area", function(_ref4) {
+          var settings = _ref4.settings;
+          _this.stop(settings["area:pre"]);
+          _this.init();
+        });
+        this.DS.subscribe("PointerStore:updated", this.update);
+        this.DS.subscribe("Selectable:click", this.onClick);
+        this.DS.subscribe("Selectable:pointer", function(_ref5) {
+          var event = _ref5.event;
+          return _this.start(event);
+        });
+        this.DS.subscribe("Interaction:start:pre", function(_ref6) {
+          var event = _ref6.event;
+          return _this._start(event);
+        });
+        this.DS.subscribe("Interaction:init:pre", this._init);
+        this.DS.subscribe("Interaction:end:pre", function(_ref7) {
+          var event = _ref7.event;
+          return _this._reset(event);
+        });
+        this.DS.subscribe("Area:scroll", this.update);
+      }
+      _createClass2(Interaction2, [{
+        key: "_canInteract",
+        value: (
+          /**
+           * @param {DSEvent} event
+           */
+          function _canInteract(event) {
+            var isKeyboardClick = (
+              /** @type {MouseEvent} */
+              event.clientX === 0 && /** @type {MouseEvent} */
+              event.clientY === 0 && /** @type {MouseEvent} */
+              event.detail === 0 && event.target
+            );
+            if (
+              /** @type {MouseEvent} */
+              event.button === 2 || // right-clicks
+              this.isInteracting || // fix double-click issues
+              event.target && !this.DS.SelectorArea.isInside(
+                /** @type {DSElement} */
+                event.target
+              ) || // fix outside elements issue
+              !isKeyboardClick && !this.DS.SelectorArea.isClicked(event)
+            )
+              return false;
+            return true;
+          }
+        )
+        /**
+         * @param {DSEvent} event
+         */
+      }]);
+      return Interaction2;
+    }();
+    var PubSub = /* @__PURE__ */ _createClass2(
+      function PubSub2(_ref) {
+        var _this = this;
+        var DS = _ref.DS;
+        _classCallCheck(this, PubSub2);
+        _defineProperty2(this, "subscribers", {});
+        _defineProperty2(this, "subscribe", function(eventName, callback) {
+          if (!Array.isArray(_this.subscribers[eventName]))
+            _this.subscribers[eventName] = [];
+          _this.subscribers[eventName].push(callback);
+          return _this.subscribers[eventName].length - 1;
+        });
+        _defineProperty2(this, "unsubscribe", function(eventName, callback, id2) {
+          if (id2 >= 0)
+            _this.subscribers[eventName].splice(id2, 1);
+          else if (callback)
+            _this.subscribers[eventName] = _this.subscribers[eventName].filter(function(cb2) {
+              return cb2 !== callback;
+            });
+        });
+        _defineProperty2(this, "publish", function(eventName, data) {
+          if (Array.isArray(eventName))
+            eventName.forEach(function(name2) {
+              return _this._publish(name2, data);
+            });
+          else
+            _this._publish(eventName, data);
+        });
+        _defineProperty2(this, "_publish", function(eventName, data) {
+          var subscribers2 = _this.subscribers[eventName];
+          if (!Array.isArray(subscribers2))
+            return;
+          if (eventName.includes(":pre"))
+            _this._handlePrePublish(subscribers2, data);
+          else
+            _this._handlePublish(subscribers2, data);
+        });
+        _defineProperty2(this, "_handlePublish", function(subscribers2, data) {
+          for (var i2 = 0, il2 = subscribers2.length; i2 < il2; i2++) {
+            if (_this.DS.stopped)
+              return;
+            subscribers2[i2](data);
+          }
+        });
+        _defineProperty2(this, "_handlePrePublish", function(subscribers2, data) {
+          var i2 = subscribers2.length;
+          while (i2--) {
+            if (_this.DS.stopped)
+              return;
+            subscribers2[i2](data);
+          }
+        });
+        this.DS = DS;
+      }
+      /**
+       * Subscribe to an event
+       * @memberof DragSelect#
+       * @function subscribe
+       * @param {DSCallbackNames} eventName
+       * @param {DSCallback} callback
+       * @returns {number} event id, can be used to unsubscribe more efficiently
+       */
+    );
+    var SelectableSet = /* @__PURE__ */ function(_Set) {
+      _inherits(SelectableSet2, _Set);
+      var _super = _createSuper(SelectableSet2);
+      function SelectableSet2(_ref) {
+        var _this;
+        var DS = _ref.DS;
+        _classCallCheck(this, SelectableSet2);
+        _this = _super.call(this);
+        _defineProperty2(_assertThisInitialized(_this), "_rects", void 0);
+        _defineProperty2(_assertThisInitialized(_this), "_timeout", void 0);
+        _defineProperty2(_assertThisInitialized(_this), "init", function() {
+          return toArray2(_this.Settings.selectables).forEach(function(el2) {
+            return _this.add(el2);
+          });
+        });
+        _defineProperty2(_assertThisInitialized(_this), "clear", function() {
+          return _this.forEach(function(el2) {
+            return _this["delete"](el2);
+          });
+        });
+        _defineProperty2(_assertThisInitialized(_this), "_onClick", function(event) {
+          return _this.DS.publish(["Selectable:click:pre", "Selectable:click"], {
+            event
+          });
+        });
+        _defineProperty2(_assertThisInitialized(_this), "_onPointer", function(event) {
+          return _this.DS.publish(["Selectable:pointer:pre", "Selectable:pointer"], {
+            event
+          });
+        });
+        _defineProperty2(_assertThisInitialized(_this), "addAll", function(elements) {
+          return elements.forEach(function(el2) {
+            return _this.add(el2);
+          });
+        });
+        _defineProperty2(_assertThisInitialized(_this), "deleteAll", function(elements) {
+          return elements.forEach(function(el2) {
+            return _this["delete"](el2);
+          });
+        });
+        _defineProperty2(_assertThisInitialized(_this), "getRect", function(element) {
+          return _this._rects ? _this.rects.get(element) : element.getBoundingClientRect();
+        });
+        _this.DS = DS;
+        _this.Settings = DS.stores.SettingsStore.s;
+        _this.DS.subscribe("Interaction:init", _this.init);
+        _this.DS.PubSub.subscribe("Settings:updated:selectables", function() {
+          _this.clear();
+          _this.init();
+        });
+        _this.DS.subscribe("Settings:updated:selectableClass", function(_ref2) {
+          var settings = _ref2.settings;
+          _this.forEach(function(el2) {
+            el2.classList.remove(settings["selectableClass:pre"]);
+            el2.classList.add(settings.selectableClass);
+          });
+        });
+        return _this;
+      }
+      _createClass2(SelectableSet2, [{
+        key: "add",
+        value: (
+          /** 
+           * @param {DSElement} element
+           * @return {this}
+           * */
+          function add2(element) {
+            if (_get(_getPrototypeOf(SelectableSet2.prototype), "has", this).call(this, element))
+              return this;
+            var publishData = {
+              items: this.elements,
+              item: element
+            };
+            this.DS.publish("Selectable:added:pre", publishData);
+            element.classList.add(this.Settings.selectableClass);
+            element.addEventListener("click", this._onClick);
+            if (this.Settings.usePointerEvents)
+              element.addEventListener("pointerdown", this._onPointer, {
+                // @ts-ignore
+                passive: false
+              });
+            else
+              element.addEventListener("mousedown", this._onPointer);
+            element.addEventListener("touchstart", this._onPointer, {
+              // @ts-ignore
+              passive: false
+            });
+            if (this.Settings.draggability && !this.Settings.useTransform)
+              handleElementPositionAttribute({
+                computedStyle: window.getComputedStyle(element),
+                node: element
+              });
+            _get(_getPrototypeOf(SelectableSet2.prototype), "add", this).call(this, element);
+            this.DS.publish("Selectable:added", publishData);
+            return this;
+          }
+        )
+        /** @param {DSElement} element */
+      }, {
+        key: "delete",
+        value: function _delete(element) {
+          if (!_get(_getPrototypeOf(SelectableSet2.prototype), "has", this).call(this, element))
+            return true;
+          var publishData = {
+            items: this.elements,
+            item: element
+          };
+          this.DS.publish("Selectable:removed:pre", publishData);
+          element.classList.remove(this.Settings.selectableClass);
+          element.classList.remove(this.Settings.hoverClass);
+          element.removeEventListener("click", this._onClick);
+          if (this.Settings.usePointerEvents)
+            element.removeEventListener("pointerdown", this._onPointer, {
+              // @ts-ignore
+              passive: false
+            });
+          else
+            element.removeEventListener("mousedown", this._onPointer);
+          element.removeEventListener("touchstart", this._onPointer, {
+            // @ts-ignore
+            passive: false
+          });
+          _get(_getPrototypeOf(SelectableSet2.prototype), "delete", this).call(this, element);
+          this.DS.publish("Selectable:removed", publishData);
+          return true;
+        }
+      }, {
+        key: "elements",
+        get: (
+          /** @return {DSElements} */
+          function get2() {
+            return Array.from(this.values());
+          }
+        )
+      }, {
+        key: "rects",
+        get: function get2() {
+          var _this2 = this;
+          if (this._rects)
+            return this._rects;
+          this._rects = /* @__PURE__ */ new Map();
+          this.forEach(function(element) {
+            return _this2._rects.set(element, element.getBoundingClientRect());
+          });
+          if (this._timeout)
+            clearTimeout(this._timeout);
+          this._timeout = setTimeout(function() {
+            return _this2._rects = null;
+          }, this.Settings.refreshMemoryRate);
+          return this._rects;
+        }
+      }]);
+      return SelectableSet2;
+    }(/* @__PURE__ */ _wrapNativeSuper(Set));
+    var SelectedSet = /* @__PURE__ */ function(_Set) {
+      _inherits(SelectedSet2, _Set);
+      var _super = _createSuper(SelectedSet2);
+      function SelectedSet2(_ref) {
+        var _this;
+        var DS = _ref.DS;
+        _classCallCheck(this, SelectedSet2);
+        _this = _super.call(this);
+        _defineProperty2(_assertThisInitialized(_this), "clear", function() {
+          return _this.forEach(function(el2) {
+            return _this["delete"](el2);
+          });
+        });
+        _defineProperty2(_assertThisInitialized(_this), "addAll", function(elements) {
+          return elements.forEach(function(el2) {
+            return _this.add(el2);
+          });
+        });
+        _defineProperty2(_assertThisInitialized(_this), "deleteAll", function(elements) {
+          return elements.forEach(function(el2) {
+            return _this["delete"](el2);
+          });
+        });
+        _this.DS = DS;
+        return _this;
+      }
+      _createClass2(SelectedSet2, [{
+        key: "add",
+        value: function add2(element) {
+          if (_get(_getPrototypeOf(SelectedSet2.prototype), "has", this).call(this, element))
+            return this;
+          var publishData = {
+            items: this.elements,
+            item: element
+          };
+          this.DS.publish("Selected:added:pre", publishData);
+          _get(_getPrototypeOf(SelectedSet2.prototype), "add", this).call(this, element);
+          element.classList.add(this.DS.stores.SettingsStore.s.selectedClass);
+          element.style.zIndex = "".concat((parseInt(element.style.zIndex) || 0) + 1);
+          this.DS.publish("Selected:added", publishData);
+          return this;
+        }
+        /** @param {DSElement} element */
+      }, {
+        key: "delete",
+        value: function _delete(element) {
+          if (!_get(_getPrototypeOf(SelectedSet2.prototype), "has", this).call(this, element))
+            return true;
+          var publishData = {
+            items: this.elements,
+            item: element
+          };
+          this.DS.publish("Selected:removed:pre", publishData);
+          var deleted = _get(_getPrototypeOf(SelectedSet2.prototype), "delete", this).call(this, element);
+          element.classList.remove(this.DS.stores.SettingsStore.s.selectedClass);
+          element.style.zIndex = "".concat((parseInt(element.style.zIndex) || 0) - 1);
+          this.DS.publish("Selected:removed", publishData);
+          return deleted;
+        }
+      }, {
+        key: "toggle",
+        value: (
+          /**
+           * Adds/Removes an element. If it is already selected = remove, if not = add.
+           * @param {DSElement} element
+           * @return {DSElement}
+           */
+          function toggle(element) {
+            if (this.has(element))
+              this["delete"](element);
+            else
+              this.add(element);
+            return element;
+          }
+        )
+        /** @param {DSElements} elements */
+      }, {
+        key: "elements",
+        get: (
+          /** @return {DSElements} */
+          function get2() {
+            return Array.from(this.values());
+          }
+        )
+      }]);
+      return SelectedSet2;
+    }(/* @__PURE__ */ _wrapNativeSuper(Set));
+    var Selection = /* @__PURE__ */ function() {
+      function Selection2(_ref) {
+        var _this = this;
+        var DS = _ref.DS;
+        _classCallCheck(this, Selection2);
+        _defineProperty2(this, "_prevSelectedSet", void 0);
+        _defineProperty2(this, "start", function(_ref2) {
+          var event = _ref2.event, isDragging = _ref2.isDragging;
+          if (isDragging)
+            return;
+          _this._storePrevious(event);
+          _this._handleInsideSelection(true, event);
+        });
+        _defineProperty2(this, "update", function(_ref3) {
+          var isDragging = _ref3.isDragging;
+          if (isDragging || _this.DS["continue"])
+            return;
+          _this._handleInsideSelection();
+        });
+        _defineProperty2(this, "_handleInsideSelection", function(force, event) {
+          var _this$DS = _this.DS, SelectableSet2 = _this$DS.SelectableSet, SelectorArea2 = _this$DS.SelectorArea, Selector2 = _this$DS.Selector;
+          var multiSelectionToggle = _this.DS.stores.KeyStore.isMultiSelectKeyPressed(event) && _this.Settings.multiSelectToggling;
+          var selectionThreshold = _this.Settings.selectionThreshold;
+          var elRects = SelectableSet2.rects;
+          var selectorRect = Selector2.rect;
+          var select = /* @__PURE__ */ new Map();
+          var unselect = /* @__PURE__ */ new Map();
+          var _iterator = _createForOfIteratorHelper(elRects), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var _step$value = _slicedToArray2(_step.value, 2), element = _step$value[0], elementRect = _step$value[1];
+              if (!SelectorArea2.isInside(element, elementRect))
+                continue;
+              if (isCollision(elementRect, selectorRect, selectionThreshold))
+                select.set(element, elementRect);
+              else
+                unselect.set(element, elementRect);
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+          if (_this.DS["continue"])
+            return;
+          var _this$filterSelected = _this.filterSelected({
+            select,
+            unselect,
+            selectorRect
+          }), filteredSelect = _this$filterSelected.select, filteredUnselect = _this$filterSelected.unselect;
+          filteredSelect.forEach(function(_2, element2) {
+            return handleSelection({
+              element: element2,
+              force,
+              multiSelectionToggle,
+              SelectedSet: _this.DS.SelectedSet,
+              hoverClassName: _this.Settings.hoverClass
+            });
+          });
+          filteredUnselect.forEach(function(_2, element2) {
+            return handleUnSelection({
+              element: element2,
+              force,
+              SelectedSet: _this.DS.SelectedSet,
+              hoverClassName: _this.Settings.hoverClass,
+              PrevSelectedSet: _this._prevSelectedSet
+            });
+          });
+        });
+        _defineProperty2(this, "filterSelected", function(_ref4) {
+          var select = _ref4.select, unselect = _ref4.unselect;
+          _ref4.selectorRect;
+          return {
+            select,
+            unselect
+          };
+        });
+        this.DS = DS;
+        this.Settings = this.DS.stores.SettingsStore.s;
+        this.DS.subscribe("Interaction:start", this.start);
+        this.DS.subscribe("Interaction:update", this.update);
+      }
+      _createClass2(Selection2, [{
+        key: "_storePrevious",
+        value: function _storePrevious(event) {
+          var _this$DS2 = this.DS, KeyStore2 = _this$DS2.stores.KeyStore, SelectedSet2 = _this$DS2.SelectedSet;
+          if (KeyStore2.isMultiSelectKeyPressed(event))
+            this._prevSelectedSet = new Set(SelectedSet2);
+          else
+            this._prevSelectedSet = /* @__PURE__ */ new Set();
+        }
+        /** @param {{event:DSEvent,isDragging:boolean}} event */
+      }]);
+      return Selection2;
+    }();
+    var Selector = /* @__PURE__ */ function() {
+      function Selector2(_ref) {
+        var _this = this;
+        var DS = _ref.DS;
+        _classCallCheck(this, Selector2);
+        _defineProperty2(this, "_rect", void 0);
+        _defineProperty2(this, "attachSelector", function() {
+          var _this$DS$SelectorArea, _this$DS$SelectorArea2;
+          if (_this.HTMLNode && (_this$DS$SelectorArea = _this.DS.SelectorArea) !== null && _this$DS$SelectorArea !== void 0 && _this$DS$SelectorArea.HTMLNode)
+            _this.DS.SelectorArea.HTMLNode.removeChild(_this.HTMLNode);
+          _this.HTMLNode = _this.DS.stores.SettingsStore.s.selector || createSelectorElement(_this.DS.stores.SettingsStore.s.customStyles);
+          _this.HTMLNode.classList.add(_this.DS.stores.SettingsStore.s.selectorClass);
+          if (_this.HTMLNode && (_this$DS$SelectorArea2 = _this.DS.SelectorArea) !== null && _this$DS$SelectorArea2 !== void 0 && _this$DS$SelectorArea2.HTMLNode)
+            _this.DS.SelectorArea.HTMLNode.appendChild(_this.HTMLNode);
+        });
+        _defineProperty2(this, "start", function(_ref2) {
+          var isDragging = _ref2.isDragging;
+          if (isDragging)
+            return;
+          var PointerStore2 = _this.DS.stores.PointerStore;
+          var pPos = PointerStore2.initialValArea;
+          updateElementStylePos(_this.HTMLNode, vect2rect(pPos, 1));
+          _this.HTMLNode.style.display = "block";
+          _this._rect = null;
+        });
+        _defineProperty2(this, "stop", function() {
+          _this.HTMLNode.style.width = "0";
+          _this.HTMLNode.style.height = "0";
+          _this.HTMLNode.style.display = "none";
+        });
+        _defineProperty2(this, "update", function(_ref3) {
+          var isDragging = _ref3.isDragging;
+          if (isDragging || _this.DS["continue"])
+            return;
+          var _this$DS$stores = _this.DS.stores, ScrollStore2 = _this$DS$stores.ScrollStore, PointerStore2 = _this$DS$stores.PointerStore;
+          var pos = getSelectorPosition({
+            scrollAmount: ScrollStore2.scrollAmount,
+            initialPointerPos: PointerStore2.initialValArea,
+            pointerPos: PointerStore2.currentValArea
+          });
+          updateElementStylePos(_this.HTMLNode, pos);
+          _this._rect = null;
+        });
+        this.DS = DS;
+        this.DS.subscribe("Settings:updated:selectorClass", function(_ref4) {
+          var settings = _ref4.settings;
+          _this.HTMLNode.classList.remove(settings["selectorClass:pre"]);
+          _this.HTMLNode.classList.add(settings.selectorClass);
+        });
+        this.DS.subscribe("Settings:updated:selector", this.attachSelector);
+        this.DS.subscribe("Settings:updated:customStyles", this.attachSelector);
+        this.attachSelector();
+        this.DS.subscribe("Interaction:start", this.start);
+        this.DS.subscribe("Interaction:update", this.update);
+        this.DS.subscribe("Interaction:end", this.stop);
+      }
+      _createClass2(Selector2, [{
+        key: "rect",
+        get: function get2() {
+          if (this._rect)
+            return this._rect;
+          return this._rect = this.HTMLNode.getBoundingClientRect();
+        }
+      }]);
+      return Selector2;
+    }();
+    var SelectorArea = /* @__PURE__ */ function() {
+      function SelectorArea2(_ref) {
+        var _this = this;
+        var DS = _ref.DS;
+        _classCallCheck(this, SelectorArea2);
+        _defineProperty2(this, "_scrollInterval", void 0);
+        _defineProperty2(this, "_rect", void 0);
+        _defineProperty2(this, "currentEdges", []);
+        _defineProperty2(this, "start", function() {
+          _this.applyElements("append");
+          _this.updatePos();
+        });
+        _defineProperty2(this, "applyElements", function() {
+          var method = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : "append";
+          var docEl = document.body ? "body" : "documentElement";
+          var methodName = "".concat(method, "Child");
+          _this.HTMLNode[methodName](_this.DS.Selector.HTMLNode);
+          document[docEl][methodName](_this.HTMLNode);
+        });
+        _defineProperty2(this, "updatePos", function() {
+          _this._rect = null;
+          var rect = _this.DS.Area.rect;
+          var border = _this.DS.Area.computedBorder;
+          var style = _this.HTMLNode.style;
+          var top2 = "".concat(rect.top + border.top, "px");
+          var left = "".concat(rect.left + border.left, "px");
+          var width = "".concat(rect.width, "px");
+          var height = "".concat(rect.height, "px");
+          if (style.top !== top2)
+            style.top = top2;
+          if (style.left !== left)
+            style.left = left;
+          if (style.width !== width)
+            style.width = width;
+          if (style.height !== height)
+            style.height = height;
+        });
+        _defineProperty2(this, "stop", function(remove2) {
+          _this.stopAutoScroll();
+          if (remove2)
+            _this.applyElements("remove");
+        });
+        _defineProperty2(this, "startAutoScroll", function() {
+          _this.currentEdges = [];
+          _this._scrollInterval = setInterval(function() {
+            return _this.handleAutoScroll();
+          }, 16);
+        });
+        _defineProperty2(this, "handleAutoScroll", function() {
+          if (_this.DS["continue"])
+            return;
+          var _this$DS = _this.DS, PointerStore2 = _this$DS.stores.PointerStore, Area2 = _this$DS.Area;
+          _this.currentEdges = getOverflowEdges({
+            elementRect: vect2rect(PointerStore2.currentVal),
+            containerRect: _this.rect,
+            tolerance: _this.DS.stores.SettingsStore.s.overflowTolerance
+          });
+          if (_this.currentEdges.length)
+            Area2.scroll(_this.currentEdges, _this.DS.stores.SettingsStore.s.autoScrollSpeed);
+        });
+        _defineProperty2(this, "stopAutoScroll", function() {
+          _this.currentEdges = [];
+          clearInterval(_this._scrollInterval);
+        });
+        _defineProperty2(this, "isInside", function(element, elementRect) {
+          if (_this.DS.Area.HTMLNode.contains(element) && _this.DS.stores.ScrollStore.canScroll)
+            return true;
+          return isCollision(_this.rect, elementRect || element.getBoundingClientRect());
+        });
+        this.DS = DS;
+        this.HTMLNode = createSelectorAreaElement();
+        this.DS.subscribe("Settings:updated:selectorAreaClass", function(_ref2) {
+          var settings = _ref2.settings;
+          _this.HTMLNode.classList.remove(settings["selectorAreaClass:pre"]);
+          _this.HTMLNode.classList.add(settings["selectorAreaClass"]);
+        });
+        this.HTMLNode.classList.add(this.DS.stores.SettingsStore.s.selectorAreaClass);
+        this.DS.subscribe("Area:modified", this.updatePos);
+        this.DS.subscribe("Area:modified", this.updatePos);
+        this.DS.subscribe("Interaction:init", this.start);
+        this.DS.subscribe("Interaction:start", this.startAutoScroll);
+        this.DS.subscribe("Interaction:end", function() {
+          _this.updatePos();
+          _this.stopAutoScroll();
+        });
+      }
+      _createClass2(SelectorArea2, [{
+        key: "isClicked",
+        value: (
+          /**
+           * checks if the click was triggered on the area.
+           * @param {DSEvent} [event]
+           * @returns {boolean}
+           */
+          function isClicked(event) {
+            var PointerStore2 = this.DS.stores.PointerStore;
+            var initialVal = event ? PointerStore2.getPointerPosition(event) : PointerStore2.initialVal;
+            return isCollision({
+              left: initialVal.x,
+              top: initialVal.y,
+              right: initialVal.x,
+              bottom: initialVal.y
+            }, this.rect);
+          }
+        )
+      }, {
+        key: "rect",
+        get: function get2() {
+          if (this._rect)
+            return this._rect;
+          return this._rect = this.HTMLNode.getBoundingClientRect();
+        }
+      }]);
+      return SelectorArea2;
+    }();
+    var KeyStore = /* @__PURE__ */ function() {
+      function KeyStore2(_ref) {
+        var _this = this;
+        var DS = _ref.DS;
+        _classCallCheck(this, KeyStore2);
+        _defineProperty2(this, "_currentValues", /* @__PURE__ */ new Set());
+        _defineProperty2(this, "_keyMapping", {
+          control: "ctrlKey",
+          shift: "shiftKey",
+          meta: "metaKey"
+        });
+        _defineProperty2(this, "init", function() {
+          document.addEventListener("keydown", _this.keydown);
+          document.addEventListener("keyup", _this.keyup);
+          window.addEventListener("blur", _this.reset);
+        });
+        _defineProperty2(this, "keydown", function(event) {
+          var key = event.key.toLowerCase();
+          _this.DS.publish("KeyStore:down:pre", {
+            event,
+            key
+          });
+          _this._currentValues.add(key);
+          _this.DS.publish("KeyStore:down", {
+            event,
+            key
+          });
+        });
+        _defineProperty2(this, "keyup", function(event) {
+          var key = event.key.toLowerCase();
+          _this.DS.publish("KeyStore:up:pre", {
+            event,
+            key
+          });
+          _this._currentValues["delete"](key);
+          _this.DS.publish("KeyStore:up", {
+            event,
+            key
+          });
+        });
+        _defineProperty2(this, "stop", function() {
+          document.removeEventListener("keydown", _this.keydown);
+          document.removeEventListener("keyup", _this.reset);
+          window.removeEventListener("blur", _this.reset);
+          _this.reset();
+        });
+        _defineProperty2(this, "reset", function() {
+          return _this._currentValues.clear();
+        });
+        this.DS = DS;
+        this.DS.subscribe("Interaction:init", this.init);
+      }
+      _createClass2(KeyStore2, [{
+        key: "isMultiSelectKeyPressed",
+        value: (
+          /** @param {KeyboardEvent|MouseEvent|PointerEvent|TouchEvent} [event] */
+          function isMultiSelectKeyPressed(event) {
+            var _this2 = this;
+            if (this.DS.stores.SettingsStore.s.multiSelectMode)
+              return true;
+            var multiSelectKeys = this.DS.stores.SettingsStore.s.multiSelectKeys.map(function(key) {
+              return key.toLocaleLowerCase();
+            });
+            if (this.currentValues.some(function(key) {
+              return multiSelectKeys.includes(key.toLocaleLowerCase());
+            }))
+              return true;
+            if (event && multiSelectKeys.some(function(key) {
+              return event[_this2._keyMapping[key]];
+            }))
+              return true;
+            return false;
+          }
+        )
+      }, {
+        key: "currentValues",
+        get: function get2() {
+          return Array.from(this._currentValues.values());
+        }
+      }]);
+      return KeyStore2;
+    }();
+    var PointerStore = /* @__PURE__ */ function() {
+      function PointerStore2(_ref) {
+        var _this = this;
+        var DS = _ref.DS;
+        _classCallCheck(this, PointerStore2);
+        _defineProperty2(this, "_isMouseInteraction", false);
+        _defineProperty2(this, "_initialValArea", void 0);
+        _defineProperty2(this, "_currentValArea", void 0);
+        _defineProperty2(this, "_lastValArea", void 0);
+        _defineProperty2(this, "_initialVal", void 0);
+        _defineProperty2(this, "_currentVal", void 0);
+        _defineProperty2(this, "_lastVal", void 0);
+        _defineProperty2(this, "_lastTouch", void 0);
+        _defineProperty2(this, "init", function() {
+          if (_this.Settings.usePointerEvents)
+            document.addEventListener("pointermove", _this.update, {
+              // @ts-ignore
+              passive: false
+            });
+          else
+            document.addEventListener("mousemove", _this.update);
+          document.addEventListener("touchmove", _this.update, {
+            // @ts-ignore
+            passive: false
+          });
+        });
+        _defineProperty2(this, "getPointerPosition", function(event) {
+          return getPointerPos({
+            event: _this._normalizedEvent(event)
+          });
+        });
+        _defineProperty2(this, "update", function(event) {
+          if (!event)
+            return;
+          _this.DS.publish("PointerStore:updated:pre", {
+            event
+          });
+          _this.currentVal = _this.getPointerPosition(event);
+          if (!_this._isMouseInteraction)
+            return;
+          _this.DS.publish("PointerStore:updated", {
+            event
+          });
+        });
+        _defineProperty2(this, "stop", function() {
+          if (_this.Settings.usePointerEvents)
+            document.removeEventListener("pointermove", _this.update, {
+              // @ts-ignore
+              passive: false
+            });
+          else
+            document.removeEventListener("mousemove", _this.update);
+          document.removeEventListener("touchmove", _this.update, {
+            // @ts-ignore
+            passive: false
+          });
+          setTimeout(function() {
+            return _this._isMouseInteraction = false;
+          }, 100);
+        });
+        _defineProperty2(this, "reset", function(event) {
+          if (!event)
+            return;
+          _this.currentVal = _this.lastVal = _this.getPointerPosition(event);
+          _this.stop();
+          _this.init();
+        });
+        this.DS = DS;
+        this.Settings = DS.stores.SettingsStore.s;
+        this.DS.subscribe("Interaction:init", this.init);
+        this.DS.subscribe("Interaction:start", function(_ref2) {
+          var event = _ref2.event;
+          return _this.start(event);
+        });
+        this.DS.subscribe("Interaction:end", function(_ref3) {
+          var event = _ref3.event;
+          return _this.reset(event);
+        });
+      }
+      _createClass2(PointerStore2, [{
+        key: "start",
+        value: (
+          /** @param {DSEvent} [event] */
+          function start(event) {
+            if (!event)
+              return;
+            this._isMouseInteraction = true;
+            this.currentVal = this.initialVal = this.getPointerPosition(event);
+          }
+        )
+        /** @param {DSEvent} event */
+      }, {
+        key: "_normalizedEvent",
+        value: (
+          /**
+           * @param {DSEvent} event
+           * @return {MouseEvent|PointerEvent|Touch}
+           * @private
+           */
+          function _normalizedEvent(event) {
+            if ("touches" in event && event.type !== "touchend")
+              this._lastTouch = event;
+            return "touches" in event ? this._lastTouch.touches[0] : event;
+          }
+        )
+        /** First recorded pointer position within the area */
+      }, {
+        key: "initialValArea",
+        get: function get2() {
+          if (!this._initialValArea)
+            return {
+              x: 0,
+              y: 0
+            };
+          return this._initialValArea;
+        }
+        /** Current pointer position within the area */
+      }, {
+        key: "currentValArea",
+        get: function get2() {
+          if (!this._currentValArea)
+            return {
+              x: 0,
+              y: 0
+            };
+          return this._currentValArea;
+        }
+        /** Last recorded pointer position within the area */
+      }, {
+        key: "lastValArea",
+        get: function get2() {
+          if (!this._lastValArea)
+            return {
+              x: 0,
+              y: 0
+            };
+          return this._lastValArea;
+        }
+        /** First recorded pointer position */
+      }, {
+        key: "initialVal",
+        get: function get2() {
+          if (!this._initialVal)
+            return {
+              x: 0,
+              y: 0
+            };
+          return this._initialVal;
+        },
+        set: function set2(value) {
+          this._initialVal = value;
+          this._initialValArea = value && calc(value, "-", calc(rect2vect(this.DS.Area.rect), "+", rect2vect(this.DS.Area.computedBorder)));
+        }
+      }, {
+        key: "currentVal",
+        get: function get2() {
+          if (!this._currentVal)
+            return {
+              x: 0,
+              y: 0
+            };
+          return this._currentVal;
+        },
+        set: function set2(value) {
+          this._currentVal = value;
+          this._currentValArea = value && calc(value, "-", calc(rect2vect(this.DS.Area.rect), "+", rect2vect(this.DS.Area.computedBorder)));
+        }
+      }, {
+        key: "lastVal",
+        get: function get2() {
+          if (!this._lastVal)
+            return {
+              x: 0,
+              y: 0
+            };
+          return this._lastVal;
+        },
+        set: function set2(value) {
+          this._lastVal = value;
+          this._lastValArea = value && calc(value, "-", calc(rect2vect(this.DS.Area.rect), "+", rect2vect(this.DS.Area.computedBorder)));
+        }
+      }]);
+      return PointerStore2;
+    }();
+    var ScrollStore = /* @__PURE__ */ function() {
+      function ScrollStore2(_ref) {
+        var _this = this;
+        var DS = _ref.DS;
+        _classCallCheck(this, ScrollStore2);
+        _defineProperty2(this, "_initialVal", void 0);
+        _defineProperty2(this, "_currentVal", void 0);
+        _defineProperty2(this, "_canScroll", void 0);
+        _defineProperty2(this, "init", function() {
+          return _this.DS.stores.SettingsStore.s.area.addEventListener("scroll", _this.update);
+        });
+        _defineProperty2(this, "start", function() {
+          _this._currentVal = _this._initialVal = getCurrentScroll(_this.DS.stores.SettingsStore.s.area);
+          _this.DS.stores.SettingsStore.s.area.addEventListener("scroll", _this.update);
+        });
+        _defineProperty2(this, "update", function() {
+          return _this._currentVal = getCurrentScroll(_this.DS.stores.SettingsStore.s.area);
+        });
+        _defineProperty2(this, "stop", function() {
+          _this.DS.stores.SettingsStore.s.area.removeEventListener("scroll", _this.update);
+          _this._initialVal = {
+            x: 0,
+            y: 0
+          };
+          _this._canScroll = null;
+        });
+        _defineProperty2(this, "reset", function() {
+          _this.stop();
+          _this.start();
+        });
+        this.DS = DS;
+        this.DS.subscribe("Interaction:init", this.init);
+        this.DS.subscribe("Interaction:start", function() {
+          return _this.start();
+        });
+        this.DS.subscribe("Interaction:end", function() {
+          return _this.reset();
+        });
+      }
+      _createClass2(ScrollStore2, [{
+        key: "canScroll",
+        get: function get2() {
+          if (typeof this._canScroll === "boolean")
+            return this._canScroll;
+          return this._canScroll = canScroll(this.DS.stores.SettingsStore.s.area);
+        }
+      }, {
+        key: "scrollAmount",
+        get: function get2() {
+          var scrollDiff = calc(this.currentVal, "-", this.initialVal);
+          var zoom = num2vect(this.DS.stores.SettingsStore.s.zoom);
+          var zoomScroll = calc(calc(scrollDiff, "*", zoom), "-", scrollDiff);
+          return {
+            x: scrollDiff.x + zoomScroll.x,
+            y: scrollDiff.y + zoomScroll.y
+          };
+        }
+      }, {
+        key: "initialVal",
+        get: function get2() {
+          if (!this._initialVal)
+            return {
+              x: 0,
+              y: 0
+            };
+          return this._initialVal;
+        }
+      }, {
+        key: "currentVal",
+        get: function get2() {
+          if (!this._currentVal)
+            this._currentVal = getCurrentScroll(this.DS.stores.SettingsStore.s.area);
+          return this._currentVal;
+        }
+      }]);
+      return ScrollStore2;
+    }();
+    var SettingsStore = /* @__PURE__ */ _createClass2(
+      /**
+       * @type {Settings}
+       * @private
+       * */
+      /**
+       * Holds the settings and their previous value `:pre`
+       * @example {
+       *    autoScrollSpeed: 3,
+       *    'autoScrollSpeed:pre': 5
+       * }
+       * @type {Settings}
+       * */
+      /**
+       * @class ScrollStore
+       * @constructor ScrollStore
+       * @param {{ DS:DragSelect, settings:Settings }} p
+       * @ignore
+       */
+      function SettingsStore2(_ref) {
+        var _this = this;
+        var DS = _ref.DS, _settings2 = _ref.settings;
+        _classCallCheck(this, SettingsStore2);
+        _defineProperty2(this, "_settings", {});
+        _defineProperty2(this, "s", {});
+        _defineProperty2(this, "update", function(_ref2) {
+          var settings = _ref2.settings, init2 = _ref2.init;
+          return _this.DS.publish("Settings:updated:pre", _objectSpread22({
+            settings
+          }, init2 ? {
+            init: init2
+          } : {}));
+        });
+        _defineProperty2(this, "_update", function(_ref3) {
+          var settings = _ref3.settings, init2 = _ref3.init;
+          var _settings = hydrateSettings(settings, init2);
+          var _loop = function _loop2() {
+            var _settings4;
+            var _Object$entries$_i = _slicedToArray2(_Object$entries[_i], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
+            if (!(key in _this._settings)) {
+              Object.defineProperty(_this.s, key, {
+                get: function get2() {
+                  return _this._settings[key];
+                },
+                set: function set2(newValue) {
+                  return _this.update({
+                    settings: _defineProperty2({}, key, newValue)
+                  });
+                }
+              });
+            }
+            _this._settings["".concat(key, ":pre")] = _this._settings[key];
+            _this._settings[key] = value;
+            var update = {
+              settings: (_settings4 = {}, _defineProperty2(_settings4, key, _this._settings[key]), _defineProperty2(_settings4, "".concat(key, ":pre"), _this._settings["".concat(key, ":pre")]), _settings4)
+            };
+            _this.DS.publish("Settings:updated", update);
+            _this.DS.publish("Settings:updated:".concat(key), update);
+          };
+          for (var _i = 0, _Object$entries = Object.entries(_settings); _i < _Object$entries.length; _i++) {
+            _loop();
+          }
+        });
+        this.DS = DS;
+        this.DS.subscribe("Settings:updated:pre", this._update);
+        this.update({
+          settings: _settings2,
+          init: true
+        });
+      }
+      /** @param {{settings: Settings, init?: boolean}} props */
+    );
+    var DragSelect2 = /* @__PURE__ */ function() {
+      function DragSelect3(_settings) {
+        var _this = this;
+        _classCallCheck(this, DragSelect3);
+        _defineProperty2(this, "continue", false);
+        _defineProperty2(this, "start", function() {
+          _this.stopped = false;
+          _this.Interaction.init();
+        });
+        _defineProperty2(this, "break", function() {
+          return _this["continue"] = true;
+        });
+        _defineProperty2(this, "setSettings", function(settings) {
+          return _this.stores.SettingsStore.update({
+            settings
+          });
+        });
+        _defineProperty2(this, "getSelection", function() {
+          return _this.SelectedSet.elements;
+        });
+        _defineProperty2(this, "getSelectables", function() {
+          return _this.SelectableSet.elements;
+        });
+        _defineProperty2(this, "getInitialCursorPosition", function() {
+          return _this.stores.PointerStore.initialVal;
+        });
+        _defineProperty2(this, "getCurrentCursorPosition", function() {
+          return _this.stores.PointerStore.currentVal;
+        });
+        _defineProperty2(this, "getPreviousCursorPosition", function() {
+          return _this.stores.PointerStore.lastVal;
+        });
+        _defineProperty2(this, "getInitialCursorPositionArea", function() {
+          return _this.stores.PointerStore.initialValArea;
+        });
+        _defineProperty2(this, "getCurrentCursorPositionArea", function() {
+          return _this.stores.PointerStore.currentValArea;
+        });
+        _defineProperty2(this, "getPreviousCursorPositionArea", function() {
+          return _this.stores.PointerStore.lastValArea;
+        });
+        _defineProperty2(this, "isMultiSelect", function(event) {
+          return _this.stores.KeyStore.isMultiSelectKeyPressed(event);
+        });
+        _defineProperty2(this, "isDragging", function() {
+          return _this.Interaction.isDragging;
+        });
+        _defineProperty2(this, "getZoneByCoordinates", function(coordinates) {
+          var _this$DropZones$getTa;
+          return (_this$DropZones$getTa = _this.DropZones.getTarget(coordinates)) === null || _this$DropZones$getTa === void 0 ? void 0 : _this$DropZones$getTa.toObject();
+        });
+        _defineProperty2(this, "getItemsDroppedByZoneId", function(zoneId) {
+          return _this.DropZones.getItemsDroppedById(zoneId);
+        });
+        _defineProperty2(this, "getItemsInsideByZoneId", function(zoneId, addClasses) {
+          return _this.DropZones.getItemsInsideById(zoneId, addClasses);
+        });
+        this.PubSub = new PubSub({
+          DS: this
+        });
+        this.subscribe = this.PubSub.subscribe;
+        this.unsubscribe = this.PubSub.unsubscribe;
+        this.publish = this.PubSub.publish;
+        this.stores = /** @type {{ SettingsStore:SettingsStore, PointerStore:PointerStore, ScrollStore:ScrollStore, KeyStore:KeyStore }} */
+        {};
+        this.stores.SettingsStore = new SettingsStore({
+          DS: this,
+          settings: _settings
+        });
+        this.stores.PointerStore = new PointerStore({
+          DS: this
+        });
+        this.stores.ScrollStore = new ScrollStore({
+          DS: this
+        });
+        this.stores.KeyStore = new KeyStore({
+          DS: this
+        });
+        this.Area = new Area({
+          DS: this
+        });
+        this.Selector = new Selector({
+          DS: this
+        });
+        this.SelectorArea = new SelectorArea({
+          DS: this
+        });
+        this.SelectableSet = new SelectableSet({
+          DS: this
+        });
+        this.SelectedSet = new SelectedSet({
+          DS: this
+        });
+        this.Selection = new Selection({
+          DS: this
+        });
+        this.Drag = new Drag({
+          DS: this
+        });
+        this.DropZones = new DropZones({
+          DS: this
+        });
+        this.Interaction = new Interaction({
+          DS: this
+        });
+        subscriberAliases({
+          subscribe: this.subscribe,
+          publish: this.publish,
+          SelectedSet: this.SelectedSet,
+          Interaction: this.Interaction,
+          DropZones: this.DropZones
+        });
+        this.subscribe("Interaction:end", function() {
+          return _this["continue"] = false;
+        });
+        this.start();
+      }
+      _createClass2(DragSelect3, [{
+        key: "stop",
+        value: (
+          /**
+           * Complete function teardown
+           * Will teardown/stop the whole functionality
+           * @param {boolean} [remove] - if elements should be removed.
+           * @param {boolean} [fromSelection] - if elements should also be added/removed to the selection.
+           * @param {boolean} [withCallback] - if elements should also be added/removed to the selection.
+           */
+          function stop() {
+            var remove2 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : true;
+            var fromSelection = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : true;
+            var withCallback = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+            if (withCallback)
+              this.publish("callback", {
+                items: this.getSelection()
+              });
+            this.Interaction.stop();
+            this.Area.stop();
+            this.Drag.stop();
+            this.Selector.stop();
+            this.SelectorArea.stop(remove2);
+            this.stores.KeyStore.stop();
+            this.stores.PointerStore.stop();
+            this.stores.ScrollStore.stop();
+            if (remove2)
+              this.SelectableSet.clear();
+            if (fromSelection)
+              this.SelectedSet.clear();
+            this.stopped = true;
+          }
+        )
+        /**
+         * Utility to override DragSelect internal functionality:
+         * Break will skip the selection or dragging functionality (until after the callback) but let everything continue to run.
+         * Useful utility to write your own functionality/move/dragNdrop based on DragSelect pointer positions.
+         */
+      }, {
+        key: "addSelection",
+        value: (
+          /**
+           * Adds several elements to the selection list also adds the specific classes and take into account all calculations.
+           * Does not clear the selection, in contrary to .setSelection. Can add multiple elements at once
+           * @param {DSInputElements} elements one or multiple elements
+           * @param {boolean} [triggerCallback] - if callback should be called
+           * @param {boolean} [dontAddToSelectables] - if element should not be added to the list of selectable elements
+           * @return {DSElements} all selected elements
+           */
+          function addSelection2(elements) {
+            var triggerCallback = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+            var dontAddToSelectables = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+            this.SelectedSet.addAll(toArray2(elements));
+            if (!dontAddToSelectables)
+              this.addSelectables(elements);
+            if (triggerCallback)
+              this.PubSub.publish("callback", {
+                items: this.getSelection()
+              });
+            return this.getSelection();
+          }
+        )
+        /**
+         * Removes specific elements from the selection
+         * Multiple elements can be given at once, in contrary to unselect
+         * @param {DSInputElements} elements one or multiple elements
+         * @param {boolean} [triggerCallback] - if callback should be called
+         * @param {boolean} [removeFromSelectables] - if element should be removed from the list of selectable elements
+         * @return {DSElements} all selected elements
+         */
+      }, {
+        key: "removeSelection",
+        value: function removeSelection(elements) {
+          var triggerCallback = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+          var removeFromSelectables = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+          this.SelectedSet.deleteAll(toArray2(elements));
+          if (removeFromSelectables)
+            this.removeSelectables(elements);
+          if (triggerCallback)
+            this.PubSub.publish("callback", {
+              items: this.getSelection()
+            });
+          return this.getSelection();
+        }
+        /**
+         * Toggles specific elements from the selection:
+         * If element is not in selection it will be added, if it is already selected, it will be removed.
+         * Multiple elements can be given at once.
+         * @param {DSInputElements} elements one or multiple elements
+         * @param {boolean} [triggerCallback] - if callback should be called
+         * @param {boolean} [removeFromSelectables] - if element should not be added/removed to the list of selectable elements accordingly
+         * @return {DSElements} all selected elements
+         */
+      }, {
+        key: "toggleSelection",
+        value: function toggleSelection(elements) {
+          var _this2 = this;
+          var triggerCallback = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+          var removeFromSelectables = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+          toArray2(elements).forEach(function(el2) {
+            return _this2.SelectedSet.has(el2) ? _this2.removeSelection(elements, triggerCallback, removeFromSelectables) : _this2.addSelection(elements, triggerCallback, removeFromSelectables);
+          });
+          if (triggerCallback)
+            this.PubSub.publish("callback", {
+              items: this.getSelection()
+            });
+          return this.getSelection();
+        }
+        /**
+         * Sets the current selected elements and optionally run the callback
+         * By default, adds new elements also to the list of selectables
+         * @param {DSInputElements} elements – dom elements
+         * @param {boolean} [triggerCallback] - if callback should be called
+         * @param {boolean} [dontAddToSelectables] - if element should not be added to the list of selectable elements
+         * @return {DSElements}
+         */
+      }, {
+        key: "setSelection",
+        value: function setSelection(elements) {
+          var triggerCallback = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+          var dontAddToSelectables = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+          this.clearSelection();
+          this.addSelection(elements, triggerCallback, dontAddToSelectables);
+          return this.getSelection();
+        }
+        /**
+         * Unselect / Deselect all current selected Nodes
+         * @param {boolean} [triggerCallback] - if callback should be called
+         * @return {DSElements} this.selected, should be empty
+         */
+      }, {
+        key: "clearSelection",
+        value: function clearSelection() {
+          var triggerCallback = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : false;
+          this.SelectedSet.clear();
+          if (triggerCallback)
+            this.PubSub.publish("callback", {
+              items: this.getSelection()
+            });
+          return this.getSelection();
+        }
+        /**
+         * Add elements that can be selected. No node is added twice
+         * @param {DSInputElements} elements dom element(s)
+         * @param {boolean} [addToSelection] if elements should also be added to current selection
+         * @param {boolean} [triggerCallback] - if callback should be called
+         * @return {DSInputElements} the added element(s)
+         */
+      }, {
+        key: "addSelectables",
+        value: function addSelectables(elements, addToSelection, triggerCallback) {
+          var els = toArray2(elements);
+          this.SelectableSet.addAll(els);
+          if (addToSelection)
+            this.SelectedSet.addAll(els);
+          if (triggerCallback)
+            this.PubSub.publish("callback", {
+              items: this.getSelection()
+            });
+          return elements;
+        }
+        /**
+         * Gets all nodes that can potentially be selected
+         * @return {DSElements} this.selectables
+         */
+      }, {
+        key: "setSelectables",
+        value: (
+          /**
+           * Sets all elements that can be selected.
+           * Removes all current selectables (& their respective classes).
+           * Adds the new set to the selectables set, thus replacing the original set.
+           * @param {DSInputElements} elements – dom element(s)
+           * @param {boolean} [removeFromSelection] if elements should also be removed from current selection
+           * @param {boolean} [addToSelection] if elements should also be added to current selection
+           * @return {DSInputElements} elements – the added element(s)
+           */
+          function setSelectables(elements) {
+            var removeFromSelection = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+            var addToSelection = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+            console.warn('[DragSelect] DEPRECATION ".setSelectables" is deprecated and will be removed soon. Please use "ds.setSettings({ selectables: << new dom elements >> })" instead (see docs)');
+            this.removeSelectables(elements, removeFromSelection);
+            return this.addSelectables(elements, addToSelection);
+          }
+        )
+        /**
+         * Remove elements from the elements that can be selected.
+         * @param {DSInputElements} elements – dom element(s)
+         * @param {boolean} [removeFromSelection] if elements should also be removed from current selection
+         * @param {boolean} [triggerCallback] - if callback should be called
+         * @return {DSInputElements} the removed element(s)
+         */
+      }, {
+        key: "removeSelectables",
+        value: function removeSelectables(elements, removeFromSelection, triggerCallback) {
+          this.SelectableSet.deleteAll(toArray2(elements));
+          if (removeFromSelection)
+            this.removeSelection(elements);
+          if (triggerCallback)
+            this.PubSub.publish("callback", {
+              items: this.getSelection()
+            });
+          return elements;
+        }
+        /** The starting/initial position of the cursor/selector @return {Vect2} */
+      }]);
+      return DragSelect3;
+    }();
+    DragSelect2.isCollision = isCollision;
+    return DragSelect2;
+  });
+})(DragSelect$1);
+var DragSelectExports = DragSelect$1.exports;
+const DragSelect = /* @__PURE__ */ getDefaultExportFromCjs(DragSelectExports);
+/**
+ * @license
+ * Copyright 2022 MIT
+ * SPDX-License-Identifier: Apache-2.0
+ */
+const WIDTH = 32;
+const HEIGHT = 32;
+const MARGIN_VERTICAL = 20;
+const MARGIN_HORIZONTAL = 20;
+class MultiselectControls {
+  /**
+   * @param {!Blockly.WorkspaceSvg} workspace The workspace to sit in.
+   * @param {Object} options The icons configuration.
+   */
+  constructor(workspace, options) {
+    this.enabled_img = "https://github.com/mit-cml/workspace-multiselect/raw/main/test/media/select.svg";
+    this.disabled_img = "https://github.com/mit-cml/workspace-multiselect/raw/main/test/media/unselect.svg";
+    this.workspace_ = workspace;
+    this.enabled = false;
+    this.id = "multiselectControls";
+    this.onMultiselectWrapper_ = null;
+    this.multiselectGroup_ = null;
+    this.initialized_ = false;
+    this.hasDisableWorkspaceDrag_ = false;
+    this.justUnselectedBlock_ = null;
+    if (options && options.enabledIcon) {
+      this.enabled_img = options.enabledIcon;
+    }
+    if (options && options.disabledIcon) {
+      this.disabled_img = options.disabledIcon;
+    }
+    this.blockSelection = blockSelectionWeakMap.get(workspace);
+  }
+  /**
+   * Create the multi select controls.
+   * @returns {!SVGElement} The multi select controls SVG group.
+   */
+  createDom() {
+    this.svgGroup_ = coreBrowserExports.utils.dom.createSvgElement(
+      coreBrowserExports.utils.Svg.G,
+      {},
+      null
+    );
+    this.createMultiselectSvg_();
+    return this.svgGroup_;
+  }
+  /**
+   * Initializes the multi select controls.
+   */
+  init() {
+    this.workspace_.getComponentManager().addComponent({
+      component: this,
+      weight: 3,
+      capabilities: [coreBrowserExports.ComponentManager.Capability.POSITIONABLE]
+    });
+    this.initialized_ = true;
+    this.workspace_.resize();
+  }
+  /**
+   * Disposes of this multi select controls.
+   * Unlink from all DOM elements to prevent memory leaks.
+   */
+  dispose() {
+    this.disableMultiselect();
+    this.workspace_.getComponentManager().removeComponent(this.id);
+    if (this.svgGroup_) {
+      coreBrowserExports.utils.dom.removeNode(this.svgGroup_);
+    }
+    if (this.onMultiselectWrapper_) {
+      coreBrowserExports.browserEvents.unbind(this.onMultiselectWrapper_);
+    }
+  }
+  /**
+   * Returns the bounding rectangle of the UI element in pixel units relative to
+   * the Blockly injection div.
+   * @returns {?Blockly.utils.Rect} The UI elements's bounding box. Null if
+   *   bounding box should be ignored by other UI elements.
+   */
+  getBoundingRectangle() {
+    const bottom = this.top_ + HEIGHT;
+    const right = this.left_ + WIDTH;
+    return new coreBrowserExports.utils.Rect(this.top_, bottom, this.left_, right);
+  }
+  /**
+   * Positions the multi select controls.
+   * It is positioned in the opposite corner to the corner the
+   * categories/toolbox starts at.
+   * @param {!Blockly.MetricsManager.UiMetrics} metrics The workspace metrics.
+   * @param {!Array<!Blockly.utils.Rect>} savedPositions List of rectangles that
+   *     are already on the workspace.
+   */
+  position(metrics, savedPositions) {
+    if (!this.initialized_) {
+      return;
+    }
+    const cornerPosition = coreBrowserExports.uiPosition.getCornerOppositeToolbox(this.workspace_, metrics);
+    const startRect = coreBrowserExports.uiPosition.getStartPositionRect(
+      cornerPosition,
+      new coreBrowserExports.utils.Size(WIDTH, HEIGHT),
+      MARGIN_HORIZONTAL,
+      MARGIN_VERTICAL,
+      metrics,
+      this.workspace_
+    );
+    const verticalPosition = cornerPosition.vertical;
+    const bumpDirection = verticalPosition === coreBrowserExports.uiPosition.verticalPosition.TOP ? coreBrowserExports.uiPosition.bumpDirection.DOWN : coreBrowserExports.uiPosition.bumpDirection.UP;
+    const positionRect = coreBrowserExports.uiPosition.bumpPositionRect(
+      startRect,
+      MARGIN_VERTICAL,
+      bumpDirection,
+      savedPositions
+    );
+    this.top_ = positionRect.top;
+    this.left_ = positionRect.left;
+    if (this.svgGroup_) {
+      this.svgGroup_.setAttribute(
+        "transform",
+        "translate(" + this.left_ + "," + this.top_ + ")"
+      );
+    }
+  }
+  /**
+   * Create the zoom reset icon and its event handler.
+   * @private
+   */
+  createMultiselectSvg_() {
+    this.multiselectGroup_ = coreBrowserExports.utils.dom.createSvgElement(coreBrowserExports.utils.Svg.G, {
+      "class": "blocklyMultiselect"
+    }, this.svgGroup_);
+    const MultiselectSvg = coreBrowserExports.utils.dom.createSvgElement(
+      coreBrowserExports.utils.Svg.IMAGE,
+      {
+        "width": WIDTH,
+        "height": HEIGHT
+      },
+      this.multiselectGroup_
+    );
+    MultiselectSvg.setAttributeNS(
+      coreBrowserExports.utils.dom.XLINK_NS,
+      "xlink:href",
+      this.disabled_img
+    );
+    this.onMultiselectWrapper_ = coreBrowserExports.browserEvents.conditionalBind(
+      this.multiselectGroup_,
+      "mousedown",
+      null,
+      this.switchMultiselect_.bind(this)
+    );
+  }
+  /**
+   * Handles a mouse down event on the reset zoom button on the workspace.
+   * @param {!Event} e A mouse down event.
+   * @private
+   */
+  switchMultiselect_(e2) {
+    this.workspace_.markFocused();
+    this.enabled = !this.enabled;
+    if (this.enabled) {
+      this.enableMultiselect(true);
+    } else {
+      this.disableMultiselect(true);
+    }
+    coreBrowserExports.Touch.clearTouchIdentifier();
+    e2.stopPropagation();
+    e2.preventDefault();
+  }
+  /**
+   * Maintain the selected blocks set list when updating.
+   * @param {!Blockly.BlockSvg} block The block to update.
+   * @private
+   */
+  updateBlocks_(block) {
+    if (block && (block.isDeletable() || block.isMovable())) {
+      if (this.blockSelection.has(block.id)) {
+        this.blockSelection.delete(block.id);
+        this.justUnselectedBlock_ = block;
+        block.pathObject.updateSelected(false);
+      } else {
+        this.blockSelection.add(block.id);
+        this.justUnselectedBlock_ = null;
+        block.pathObject.updateSelected(true);
+        block.bringToFront();
+      }
+    }
+  }
+  /**
+   * update the multiple selection blocks status.
+   */
+  updateMultiselect() {
+    if (!inMultipleSelectionModeWeakMap.get(this.workspace_)) {
+      if (!coreBrowserExports.getSelected() || coreBrowserExports.getSelected() && !this.blockSelection.has(coreBrowserExports.getSelected().id)) {
+        this.blockSelection.forEach((id2) => {
+          const element = this.workspace_.getBlockById(id2);
+          if (element) {
+            element.pathObject.updateSelected(false);
+          }
+        });
+        this.blockSelection.clear();
+        this.updateBlocks_(coreBrowserExports.getSelected());
+      }
+    } else if (this.justUnselectedBlock_ && coreBrowserExports.getSelected() && coreBrowserExports.getSelected().id === this.justUnselectedBlock_.id) {
+      if (this.blockSelection.size) {
+        coreBrowserExports.common.setSelected(
+          this.workspace_.getBlockById(
+            this.blockSelection.keys().next().value
+          )
+        );
+      } else {
+        coreBrowserExports.common.setSelected(null);
+      }
+      this.justUnselectedBlock_.pathObject.updateSelected(false);
+      this.justUnselectedBlock_ = null;
+    }
+    this.blockSelection.forEach((id2) => {
+      const element = this.workspace_.getBlockById(id2);
+      if (element) {
+        element.pathObject.updateSelected(true);
+      }
+    });
+  }
+  /**
+   * Enable the multiple select mode.
+   * @param {!boolean} byIcon Whether to simulate a keyboard event.
+   */
+  enableMultiselect(byIcon = false) {
+    if (!this.hasDisableWorkspaceDrag_ && this.workspace_.options.moveOptions && this.workspace_.options.moveOptions.drag) {
+      this.workspace_.options.moveOptions.drag = false;
+      this.hasDisableWorkspaceDrag_ = true;
+    }
+    this.dragSelect_ = new DragSelect({
+      selectables: document.querySelectorAll(
+        "g.blocklyDraggable:not(.blocklyInsertionMarker)> path.blocklyPath"
+      ),
+      area: document.querySelector(".blocklyWorkspace"),
+      multiselectMode: true,
+      draggability: false,
+      usePointerEvents: true
+    });
+    const filterParent = (list, rect) => {
+      const toRemove = [];
+      for (const [parent, parentRect] of list.entries()) {
+        for (const [child, childRect] of list.entries()) {
+          if (parent === child || !DragSelect.isCollision(childRect, parentRect, 0) || parent.parentNode === null || child.parentNode === null || parent.parentNode === child.parentNode)
+            continue;
+          else if (parent.parentNode.contains(child.parentNode) && // Continue to select if user draws a rectangle that
+          // covers more than the child itself
+          DragSelect.isCollision(rect, childRect, 1)) {
+            toRemove.push(parent);
+            break;
+          }
+        }
+      }
+      return toRemove;
+    };
+    this.dragSelect_.Selection.filterSelected = ({ selectorRect, select: _select, unselect: _unselect }) => {
+      const select = _select;
+      const unselect = _unselect;
+      const toRemove = filterParent(select, selectorRect);
+      toRemove.forEach((el2) => {
+        const rect = select.get(el2);
+        select.delete(el2);
+        unselect.set(el2, rect);
+      });
+      return { select, unselect };
+    };
+    this.dragSelect_.subscribe("elementselect", (info) => {
+      const element = info.item.parentElement;
+      if (inMultipleSelectionModeWeakMap.get(this.workspace_) && element.dataset && element.dataset.id) {
+        this.updateBlocks_(
+          this.workspace_.getBlockById(element.dataset.id)
+        );
+      }
+    });
+    this.dragSelect_.subscribe("elementunselect", (info) => {
+      const element = info.item.parentElement;
+      if (inMultipleSelectionModeWeakMap.get(this.workspace_) && element.dataset && element.dataset.id) {
+        this.updateBlocks_(
+          this.workspace_.getBlockById(element.dataset.id)
+        );
+      }
+    });
+    if (byIcon) {
+      document.dispatchEvent(new KeyboardEvent("keydown", { "key": "meta" }));
+    }
+    this.updateMultiselectIcon(true);
+    inMultipleSelectionModeWeakMap.set(this.workspace_, true);
+  }
+  /**
+   * Disable the multiple select mode.
+   * @param {!boolean} byIcon Whether to simulate a keyboard event.
+   */
+  disableMultiselect(byIcon = false) {
+    inMultipleSelectionModeWeakMap.set(this.workspace_, false);
+    if (this.dragSelect_) {
+      if (byIcon) {
+        document.dispatchEvent(new KeyboardEvent("keyup", { "key": "meta" }));
+      }
+      this.dragSelect_.stop();
+      this.dragSelect_ = null;
+    }
+    if (!this.blockSelection.size && coreBrowserExports.getSelected()) {
+      coreBrowserExports.common.setSelected(null);
+    } else if (this.blockSelection.size && !coreBrowserExports.getSelected()) {
+      coreBrowserExports.common.setSelected(
+        this.workspace_.getBlockById(
+          this.blockSelection.keys().next().value
+        )
+      );
+    }
+    if (this.hasDisableWorkspaceDrag_) {
+      this.workspace_.options.moveOptions.drag = true;
+      this.hasDisableWorkspaceDrag_ = false;
+    }
+    this.updateMultiselectIcon(false);
+  }
+  /**
+   * Updates the multi select icon.
+   * @param {boolean} enable Whether the multi select is enabled.
+   */
+  updateMultiselectIcon(enable) {
+    if (!this.multiselectGroup_) {
+      return;
+    }
+    this.enabled = enable;
+    if (enable) {
+      this.multiselectGroup_.firstElementChild.setAttributeNS(
+        coreBrowserExports.utils.dom.XLINK_NS,
+        "xlink:href",
+        this.enabled_img
+      );
+    } else {
+      this.multiselectGroup_.firstElementChild.setAttributeNS(
+        coreBrowserExports.utils.dom.XLINK_NS,
+        "xlink:href",
+        this.disabled_img
+      );
+    }
+  }
+}
+coreBrowserExports.Css.register(`
+.blocklyMultiselect>image, .blocklyMultiselect>svg>image {
+  opacity: .2;
+}
+
+.blocklyMultiselect>image:hover, .blocklyMultiselect>svg>image:hover {
+  opacity: .4;
+}
+
+.blocklyMultiselect>image:active, .blocklyMultiselect>svg>image:active {
+  opacity: .6;
+}
+`);
+/**
+ * @license
+ * Copyright 2022 MIT
+ * SPDX-License-Identifier: Apache-2.0
+ */
+class Multiselect {
+  /**
+   * Initalize the class data structure.
+   * @param {!Blockly.WorkspaceSvg} workspace The workspace to sit in.
+   */
+  constructor(workspace) {
+    this.workspace_ = workspace;
+    this.origHandleWsStart_ = coreBrowserExports.Gesture.prototype.handleWsStart;
+    blockSelectionWeakMap.set(this.workspace_, /* @__PURE__ */ new Set());
+    this.blockSelection_ = blockSelectionWeakMap.get(this.workspace_);
+    inMultipleSelectionModeWeakMap.set(this.workspace_, false);
+    BaseBlockDraggerWeakMap.set(this.workspace_, coreBrowserExports.BlockDragger);
+    this.useCopyPasteCrossTab_ = true;
+    this.useCopyPasteMenu_ = true;
+  }
+  /**
+   * Bind the events and replace registration.
+   * @param {Object} options
+   * to set.
+   */
+  init(options) {
+    this.onKeyDownWrapper_ = coreBrowserExports.browserEvents.conditionalBind(
+      this.workspace_.getInjectionDiv(),
+      "keydown",
+      this,
+      this.onKeyDown_
+    );
+    this.onKeyUpWrapper_ = coreBrowserExports.browserEvents.conditionalBind(
+      globalThis["window"],
+      "blur",
+      this,
+      this.onBlur_
+    );
+    this.onKeyUpWrapper_ = coreBrowserExports.browserEvents.conditionalBind(
+      this.workspace_.getInjectionDiv(),
+      "keyup",
+      this,
+      this.onKeyUp_
+    );
+    this.eventListenerWrapper_ = this.eventListener_.bind(this);
+    this.workspace_.addChangeListener(this.eventListenerWrapper_);
+    if (options.multiselectCopyPaste && options.multiselectCopyPaste.crossTab === false) {
+      this.useCopyPasteCrossTab_ = false;
+    }
+    if (options.multiselectCopyPaste && options.multiselectCopyPaste.menu === false) {
+      this.useCopyPasteMenu_ = false;
+    }
+    if (!coreBrowserExports.ContextMenuRegistry.registry.registry_.workspaceSelectAll) {
+      unregisterContextMenu();
+      registerOurContextMenu(
+        this.useCopyPasteMenu_,
+        this.useCopyPasteCrossTab_
+      );
+      unregisterShortcut();
+      registerOurShortcut(this.useCopyPasteCrossTab_);
+    }
+    this.controls_ = new MultiselectControls(
+      this.workspace_,
+      options.multiselectIcon,
+      this
+    );
+    if (!options.multiselectIcon || !options.multiselectIcon.hideIcon) {
+      const svgControls = this.controls_.createDom();
+      this.workspace_.getParentSvg().appendChild(svgControls);
+    }
+    this.controls_.init();
+    if (options.useDoubleClick) {
+      this.useDoubleClick_(true);
+    }
+    if (options.baseBlockDragger) {
+      BaseBlockDraggerWeakMap.set(this.workspace_, options.baseBlockDragger);
+    }
+    if (!options.bumpNeighbours) {
+      this.origBumpNeighbours = coreBrowserExports.BlockSvg.prototype.bumpNeighbours;
+      coreBrowserExports.BlockSvg.prototype.bumpNeighbours = function() {
+      };
+    }
+  }
+  /**
+   * Unbind the events and replace with original registration.
+   * @param {boolean} keepRegistry Keep the context menu and shortcut registry.
+   */
+  dispose(keepRegistry = false) {
+    if (this.onKeyDownWrapper_) {
+      coreBrowserExports.browserEvents.unbind(this.onKeyDownWrapper_);
+      this.onKeyDownWrapper_ = null;
+    }
+    if (this.onKeyUpWrapper_) {
+      coreBrowserExports.browserEvents.unbind(this.onKeyUpWrapper_);
+      this.onKeyUpWrapper_ = null;
+    }
+    if (this.eventListenerWrapper_) {
+      this.workspace_.removeChangeListener(this.eventListenerWrapper_);
+      this.eventListenerWrapper_ = null;
+    }
+    if (!keepRegistry) {
+      unregisterContextMenu();
+      if (this.useCopyPasteMenu_) {
+        coreBrowserExports.ContextMenuRegistry.registry.unregister("blockCopyToStorage");
+        coreBrowserExports.ContextMenuRegistry.registry.unregister("blockPasteFromStorage");
+      }
+      coreBrowserExports.ContextMenuRegistry.registry.unregister("workspaceSelectAll");
+      registerOrigContextMenu();
+      unregisterShortcut();
+      coreBrowserExports.ShortcutRegistry.registry.unregister("selectall");
+      registerOrigShortcut();
+    }
+    if (this.controls_) {
+      this.controls_.dispose();
+      this.controls_ = null;
+    }
+    this.useDoubleClick_(false);
+    if (this.origBumpNeighbours) {
+      coreBrowserExports.BlockSvg.prototype.bumpNeighbours = this.origBumpNeighbours;
+    }
+  }
+  /**
+   * Add double click to expand/collapse blocks (MIT App Inventor Supported).
+   * @param {!boolean} on Whether to turn on the mode.
+   * @private
+   */
+  useDoubleClick_(on2) {
+    if (!on2) {
+      coreBrowserExports.Gesture.prototype.handleWsStart = this.origHandleWsStart_;
+      return;
+    }
+    coreBrowserExports.Gesture.prototype.handleWsStart = function(func) {
+      if (func.isWrapped) {
+        return func;
+      }
+      const wrappedFunc = function(e2, ws) {
+        func.call(this, e2, ws);
+        if (this.targetBlock_ && e2.buttons === 1 && !inMultipleSelectionModeWeakMap.get(ws)) {
+          const preCondition = function(block) {
+            return !block.isInFlyout && block.isMovable() && block.workspace.options.collapse;
+          };
+          if (coreBrowserExports.getSelected() && preCondition(coreBrowserExports.getSelected())) {
+            if (ws.doubleClickPid_) {
+              clearTimeout(ws.doubleClickPid_);
+              ws.doubleClickPid_ = void 0;
+              if (coreBrowserExports.getSelected().id === ws.doubleClickBlock_) {
+                const state2 = !coreBrowserExports.getSelected().isCollapsed();
+                const maybeCollapse = function(block) {
+                  if (block && preCondition(block) && !hasSelectedParent(block)) {
+                    block.setCollapsed(state2);
+                  }
+                };
+                coreBrowserExports.Events.setGroup(true);
+                const blockSelection = blockSelectionWeakMap.get(ws);
+                if (coreBrowserExports.getSelected() && !blockSelection.size) {
+                  maybeCollapse(coreBrowserExports.getSelected());
+                }
+                blockSelection.forEach(function(id2) {
+                  const block = ws.getBlockById(id2);
+                  if (block) {
+                    maybeCollapse(block);
+                  }
+                });
+                coreBrowserExports.Events.setGroup(false);
+                return;
+              }
+            }
+            if (!ws.doubleClickPid_) {
+              ws.doubleClickBlock_ = coreBrowserExports.getSelected().id;
+              ws.doubleClickPid_ = setTimeout(function() {
+                ws.doubleClickPid_ = void 0;
+              }, 500);
+            }
+          }
+        }
+      };
+      wrappedFunc.isWrapped = true;
+      return wrappedFunc;
+    }(coreBrowserExports.Gesture.prototype.handleWsStart);
+  }
+  /**
+   * Handle workspace events.
+   * @param {!Event} e Blockly event.
+   * @private
+   */
+  eventListener_(e2) {
+    if (e2.type === coreBrowserExports.Events.SELECTED) {
+      this.controls_.updateMultiselect();
+    } else if (e2.type === coreBrowserExports.Events.CHANGE && e2.element === "field" && e2.recordUndo && this.blockSelection_.has(e2.blockId)) {
+      const inGroup = !!e2.group;
+      if (!inGroup) {
+        coreBrowserExports.Events.setGroup(true);
+        e2.group = coreBrowserExports.Events.getGroup();
+      }
+      try {
+        const blockType = this.workspace_.getBlockById(e2.blockId).type;
+        this.blockSelection_.forEach((id2) => {
+          const block = this.workspace_.getBlockById(id2);
+          if (block.type === blockType) {
+            block.setFieldValue(e2.newValue, e2.name);
+          }
+        });
+      } finally {
+        if (!inGroup) {
+          coreBrowserExports.Events.setGroup(false);
+        }
+      }
+    }
+  }
+  /**
+   * Handle a key-down on the workspace.
+   * @param {KeyboardEvent} e The keyboard event.
+   * @private
+   */
+  onKeyDown_(e2) {
+    if (e2.keyCode === coreBrowserExports.utils.KeyCodes.SHIFT && !inMultipleSelectionModeWeakMap.get(this.workspace_)) {
+      this.controls_.enableMultiselect();
+    }
+  }
+  /**
+   * Handle a key-up on the workspace.
+   * @param {KeyboardEvent} e The keyboard event.
+   * @private
+   */
+  onKeyUp_(e2) {
+    if (e2.keyCode === coreBrowserExports.utils.KeyCodes.SHIFT) {
+      this.controls_.disableMultiselect();
+    }
+  }
+  /**
+   * Handle a blur on the workspace.
+   * @private
+   */
+  onBlur_() {
+    if (inMultipleSelectionModeWeakMap.get(this.workspace_)) {
+      this.controls_.disableMultiselect();
+    }
+  }
+}
+/**
+ * @license
+ * Copyright 2022 MIT
+ * SPDX-License-Identifier: Apache-2.0
+ */
+class MultiselectBlockDragger extends coreBrowserExports.BlockDragger {
+  /** @override */
+  constructor(block, workspace) {
+    super(block, workspace);
+    this.block_ = block;
+    this.workspace_ = workspace;
+    this.group_ = "";
+    this.blockDraggers_ = /* @__PURE__ */ new Set();
+    this.origHighlight_ = coreBrowserExports.RenderedConnection.prototype.highlight;
+    this.BaseBlockDragger = BaseBlockDraggerWeakMap.get(workspace);
+    this.origUpdateBlockAfterMove_ = this.BaseBlockDragger.prototype.updateBlockAfterMove_;
+    this.blockSelection = blockSelectionWeakMap.get(workspace);
+  }
+  /**
+   * Prepares the block dragger for a new drag.
+   * @param {!Blockly.utils.Coordinate} currentDragDeltaXY How far the pointer
+   *     has moved from the position at the start of the drag, in pixel units.
+   * @param {boolean} healStack Whether or not to heal the stack after
+   *     disconnecting.
+   */
+  startDrag(currentDragDeltaXY, healStack) {
+    if (inMultipleSelectionModeWeakMap.get(this.workspace_)) {
+      return;
+    }
+    const blockDraggerList = [];
+    if (this.blockSelection.has(this.block_.id)) {
+      this.blockSelection.forEach((id2) => {
+        const element = this.workspace_.getBlockById(id2);
+        if (!element) {
+          this.blockSelection.delete(id2);
+          return;
+        }
+        if (hasSelectedParent(element, true)) {
+          return;
+        }
+        blockDraggerList.push(new this.BaseBlockDragger(
+          element,
+          this.workspace_
+        ));
+      });
+    } else {
+      this.blockSelection.forEach((id2) => {
+        const element = this.workspace_.getBlockById(id2);
+        if (element) {
+          element.pathObject.updateSelected(false);
+        }
+      });
+      this.blockSelection.clear();
+      blockDraggerList.push(new this.BaseBlockDragger(
+        this.block_,
+        this.workspace_
+      ));
+      this.block_.pathObject.updateSelected(true);
+    }
+    if (blockDraggerList.length > 1) {
+      coreBrowserExports.RenderedConnection.prototype.highlight = function() {
+      };
+    }
+    blockDraggerList.forEach((blockDragger) => {
+      blockDragger.startDrag(currentDragDeltaXY, healStack);
+      this.blockDraggers_.add(blockDragger);
+    });
+  }
+  /**
+   * Moves the block to the specified location.
+   * @param {!Event} e The mouseup/touchend event.
+   * @param {!Blockly.utils.Coordinate} currentDragDeltaXY How far the pointer
+   *     has moved from the position at the start of the drag, in pixel units.
+   */
+  drag(e2, currentDragDeltaXY) {
+    this.blockDraggers_.forEach(function(blockDragger_) {
+      blockDragger_.drag(e2, currentDragDeltaXY);
+    });
+    e2.preventDefault();
+    e2.stopPropagation();
+  }
+  /**
+   * Finishes the block drag.
+   * @param {!Event} e The mouseup/touchend event.
+   * @param {!Blockly.utils.Coordinate} currentDragDeltaXY How far the pointer
+   *     has moved from the position at the start of the drag, in pixel units.
+   */
+  endDrag(e2, currentDragDeltaXY) {
+    if (this.blockDraggers_.size > 1) {
+      this.patchUpdateBlockAfterMove(true);
+    }
+    this.blockDraggers_.forEach((blockDragger_) => {
+      if (coreBrowserExports.Events.getGroup()) {
+        this.group_ = coreBrowserExports.Events.getGroup();
+      } else {
+        coreBrowserExports.Events.setGroup(this.group_);
+      }
+      blockDragger_.endDrag(e2, currentDragDeltaXY);
+    });
+    if (this.blockDraggers_.size > 1) {
+      coreBrowserExports.RenderedConnection.prototype.highlight = this.origHighlight_;
+      this.patchUpdateBlockAfterMove(false);
+    }
+  }
+  /**
+   * Updates the location of the block that is being dragged.
+   * @param {number} deltaX Horizontal offset in pixel units.
+   * @param {number} deltaY Vertical offset in pixel units.
+   */
+  moveBlockWhileDragging(deltaX, deltaY) {
+    this.blockDraggers_.forEach(function(blockDragger_) {
+      blockDragger_.moveBlockWhileDragging(deltaX, deltaY);
+    });
+  }
+  /**
+   * Patch the this.BaseBlockDragger.updateBlockAfterMove_ function.
+   * @param {boolean} on To start the patch or restore.
+   */
+  patchUpdateBlockAfterMove(on2) {
+    if (!on2) {
+      this.BaseBlockDragger.prototype.updateBlockAfterMove_ = this.origUpdateBlockAfterMove_;
+    } else {
+      this.BaseBlockDragger.prototype.updateBlockAfterMove_ = function() {
+        this.fireMoveEvent_();
+        if (this.draggedConnectionManager_.wouldConnectBlock()) {
+          const closest = this.draggedConnectionManager_.activeCandidate.closest;
+          if (!blockSelectionWeakMap.get(this.workspace_).has(
+            closest.sourceBlock_.id
+          ) && !hasSelectedParent(closest.sourceBlock_, true)) {
+            this.draggedConnectionManager_.applyConnections();
+          } else {
+            coreBrowserExports.Events.disable();
+            this.draggedConnectionManager_.hidePreview();
+            coreBrowserExports.Events.enable();
+          }
+        }
+        this.draggingBlock_.getDescendants(false).forEach(function(block) {
+          if (!block.getChildren().length) {
+            block.render();
+          }
+        });
+        this.draggingBlock_.scheduleSnapAndBump();
+      };
+    }
+  }
+  /**
+   * Get a list of the insertion markers that currently exist.  Drags have 0, 1,
+   * or 2 insertion markers.
+   * @returns {!Array<!Blockly.BlockSvg>} A possibly empty list of insertion
+   *     marker blocks.
+   */
+  getInsertionMarkers() {
+    const insertionMarkers = [];
+    this.blockDraggers_.forEach(function(blockDragger_) {
+      insertionMarkers.push(...blockDragger_.getInsertionMarkers());
+    });
+    return insertionMarkers;
+  }
+}
+coreBrowserExports.registry.register(
+  coreBrowserExports.registry.Type.BLOCK_DRAGGER,
+  "MultiselectBlockDragger",
+  MultiselectBlockDragger
 );
 function debounce$1(func, wait) {
   var timeout = null;
@@ -75637,6 +81843,11 @@ const BlockEditorHeader = () => {
   ) });
 };
 const zoomScaleSpeed = 1.2;
+const blocklyTheme = Blockly.registry.getObject(Blockly.registry.Type.THEME, "robart", false) ?? Blockly.Theme.defineTheme("robart", {
+  name: "robart",
+  base: Blockly.Themes.Classic,
+  fontStyle: { family: defaultTheme$2.fontFamily.sans.join(", ") }
+});
 Blockly.Scrollbar.scrollbarThickness = 8;
 class FixedScaleFlyout extends Blockly.VerticalFlyout {
   getFlyoutScale() {
@@ -75665,7 +81876,9 @@ const BlockEditorPanel = () => {
       // or every scroll would zoom.
       zoom: { wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed },
       move: { wheel: true, drag: true, scrollbars: true },
-      plugins: { flyoutsVerticalToolbox: FixedScaleFlyout }
+      // MultiselectBlockDragger moves all selected blocks together (required by the multiselect plugin)
+      plugins: { flyoutsVerticalToolbox: FixedScaleFlyout, blockDragger: MultiselectBlockDragger },
+      theme: blocklyTheme
     },
     onWorkspaceChange: (workspaceChanged) => {
       if (!loadedBlockId.current)
@@ -75677,6 +81890,49 @@ const BlockEditorPanel = () => {
     },
     ref: workspaceRef
   });
+  reactExports.useEffect(() => {
+    if (!workspace)
+      return;
+    const multiselect = new Multiselect(workspace);
+    multiselect.init({
+      multiselectIcon: { hideIcon: true },
+      // Shift does the same; its default icons load from GitHub
+      bumpNeighbours: true,
+      // Keep Blockly's nudging of overlapping blocks (the plugin turns it off by default)
+      multiselectCopyPaste: { crossTab: true, menu: false }
+      // Keyboard copy/paste only, no extra menu items
+    });
+    const editor = workspace.getInjectionDiv();
+    let pointerInside = false;
+    const isOn = () => inMultipleSelectionModeWeakMap.get(workspace) === true;
+    const onPointerEnter = () => {
+      pointerInside = true;
+    };
+    const onPointerLeave = () => {
+      pointerInside = false;
+    };
+    const onKeyDown = (event) => {
+      var _a3;
+      if (event.key === "Shift" && pointerInside && !isOn())
+        (_a3 = multiselect.controls_) == null ? void 0 : _a3.enableMultiselect();
+    };
+    const onKeyUp = (event) => {
+      var _a3;
+      if (event.key === "Shift" && isOn())
+        (_a3 = multiselect.controls_) == null ? void 0 : _a3.disableMultiselect();
+    };
+    editor.addEventListener("pointerenter", onPointerEnter);
+    editor.addEventListener("pointerleave", onPointerLeave);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      editor.removeEventListener("pointerenter", onPointerEnter);
+      editor.removeEventListener("pointerleave", onPointerLeave);
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      multiselect.dispose();
+    };
+  }, [workspace]);
   reactExports.useEffect(() => {
     const element = workspaceRef.current;
     if (!workspace || !element)
@@ -82533,6 +88789,11 @@ var faPlay = {
   iconName: "play",
   icon: [384, 512, [9654], "f04b", "M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"]
 };
+var faChevronDown = {
+  prefix: "fas",
+  iconName: "chevron-down",
+  icon: [448, 512, [], "f078", "M201.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 338.7 54.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"]
+};
 var faCopy = {
   prefix: "fas",
   iconName: "copy",
@@ -82543,12 +88804,22 @@ var faPlus = {
   iconName: "plus",
   icon: [448, 512, [10133, 61543, "add"], "2b", "M240 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H176V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H384c17.7 0 32-14.3 32-32s-14.3-32-32-32H240V80z"]
 };
+var faChevronRight = {
+  prefix: "fas",
+  iconName: "chevron-right",
+  icon: [320, 512, [9002], "f054", "M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"]
+};
 var faCirclePlus = {
   prefix: "fas",
   iconName: "circle-plus",
   icon: [512, 512, ["plus-circle"], "f055", "M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"]
 };
 var faPlusCircle = faCirclePlus;
+var faTriangleExclamation = {
+  prefix: "fas",
+  iconName: "triangle-exclamation",
+  icon: [512, 512, [9888, "exclamation-triangle", "warning"], "f071", "M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"]
+};
 var faCircleXmark = {
   prefix: "fas",
   iconName: "circle-xmark",
@@ -82610,12 +88881,15 @@ const BlockManagerPanel = () => {
           onClick: () => {
             if (selectedBlockId === void 0)
               return;
-            setConfirmDeleteOpen(true);
+            if ((selectedBlock == null ? void 0 : selectedBlock.javaScript.trim()) === "" && selectedBlockUses === 0)
+              removeBlock(selectedBlockId);
+            else
+              setConfirmDeleteOpen(true);
           }
         }
       )
     ] }),
-    /* @__PURE__ */ jsxs(
+    /* @__PURE__ */ jsx(
       ConfirmationModal,
       {
         header: "Delete block?",
@@ -82628,13 +88902,15 @@ const BlockManagerPanel = () => {
             removeBlock(selectedBlockId);
           setConfirmDeleteOpen(false);
         },
-        children: [
+        children: selectedBlockUses > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
           '"',
           selectedBlock == null ? void 0 : selectedBlock.name,
-          '" will also be removed from the timeline',
-          selectedBlockUses > 0 ? ` (used ${selectedBlockUses} time${selectedBlockUses === 1 ? "" : "s"})` : "",
-          "."
-        ]
+          '" will also be removed from the timeline (used ',
+          selectedBlockUses,
+          " time",
+          selectedBlockUses === 1 ? "" : "s",
+          ")."
+        ] })
       }
     ),
     /* @__PURE__ */ jsx("div", { className: "flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto p-2", children: blocks2.map((b2) => /* @__PURE__ */ jsx(
@@ -91057,7 +97333,7 @@ function createEvents(store) {
 }
 const privateKeys = ["set", "get", "setSize", "setFrameloop", "setDpr", "events", "invalidate", "advance", "size", "viewport"];
 const isRenderer = (def) => !!(def != null && def.render);
-const context$1 = /* @__PURE__ */ reactExports.createContext(null);
+const context = /* @__PURE__ */ reactExports.createContext(null);
 const createStore = (invalidate2, advance2) => {
   const rootState = create$1((set2, get2) => {
     const position = new Vector3();
@@ -91124,7 +97400,7 @@ const createStore = (invalidate2, advance2) => {
       xr: null,
       scene: null,
       invalidate: (frames = 1) => invalidate2(get2(), frames),
-      advance: (timestamp, runGlobalEffects) => advance2(timestamp, runGlobalEffects, get2()),
+      advance: (timestamp2, runGlobalEffects) => advance2(timestamp2, runGlobalEffects, get2()),
       legacy: false,
       linear: false,
       flat: false,
@@ -91292,33 +97568,33 @@ let globalEffects = /* @__PURE__ */ new Set();
 let globalAfterEffects = /* @__PURE__ */ new Set();
 let globalTailEffects = /* @__PURE__ */ new Set();
 const addEffect = (callback) => createSubs(callback, globalEffects);
-function run(effects, timestamp) {
+function run(effects, timestamp2) {
   if (!effects.size)
     return;
   for (const {
     callback
   } of effects.values()) {
-    callback(timestamp);
+    callback(timestamp2);
   }
 }
-function flushGlobalEffects(type, timestamp) {
+function flushGlobalEffects(type, timestamp2) {
   switch (type) {
     case "before":
-      return run(globalEffects, timestamp);
+      return run(globalEffects, timestamp2);
     case "after":
-      return run(globalAfterEffects, timestamp);
+      return run(globalAfterEffects, timestamp2);
     case "tail":
-      return run(globalTailEffects, timestamp);
+      return run(globalTailEffects, timestamp2);
   }
 }
 let subscribers;
 let subscription;
-function render$1(timestamp, state2, frame) {
+function render$1(timestamp2, state2, frame) {
   let delta = state2.clock.getDelta();
-  if (state2.frameloop === "never" && typeof timestamp === "number") {
-    delta = timestamp - state2.clock.elapsedTime;
+  if (state2.frameloop === "never" && typeof timestamp2 === "number") {
+    delta = timestamp2 - state2.clock.elapsedTime;
     state2.clock.oldTime = state2.clock.elapsedTime;
-    state2.clock.elapsedTime = timestamp;
+    state2.clock.elapsedTime = timestamp2;
   }
   subscribers = state2.internal.subscribers;
   for (i$2 = 0; i$2 < subscribers.length; i$2++) {
@@ -91335,21 +97611,21 @@ function createLoop(roots2) {
   let repeat;
   let frame;
   let state2;
-  function loop(timestamp) {
+  function loop(timestamp2) {
     frame = requestAnimationFrame(loop);
     running = true;
     repeat = 0;
-    flushGlobalEffects("before", timestamp);
+    flushGlobalEffects("before", timestamp2);
     for (const root2 of roots2.values()) {
       var _state$gl$xr;
       state2 = root2.store.getState();
       if (state2.internal.active && (state2.frameloop === "always" || state2.internal.frames > 0) && !((_state$gl$xr = state2.gl.xr) != null && _state$gl$xr.isPresenting)) {
-        repeat += render$1(timestamp, state2);
+        repeat += render$1(timestamp2, state2);
       }
     }
-    flushGlobalEffects("after", timestamp);
+    flushGlobalEffects("after", timestamp2);
     if (repeat === 0) {
-      flushGlobalEffects("tail", timestamp);
+      flushGlobalEffects("tail", timestamp2);
       running = false;
       return cancelAnimationFrame(frame);
     }
@@ -91366,16 +97642,16 @@ function createLoop(roots2) {
       requestAnimationFrame(loop);
     }
   }
-  function advance2(timestamp, runGlobalEffects = true, state3, frame2) {
+  function advance2(timestamp2, runGlobalEffects = true, state3, frame2) {
     if (runGlobalEffects)
-      flushGlobalEffects("before", timestamp);
+      flushGlobalEffects("before", timestamp2);
     if (!state3)
       for (const root2 of roots2.values())
-        render$1(timestamp, root2.store.getState());
+        render$1(timestamp2, root2.store.getState());
     else
-      render$1(timestamp, state3, frame2);
+      render$1(timestamp2, state3, frame2);
     if (runGlobalEffects)
-      flushGlobalEffects("after", timestamp);
+      flushGlobalEffects("after", timestamp2);
   }
   return {
     loop,
@@ -91392,7 +97668,7 @@ function createLoop(roots2) {
   };
 }
 function useStore() {
-  const store = reactExports.useContext(context$1);
+  const store = reactExports.useContext(context);
   if (!store)
     throw new Error("R3F: Hooks can only be used within the Canvas component!");
   return store;
@@ -91590,11 +97866,11 @@ function createRoot(canvas) {
         });
       }
       if (!state2.xr) {
-        const handleXRFrame = (timestamp, frame) => {
+        const handleXRFrame = (timestamp2, frame) => {
           const state3 = store.getState();
           if (state3.frameloop === "never")
             return;
-          advance(timestamp, true, state3, frame);
+          advance(timestamp2, true, state3, frame);
         };
         const handleSessionChange = () => {
           const state3 = store.getState();
@@ -91731,7 +98007,7 @@ function Provider({
     if (!store.getState().events.connected)
       state2.events.connect == null ? void 0 : state2.events.connect(rootElement);
   }, []);
-  return /* @__PURE__ */ reactExports.createElement(context$1.Provider, {
+  return /* @__PURE__ */ reactExports.createElement(context.Provider, {
     value: store
   }, children);
 }
@@ -91874,7 +98150,7 @@ function Portal({
   reactExports.useEffect(() => {
     usePortalStore.setState((injectState) => inject(previousRoot.getState(), injectState));
   }, [inject]);
-  return /* @__PURE__ */ reactExports.createElement(reactExports.Fragment, null, reconciler.createPortal(/* @__PURE__ */ reactExports.createElement(context$1.Provider, {
+  return /* @__PURE__ */ reactExports.createElement(reactExports.Fragment, null, reconciler.createPortal(/* @__PURE__ */ reactExports.createElement(context.Provider, {
     value: usePortalStore
   }, children), usePortalStore, null));
 }
@@ -91898,11 +98174,11 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 function debounce(func, wait, immediate) {
-  var timeout, args, context2, timestamp, result;
+  var timeout, args, context2, timestamp2, result;
   if (null == wait)
     wait = 100;
   function later() {
-    var last = Date.now() - timestamp;
+    var last = Date.now() - timestamp2;
     if (last < wait && last >= 0) {
       timeout = setTimeout(later, wait - last);
     } else {
@@ -91916,7 +98192,7 @@ function debounce(func, wait, immediate) {
   var debounced = function() {
     context2 = this;
     args = arguments;
-    timestamp = Date.now();
+    timestamp2 = Date.now();
     var callNow = immediate && !timeout;
     if (!timeout)
       timeout = setTimeout(later, wait);
@@ -92300,7 +98576,7 @@ const CanvasImpl = /* @__PURE__ */ reactExports.forwardRef(function Canvas2({
   onCreated,
   ...props
 }, forwardedRef) {
-  reactExports.useMemo(() => extend$1(r$6), []);
+  reactExports.useMemo(() => extend$1(r$9), []);
   const Bridge = useContextBridge();
   const [containerRef, containerRect] = useMeasure({
     scroll: true,
@@ -106365,95 +112641,7 @@ const Sky = /* @__PURE__ */ reactExports.forwardRef(({
     scale
   }, props));
 });
-const context = /* @__PURE__ */ reactExports.createContext(null);
-function PerformanceMonitor({
-  iterations = 10,
-  ms = 250,
-  threshold = 0.75,
-  step = 0.1,
-  factor: _factor = 0.5,
-  flipflops = Infinity,
-  bounds = (refreshrate) => refreshrate > 100 ? [60, 100] : [40, 60],
-  onIncline,
-  onDecline,
-  onChange: onChange2,
-  onFallback,
-  children
-}) {
-  const decimalPlacesRatio = Math.pow(10, 0);
-  const [api2, _2] = reactExports.useState(() => ({
-    fps: 0,
-    index: 0,
-    factor: _factor,
-    flipped: 0,
-    refreshrate: 0,
-    fallback: false,
-    frames: [],
-    averages: [],
-    subscriptions: /* @__PURE__ */ new Map(),
-    subscribe: (ref) => {
-      const key = Symbol();
-      api2.subscriptions.set(key, ref.current);
-      return () => void api2.subscriptions.delete(key);
-    }
-  }));
-  let lastFactor = 0;
-  useFrame(() => {
-    const {
-      frames,
-      averages
-    } = api2;
-    if (api2.fallback)
-      return;
-    if (averages.length < iterations) {
-      frames.push(performance.now());
-      const msPassed = frames[frames.length - 1] - frames[0];
-      if (msPassed >= ms) {
-        api2.fps = Math.round(frames.length / msPassed * 1e3 * decimalPlacesRatio) / decimalPlacesRatio;
-        api2.refreshrate = Math.max(api2.refreshrate, api2.fps);
-        averages[api2.index++ % iterations] = api2.fps;
-        if (averages.length === iterations) {
-          const [lower, upper] = bounds(api2.refreshrate);
-          const upperBounds = averages.filter((value) => value >= upper);
-          const lowerBounds = averages.filter((value) => value < lower);
-          if (upperBounds.length > iterations * threshold) {
-            api2.factor = Math.min(1, api2.factor + step);
-            api2.flipped++;
-            if (onIncline)
-              onIncline(api2);
-            api2.subscriptions.forEach((value) => value.onIncline && value.onIncline(api2));
-          }
-          if (lowerBounds.length > iterations * threshold) {
-            api2.factor = Math.max(0, api2.factor - step);
-            api2.flipped++;
-            if (onDecline)
-              onDecline(api2);
-            api2.subscriptions.forEach((value) => value.onDecline && value.onDecline(api2));
-          }
-          if (lastFactor !== api2.factor) {
-            lastFactor = api2.factor;
-            if (onChange2)
-              onChange2(api2);
-            api2.subscriptions.forEach((value) => value.onChange && value.onChange(api2));
-          }
-          if (api2.flipped > flipflops && !api2.fallback) {
-            api2.fallback = true;
-            if (onFallback)
-              onFallback(api2);
-            api2.subscriptions.forEach((value) => value.onFallback && value.onFallback(api2));
-          }
-          api2.averages = [];
-        }
-        api2.frames = [];
-      }
-    }
-  });
-  return /* @__PURE__ */ reactExports.createElement(context.Provider, {
-    value: api2
-  }, children);
-}
 function Crazyflie({ robotId: robotId2, renderBoundingBox }) {
-  const updateRobotBoundingBox = useSimulator((state2) => state2.updateRobotBoundingBox);
   const checkCollisions = useSimulator((state2) => state2.checkCollisions);
   const robot = useRobartState((state2) => state2.robots[robotId2]);
   const simRobot = useSimulator((state2) => state2.robots[robotId2]);
@@ -106476,18 +112664,8 @@ function Crazyflie({ robotId: robotId2, renderBoundingBox }) {
     setIsLoadingCFs(false);
   }, []);
   reactExports.useEffect(() => {
-    if (!group.current) {
-      setIsLoadingWireframes(false);
-      return;
-    }
-    if (renderBoundingBox) {
-      const crazyflieBoundingBox = new Box3();
-      crazyflieBoundingBox.setFromObject(group.current);
-      crazyflieBoundingBox.expandByVector(new Vector3(0.05, 0.05, 0.35));
-      updateRobotBoundingBox(robotId2, crazyflieBoundingBox);
-    }
     setIsLoadingWireframes(false);
-  }, [group.current, boundingBox === void 0]);
+  }, []);
   if (isLoadingCFs || isLoadingWireframes) {
     return /* @__PURE__ */ jsx(Text$1, { fontSize: 1, children: "Loading..." });
   }
@@ -107983,7 +114161,7 @@ function ct(t2) {
   }), $t(t2, { type: "idle", parent: t2 }));
 }
 p.assign({ createStringInterpolator: Xt, to: (t2, e2) => new W(t2, e2) });
-var o = ["primitive"].concat(Object.keys(r$6).filter((t2) => /^[A-Z]/.test(t2)).map((t2) => t2[0].toLowerCase() + t2.slice(1)));
+var o = ["primitive"].concat(Object.keys(r$9).filter((t2) => /^[A-Z]/.test(t2)).map((t2) => t2[0].toLowerCase() + t2.slice(1)));
 p.assign({ createStringInterpolator: Xt, colors: It, frameLoop: "demand" });
 addEffect(() => {
   n.advance();
@@ -108123,6 +114301,36 @@ const CurveEditorModal = () => {
     /* @__PURE__ */ jsx(Modal.Footer, {})
   ] });
 };
+const isPositiveNumber = (value) => value.trim() !== "" && Number(value) > 0;
+const BoundingBoxSizeEditor = () => {
+  const size = useRobartState((state2) => state2.boundingBoxSize ?? defaultBoundingBoxSize);
+  const setSize = useRobartState((state2) => state2.setBoundingBoxSize);
+  const [values, setValues] = reactExports.useState(size.map(String));
+  reactExports.useEffect(() => {
+    if (!values.every((value, i2) => Number(value) === size[i2]))
+      setValues(size.map(String));
+  }, [size]);
+  return /* @__PURE__ */ jsxs("div", { children: [
+    /* @__PURE__ */ jsx("div", { className: "mb-1 font-bold", children: "Bounding box dimensions (m):" }),
+    /* @__PURE__ */ jsx("div", { className: "flex gap-3", children: ["x", "y", "z"].map((axis, i2) => /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
+      axis,
+      /* @__PURE__ */ jsx(
+        "input",
+        {
+          className: clsx("w-20 rounded px-2 py-1", isPositiveNumber(values[i2]) ? "border border-gray-300" : "border-2 border-red-500"),
+          inputMode: "decimal",
+          value: values[i2],
+          onChange: (e2) => {
+            const next2 = values.map((value, j2) => j2 === i2 ? e2.target.value : value);
+            setValues(next2);
+            if (next2.every(isPositiveNumber))
+              setSize(next2.map(Number));
+          }
+        }
+      )
+    ] }, axis)) })
+  ] });
+};
 const SettingsModal = () => {
   const settingsModalOpen = useUIState((state2) => state2.settingsModalOpen);
   const toggleSettingsModal = useUIState((state2) => state2.toggleSettingsModal);
@@ -108148,14 +114356,17 @@ const SettingsModal = () => {
           } })
         ] }) }),
         /* @__PURE__ */ jsxs(Tabs.Item, { title: "Preferences", children: [
-          /* @__PURE__ */ jsx(
-            Checkbox,
-            {
-              checked: !renderBoundingBoxes,
-              onChange: handleBoundingBoxChange
-            }
-          ),
-          /* @__PURE__ */ jsx("span", { style: { marginLeft: "10px" }, children: "Remove Bounding Boxes" })
+          /* @__PURE__ */ jsx(BoundingBoxSizeEditor, {}),
+          /* @__PURE__ */ jsxs("div", { className: "mt-4 flex items-center", children: [
+            /* @__PURE__ */ jsx(
+              Checkbox,
+              {
+                checked: !renderBoundingBoxes,
+                onChange: handleBoundingBoxChange
+              }
+            ),
+            /* @__PURE__ */ jsx("span", { style: { marginLeft: "10px" }, children: "Remove Bounding Boxes" })
+          ] })
         ] }),
         /* @__PURE__ */ jsx(Tabs.Item, { title: "Utilities", children: /* @__PURE__ */ jsx(Button, { onClick: toggleCurveEditor, children: "Curve Editor" }) })
       ] }) }),
@@ -113720,19 +119931,19 @@ class Configuration {
     return addr == null ? facet.default : this.staticValues[addr >> 1];
   }
   static resolve(base2, compartments, oldState) {
-    let fields = [];
+    let fields2 = [];
     let facets = /* @__PURE__ */ Object.create(null);
     let newCompartments = /* @__PURE__ */ new Map();
     for (let ext of flatten(base2, compartments, newCompartments)) {
       if (ext instanceof StateField)
-        fields.push(ext);
+        fields2.push(ext);
       else
         (facets[ext.facet.id] || (facets[ext.facet.id] = [])).push(ext);
     }
     let address = /* @__PURE__ */ Object.create(null);
     let staticValues = [];
     let dynamicSlots = [];
-    for (let field of fields) {
+    for (let field of fields2) {
       address[field.id] = dynamicSlots.length << 1;
       dynamicSlots.push((a2) => field.slot(a2));
     }
@@ -114324,16 +120535,16 @@ class EditorState {
   mapping property names (in the resulting object, which should
   not use `doc` or `selection`) to fields.
   */
-  toJSON(fields) {
+  toJSON(fields2) {
     let result = {
       doc: this.sliceDoc(),
       selection: this.selection.toJSON()
     };
-    if (fields)
-      for (let prop in fields) {
-        let value = fields[prop];
+    if (fields2)
+      for (let prop in fields2) {
+        let value = fields2[prop];
         if (value instanceof StateField && this.config.address[value.id] != null)
-          result[prop] = value.spec.toJSON(this.field(fields[prop]), this);
+          result[prop] = value.spec.toJSON(this.field(fields2[prop]), this);
       }
     return result;
   }
@@ -114343,14 +120554,14 @@ class EditorState {
   to [`toJSON`](https://codemirror.net/6/docs/ref/#state.EditorState.toJSON) when serializing as
   third argument.
   */
-  static fromJSON(json, config2 = {}, fields) {
+  static fromJSON(json, config2 = {}, fields2) {
     if (!json || typeof json.doc != "string")
       throw new RangeError("Invalid JSON representation for EditorState");
     let fieldInit = [];
-    if (fields)
-      for (let prop in fields) {
+    if (fields2)
+      for (let prop in fields2) {
         if (Object.prototype.hasOwnProperty.call(json, prop)) {
-          let field = fields[prop], value = json[prop];
+          let field = fields2[prop], value = json[prop];
           fieldInit.push(field.init((state2) => field.spec.fromJSON(value, state2)));
         }
       }
@@ -126265,11 +132476,11 @@ function sortOptions(active, state2) {
   return result;
 }
 class CompletionDialog {
-  constructor(options, attrs, tooltip, timestamp, selected, disabled2) {
+  constructor(options, attrs, tooltip, timestamp2, selected, disabled2) {
     this.options = options;
     this.attrs = attrs;
     this.tooltip = tooltip;
-    this.timestamp = timestamp;
+    this.timestamp = timestamp2;
     this.selected = selected;
     this.disabled = disabled2;
   }
@@ -126857,20 +133068,20 @@ class Snippet {
     return { text, ranges };
   }
   static parse(template) {
-    let fields = [];
+    let fields2 = [];
     let lines = [], positions = [], m2;
     for (let line of template.split(/\r\n?|\n/)) {
       while (m2 = /[#$]\{(?:(\d+)(?::([^}]*))?|([^}]*))\}/.exec(line)) {
         let seq = m2[1] ? +m2[1] : null, name2 = m2[2] || m2[3] || "", found = -1;
-        for (let i2 = 0; i2 < fields.length; i2++) {
-          if (seq != null ? fields[i2].seq == seq : name2 ? fields[i2].name == name2 : false)
+        for (let i2 = 0; i2 < fields2.length; i2++) {
+          if (seq != null ? fields2[i2].seq == seq : name2 ? fields2[i2].name == name2 : false)
             found = i2;
         }
         if (found < 0) {
           let i2 = 0;
-          while (i2 < fields.length && (seq == null || fields[i2].seq != null && fields[i2].seq < seq))
+          while (i2 < fields2.length && (seq == null || fields2[i2].seq != null && fields2[i2].seq < seq))
             i2++;
-          fields.splice(i2, 0, { seq, name: name2 });
+          fields2.splice(i2, 0, { seq, name: name2 });
           found = i2;
           for (let pos of positions)
             if (pos.field >= found)
@@ -130831,22 +137042,55 @@ const Simulation = () => {
     ),
     /* @__PURE__ */ jsx(Plane, { args: [1e3, 1e3], rotation: [0, 0, -Math.PI / 2], position: [0, 0, -0.02], children: /* @__PURE__ */ jsx("meshStandardMaterial", { color: "black" }) }),
     Object.values(robots2).map((robot) => /* @__PURE__ */ jsx("group", { ref: marker, position: robot.pos, children: /* @__PURE__ */ jsx(Crazyflie, { robotId: robot.id, renderBoundingBox: renderBB }) }, robot.id)),
+    simulatorState.showPaths && Object.entries(simulatorState.plannedPaths).filter(([, points]) => points.some((point) => !point.equals(points[0]))).map(([robotId2, points]) => {
+      var _a3;
+      return /* @__PURE__ */ jsx(
+        Line$1,
+        {
+          points,
+          color: ((_a3 = Object.values(robartState.timelineState.groups).find((group) => group.id !== allDronesGroupId && robotId2 in group.robots)) == null ? void 0 : _a3.color) ?? "#9ca3af",
+          lineWidth: 1.5,
+          transparent: true,
+          opacity: 0.6
+        },
+        `path-${robotId2}`
+      );
+    }),
     Object.values(trajectoryMarkers2).map((trajectoryMarker) => /* @__PURE__ */ jsx("group", { position: trajectoryMarker.position, children: /* @__PURE__ */ jsx(Sphere, { args: [0.03], children: /* @__PURE__ */ jsx("meshBasicMaterial", { color: [trajectoryMarker.color.r / 255, trajectoryMarker.color.g / 255, trajectoryMarker.color.b / 255] }) }) }, trajectoryMarker.id)),
     /* @__PURE__ */ jsx("primitive", { object: camera })
   ] });
+};
+const laneOverlapWarnings = (state2) => {
+  const warnings = [];
+  const groups = Object.values(state2.timelineState.groups);
+  Object.values(state2.robots).forEach((robot) => {
+    const items = groups.filter((group) => robot.id in group.robots).flatMap((group) => Object.values(group.items).map((item) => ({ item, group })));
+    items.forEach((a2, i2) => {
+      items.slice(i2 + 1).forEach((b2) => {
+        if (a2.group.id === b2.group.id)
+          return;
+        const start = Math.max(a2.item.startTime, b2.item.startTime);
+        const end2 = Math.min(a2.item.startTime + a2.item.duration, b2.item.startTime + b2.item.duration);
+        if (start < end2) {
+          warnings.push({
+            time: start,
+            short: `${robot.name} in ${a2.group.name} and ${b2.group.name} at once`,
+            full: `robot ${robot.name} is in lanes ${a2.group.name} and ${b2.group.name}, which both have blocks between ${start.toFixed(2)} s and ${end2.toFixed(2)} s.
+`
+          });
+        }
+      });
+    });
+  });
+  return warnings;
 };
 const speeds = [0.5, 1, 2, 4, 8];
 const formatTime = (seconds) => {
   const wholeSeconds = Math.floor(seconds);
   return `${Math.floor(wholeSeconds / 60)}:${String(wholeSeconds % 60).padStart(2, "0")}`;
 };
-const SimulationControls = () => {
+const useShowLength = () => {
   const time2 = useSimulator((state2) => state2.time);
-  const timeDilation = useSimulator((state2) => state2.timeDilation);
-  const showCoordinates = useSimulator((state2) => state2.showCoordinates);
-  const seek = useSimulator((state2) => state2.seek);
-  const setTimeDilation = useSimulator((state2) => state2.setTimeDilation);
-  const toggleCoordinates = useSimulator((state2) => state2.toggleCoordinates);
   const measuredEndTime = useSimulator((state2) => state2.endTime);
   const estimatedEndTime = useRobartState((state2) => {
     const itemEnds = Object.values(state2.timelineState.groups).flatMap(
@@ -130854,33 +137098,27 @@ const SimulationControls = () => {
     );
     return Math.max(0, ...itemEnds);
   });
-  const maxTime = Math.max(measuredEndTime > 0 ? measuredEndTime : estimatedEndTime, time2);
-  return /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 bottom-0 flex items-center gap-3 bg-black/60 px-3 py-2 text-sm text-white", children: [
-    /* @__PURE__ */ jsx(
-      "input",
-      {
-        type: "range",
-        className: "flex-grow",
-        "aria-label": "Simulation time",
-        disabled: maxTime === 0,
-        min: 0,
-        max: maxTime,
-        step: 0.01,
-        value: time2,
-        onChange: (e2) => {
-          seek(Number(e2.target.value));
-        }
-      }
-    ),
+  return Math.max(measuredEndTime > 0 ? measuredEndTime : estimatedEndTime, time2);
+};
+const SimulationOptions = () => {
+  const time2 = useSimulator((state2) => state2.time);
+  const showLength = useShowLength();
+  const timeDilation = useSimulator((state2) => state2.timeDilation);
+  const setTimeDilation = useSimulator((state2) => state2.setTimeDilation);
+  const showPaths = useSimulator((state2) => state2.showPaths);
+  const togglePaths = useSimulator((state2) => state2.togglePaths);
+  const showCoordinates = useSimulator((state2) => state2.showCoordinates);
+  const toggleCoordinates = useSimulator((state2) => state2.toggleCoordinates);
+  return /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 text-sm", children: [
     /* @__PURE__ */ jsxs("span", { className: "tabular-nums", children: [
       formatTime(time2),
       " / ",
-      formatTime(maxTime)
+      formatTime(showLength)
     ] }),
     /* @__PURE__ */ jsx(
       "select",
       {
-        className: "rounded border-none bg-gray-800 py-0 pl-2 pr-8 text-sm",
+        className: "rounded border border-gray-300 bg-white py-1 pl-2 pr-8 text-sm",
         "aria-label": "Simulation speed",
         value: timeDilation,
         onChange: (e2) => {
@@ -130893,27 +137131,43 @@ const SimulationControls = () => {
       }
     ),
     /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
+      /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showPaths, onChange: togglePaths }),
+      "Paths"
+    ] }),
+    /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
       /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showCoordinates, onChange: toggleCoordinates }),
       "Coordinates"
     ] })
   ] });
 };
-const SimulationPanel = () => {
-  const [dpr, setDpr] = reactExports.useState(1.5);
-  const onPerformanceDecline = () => {
-    const newDpr = Math.max(dpr - 0.5, 0.5);
-    setDpr(newDpr);
-  };
-  const onPerformanceIncline = () => {
-    const newDpr = Math.min(dpr + 0.5, 2);
-    setDpr(newDpr);
-  };
-  return /* @__PURE__ */ jsxs("div", { className: "relative h-full w-full", children: [
-    /* @__PURE__ */ jsxs(Canvas, { dpr, children: [
-      /* @__PURE__ */ jsx(Simulation, {}),
-      /* @__PURE__ */ jsx(PerformanceMonitor, { onIncline: onPerformanceIncline, onDecline: onPerformanceDecline })
+const maxShown = 4;
+const SimulationWarnings = () => {
+  const time2 = useSimulator((state2) => state2.time);
+  const atStart = useSimulator((state2) => state2.status === "STOPPED" && state2.time === 0);
+  const timedWarnings = useSimulator((state2) => state2.timedWarnings);
+  const overlapWarnings = useRobartState(laneOverlapWarnings);
+  if (atStart)
+    return null;
+  const reached = [...timedWarnings, ...overlapWarnings].filter((warning) => warning.time <= time2).sort((a2, b2) => b2.time - a2.time);
+  if (reached.length === 0)
+    return null;
+  return /* @__PURE__ */ jsxs("div", { className: "pointer-events-none absolute right-2 top-2 max-w-xs rounded bg-black/60 px-2 py-1 text-xs text-white", children: [
+    /* @__PURE__ */ jsxs("div", { className: "font-bold text-yellow-300", children: [
+      /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faTriangleExclamation }),
+      " ",
+      reached.length
     ] }),
-    /* @__PURE__ */ jsx(SimulationControls, {})
+    reached.slice(0, maxShown).map((warning, i2) => /* @__PURE__ */ jsxs("div", { className: "truncate", children: [
+      /* @__PURE__ */ jsx("span", { className: "tabular-nums text-gray-300", children: formatTime(warning.time) }),
+      " ",
+      warning.short
+    ] }, i2))
+  ] });
+};
+const SimulationPanel = () => {
+  return /* @__PURE__ */ jsxs("div", { className: "relative h-full w-full", children: [
+    /* @__PURE__ */ jsx(Canvas, { dpr: [1, 2], children: /* @__PURE__ */ jsx(Simulation, {}) }),
+    /* @__PURE__ */ jsx(SimulationWarnings, {})
   ] });
 };
 const noSemi = 302, incdec = 1, incdecPrefix = 2, insertSemi = 303, spaces = 305, newline = 306, LineComment = 3, BlockComment = 4;
@@ -131331,34 +137585,21 @@ const BlockJavaScriptCodePanel = () => {
   const currentBlock = useRobartState((state2) => state2.blocks[currentBlockId ?? ""]);
   return /* @__PURE__ */ jsx("div", { className: "h-full w-full overflow-auto", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: currentBlock == null ? void 0 : currentBlock.javaScript, className: "h-full w-full", extensions: [javascript()], readOnly: true }) });
 };
-const laneOverlapWarnings = (state2) => {
-  const warnings = [];
-  const groups = Object.values(state2.timelineState.groups);
-  Object.values(state2.robots).forEach((robot) => {
-    const items = groups.filter((group) => robot.id in group.robots).flatMap((group) => Object.values(group.items).map((item) => ({ item, group })));
-    items.forEach((a2, i2) => {
-      items.slice(i2 + 1).forEach((b2) => {
-        if (a2.group.id === b2.group.id)
-          return;
-        const start = Math.max(a2.item.startTime, b2.item.startTime);
-        const end2 = Math.min(a2.item.startTime + a2.item.duration, b2.item.startTime + b2.item.duration);
-        if (start < end2) {
-          warnings.push(`robot ${robot.name} is in lanes ${a2.group.name} and ${b2.group.name}, which both have blocks between ${start.toFixed(2)} s and ${end2.toFixed(2)} s.
-`);
-        }
-      });
-    });
-  });
-  return warnings.join("");
-};
+const warningLines = (state2) => [
+  // Notes from loading the project, e.g. robots moved out of extra groups
+  ...state2.notices ?? [],
+  ...laneOverlapWarnings(state2).map((warning) => warning.full),
+  // Speed and work area, found when the show is measured
+  ...state2.warnings ?? []
+];
+const warningCount = (state2) => warningLines(state2).length;
 const WarningsPanel = () => {
-  const constraintWarnings = useRobartState((state2) => (state2.warnings ?? []).join(""));
-  const overlapWarnings = useRobartState(laneOverlapWarnings);
-  const notices = useRobartState((state2) => (state2.notices ?? []).join(""));
-  return /* @__PURE__ */ jsx("div", { className: "overflow-auto h-full w-full ", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: notices + overlapWarnings + constraintWarnings, className: "h-full w-full", readOnly: true }) });
+  const text = useRobartState((state2) => warningLines(state2).join(""));
+  return /* @__PURE__ */ jsx("div", { className: "overflow-auto h-full w-full ", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: text, className: "h-full w-full", readOnly: true }) });
 };
 const RightPanel = () => {
   const [selectedTab, setSelectedTab] = reactExports.useState("simulation");
+  const warnings = useRobartState(warningCount);
   return /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 h-full", children: [
     /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(Button.Group, { children: [
       /* @__PURE__ */ jsx(Button, { color: selectedTab == "simulation" ? "blue" : "gray", onClick: () => {
@@ -131370,9 +137611,12 @@ const RightPanel = () => {
       /* @__PURE__ */ jsx(Button, { color: selectedTab == "javascript" ? "blue" : "gray", onClick: () => {
         setSelectedTab("javascript");
       }, children: "JavaScript Code" }),
-      /* @__PURE__ */ jsx(Button, { color: selectedTab == "warnings" ? "blue" : "gray", onClick: () => {
+      /* @__PURE__ */ jsxs(Button, { color: selectedTab == "warnings" ? "blue" : "gray", onClick: () => {
         setSelectedTab("warnings");
-      }, children: "Warnings" })
+      }, children: [
+        "Warnings",
+        warnings > 0 ? ` (${warnings})` : ""
+      ] })
     ] }) }),
     /* @__PURE__ */ jsxs("div", { className: "min-h-0 flex-grow", children: [
       selectedTab == "simulation" && /* @__PURE__ */ jsx(SimulationPanel, {}),
@@ -131558,7 +137802,7 @@ const TimelineGroupBody = ({ group }) => {
   return /* @__PURE__ */ jsxs(
     "div",
     {
-      className: clsx("relative h-16 rounded bg-no-repeat", hasDrones ? "bg-blue-300" : "bg-gray-300"),
+      className: clsx("relative rounded bg-no-repeat", group.collapsed ? "h-7" : "h-16", hasDrones ? "bg-blue-300" : "bg-gray-300"),
       ref: laneBodyRef,
       "data-lane-id": group.id,
       onDragOver: handleDragOver,
@@ -131571,7 +137815,7 @@ const TimelineGroupBody = ({ group }) => {
         backgroundPosition: `${timelineStartPadding}px 0`
       },
       children: [
-        [...new Array(Math.ceil(group.duration / labelEvery))].map((_2, index2) => (
+        !group.collapsed && [...new Array(Math.ceil(group.duration / labelEvery))].map((_2, index2) => (
           // Centered on their ticks
           /* @__PURE__ */ jsx("span", { className: "absolute top-1/4 -translate-x-1/2", style: { left: timeToX(index2 * labelEvery, scale) }, children: index2 * labelEvery }, index2)
         )),
@@ -131607,15 +137851,28 @@ const TimelineGroupBody = ({ group }) => {
 };
 const TimelineMarker = () => {
   const time2 = useSimulator((state2) => state2.time);
-  const stopped = useSimulator((state2) => state2.status === "STOPPED");
+  const seek = useSimulator((state2) => state2.seek);
   const scale = useRobartState((state2) => state2.timelineState.scale);
-  if (stopped && time2 === 0)
-    return null;
-  return /* @__PURE__ */ jsx(
+  const showLength = useShowLength();
+  const markerRef = reactExports.useRef(null);
+  const bind = useDrag(({ xy: [x2], tap }) => {
+    var _a3;
+    const scroller = (_a3 = markerRef.current) == null ? void 0 : _a3.parentElement;
+    if (tap || !scroller || showLength === 0)
+      return;
+    const contentX = x2 - scroller.getBoundingClientRect().left + scroller.scrollLeft;
+    seek(Math.min(showLength, Math.max(0, convertPixelsToSeconds(contentX - timelineStartPadding, scale))));
+  }, { pointer: { keys: false }, filterTaps: true });
+  return /* @__PURE__ */ jsxs(
     "div",
     {
-      className: "min-w-1 absolute z-10 h-full w-1 -translate-x-1/2 bg-black",
-      style: { left: timeToX(time2, scale) }
+      ref: markerRef,
+      className: "pointer-events-none absolute inset-y-0 z-10 flex -translate-x-1/2 flex-col items-center",
+      style: { left: timeToX(time2, scale) },
+      children: [
+        /* @__PURE__ */ jsx("div", { ...bind(), className: "pointer-events-auto h-3 w-3 shrink-0 cursor-grab touch-none rounded-full bg-black" }),
+        /* @__PURE__ */ jsx("div", { className: "w-[3px] flex-1 bg-black" })
+      ]
     }
   );
 };
@@ -131632,7 +137889,7 @@ const StartingPosition = ({ robotId: robotId2 }) => {
       /* @__PURE__ */ jsx(
         "input",
         {
-          className: clsx("w-20 rounded", isNumber(values[i2]) ? "border-gray-300" : "border-2 border-red-500"),
+          className: clsx("w-20 rounded px-2 py-1", isNumber(values[i2]) ? "border border-gray-300" : "border-2 border-red-500"),
           inputMode: "decimal",
           value: values[i2],
           onChange: (e2) => {
@@ -131764,12 +138021,43 @@ const TimelineGroupLabel = ({ group }) => {
   const removeGroup = useRobartState((state2) => state2.removeGroup);
   const setRobotGroup = useRobartState((state2) => state2.setRobotGroup);
   const createRobot = useRobartState((state2) => state2.createRobot);
+  const toggleCollapsed = useRobartState((state2) => state2.toggleGroupCollapsed);
   const [confirmRemoveOpen, setConfirmRemoveOpen] = reactExports.useState(false);
+  const collapseButton = /* @__PURE__ */ jsx(
+    "button",
+    {
+      "aria-label": group.collapsed ? `Expand ${group.name}` : `Collapse ${group.name}`,
+      className: "w-4 shrink-0 text-xs text-gray-600 hover:text-black",
+      onClick: () => {
+        toggleCollapsed(group.id);
+      },
+      children: /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: group.collapsed ? faChevronRight : faChevronDown })
+    }
+  );
   if (group.id === allDronesGroupId) {
-    return /* @__PURE__ */ jsx("div", { className: "flex h-16 w-52 flex-col justify-center rounded bg-green-400 px-2", children: /* @__PURE__ */ jsx("div", { className: "font-bold", children: group.name }) });
+    return /* @__PURE__ */ jsxs("div", { className: clsx("flex w-52 items-center gap-1 rounded bg-green-400 px-2", group.collapsed ? "h-7" : "h-16"), children: [
+      collapseButton,
+      /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name })
+    ] });
   }
   const color = group.color ?? defaultGroupColor;
   const robotIds = Object.keys(group.robots);
+  if (group.collapsed) {
+    return /* @__PURE__ */ jsxs(
+      "div",
+      {
+        className: "flex h-7 w-52 items-center gap-1 rounded bg-white px-2",
+        style: { borderLeft: `8px solid ${color}` },
+        ...acceptRobotDrop((robotId2) => {
+          setRobotGroup(robotId2, group.id);
+        }),
+        children: [
+          collapseButton,
+          /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name })
+        ]
+      }
+    );
+  }
   return /* @__PURE__ */ jsxs(
     "div",
     {
@@ -131780,6 +138068,7 @@ const TimelineGroupLabel = ({ group }) => {
       }),
       children: [
         /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1", children: [
+          collapseButton,
           /* @__PURE__ */ jsx("div", { className: "min-w-0 flex-1 truncate", children: /* @__PURE__ */ jsx(
             RenamableText,
             {
@@ -131795,7 +138084,10 @@ const TimelineGroupLabel = ({ group }) => {
             createRobot(group.id);
           }, children: "+ add" }),
           /* @__PURE__ */ jsx("button", { "aria-label": `Remove ${group.name}`, title: "Remove group", className: "px-1 text-gray-500 hover:text-red-600", onClick: () => {
-            setConfirmRemoveOpen(true);
+            if (robotIds.length === 0 && Object.keys(group.items).length === 0)
+              removeGroup(group.id);
+            else
+              setConfirmRemoveOpen(true);
           }, children: "×" })
         ] }),
         /* @__PURE__ */ jsx("div", { className: "flex gap-1 overflow-x-auto", children: robotIds.length === 0 ? /* @__PURE__ */ jsx("span", { className: "text-xs text-gray-400", children: "No drones yet" }) : robotIds.map((robotId2) => /* @__PURE__ */ jsx(RobotTag, { robotId: robotId2, color }, robotId2)) }),
@@ -131824,6 +138116,27 @@ const TimelineSimulationButtons = () => {
   const pause = useSimulator((state2) => state2.pause);
   const resume = useSimulator((state2) => state2.resume);
   const hasDrones = useRobartState((state2) => Object.keys(state2.robots).length > 0);
+  reactExports.useEffect(() => {
+    const onKeyDown = (event) => {
+      var _a3;
+      if (event.key !== " " || event.repeat)
+        return;
+      if ((_a3 = event.target) == null ? void 0 : _a3.closest('input, textarea, select, button, [contenteditable="true"]'))
+        return;
+      event.preventDefault();
+      const simulator2 = useSimulator.getState();
+      if (simulator2.status === "RUNNING")
+        simulator2.pause();
+      else if (simulator2.status === "PAUSED")
+        simulator2.resume();
+      else if (Object.keys(useRobartState.getState().robots).length > 0)
+        simulator2.play();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     simulationStatus === "RUNNING" && /* @__PURE__ */ jsx(IconButton, { icon: faPause, onClick: pause, text: "Pause Sim", color: "gray" }),
     simulationStatus === "PAUSED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: resume, text: "Resume Sim", color: "success" }),
@@ -131874,7 +138187,7 @@ const Timeline = () => {
     };
     remeasure();
     const unsubscribe = useRobartState.subscribe((state2, previous) => {
-      if (state2.timelineState.groups !== previous.timelineState.groups || state2.blocks !== previous.blocks || state2.robots !== previous.robots) {
+      if (state2.timelineState.groups !== previous.timelineState.groups || state2.blocks !== previous.blocks || state2.robots !== previous.robots || state2.boundingBoxSize !== previous.boundingBoxSize) {
         remeasure();
       }
     });
@@ -131886,15 +138199,18 @@ const Timeline = () => {
   return /* @__PURE__ */ jsxs("div", { className: "flex h-full w-full flex-col gap-2 rounded bg-blue-100", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex", children: [
       /* @__PURE__ */ jsx("div", { className: "flex flex-grow" }),
-      /* @__PURE__ */ jsx("div", { className: "flex gap-3 pt-2 pr-3", children: /* @__PURE__ */ jsx(TimelineSimulationButtons, {}) })
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 pt-2 pr-3", children: [
+        /* @__PURE__ */ jsx(SimulationOptions, {}),
+        /* @__PURE__ */ jsx(TimelineSimulationButtons, {})
+      ] })
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "overflow-y-auto", children: [
       /* @__PURE__ */ jsxs("div", { className: "flex flex-shrink-0 gap-2", children: [
-        /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2", children: [
+        /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2 pt-4", children: [
           groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupLabel, { group }, group.id)),
           /* @__PURE__ */ jsx("button", { className: "h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200", onClick: addNewGroup, children: "+ New group" })
         ] }),
-        /* @__PURE__ */ jsxs("div", { ref: scrollerRef, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto", children: [
+        /* @__PURE__ */ jsxs("div", { ref: scrollerRef, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-4", children: [
           groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group }, group.id)),
           /* @__PURE__ */ jsx(TimelineMarker, {})
         ] })
