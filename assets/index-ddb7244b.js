@@ -81654,6 +81654,7 @@ const defaultSimulatorState = {
   showCoordinates: false,
   plannedPaths: {},
   timedWarnings: [],
+  warningsShownUntil: 0,
   showPaths: true,
   trajectoryQueue: new Queue_1(),
   trajectoryMarkers: [],
@@ -81677,7 +81678,7 @@ const useSimulator = create$2()(
     ...defaultSimulatorState,
     play: () => {
       get().measureShowLength();
-      set({ status: "RUNNING", lastStepTime: performance.now() });
+      set({ status: "RUNNING", lastStepTime: performance.now(), warningsShownUntil: 0 });
     },
     // Warnings come from measuring the whole show (measureShowLength), not from what has played so far
     pause: () => {
@@ -81695,7 +81696,7 @@ const useSimulator = create$2()(
         return;
       const currentTime = performance.now();
       get().advance((currentTime - get().lastStepTime) / 1e3 * get().timeDilation);
-      set({ lastStepTime: currentTime });
+      set({ lastStepTime: currentTime, warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
       if (isFinished(get().robots))
         get().halt();
     },
@@ -81801,7 +81802,7 @@ const useSimulator = create$2()(
       while (get().time < targetTime - 1e-6) {
         get().advance(Math.min(1 / fps, targetTime - get().time));
       }
-      set({ status: wasRunning ? "RUNNING" : "PAUSED", lastStepTime: performance.now() });
+      set({ status: wasRunning ? "RUNNING" : "PAUSED", lastStepTime: performance.now(), warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
     },
     measureShowLength: () => {
       get().executeSimulation(0);
@@ -81984,7 +81985,6 @@ const useSimulator = create$2()(
       if (startTime === 0) {
         set({ time: 0, trajectoryMarkers: [] });
         get().setRobots(robartRobots);
-        useRobartState.setState({ warnings: [] });
         useCrazyflieConstraintState.setState({ positionHistory: [] });
         itemEndTimes = {};
       }
@@ -82007,7 +82007,8 @@ const useSimulator = create$2()(
       pendingItems.length = 0;
     },
     reset: () => {
-      set({ status: "STOPPED", endTime: 0, plannedPaths: {}, timedWarnings: [] });
+      set({ status: "STOPPED", endTime: 0, plannedPaths: {}, timedWarnings: [], warningsShownUntil: 0 });
+      useRobartState.setState({ warnings: [] });
       get().executeSimulation(0);
       get().cancelSimulation();
     }
@@ -145355,13 +145356,13 @@ const SimulationOptions = () => {
 };
 const maxShown = 4;
 const SimulationWarnings = () => {
-  const time2 = useSimulator((state2) => state2.time);
+  const shownUntil = useSimulator((state2) => state2.warningsShownUntil);
   const atStart = useSimulator((state2) => state2.status === "STOPPED" && state2.time === 0);
   const timedWarnings = useSimulator((state2) => state2.timedWarnings);
   const overlapWarnings = useRobartState(laneOverlapWarnings);
   if (atStart)
     return null;
-  const reached = [...timedWarnings, ...overlapWarnings].filter((warning) => warning.time <= time2).sort((a2, b2) => b2.time - a2.time);
+  const reached = [...timedWarnings, ...overlapWarnings].filter((warning) => warning.time <= shownUntil).sort((a2, b2) => b2.time - a2.time);
   if (reached.length === 0)
     return null;
   return /* @__PURE__ */ jsxs("div", { className: "pointer-events-none absolute right-2 top-2 max-w-xs rounded bg-black/60 px-2 py-1 text-xs text-white", children: [
