@@ -74604,16 +74604,22 @@ const defaultSimulatorState = {
   trajectoryQueue: new Queue_1(),
   trajectoryMarkers: [],
   markerFrequency: 0.25,
-  lastStepTime: performance.now()
+  lastStepTime: performance.now(),
+  endTime: 0
 };
 const nullTrajectory = new PolynomialTrajectory(-1, []);
 const pendingItems = [];
+const maxShowLength = 60 * 60;
+const isFinished = (robots2) => pendingItems.length === 0 && Object.values(robots2).every((robot) => {
+  var _a3;
+  return robot.trajectoryQueue.length === 0 && !(((_a3 = robot.trajectory) == null ? void 0 : _a3.duration) > 0);
+});
 const useSimulator = create$2()(
   immer((set, get) => ({
     ...defaultSimulatorState,
     play: () => {
-      set({ status: "RUNNING", time: 0, trajectoryMarkers: [], lastStepTime: performance.now() });
-      get().executeSimulation(0);
+      get().measureShowLength();
+      set({ status: "RUNNING", lastStepTime: performance.now() });
     },
     pause: () => {
       const warnings = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots));
@@ -74643,6 +74649,8 @@ const useSimulator = create$2()(
       const currentTime = performance.now();
       get().advance((currentTime - get().lastStepTime) / 1e3 * get().timeDilation);
       set({ lastStepTime: currentTime });
+      if (isFinished(get().robots))
+        get().halt();
     },
     advance: (deltaT) => {
       const newSimTime = get().time + deltaT;
@@ -74721,14 +74729,24 @@ const useSimulator = create$2()(
     },
     seek: (targetTime) => {
       const wasRunning = get().status === "RUNNING";
-      if (get().status === "STOPPED" || targetTime < get().time) {
-        set({ time: 0, trajectoryMarkers: [] });
+      if (get().status === "STOPPED") {
+        get().measureShowLength();
+      } else if (targetTime < get().time) {
         get().executeSimulation(0);
       }
       while (get().time < targetTime - 1e-6) {
         get().advance(Math.min(1 / fps, targetTime - get().time));
       }
       set({ status: wasRunning ? "RUNNING" : "PAUSED", lastStepTime: performance.now() });
+    },
+    measureShowLength: () => {
+      get().executeSimulation(0);
+      while (!isFinished(get().robots) && get().time < maxShowLength) {
+        get().advance(1 / fps);
+      }
+      const endTime = get().time;
+      get().executeSimulation(0);
+      set({ endTime });
     },
     setTimeDilation: (timeDilation) => {
       set({ timeDilation });
@@ -74827,8 +74845,10 @@ const useSimulator = create$2()(
       const blocks2 = useRobartState.getState().blocks;
       const robartRobots = useRobartState.getState().robots;
       if (startTime2 === 0) {
+        set({ time: 0, trajectoryMarkers: [] });
         get().setRobots(robartRobots);
         useRobartState.getState().warnings = [];
+        useCrazyflieConstraintState.setState({ positionHistory: [] });
       }
       pendingItems.length = 0;
       Object.values(timeline.groups).forEach((group) => {
@@ -130645,14 +130665,15 @@ const SimulationControls = () => {
   const seek = useSimulator((state2) => state2.seek);
   const setTimeDilation = useSimulator((state2) => state2.setTimeDilation);
   const toggleCoordinates = useSimulator((state2) => state2.toggleCoordinates);
-  const endTime = useRobartState((state2) => {
+  const measuredEndTime = useSimulator((state2) => state2.endTime);
+  const estimatedEndTime = useRobartState((state2) => {
     const { groups, scale } = state2.timelineState;
     const itemEnds = Object.values(groups).flatMap(
       (group) => Object.values(group.items).map((item) => (item.startTime + item.duration) * scale)
     );
     return Math.max(10, ...itemEnds);
   });
-  const maxTime = Math.max(endTime, time2);
+  const maxTime = Math.max(measuredEndTime > 0 ? measuredEndTime : estimatedEndTime, time2);
   return /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 bottom-0 flex items-center gap-3 bg-black/60 px-3 py-2 text-sm text-white", children: [
     /* @__PURE__ */ jsx(
       "input",
