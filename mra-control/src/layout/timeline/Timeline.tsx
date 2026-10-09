@@ -10,7 +10,7 @@ import {nextGroupName} from '../../state/groupMigration';
 import {useSimulator} from '../../state/useSimulator';
 import {SimulationOptions} from './SimulationOptions';
 import {TimelineSimulationButtons} from './TimelineSimulationButtons';
-import React, {useEffect, useLayoutEffect, useRef} from 'react';
+import React, {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
 
 const addNewGroup = () => {
 	useRobartState.getState().addGroup(nextGroupName(useRobartState.getState().timelineState.groups));
@@ -46,14 +46,35 @@ export const Timeline = () => {
 			return {min: Math.min(Math.max(fitScale, 0.01), maxScale), max: maxScale};
 		},
 	});
+	// Lanes draw second labels only near what's visible (a screen to either side). Lanes grow with the show, and zoomed in
+	// they had thousands of labels, all moved on every zoom step. Re-rendered only when the view leaves the range, or it's
+	// far wider than needed (after zooming in).
+	const [labelRange, setLabelRange] = useState<[number, number]>([0, 0]);
+	const updateLabelRange = useCallback(() => {
+		const scroller = scrollerRef.current;
+		if (!scroller) return;
+		const {scale} = useRobartState.getState().timelineState;
+		const from = convertPixelsToSeconds(scroller.scrollLeft - timelineStartPadding, scale);
+		const span = convertPixelsToSeconds(scroller.clientWidth, scale);
+		setLabelRange((range) => (from >= range[0] && from + span <= range[1] && range[1] - range[0] <= 4 * span
+			? range
+			: [from - span, from + 2 * span]));
+	}, []);
+	useEffect(() => {
+		window.addEventListener('resize', updateLabelRange);
+		return () => {
+			window.removeEventListener('resize', updateLabelRange);
+		};
+	}, [updateLabelRange]);
+
 	// After the zoomed timeline renders, scroll so the anchor time is back under the fingers
 	useLayoutEffect(() => {
 		const scroller = scrollerRef.current;
 		const anchor = zoomAnchor.current;
-		if (!scroller || !anchor) return;
-		scroller.scrollLeft = timeToX(anchor.time, timelineState.scale) - anchor.x;
+		if (scroller && anchor) scroller.scrollLeft = timeToX(anchor.time, timelineState.scale) - anchor.x;
 		zoomAnchor.current = undefined;
-	}, [timelineState.scale]);
+		updateLabelRange();
+	}, [timelineState.scale, updateLabelRange]);
 
 	// Item lengths come from simulating the show; redo it shortly after the timeline, blocks or robots change.
 	useEffect(() => {
@@ -100,9 +121,9 @@ export const Timeline = () => {
 							+ New group
 						</button>
 					</div>
-					<div ref={scrollerRef} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-5">
+					<div ref={scrollerRef} onScroll={updateLabelRange} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-5">
 						{groups.map((group) => (
-							<TimelineGroupBody group={group} key={group.id} />
+							<TimelineGroupBody group={group} labelRange={labelRange} key={group.id} />
 						))}
 
 						<TimelineMarker />

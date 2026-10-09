@@ -14,31 +14,32 @@ import React from 'react';
 
 type TimelineGroupProps = {
 	group: TimelineGroupState;
+	// Times (s) to draw second labels between: only near what's visible (see Timeline)
+	labelRange: [number, number];
 };
 
 export const pixelsPerSecond = 100;
 // Lanes reach this far past the last block (s), and are at least minTimelineLength long, so there's always room to add more
 const roomAfterLastBlock = 30;
 const minTimelineLength = 120;
-// Length of every lane (s)
 // Seconds between labels and between major ticks, when that many seconds are far enough apart (px)
 const roundSeconds = [1, 2, 5, 10, 15, 30, 60];
 const everyAtLeast = (secondWidth: number, minWidth: number) => roundSeconds.find((seconds) => seconds * secondWidth >= minWidth) ?? 60;
 
 /**
  * Tick marks as a repeating background, not elements: thousands of tick elements made zooming slow. A major tick every
- * second, or every few seconds when zoomed out (every second merged into a black band); subdivision ticks in between
- * when there's room. Heights are how far down each kind reaches. Each layer is one repeating
+ * second, or every few seconds when zoomed out (every second merged into a black band); 2, 4 or 8 subdivision ticks
+ * per second when they stay far enough apart. Heights are how far down each kind reaches. Each layer is one repeating
  * gradient placed from time 0 onward (a tiled image would also repeat backwards into the start padding).
  */
 const tickBackground = (scale: number, majorHeight: string, minorHeight: string) => {
 	const secondWidth = convertSecondsToPixels(1, scale);
-	const majorWidth = everyAtLeast(secondWidth, 6) * secondWidth;
-	const minorWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
+	const majorWidth = everyAtLeast(secondWidth, 10) * secondWidth;
+	const subdivisions = majorWidth === secondWidth ? [8, 4, 2].find((perSecond) => secondWidth / perSecond >= 12) : undefined;
 	const ticks = (spacing: number) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
 	const area = `calc(100% - ${timelineStartPadding}px)`;
 	const layers = [{image: ticks(majorWidth), height: majorHeight}];
-	if (majorWidth === secondWidth && minorWidth >= 6) layers.push({image: ticks(minorWidth), height: minorHeight});
+	if (subdivisions) layers.push({image: ticks(secondWidth / subdivisions), height: minorHeight});
 	return {
 		backgroundImage: layers.map((layer) => layer.image).join(', '),
 		backgroundSize: layers.map((layer) => `${area} ${layer.height}`).join(', '),
@@ -47,8 +48,8 @@ const tickBackground = (scale: number, majorHeight: string, minorHeight: string)
 	};
 };
 
+// Length of every lane (s)
 export const timelineLength = (state: Pick<MRAState, 'timelineState'>) => Math.max(minTimelineLength, lastItemEnd(state) + roomAfterLastBlock);
-export const SUBDIVISIONS_PER_SECOND = 8;
 // Display only: very short items (an LED color change is 0.1 s) would be too thin to see or grab
 export const minItemWidth = 12;
 
@@ -95,7 +96,7 @@ export const laneOccupiedItems = (groups: Record<string, TimelineGroupState>, la
 	? Object.values(groups).flatMap((group) => Object.values(group.items))
 	: [...Object.values(groups[laneId]?.items ?? {}), ...Object.values(groups[allDronesGroupId]?.items ?? {})]);
 
-export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
+export const TimelineGroupBody = ({group, labelRange}: TimelineGroupProps) => {
 	const addBlockToTimeline = useRobartState((state) => state.addBlockToTimeline);
 	const selectedBlockId = useRobartState((state) => state.editingBlockId);
 	const blocks = useRobartState((state) => state.blocks);
@@ -163,8 +164,10 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 		}
 	};
 
-	// Labels only when far enough apart to read
+	// Labels only when far enough apart to read, and only near what's visible
 	const labelEvery = everyAtLeast(convertSecondsToPixels(1, scale), 32);
+	const firstLabel = Math.max(0, Math.floor(labelRange[0] / labelEvery));
+	const labelCount = Math.max(0, Math.min(Math.ceil(length / labelEvery), Math.ceil(labelRange[1] / labelEvery)) - firstLabel);
 
 	return (
 		<div
@@ -181,10 +184,10 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 			}}
 		>
 			{/* No second labels on a collapsed lane: no room */}
-			{!group.collapsed && [...new Array(Math.ceil(length / labelEvery))].map((_, index) => (
+			{!group.collapsed && [...new Array(labelCount)].map((_, i) => (firstLabel + i) * labelEvery).map((seconds) => (
 				// Centered on their ticks
-				<span key={index} className="absolute top-1/4 -translate-x-1/2" style={{left: timeToX(index * labelEvery, scale)}}>
-					{index * labelEvery}
+				<span key={seconds} className="absolute top-1/4 -translate-x-1/2" style={{left: timeToX(seconds, scale)}}>
+					{seconds}
 				</span>
 			))}
 			{allDronesItems.map((item) => (
