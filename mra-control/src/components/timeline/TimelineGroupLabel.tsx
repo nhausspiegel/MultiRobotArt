@@ -122,7 +122,9 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 					+ add
 				</button>
 				<button aria-label={`Remove ${group.name}`} title="Remove group" className="px-1 text-gray-500 hover:text-red-600" onClick={() => {
-					setConfirmRemoveOpen(true);
+					// Nothing to lose without drones or blocks, so no confirmation
+					if (robotIds.length === 0 && Object.keys(group.items).length === 0) removeGroup(group.id);
+					else setConfirmRemoveOpen(true);
 				}}>
 					×
 				</button>
