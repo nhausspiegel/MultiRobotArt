@@ -128,7 +128,13 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 			}}
 		>
 			{[...new Array(Math.ceil(group.duration / labelEvery))].map((_, index) => (
-				<span key={index} className="absolute top-1/4" style={{left: convertSecondsToPixels(index * labelEvery, scale)}}>
+				// Centered on their ticks. 0 can't be (half would hang off the lane's left edge), so it sits just right of its
+				// tick and the playhead, which is 4 px wide at time 0 and drawn on top
+				<span
+					key={index}
+					className={clsx('absolute top-1/4', index > 0 && '-translate-x-1/2')}
+					style={{left: index === 0 ? 6 : convertSecondsToPixels(index * labelEvery, scale)}}
+				>
 					{index * labelEvery}
 				</span>
 			))}
