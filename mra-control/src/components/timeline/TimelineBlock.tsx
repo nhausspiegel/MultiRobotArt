@@ -21,7 +21,8 @@ export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}
 		if (!blockOverlaps(groups[item.groupId], blocks, newStartTime, correspondingBlock, item.id)) {
 			updateItem(item.groupId, item.id, newStartTime);
 		}
-	});
+	// keys: false, otherwise bind() returns its own onKeyDown (arrow-key dragging) that replaces the delete handler below
+	}, {pointer: {keys: false}});
 	let duration = 0;
 	if (item === undefined) {
 		duration = 0.1;
