@@ -82302,7 +82302,6 @@ const useRobartState = create$2()(
             });
           },
           removeBlock: (id2) => {
-            var _a3;
             const newBlocks = Object.fromEntries(Object.entries(get2().blocks).filter(([key, _2]) => key !== id2));
             const itemsToRemove = Object.values(get2().timelineState.groups).map(
               (group) => Object.values(group.items).filter((item) => item.blockId === id2)
@@ -82310,7 +82309,9 @@ const useRobartState = create$2()(
             itemsToRemove.flat().forEach((item) => {
               get2().removeTimelineItem(item.groupId, item.id);
             });
-            const selectedBlockId = (_a3 = Object.values(newBlocks).at(-1)) == null ? void 0 : _a3.id;
+            const ids = Object.keys(get2().blocks);
+            const index2 = ids.indexOf(id2);
+            const selectedBlockId = ids[index2 + 1] ?? ids[index2 - 1];
             set2({ blocks: newBlocks, editingBlockId: selectedBlockId });
           },
           renameBlock: (name2) => {
@@ -90115,7 +90116,7 @@ const BlockEditorHeader = () => {
   const currentBlock = useRobartState((state2) => state2.blocks[currentBlockId ?? ""]);
   const renameBlock = useRobartState((state2) => state2.renameBlock);
   if (!currentBlock)
-    return /* @__PURE__ */ jsx("div", { className: "h-full w-full text-3xl font-bold flex justify-center items-center", children: "No Timeline Block Selected." });
+    return /* @__PURE__ */ jsx("div", { className: "h-full w-full text-3xl font-bold flex justify-center items-center", children: "No timeline block selected" });
   return /* @__PURE__ */ jsx("div", { className: "m-2 flex items-center gap-2", children: /* @__PURE__ */ jsx(
     RenamableText,
     {
@@ -97147,14 +97148,22 @@ const BlockManagerPanel = () => {
   const selectedBlock = useRobartState((state2) => state2.blocks[selectedBlockId ?? ""]);
   const selectedBlockUses = useRobartState((state2) => Object.values(state2.timelineState.groups).flatMap((group) => Object.values(group.items)).filter((item) => item.blockId === selectedBlockId).length);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = reactExports.useState(false);
+  const listRef = reactExports.useRef(null);
   const addCopy = (block) => {
     setEditingBlock(copyBlock(block));
+  };
+  const remove2 = (blockId) => {
+    removeBlock(blockId);
+    requestAnimationFrame(() => {
+      var _a3, _b2;
+      return (_b2 = (_a3 = listRef.current) == null ? void 0 : _a3.querySelector('[data-selected="true"]')) == null ? void 0 : _b2.focus();
+    });
   };
   const deleteSelected = () => {
     if (selectedBlockId === void 0)
       return;
     if ((selectedBlock == null ? void 0 : selectedBlock.javaScript.trim()) === "" && selectedBlockUses === 0)
-      removeBlock(selectedBlockId);
+      remove2(selectedBlockId);
     else
       setConfirmDeleteOpen(true);
   };
@@ -97223,7 +97232,7 @@ const BlockManagerPanel = () => {
             },
             onConfirm: () => {
               if (selectedBlockId !== void 0)
-                removeBlock(selectedBlockId);
+                remove2(selectedBlockId);
               setConfirmDeleteOpen(false);
             },
             children: selectedBlockUses > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
@@ -97237,13 +97246,14 @@ const BlockManagerPanel = () => {
             ] })
           }
         ),
-        /* @__PURE__ */ jsx("div", { className: "flex min-h-0 flex-1 flex-wrap content-start gap-1.5 overflow-y-auto p-2", children: blocks.map((b2) => {
+        /* @__PURE__ */ jsx("div", { ref: listRef, className: "flex min-h-0 flex-1 flex-wrap content-start gap-1.5 overflow-y-auto p-2", children: blocks.map((b2) => {
           const empty2 = b2.javaScript.trim() === "";
           return /* @__PURE__ */ jsxs(
             "div",
             {
               role: "button",
               tabIndex: 0,
+              "data-selected": selectedBlockId === b2.id,
               className: clsx(
                 "flex max-w-full cursor-grab items-baseline gap-1.5 rounded-xl border px-2.5 py-1.5 text-sm focus:outline-none",
                 empty2 ? "border-dashed border-gray-400 bg-white text-gray-400" : "border-black/15",
