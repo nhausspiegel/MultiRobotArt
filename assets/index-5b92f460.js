@@ -145332,10 +145332,13 @@ const SimulationOptions = () => {
   const showCoordinates = useSimulator((state2) => state2.showCoordinates);
   const toggleCoordinates = useSimulator((state2) => state2.toggleCoordinates);
   return /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 text-sm", children: [
-    /* @__PURE__ */ jsxs("span", { className: "tabular-nums", children: [
-      formatTime(time2),
-      " / ",
-      formatTime(showLength)
+    /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
+      /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showCoordinates, onChange: toggleCoordinates }),
+      "Coordinates"
+    ] }),
+    /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
+      /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showPaths, onChange: togglePaths }),
+      "Paths"
     ] }),
     /* @__PURE__ */ jsx(
       "select",
@@ -145352,13 +145355,10 @@ const SimulationOptions = () => {
         ] }, speed))
       }
     ),
-    /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
-      /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showPaths, onChange: togglePaths }),
-      "Paths"
-    ] }),
-    /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
-      /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showCoordinates, onChange: toggleCoordinates }),
-      "Coordinates"
+    /* @__PURE__ */ jsxs("span", { className: "tabular-nums", children: [
+      formatTime(time2),
+      " / ",
+      formatTime(showLength)
     ] })
   ] });
 };
@@ -146360,10 +146360,10 @@ const TimelineSimulationButtons = () => {
     };
   }, []);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
+    simulationStatus !== "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faSquare, onClick: halt, text: "Stop Sim", color: "failure" }),
     simulationStatus === "RUNNING" && /* @__PURE__ */ jsx(IconButton, { icon: faPause, onClick: pause, text: "Pause Sim", color: "gray" }),
     simulationStatus === "PAUSED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: resume, text: "Resume Sim", color: "success" }),
-    simulationStatus === "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: play, text: "Run Sim", color: "success", disabled: !hasDrones }),
-    simulationStatus !== "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faSquare, onClick: halt, text: "Stop Sim", color: "failure" })
+    simulationStatus === "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: play, text: "Run Sim", color: "success", disabled: !hasDrones })
   ] });
 };
 const addNewGroup = () => {
@@ -146424,8 +146424,8 @@ const Timeline = () => {
     /* @__PURE__ */ jsxs("div", { className: "flex", children: [
       /* @__PURE__ */ jsx("div", { className: "flex flex-grow" }),
       /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 pt-2 pr-3", children: [
-        /* @__PURE__ */ jsx(SimulationOptions, {}),
-        /* @__PURE__ */ jsx(TimelineSimulationButtons, {})
+        /* @__PURE__ */ jsx(TimelineSimulationButtons, {}),
+        /* @__PURE__ */ jsx(SimulationOptions, {})
       ] })
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "overflow-y-auto", children: [
