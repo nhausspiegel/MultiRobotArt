@@ -537,10 +537,9 @@ export const useRobartState = create<MRAState & MRAActions>()(
 						});
 					},
 					renameGroup: (groupId: string, groupName: string) => {
-						const groups = get().timelineState.groups;
-						groups[groupId].name = groupName;
+						// Through the draft: the stored state is frozen, so assigning to it directly throws
 						set((state) => {
-							state.timelineState.groups = groups;
+							state.timelineState.groups[groupId].name = groupName;
 						});
 					},
 					addGroup: (groupName: string) => {
