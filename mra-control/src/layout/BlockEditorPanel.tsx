@@ -139,6 +139,15 @@ export const BlockEditorPanel = () => {
 			}];
 		};
 
+		// Clicking empty space (without Shift) clears the multi-selection. The plugin clears it on Blockly's selection events,
+		// which Blockly 13 doesn't fire for that click, so the blocks looked unselected but the next box added to them.
+		const onWorkspaceClick = (event: Blockly.Events.Abstract) => {
+			if (event.type !== Blockly.Events.CLICK || (event as Blockly.Events.Click).targetType !== 'workspace' || isOn()) return;
+			controls.multiDraggable.clearAll_(); // Also unhighlights them
+			controls.dragSelection.clear();
+		};
+		workspace.addChangeListener(onWorkspaceClick);
+
 		// The plugin only hears Shift while the editor has keyboard focus, which it often doesn't (e.g. after clicking
 		// the timeline). Pass Shift on from the whole page while the pointer is over the editor, without taking focus.
 		const editor = workspace.getInjectionDiv();
@@ -167,6 +176,7 @@ export const BlockEditorPanel = () => {
 			editor.removeEventListener('pointerleave', onPointerLeave);
 			window.removeEventListener('keydown', onKeyDown);
 			window.removeEventListener('keyup', onKeyUp);
+			workspace.removeChangeListener(onWorkspaceClick);
 			multiselect.dispose();
 		};
 	}, [workspace]);
