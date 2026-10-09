@@ -312,7 +312,7 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					},
 					getWarnings: () => {
 						//TODO update warnings on call or on step?
-						return get().warnings.join('');
+						return (get().warnings ?? []).join('');
 					},
 					resetProject: () => {
 						set(defaultRobartState);

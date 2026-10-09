@@ -149,7 +149,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				return warning.repr;
 			});
 			const state = useRobartState.getState();
-			useRobartState.setState({ ...state, warnings: reprs });
+			useRobartState.setState({ warnings: reprs ?? [] }); // undefined when nothing was recorded; the Warnings tab joins this list
 
 			set({ status: 'PAUSED' });
 		},
@@ -163,7 +163,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				return warning.repr;
 			});
 			const state = useRobartState.getState();
-			useRobartState.setState({ ...state, warnings: reprs });
+			useRobartState.setState({ warnings: reprs ?? [] }); // undefined when nothing was recorded; the Warnings tab joins this list
 
 			set({ status: 'STOPPED' });
 			get().cancelSimulation();
@@ -466,7 +466,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			if (startTime === 0) {
 				set({ time: 0, trajectoryMarkers: [] });
 				get().setRobots(robartRobots);
-				useRobartState.getState().warnings = [];
+				useRobartState.setState({ warnings: [] }); // setState, not assignment, so the Warnings tab updates
 				// Constraint warnings are computed from this; without the reset they repeat across runs and replays
 				useCrazyflieConstraintState.setState({ positionHistory: [] });
 				itemEndTimes = {};
