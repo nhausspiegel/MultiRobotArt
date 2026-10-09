@@ -3,6 +3,7 @@ from types import SimpleNamespace
 import numpy as np
 from PIL import ImageColor
 import rclpy
+import random
 import time
 from crazyflieLoggers import *
 import rowan
@@ -199,6 +200,11 @@ def setLEDColor(groupState, r, g, b):
     crazyflies = groupState.crazyflies
     for cf in crazyflies:
         cf.setLEDColor(r, g, b)
+
+
+def setRandomLEDColor(groupState):
+    # One random color for the whole group, like the simulator
+    setLEDColor(groupState, random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
 
 ###

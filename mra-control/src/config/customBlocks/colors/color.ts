@@ -67,16 +67,15 @@ export const blockRandomColor: RobartBlockDefinition = {
     
 	},
 
+	// The color is picked when the code runs, not when it is generated, so each run gets a new one
 	pythonGenerator: (block, _python) => {
-		var color = {r: Math.random(), b: Math.random(), g: Math.random()};
-		const code = 'setLEDColorFromHex(groupState, "' + color + '")\n';
-		return code;
+		return 'setRandomLEDColor(groupState)\n';
 	},
 
 
 
 	javascriptGenerator: (block, _js) => {
-		var color = {r: Math.random(), b: Math.random(), g: Math.random()};
-		return `simulator.setColor(groupState, ${color?.r},${color?.g},${color?.b})\n`;
+		// 0-255 like blockColor; the simulator renders color / 255
+		return 'simulator.setColor(groupState, Math.random() * 255, Math.random() * 255, Math.random() * 255)\n';
 	},
 };

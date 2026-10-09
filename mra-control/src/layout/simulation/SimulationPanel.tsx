@@ -1,6 +1,7 @@
 import {Canvas} from '@react-three/fiber';
 
 import {Simulation} from './Simulation';
+import {SimulationControls} from './SimulationControls';
 import React, { useState } from 'react';
 import { PerformanceMonitor } from '@react-three/drei';
 
@@ -20,11 +21,12 @@ export const SimulationPanel = () => {
 	});
 
 	return (
-		<div className="h-full w-full">
+		<div className="relative h-full w-full">
 			<Canvas dpr={dpr}>
 				<Simulation />
 				<PerformanceMonitor onIncline={onPerformanceIncline} onDecline={onPerformanceDecline}></PerformanceMonitor>
 			</Canvas>
+			<SimulationControls />
 		</div>
 	);
 };

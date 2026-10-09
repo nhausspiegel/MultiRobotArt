@@ -51,6 +51,7 @@ export type SimulatorState = {
 	timeDilation: number;
 	status: 'RUNNING' | 'STOPPED' | 'PAUSED';
 	renderBoundingBoxes: boolean;
+	showCoordinates: boolean;
 	trajectoryQueue: Queue<string>;
 	trajectoryMarkers: Array<{ position: THREE.Vector3; color: THREE.Color; id: string }>;
 	markerFrequency: number;
@@ -64,6 +65,7 @@ const defaultSimulatorState: SimulatorState = {
 	trajectories: new Map<string, TrajectorySimState[]>(),
 	status: 'STOPPED',
 	renderBoundingBoxes: true,
+	showCoordinates: false,
 	trajectoryQueue: new Queue<string>(),
 	trajectoryMarkers: [],
 	markerFrequency: 0.25,
@@ -72,7 +74,8 @@ const defaultSimulatorState: SimulatorState = {
 
 const nullTrajectory = new traj.PolynomialTrajectory(-1, []) as traj.Trajectory;
 
-const simulatorTimeouts: NodeJS.Timeout[] = [];
+// Timeline items not started yet, sorted by start time (sim seconds). advance() starts them when the sim reaches them.
+const pendingItems: Array<{ time: number; robotIds: string[]; lines: string[] }> = [];
 
 export type SimulatorActions = {
 	play: () => void;
@@ -80,6 +83,16 @@ export type SimulatorActions = {
 	resume: () => void;
 	halt: () => void;
 	step: () => void;
+	/**
+   * Moves the simulation forward by deltaT sim seconds.
+   */
+	advance: (deltaT: number) => void;
+	/**
+   * Jumps the simulation to the given sim time, replaying from the start when going backwards.
+   */
+	seek: (time: number) => void;
+	setTimeDilation: (timeDilation: number) => void;
+	toggleCoordinates: () => void;
 	/**
    * Can only be used when simulator is STOPPED mode.
    * @param robots
@@ -113,11 +126,10 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			useRobartState.setState({ ...state, warnings: reprs });
 
 			set({ status: 'PAUSED' });
-			get().cancelSimulation();
 		},
 		resume: () => {
-			set({ status: 'RUNNING' });
-			get().executeSimulation(get().time);
+			// Reset lastStepTime so the paused duration isn't simulated on the next step
+			set({ status: 'RUNNING', lastStepTime: performance.now() });
 		},
 		halt: () => {
 			const warnings: ConstraintWarning[] | undefined = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots));
@@ -131,12 +143,26 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			get().cancelSimulation();
 		},
 		step: () => {
-			const { status, time, timeDilation, robots: currentRobots, markerFrequency, lastStepTime } = get();
-			const trajectoryMarkers = get().trajectoryMarkers.slice();
-			if (status !== 'RUNNING') return;
+			if (get().status !== 'RUNNING') return;
 			const currentTime = performance.now();
-			const deltaT = (currentTime - lastStepTime) / 1000 * timeDilation;
-			const newSimTime = time + deltaT;
+			get().advance((currentTime - get().lastStepTime) / 1000 * get().timeDilation);
+			set({ lastStepTime: currentTime });
+		},
+		advance: (deltaT) => {
+			const newSimTime = get().time + deltaT;
+
+			// Start the timeline items the sim has reached
+			while (pendingItems.length > 0 && pendingItems[0].time <= newSimTime) {
+				const item = pendingItems.shift();
+				item.lines.forEach((line) => {
+					item.robotIds.forEach((robotId) => {
+						get().addTrajectory(robotId, line);
+					});
+				});
+			}
+
+			const { time, robots: currentRobots, markerFrequency } = get();
+			const trajectoryMarkers = get().trajectoryMarkers.slice();
 			const robots = { ...currentRobots };
 
 			const simulator = SIM;
@@ -215,8 +241,26 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				robots,
 				time: newSimTime,
 				trajectoryMarkers: trajectoryMarkers,
-				lastStepTime: currentTime,
 			});
+		},
+		seek: (targetTime) => {
+			const wasRunning = get().status === 'RUNNING';
+			// The sim only runs forward, so going back means replaying from the start
+			if (get().status === 'STOPPED' || targetTime < get().time) {
+				set({ time: 0, trajectoryMarkers: [] });
+				get().executeSimulation(0);
+			}
+			// ponytail: replays in 1/fps steps, can lag on long shows; cache snapshots if it does
+			while (get().time < targetTime - 1e-6) {
+				get().advance(Math.min(1 / fps, targetTime - get().time));
+			}
+			set({ status: wasRunning ? 'RUNNING' : 'PAUSED', lastStepTime: performance.now() });
+		},
+		setTimeDilation: (timeDilation) => {
+			set({ timeDilation });
+		},
+		toggleCoordinates: () => {
+			set({ showCoordinates: !get().showCoordinates });
 		},
 		setRobots: (robots) => {
 			const simRobots: Record<string, RobotSimState> = {};
@@ -367,6 +411,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				get().setRobots(robartRobots);
 				useRobartState.getState().warnings = [];
 			}
+			pendingItems.length = 0;
 
 			Object.values(timeline.groups).forEach((group) => {
 				// Need the following local variables so that the EVAL works properly.
@@ -377,30 +422,20 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				// END: The need of said local variables
 
 				Object.values(group.items).forEach(timelineItem => {
-					const offset = timelineItem.startTime - startTime;
-					if (offset < 0) return;
+					const itemTime = timelineItem.startTime * timeline.scale;
+					if (itemTime < startTime) return;
 
-					const timeout = setTimeout(() => {
-						let lines = blocks[timelineItem.blockId].javaScript.split('\n');
-						lines.forEach((line) => {
-							if (line.length > 0) {
-								// let [dur, trajectoryRecord]: [number, Map<string, traj.Trajectory>] = eval(line); 
-								Object.keys(group.robots).forEach((robotId) => {
-									get().addTrajectory(robotId, line);
-								});
-							}
-						});
-					}, timeline.scale * offset * 1000);
-					simulatorTimeouts.push(timeout);
+					pendingItems.push({
+						time: itemTime,
+						robotIds: Object.keys(group.robots),
+						lines: blocks[timelineItem.blockId].javaScript.split('\n').filter((line) => line.length > 0),
+					});
 				});
 			});
+			pendingItems.sort((a, b) => a.time - b.time);
 		},
 		cancelSimulation: () => {
-			// Clear all of the timeouts
-			simulatorTimeouts.map((timeout) => {
-				clearInterval(timeout);
-			});
-			while (simulatorTimeouts.length > 0) simulatorTimeouts.pop();
+			pendingItems.length = 0;
 		},
 	})),
 );

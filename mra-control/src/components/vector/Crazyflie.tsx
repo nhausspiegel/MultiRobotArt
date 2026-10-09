@@ -23,6 +23,7 @@ export function Crazyflie({ robotId, renderBoundingBox }: CrazyflieProps) {
 	const checkCollisions = useSimulator((state) => state.checkCollisions);
 	const robot = useRobartState((state) => state.robots[robotId]);
 	const simRobot = useSimulator((state) => state.robots[robotId]);
+	const showCoordinates = useSimulator((state) => state.showCoordinates);
 	const boundingBox = simRobot?.boundingBox;
 	const boundingBoxDims = boundingBox?.getSize(new Vector3());
 
@@ -60,7 +61,7 @@ export function Crazyflie({ robotId, renderBoundingBox }: CrazyflieProps) {
 
 	return (
 		<>
-			{showText ? (
+			{showText || showCoordinates ? (
 				<Text quaternion={camera.quaternion.clone()} position={[0, 0, 1]} fontSize={0.25}>
 					{`${robot.name}, Position: (${simRobot.pos.x.toFixed(1)}, ${simRobot.pos.y.toFixed(1)}, ${simRobot.pos.z.toFixed(1)})`}
 				</Text>

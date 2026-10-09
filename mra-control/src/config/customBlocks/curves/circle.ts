@@ -33,7 +33,7 @@ export const blockCircle: RobartBlockDefinition = {
 		const dropDownDirection = block.getFieldValue('direction') as string;
 
 		const radians = degrees / 180 * Math.PI;
-		const code = 'circle(groupState, ' + radius + ', ' + velocity + ', ' + radians + ',\'' + dropDownDirection + '\')';
+		const code = 'circle(groupState, ' + radius + ', ' + velocity + ', ' + radians + ',\'' + dropDownDirection + '\')\n';
 		return code;
 	},
 	javascriptGenerator: (block, _js) => {
@@ -81,7 +81,7 @@ export const blockCircleRadians: RobartBlockDefinition = {
 		const radians = block.getFieldValue('angle_radians') as number;
 		// const dropDownDirection = block.getFieldValue('direction') as string;
 
-		const code = 'circle(groupState, ' + radius + ', ' + velocity + ', ' + radians + ',\'' + 'clockwise' + '\')';
+		const code = 'circle(groupState, ' + radius + ', ' + velocity + ', ' + radians + ',\'' + 'clockwise' + '\')\n';
 		return code;
 	},
 	javascriptGenerator: (block, _js) => {
