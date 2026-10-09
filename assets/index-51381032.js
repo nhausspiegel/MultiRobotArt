@@ -90240,6 +90240,13 @@ const BlockEditorPanel = () => {
           controls.updateDraggables_(block);
       }];
     };
+    const onWorkspaceClick = (event) => {
+      if (event.type !== Events.CLICK || event.targetType !== "workspace" || isOn())
+        return;
+      controls.multiDraggable.clearAll_();
+      controls.dragSelection.clear();
+    };
+    workspace.addChangeListener(onWorkspaceClick);
     const editor = workspace.getInjectionDiv();
     let pointerInside = false;
     const onPointerEnter = (event) => {
@@ -90270,6 +90277,7 @@ const BlockEditorPanel = () => {
       editor.removeEventListener("pointerleave", onPointerLeave);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      workspace.removeChangeListener(onWorkspaceClick);
       multiselect.dispose();
     };
   }, [workspace]);
