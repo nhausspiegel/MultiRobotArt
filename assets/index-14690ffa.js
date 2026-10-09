@@ -33671,7 +33671,7 @@ const blockCircle = {
     const degrees = block.getFieldValue("angle_degrees");
     const dropDownDirection = block.getFieldValue("direction");
     const radians = degrees / 180 * Math.PI;
-    const code2 = "circle(groupState, " + radius + ", " + velocity + ", " + radians + ",'" + dropDownDirection + "')";
+    const code2 = "circle(groupState, " + radius + ", " + velocity + ", " + radians + ",'" + dropDownDirection + "')\n";
     return code2;
   },
   javascriptGenerator: (block, _js) => {
@@ -33701,7 +33701,7 @@ const blockCircleRadians = {
     const radius = block.getFieldValue("radius_m");
     const velocity = block.getFieldValue("velocity");
     const radians = block.getFieldValue("angle_radians");
-    const code2 = "circle(groupState, " + radius + ", " + velocity + ", " + radians + ",'clockwise')";
+    const code2 = "circle(groupState, " + radius + ", " + velocity + ", " + radians + ",'clockwise')\n";
     return code2;
   },
   javascriptGenerator: (block, _js) => {
@@ -35692,15 +35692,12 @@ const blockRandomColor = {
       this.setTooltip("Change the color of the LED ring to a random color! (Picks three random numbers for red, green, and blue)");
     }
   },
+  // The color is picked when the code runs, not when it is generated, so each run gets a new one
   pythonGenerator: (block, _python) => {
-    var color = { r: Math.random(), b: Math.random(), g: Math.random() };
-    const code2 = 'setLEDColorFromHex(groupState, "' + color + '")\n';
-    return code2;
+    return "setRandomLEDColor(groupState)\n";
   },
   javascriptGenerator: (block, _js) => {
-    var color = { r: Math.random(), b: Math.random(), g: Math.random() };
-    return `simulator.setColor(groupState, ${color == null ? void 0 : color.r},${color == null ? void 0 : color.g},${color == null ? void 0 : color.b})
-`;
+    return "simulator.setColor(groupState, Math.random() * 255, Math.random() * 255, Math.random() * 255)\n";
   }
 };
 const blockColorOff = {
@@ -39911,6 +39908,7 @@ from types import SimpleNamespace
 import numpy as np
 from PIL import ImageColor
 import rclpy
+import random
 import time
 from crazyflieLoggers import *
 import rowan
@@ -40107,6 +40105,11 @@ def setLEDColor(groupState, r, g, b):
     crazyflies = groupState.crazyflies
     for cf in crazyflies:
         cf.setLEDColor(r, g, b)
+
+
+def setRandomLEDColor(groupState):
+    # One random color for the whole group, like the simulator
+    setLEDColor(groupState, random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
 
 ###
@@ -52291,9 +52294,9 @@ function getEncodingComponents(encoding) {
   }
 }
 function getShaderErrors(gl2, shader, type) {
-  const status2 = gl2.getShaderParameter(shader, 35713);
+  const status = gl2.getShaderParameter(shader, 35713);
   const errors = gl2.getShaderInfoLog(shader).trim();
-  if (status2 && errors === "")
+  if (status && errors === "")
     return "";
   const errorMatches = /ERROR: 0:(\d+)/.exec(errors);
   if (errorMatches) {
@@ -63827,7 +63830,7 @@ function flattenJSON(jsonKeys, times, values, valuePropertyName) {
     } while (key !== void 0);
   }
 }
-function subclip(sourceClip, name2, startFrame, endFrame, fps = 30) {
+function subclip(sourceClip, name2, startFrame, endFrame, fps2 = 30) {
   const clip = sourceClip.clone();
   clip.name = name2;
   const tracks = [];
@@ -63837,7 +63840,7 @@ function subclip(sourceClip, name2, startFrame, endFrame, fps = 30) {
     const times = [];
     const values = [];
     for (let j2 = 0; j2 < track.times.length; ++j2) {
-      const frame = track.times[j2] * fps;
+      const frame = track.times[j2] * fps2;
       if (frame < startFrame || frame >= endFrame)
         continue;
       times.push(track.times[j2]);
@@ -63864,11 +63867,11 @@ function subclip(sourceClip, name2, startFrame, endFrame, fps = 30) {
   clip.resetDuration();
   return clip;
 }
-function makeClipAdditive(targetClip, referenceFrame = 0, referenceClip = targetClip, fps = 30) {
-  if (fps <= 0)
-    fps = 30;
+function makeClipAdditive(targetClip, referenceFrame = 0, referenceClip = targetClip, fps2 = 30) {
+  if (fps2 <= 0)
+    fps2 = 30;
   const numTracks = referenceClip.tracks.length;
-  const referenceTime = referenceFrame / fps;
+  const referenceTime = referenceFrame / fps2;
   for (let i2 = 0; i2 < numTracks; ++i2) {
     const referenceTrack = referenceClip.tracks[i2];
     const referenceTrackType = referenceTrack.ValueTypeName;
@@ -64438,7 +64441,7 @@ class AnimationClip {
     }
     return json;
   }
-  static CreateFromMorphTargetSequence(name2, morphTargetSequence, fps, noLoop) {
+  static CreateFromMorphTargetSequence(name2, morphTargetSequence, fps2, noLoop) {
     const numMorphTargets = morphTargetSequence.length;
     const tracks = [];
     for (let i2 = 0; i2 < numMorphTargets; i2++) {
@@ -64462,7 +64465,7 @@ class AnimationClip {
           ".morphTargetInfluences[" + morphTargetSequence[i2].name + "]",
           times,
           values
-        ).scale(1 / fps)
+        ).scale(1 / fps2)
       );
     }
     return new this(name2, -1, tracks);
@@ -64480,7 +64483,7 @@ class AnimationClip {
     }
     return null;
   }
-  static CreateClipsFromMorphTargetSequences(morphTargets, fps, noLoop) {
+  static CreateClipsFromMorphTargetSequences(morphTargets, fps2, noLoop) {
     const animationToMorphTargets = {};
     const pattern = /^([\w-]*?)([\d]+)$/;
     for (let i2 = 0, il2 = morphTargets.length; i2 < il2; i2++) {
@@ -64497,7 +64500,7 @@ class AnimationClip {
     }
     const clips = [];
     for (const name2 in animationToMorphTargets) {
-      clips.push(this.CreateFromMorphTargetSequence(name2, animationToMorphTargets[name2], fps, noLoop));
+      clips.push(this.CreateFromMorphTargetSequence(name2, animationToMorphTargets[name2], fps2, noLoop));
     }
     return clips;
   }
@@ -64519,7 +64522,7 @@ class AnimationClip {
     };
     const tracks = [];
     const clipName = animation.name || "default";
-    const fps = animation.fps || 30;
+    const fps2 = animation.fps || 30;
     const blendMode = animation.blendMode;
     let duration2 = animation.length || -1;
     const hierarchyTracks = animation.hierarchy || [];
@@ -64547,7 +64550,7 @@ class AnimationClip {
           }
           tracks.push(new NumberKeyframeTrack(".morphTargetInfluence[" + morphTargetName + "]", times, values));
         }
-        duration2 = morphTargetNames.length * fps;
+        duration2 = morphTargetNames.length * fps2;
       } else {
         const boneName = ".bones[" + bones[h2].name + "]";
         addNonemptyTrack(
@@ -74589,6 +74592,7 @@ const useCrazyflieConstraintState = create$2()(
     }))
   )
 );
+const fps = 60;
 const defaultSimulatorState = {
   robots: {},
   time: 0,
@@ -74596,13 +74600,14 @@ const defaultSimulatorState = {
   trajectories: /* @__PURE__ */ new Map(),
   status: "STOPPED",
   renderBoundingBoxes: true,
+  showCoordinates: false,
   trajectoryQueue: new Queue_1(),
   trajectoryMarkers: [],
   markerFrequency: 0.25,
   lastStepTime: performance.now()
 };
 const nullTrajectory = new PolynomialTrajectory(-1, []);
-const simulatorTimeouts = [];
+const pendingItems = [];
 const useSimulator = create$2()(
   immer((set, get) => ({
     ...defaultSimulatorState,
@@ -74618,11 +74623,9 @@ const useSimulator = create$2()(
       const state2 = useRobartState.getState();
       useRobartState.setState({ ...state2, warnings: reprs });
       set({ status: "PAUSED" });
-      get().cancelSimulation();
     },
     resume: () => {
-      set({ status: "RUNNING" });
-      get().executeSimulation(get().time);
+      set({ status: "RUNNING", lastStepTime: performance.now() });
     },
     halt: () => {
       const warnings = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots));
@@ -74635,13 +74638,24 @@ const useSimulator = create$2()(
       get().cancelSimulation();
     },
     step: () => {
-      const { status, time, timeDilation, robots: currentRobots, markerFrequency, lastStepTime } = get();
-      const trajectoryMarkers = get().trajectoryMarkers.slice();
-      if (status !== "RUNNING")
+      if (get().status !== "RUNNING")
         return;
       const currentTime = performance.now();
-      const deltaT = (currentTime - lastStepTime) / 1e3 * timeDilation;
-      const newSimTime = time + deltaT;
+      get().advance((currentTime - get().lastStepTime) / 1e3 * get().timeDilation);
+      set({ lastStepTime: currentTime });
+    },
+    advance: (deltaT) => {
+      const newSimTime = get().time + deltaT;
+      while (pendingItems.length > 0 && pendingItems[0].time <= newSimTime) {
+        const item = pendingItems.shift();
+        item.lines.forEach((line2) => {
+          item.robotIds.forEach((robotId2) => {
+            get().addTrajectory(robotId2, line2);
+          });
+        });
+      }
+      const { time, robots: currentRobots, markerFrequency } = get();
+      const trajectoryMarkers = get().trajectoryMarkers.slice();
       const robots = { ...currentRobots };
       const simulator = SIM;
       const groupState = {
@@ -74702,9 +74716,25 @@ const useSimulator = create$2()(
       set({
         robots,
         time: newSimTime,
-        trajectoryMarkers,
-        lastStepTime: currentTime
+        trajectoryMarkers
       });
+    },
+    seek: (targetTime) => {
+      const wasRunning = get().status === "RUNNING";
+      if (get().status === "STOPPED" || targetTime < get().time) {
+        set({ time: 0, trajectoryMarkers: [] });
+        get().executeSimulation(0);
+      }
+      while (get().time < targetTime - 1e-6) {
+        get().advance(Math.min(1 / fps, targetTime - get().time));
+      }
+      set({ status: wasRunning ? "RUNNING" : "PAUSED", lastStepTime: performance.now() });
+    },
+    setTimeDilation: (timeDilation) => {
+      set({ timeDilation });
+    },
+    toggleCoordinates: () => {
+      set({ showCoordinates: !get().showCoordinates });
     },
     setRobots: (robots2) => {
       const simRobots = {};
@@ -74800,31 +74830,23 @@ const useSimulator = create$2()(
         get().setRobots(robartRobots);
         useRobartState.getState().warnings = [];
       }
+      pendingItems.length = 0;
       Object.values(timeline.groups).forEach((group) => {
         Object.values(group.items).forEach((timelineItem) => {
-          const offset2 = timelineItem.startTime - startTime2;
-          if (offset2 < 0)
+          const itemTime = timelineItem.startTime * timeline.scale;
+          if (itemTime < startTime2)
             return;
-          const timeout = setTimeout(() => {
-            let lines2 = blocks2[timelineItem.blockId].javaScript.split("\n");
-            lines2.forEach((line2) => {
-              if (line2.length > 0) {
-                Object.keys(group.robots).forEach((robotId2) => {
-                  get().addTrajectory(robotId2, line2);
-                });
-              }
-            });
-          }, timeline.scale * offset2 * 1e3);
-          simulatorTimeouts.push(timeout);
+          pendingItems.push({
+            time: itemTime,
+            robotIds: Object.keys(group.robots),
+            lines: blocks2[timelineItem.blockId].javaScript.split("\n").filter((line2) => line2.length > 0)
+          });
         });
       });
+      pendingItems.sort((a2, b2) => a2.time - b2.time);
     },
     cancelSimulation: () => {
-      simulatorTimeouts.map((timeout) => {
-        clearInterval(timeout);
-      });
-      while (simulatorTimeouts.length > 0)
-        simulatorTimeouts.pop();
+      pendingItems.length = 0;
     }
   }))
 );
@@ -79792,11 +79814,11 @@ const AvatarGroupCounter = ({ total, href, className, theme: customTheme = {} })
   return jsxs("a", { className: classNames(theme2.base, className), href, children: ["+", total] });
 };
 AvatarGroupCounter.displayName = "Avatar.GroupCounter";
-const AvatarComponent = ({ alt = "", bordered = false, children, img, color = "light", rounded = false, size = "md", stacked = false, status: status2, statusPosition = "top-left", placeholderInitials = "", className, theme: customTheme = {}, ...props }) => {
+const AvatarComponent = ({ alt = "", bordered = false, children, img, color = "light", rounded = false, size = "md", stacked = false, status, statusPosition = "top-left", placeholderInitials = "", className, theme: customTheme = {}, ...props }) => {
   const theme2 = mergeDeep(useTheme().theme.avatar, customTheme);
   const imgClassName = classNames(bordered && theme2.root.bordered, bordered && theme2.root.color[color], rounded && theme2.root.rounded, stacked && theme2.root.stacked, theme2.img.on, theme2.root.size[size]);
   const imgProps = { alt, className: classNames(imgClassName, theme2.img.on), "data-testid": "flowbite-avatar-img" };
-  return jsxs("div", { className: classNames(theme2.root.base, className), "data-testid": "flowbite-avatar", ...props, children: [jsxs("div", { className: "relative", children: [img ? typeof img === "string" ? jsx("img", { ...imgProps, src: img }) : img(imgProps) : placeholderInitials ? jsx("div", { className: classNames(theme2.img.off, theme2.initials.base, rounded && theme2.root.rounded, stacked && theme2.root.stacked, bordered && theme2.root.bordered, bordered && theme2.root.color[color]), "data-testid": "flowbite-avatar-initials-placeholder", children: jsx("span", { className: classNames(theme2.initials.text), "data-testid": "flowbite-avatar-initials-placeholder-text", children: placeholderInitials }) }) : jsx("div", { className: classNames(imgClassName, theme2.img.off), "data-testid": "flowbite-avatar-img", children: jsx("svg", { className: theme2.img.placeholder, fill: "currentColor", viewBox: "0 0 20 20", xmlns: "http://www.w3.org/2000/svg", children: jsx("path", { fillRule: "evenodd", d: "M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z", clipRule: "evenodd" }) }) }), status2 && jsx("span", { "data-testid": "flowbite-avatar-status", className: classNames(theme2.status.base, theme2.status[status2], theme2.root.statusPosition[statusPosition]) })] }), children && jsx("div", { children })] });
+  return jsxs("div", { className: classNames(theme2.root.base, className), "data-testid": "flowbite-avatar", ...props, children: [jsxs("div", { className: "relative", children: [img ? typeof img === "string" ? jsx("img", { ...imgProps, src: img }) : img(imgProps) : placeholderInitials ? jsx("div", { className: classNames(theme2.img.off, theme2.initials.base, rounded && theme2.root.rounded, stacked && theme2.root.stacked, bordered && theme2.root.bordered, bordered && theme2.root.color[color]), "data-testid": "flowbite-avatar-initials-placeholder", children: jsx("span", { className: classNames(theme2.initials.text), "data-testid": "flowbite-avatar-initials-placeholder-text", children: placeholderInitials }) }) : jsx("div", { className: classNames(imgClassName, theme2.img.off), "data-testid": "flowbite-avatar-img", children: jsx("svg", { className: theme2.img.placeholder, fill: "currentColor", viewBox: "0 0 20 20", xmlns: "http://www.w3.org/2000/svg", children: jsx("path", { fillRule: "evenodd", d: "M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z", clipRule: "evenodd" }) }) }), status && jsx("span", { "data-testid": "flowbite-avatar-status", className: classNames(theme2.status.base, theme2.status[status], theme2.root.statusPosition[statusPosition]) })] }), children && jsx("div", { children })] });
 };
 AvatarComponent.displayName = "Avatar";
 Object.assign(AvatarComponent, {
@@ -106241,6 +106263,7 @@ function Crazyflie({ robotId: robotId2, renderBoundingBox }) {
   const checkCollisions = useSimulator((state2) => state2.checkCollisions);
   const robot = useRobartState((state2) => state2.robots[robotId2]);
   const simRobot = useSimulator((state2) => state2.robots[robotId2]);
+  const showCoordinates = useSimulator((state2) => state2.showCoordinates);
   const boundingBox = simRobot == null ? void 0 : simRobot.boundingBox;
   const boundingBoxDims = boundingBox == null ? void 0 : boundingBox.getSize(new Vector3());
   const [showText, setShowText] = reactExports.useState(false);
@@ -106271,7 +106294,7 @@ function Crazyflie({ robotId: robotId2, renderBoundingBox }) {
     return /* @__PURE__ */ jsx(Text$1, { fontSize: 1, children: "Loading..." });
   }
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    showText ? /* @__PURE__ */ jsx(Text$1, { quaternion: camera.quaternion.clone(), position: [0, 0, 1], fontSize: 0.25, children: `${robot.name}, Position: (${simRobot.pos.x.toFixed(1)}, ${simRobot.pos.y.toFixed(1)}, ${simRobot.pos.z.toFixed(1)})` }) : null,
+    showText || showCoordinates ? /* @__PURE__ */ jsx(Text$1, { quaternion: camera.quaternion.clone(), position: [0, 0, 1], fontSize: 0.25, children: `${robot.name}, Position: (${simRobot.pos.x.toFixed(1)}, ${simRobot.pos.y.toFixed(1)}, ${simRobot.pos.z.toFixed(1)})` }) : null,
     /* @__PURE__ */ jsx("group", { children: /* @__PURE__ */ jsxs("group", { ref: group, children: [
       /* @__PURE__ */ jsx("group", { scale: 0.3, rotation: [Math.PI / 2, -Math.PI / 2, 0], children: /* @__PURE__ */ jsxs(
         "mesh",
@@ -113595,11 +113618,11 @@ function ensureAddr(state2, addr) {
   if (addr & 1)
     return 2;
   let idx = addr >> 1;
-  let status2 = state2.status[idx];
-  if (status2 == 4)
+  let status = state2.status[idx];
+  if (status == 4)
     throw new Error("Cyclic dependency between fields and/or facets");
-  if (status2 & 2)
-    return status2;
+  if (status & 2)
+    return status;
   state2.status[idx] = 4;
   let changed = state2.computeSlot(state2, state2.config.dynamicSlots[idx]);
   return state2.status[idx] = 2 | changed;
@@ -130610,6 +130633,68 @@ const Simulation = () => {
     /* @__PURE__ */ jsx("primitive", { object: camera })
   ] });
 };
+const speeds = [0.5, 1, 2, 4, 8];
+const formatTime = (seconds) => {
+  const wholeSeconds = Math.floor(seconds);
+  return `${Math.floor(wholeSeconds / 60)}:${String(wholeSeconds % 60).padStart(2, "0")}`;
+};
+const SimulationControls = () => {
+  const time2 = useSimulator((state2) => state2.time);
+  const timeDilation = useSimulator((state2) => state2.timeDilation);
+  const showCoordinates = useSimulator((state2) => state2.showCoordinates);
+  const seek = useSimulator((state2) => state2.seek);
+  const setTimeDilation = useSimulator((state2) => state2.setTimeDilation);
+  const toggleCoordinates = useSimulator((state2) => state2.toggleCoordinates);
+  const endTime = useRobartState((state2) => {
+    const { groups, scale } = state2.timelineState;
+    const itemEnds = Object.values(groups).flatMap(
+      (group) => Object.values(group.items).map((item) => (item.startTime + item.duration) * scale)
+    );
+    return Math.max(10, ...itemEnds);
+  });
+  const maxTime = Math.max(endTime, time2);
+  return /* @__PURE__ */ jsxs("div", { className: "absolute inset-x-0 bottom-0 flex items-center gap-3 bg-black/60 px-3 py-2 text-sm text-white", children: [
+    /* @__PURE__ */ jsx(
+      "input",
+      {
+        type: "range",
+        className: "flex-grow",
+        "aria-label": "Simulation time",
+        min: 0,
+        max: maxTime,
+        step: 0.01,
+        value: time2,
+        onChange: (e2) => {
+          seek(Number(e2.target.value));
+        }
+      }
+    ),
+    /* @__PURE__ */ jsxs("span", { className: "tabular-nums", children: [
+      formatTime(time2),
+      " / ",
+      formatTime(maxTime)
+    ] }),
+    /* @__PURE__ */ jsx(
+      "select",
+      {
+        className: "rounded border-none bg-gray-800 py-0 pl-2 pr-8 text-sm",
+        "aria-label": "Simulation speed",
+        value: timeDilation,
+        onChange: (e2) => {
+          setTimeDilation(Number(e2.target.value));
+        },
+        children: speeds.map((speed) => /* @__PURE__ */ jsxs("option", { value: speed, children: [
+          speed,
+          "×"
+        ] }, speed))
+      }
+    ),
+    /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
+      /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showCoordinates, onChange: toggleCoordinates }),
+      "Coordinates"
+    ] })
+  ] });
+};
 const SimulationPanel = () => {
   const [dpr, setDpr] = reactExports.useState(1.5);
   const onPerformanceDecline = () => {
@@ -130620,10 +130705,13 @@ const SimulationPanel = () => {
     const newDpr = Math.min(dpr + 0.5, 2);
     setDpr(newDpr);
   };
-  return /* @__PURE__ */ jsx("div", { className: "h-full w-full", children: /* @__PURE__ */ jsxs(Canvas, { dpr, children: [
-    /* @__PURE__ */ jsx(Simulation, {}),
-    /* @__PURE__ */ jsx(PerformanceMonitor, { onIncline: onPerformanceIncline, onDecline: onPerformanceDecline })
-  ] }) });
+  return /* @__PURE__ */ jsxs("div", { className: "relative h-full w-full", children: [
+    /* @__PURE__ */ jsxs(Canvas, { dpr, children: [
+      /* @__PURE__ */ jsx(Simulation, {}),
+      /* @__PURE__ */ jsx(PerformanceMonitor, { onIncline: onPerformanceIncline, onDecline: onPerformanceDecline })
+    ] }),
+    /* @__PURE__ */ jsx(SimulationControls, {})
+  ] });
 };
 const noSemi = 302, incdec = 1, incdecPrefix = 2, insertSemi = 303, spaces = 305, newline = 306, LineComment = 3, BlockComment = 4;
 const space = [
