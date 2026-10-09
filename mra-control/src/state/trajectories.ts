@@ -308,3 +308,40 @@ export class RotationTrajectory extends Trajectory {
 		return this.originalTrajectory.evaluate(t).sub(this.initialPosition).applyEuler(this.rotationEuler).add(this.initialPosition);
 	}
 }
+
+// Speed (m/s) of the move to a translated trajectory's start; matches translate() in the exported Python
+export const translationTravelSpeed = 0.5;
+
+/**
+ * The original trajectory shifted by an offset. It first eases from the starting position to the shifted start, so the
+ * robot doesn't jump, then follows the original path plus the offset.
+ */
+export class TranslationTrajectory extends Trajectory {
+	originalTrajectory: Trajectory;
+	offset: THREE.Vector3;
+	initialPosition: THREE.Vector3;
+	travelDuration: number;
+
+	constructor(initialPosition: THREE.Vector3, originalTrajectory: Trajectory, offset: THREE.Vector3) {
+		const travelDuration = offset.length() / translationTravelSpeed;
+		super(travelDuration + originalTrajectory.duration);
+		this.originalTrajectory = originalTrajectory;
+		this.offset = offset;
+		this.initialPosition = new THREE.Vector3().copy(initialPosition);
+		this.travelDuration = travelDuration;
+	}
+
+	evaluate(t: number): THREE.Vector3 {
+		const elapsed = t * this.duration;
+		if (elapsed < this.travelDuration) {
+			// Quintic ease in/out: starts and ends at rest
+			const u = elapsed / this.travelDuration;
+			const ease = u * u * u * (10 - 15 * u + 6 * u * u);
+			return this.initialPosition.clone().addScaledVector(this.offset, ease);
+		}
+
+		const originalDuration = this.originalTrajectory.duration;
+		const originalT = originalDuration > 0 ? Math.min(1, (elapsed - this.travelDuration) / originalDuration) : 1;
+		return this.originalTrajectory.evaluate(originalT).clone().add(this.offset);
+	}
+}

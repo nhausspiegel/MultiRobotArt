@@ -20,6 +20,7 @@ import {blockAddTrajectories} from './trajectoryModifiers/add_trajectories';
 import {blockSubtractTrajectories} from './trajectoryModifiers/subtract_trajectories';
 import {blockStretchTrajectories} from './trajectoryModifiers/stretch_trajectory';
 import {blockRotateTrajectoryDegrees, blockRotateTrajectoryRadians} from './trajectoryModifiers/rotate_trajectory';
+import {blockTranslateTrajectory} from './trajectoryModifiers/translate_trajectory';
 
 /**
  * This is where we collect all of the custom blocks and actually update Blockly definitions.
@@ -46,6 +47,7 @@ export const CUSTOM_BLOCKS = {
 	blockStretchTrajectories,
 	blockRotateTrajectoryDegrees,
 	blockRotateTrajectoryRadians,
+	blockTranslateTrajectory,
 	blockRandomColor,
 };
 

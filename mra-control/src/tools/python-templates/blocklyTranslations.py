@@ -342,6 +342,27 @@ def rotate(groupState, command, x_rot, y_rot, z_rot):
     execute_commands(simGroupState, groupState)
 
 
+def translate(groupState, command, x, y, z, speed=0.5):
+    """Runs command shifted by (x, y, z) meters.
+
+    The drones first fly to the shifted start in a straight line at `speed` m/s, so the shifted path doesn't begin
+    with a jump. The simulator does the same (TranslationTrajectory).
+    """
+    simGroupState = simCommand(groupState, command)
+    offset = np.array([x, y, z], dtype=float)
+    distance = float(np.linalg.norm(offset))
+    if distance > 0:
+        duration = distance / speed
+        for cf in groupState.crazyflies:
+            cf.goTo(np.array(_safe_cf_position(cf), dtype=float) + offset, 0, duration)
+        groupState.timeHelper.sleep(duration)
+
+    for simcf in simGroupState.crazyflies:
+        for recorded in simcf.commands:
+            if recorded.command in ("goTo", "cmdPos") and not recorded.relative:
+                recorded.position = np.array(recorded.position, dtype=float) + offset
+    execute_commands(simGroupState, groupState)
+
 def stretchTrajectory(
     groupState, command, x_stretch, y_stretch, z_stretch, time_stretch
 ):
