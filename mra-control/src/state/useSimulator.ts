@@ -11,7 +11,7 @@ import * as SIM from './simulatorCommands';
 import { defaultBoundingBoxSize, type RobotState, useRobartState } from './useRobartState';
 import * as traj from './trajectories';
 import { useCrazyflieConstraintState } from './useConstraintState';
-import { type TimedWarning } from './warnings';
+import { collisionWarning, overlappingPairs, type TimedWarning } from './warnings';
 export const fps = 60;
 
 // type TrajectoryPolynomial =
@@ -58,7 +58,7 @@ export type SimulatorState = {
    */
 	plannedPaths: Record<string, THREE.Vector3[]>;
 	/**
-   * Speed and work area warnings for the whole show, found when it is measured. Shown in the simulation's corner as
+   * Speed, work area and collision warnings for the whole show, found when it is measured. Shown in the simulation's corner as
    * playback reaches them.
    */
 	timedWarnings: TimedWarning[];
@@ -326,10 +326,29 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					(plannedPaths[robot.id] ??= []).push(robot.pos.clone());
 				});
 			};
+			// Robots whose bounding boxes (size from Settings) overlap; warned once per stretch of overlap, not once per frame
+			const boxSize = useRobartState.getState().boundingBoxSize ?? defaultBoundingBoxSize;
+			const robotNames = useRobartState.getState().robots;
+			const collisionWarnings: TimedWarning[] = [];
+			let overlapping = new Set<string>();
+			const checkCollisions = () => {
+				const positions = Object.fromEntries(Object.values(get().robots).map((robot) => [robot.id, robot.pos]));
+				const nowOverlapping = new Set<string>();
+				overlappingPairs(positions, boxSize).forEach(([a, b]) => {
+					const pair = `${a} ${b}`;
+					nowOverlapping.add(pair);
+					if (!overlapping.has(pair)) {
+						collisionWarnings.push(collisionWarning(get().time, robotNames[a]?.name ?? 'Deleted robot', robotNames[b]?.name ?? 'Deleted robot'));
+					}
+				});
+				overlapping = nowOverlapping;
+			};
 			recordPositions();
+			checkCollisions();
 			let nextSampleTime = pathSampleInterval;
 			while (!isFinished(get().robots) && get().time < maxShowLength) {
 				get().advance(1 / fps);
+				checkCollisions();
 				if (get().time >= nextSampleTime) {
 					recordPositions();
 					nextSampleTime += pathSampleInterval;
@@ -349,6 +368,10 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 
 			// Speed and work area, from the positions just recorded (before block measuring and the reset overwrite them)
 			const constraintWarnings = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots)) ?? [];
+			const timedWarnings = [
+				...constraintWarnings.map((warning) => ({ time: warning.time, short: warning.short, full: warning.repr })),
+				...collisionWarnings,
+			].sort((a, b) => a.time - b.time);
 
 			// Each block's own length, so the drop preview is right before the block is on the timeline
 			const blockLengths: Record<string, number> = {};
@@ -361,10 +384,10 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			set({
 				endTime,
 				plannedPaths,
-				timedWarnings: constraintWarnings.map((warning) => ({ time: warning.time, short: warning.short, full: warning.repr })),
+				timedWarnings,
 			});
 			// After executeSimulation(0), which clears them
-			useRobartState.setState({ warnings: constraintWarnings.map((warning) => warning.repr) });
+			useRobartState.setState({ warnings: timedWarnings.map((warning) => warning.full) });
 			useRobartState.getState().setMeasuredDurations(durations, blockLengths);
 		},
 		measureBlockLength: (javaScript) => {
