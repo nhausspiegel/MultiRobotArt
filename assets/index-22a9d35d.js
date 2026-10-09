@@ -42466,7 +42466,7 @@ function hexToRgb(hex) {
     b: parseInt(result[3], 16)
   } : null;
 }
-const blockColor = {
+const blockColor$1 = {
   name: "color",
   block: {
     init: function() {
@@ -75929,7 +75929,7 @@ const CUSTOM_BLOCKS = {
   blockCircleRadians,
   blockCircleArc,
   blockGetPosition,
-  blockColor,
+  blockColor: blockColor$1,
   blockColorOff,
   // multiTraj,
   blockNegate,
@@ -82091,6 +82091,12 @@ const migrateGroups = (state2) => {
   }
   return { ...state2, timelineState: { ...state2.timelineState, groups }, notices };
 };
+const blockColors = ["#fbbf24", "#34d399", "#fb7185", "#a78bfa", "#fb923c", "#a3e635", "#f472b6", "#2dd4bf"];
+const blockColor = (block) => block.color ?? blockColors[[...block.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % blockColors.length];
+const nextBlockColor = (blocks) => {
+  const used = Object.values(blocks).map(blockColor);
+  return blockColors.find((color) => !used.includes(color)) ?? blockColors[Object.keys(blocks).length % blockColors.length];
+};
 const defaultBoundingBoxSize = [0.4, 0.4, 0.7];
 const defaultLimits = {
   speedLimitOn: true,
@@ -82291,18 +82297,21 @@ const useRobartState = create$2()(
               xml: "",
               python: "",
               javaScript: "",
-              duration: 1
+              duration: 1,
+              color: nextBlockColor(get2().blocks)
             };
             set2((state2) => {
               state2.blocks[block.id] = block;
             });
             return block.id;
           },
-          copyBlock: (blockId) => {
+          copyBlock: (block) => {
             const newBlock = {
-              ...get2().blocks[blockId],
+              ...block,
               id: uuid$2(),
-              name: `Copy of ${get2().blocks[blockId].name}`
+              name: `Copy of ${block.name}`,
+              // Same color as the original, so copies are easy to spot
+              color: blockColor(block)
             };
             set2((state2) => {
               state2.blocks[newBlock.id] = newBlock;
@@ -90239,6 +90248,89 @@ const BlockEditorPanel = () => {
     /* @__PURE__ */ jsx("div", { ref: workspaceRef, className: "w-full flex-grow" })
   ] });
 };
+var faTrashCan = {
+  prefix: "fas",
+  iconName: "trash-can",
+  icon: [448, 512, [61460, "trash-alt"], "f2ed", "M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z"]
+};
+var faPause = {
+  prefix: "fas",
+  iconName: "pause",
+  icon: [320, 512, [9208], "f04c", "M48 64C21.5 64 0 85.5 0 112V400c0 26.5 21.5 48 48 48H80c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zm192 0c-26.5 0-48 21.5-48 48V400c0 26.5 21.5 48 48 48h32c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H240z"]
+};
+var faArrowsRotate = {
+  prefix: "fas",
+  iconName: "arrows-rotate",
+  icon: [512, 512, [128472, "refresh", "sync"], "f021", "M89.1 202.6c7.7-21.8 20.2-42.3 37.8-59.8c62.5-62.5 163.8-62.5 226.3 0L370.3 160H320c-17.7 0-32 14.3-32 32s14.3 32 32 32H447.5c0 0 0 0 0 0h.4c17.7 0 32-14.3 32-32V64c0-17.7-14.3-32-32-32s-32 14.3-32 32v51.2L398.4 97.6c-87.5-87.5-229.3-87.5-316.8 0C57.2 122 39.6 150.7 28.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5zM23 289.3c-5 1.5-9.8 4.2-13.7 8.2c-4 4-6.7 8.8-8.1 14c-.3 1.2-.6 2.5-.8 3.8c-.3 1.7-.4 3.4-.4 5.1V448c0 17.7 14.3 32 32 32s32-14.3 32-32V396.9l17.6 17.5 0 0c87.5 87.4 229.3 87.4 316.7 0c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.5 62.5-163.8 62.5-226.3 0l-.1-.1L109.6 352H160c17.7 0 32-14.3 32-32s-14.3-32-32-32H32.4c-1.6 0-3.2 .1-4.8 .3s-3.1 .5-4.6 1z"]
+};
+var faSync = faArrowsRotate;
+var faSquare = {
+  prefix: "fas",
+  iconName: "square",
+  icon: [448, 512, [9632, 9723, 9724, 61590], "f0c8", "M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"]
+};
+var faTrash = {
+  prefix: "fas",
+  iconName: "trash",
+  icon: [448, 512, [], "f1f8", "M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"]
+};
+var faGear = {
+  prefix: "fas",
+  iconName: "gear",
+  icon: [512, 512, [9881, "cog"], "f013", "M481.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-30.9 28.1c-7.7 7.1-11.4 17.5-10.9 27.9c.1 2.9 .2 5.8 .2 8.8s-.1 5.9-.2 8.8c-.5 10.5 3.1 20.9 10.9 27.9l30.9 28.1c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-39.7-12.6c-10-3.2-20.8-1.1-29.7 4.6c-4.9 3.1-9.9 6.1-15.1 8.7c-9.3 4.8-16.5 13.2-18.8 23.4l-8.9 40.7c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-8.9-40.7c-2.2-10.2-9.5-18.6-18.8-23.4c-5.2-2.7-10.2-5.6-15.1-8.7c-8.8-5.7-19.7-7.8-29.7-4.6L69.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l30.9-28.1c7.7-7.1 11.4-17.5 10.9-27.9c-.1-2.9-.2-5.8-.2-8.8s.1-5.9 .2-8.8c.5-10.5-3.1-20.9-10.9-27.9L8.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l39.7 12.6c10 3.2 20.8 1.1 29.7-4.6c4.9-3.1 9.9-6.1 15.1-8.7c9.3-4.8 16.5-13.2 18.8-23.4l8.9-40.7c2-9.1 9-16.3 18.2-17.8C213.3 1.2 227.5 0 242 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l8.9 40.7c2.2 10.2 9.4 18.6 18.8 23.4c5.2 2.7 10.2 5.6 15.1 8.7c8.8 5.7 19.7 7.7 29.7 4.6l39.7-12.6c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM242 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"]
+};
+var faDownload = {
+  prefix: "fas",
+  iconName: "download",
+  icon: [512, 512, [], "f019", "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"]
+};
+var faUpload = {
+  prefix: "fas",
+  iconName: "upload",
+  icon: [512, 512, [], "f093", "M288 109.3V352c0 17.7-14.3 32-32 32s-32-14.3-32-32V109.3l-73.4 73.4c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l128-128c12.5-12.5 32.8-12.5 45.3 0l128 128c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L288 109.3zM64 352H192c0 35.3 28.7 64 64 64s64-28.7 64-64H448c35.3 0 64 28.7 64 64v32c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V416c0-35.3 28.7-64 64-64zM432 456a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"]
+};
+var faPlay = {
+  prefix: "fas",
+  iconName: "play",
+  icon: [384, 512, [9654], "f04b", "M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"]
+};
+var faChevronDown = {
+  prefix: "fas",
+  iconName: "chevron-down",
+  icon: [448, 512, [], "f078", "M201.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 338.7 54.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"]
+};
+var faCopy = {
+  prefix: "fas",
+  iconName: "copy",
+  icon: [512, 512, [], "f0c5", "M224 0c-35.3 0-64 28.7-64 64V288c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H224zM64 160c-35.3 0-64 28.7-64 64V448c0 35.3 28.7 64 64 64H288c35.3 0 64-28.7 64-64V384H288v64H64V224h64V160H64z"]
+};
+var faPlus = {
+  prefix: "fas",
+  iconName: "plus",
+  icon: [448, 512, [10133, 61543, "add"], "2b", "M240 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H176V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H384c17.7 0 32-14.3 32-32s-14.3-32-32-32H240V80z"]
+};
+var faChevronRight = {
+  prefix: "fas",
+  iconName: "chevron-right",
+  icon: [320, 512, [9002], "f054", "M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"]
+};
+var faCirclePlus = {
+  prefix: "fas",
+  iconName: "circle-plus",
+  icon: [512, 512, ["plus-circle"], "f055", "M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"]
+};
+var faPlusCircle = faCirclePlus;
+var faTriangleExclamation = {
+  prefix: "fas",
+  iconName: "triangle-exclamation",
+  icon: [512, 512, [9888, "exclamation-triangle", "warning"], "f071", "M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"]
+};
+var faCircleXmark = {
+  prefix: "fas",
+  iconName: "circle-xmark",
+  icon: [512, 512, [61532, "times-circle", "xmark-circle"], "f057", "M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"]
+};
+var faXmarkCircle = faCircleXmark;
 const noop$2 = () => {
 };
 let _WINDOW = {};
@@ -96988,6 +97080,166 @@ ToastToggle.displayName = "Toast.Toggle";
 Object.assign(ToastComponent, {
   Toggle: ToastToggle
 });
+const ConfirmationModal = ({ open: open2, onCancel, onConfirm, header, children }) => {
+  return /* @__PURE__ */ jsxs(Modal, { show: open2, onClose: onCancel, children: [
+    /* @__PURE__ */ jsx(Modal.Header, { children: header }),
+    children && /* @__PURE__ */ jsx(Modal.Body, { children }),
+    /* @__PURE__ */ jsxs(Modal.Footer, { children: [
+      /* @__PURE__ */ jsx(Button, { color: "gray", onClick: onCancel, children: "Cancel" }),
+      /* @__PURE__ */ jsx(Button, { color: "failure", onClick: onConfirm, children: "Confirm" })
+    ] })
+  ] });
+};
+let copiedBlock;
+const ToolbarButton = ({ icon: icon2, title, danger, disabled: disabled2, onClick }) => /* @__PURE__ */ jsx(
+  "button",
+  {
+    className: clsx(
+      "flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 bg-white text-sm hover:bg-gray-50",
+      "disabled:cursor-default disabled:border-gray-100 disabled:text-gray-300 disabled:hover:bg-white",
+      danger ? "text-red-600" : "text-gray-700"
+    ),
+    title,
+    disabled: disabled2,
+    onClick,
+    children: /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: icon2 })
+  }
+);
+const BlockManagerPanel = () => {
+  const blocks = useRobartState((state2) => Object.values(state2.blocks));
+  const removeBlock = useRobartState((state2) => state2.removeBlock);
+  const createBlock = useRobartState((state2) => state2.createBlock);
+  const copyBlock = useRobartState((state2) => state2.copyBlock);
+  const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
+  const setEditingBlock = useRobartState((state2) => state2.setEditingBlock);
+  const selectedBlock = useRobartState((state2) => state2.blocks[selectedBlockId ?? ""]);
+  const selectedBlockUses = useRobartState((state2) => Object.values(state2.timelineState.groups).flatMap((group) => Object.values(group.items)).filter((item) => item.blockId === selectedBlockId).length);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = reactExports.useState(false);
+  const addCopy = (block) => {
+    setEditingBlock(copyBlock(block));
+  };
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: "flex h-full flex-col",
+      onKeyDown: (e2) => {
+        if (!(e2.metaKey || e2.ctrlKey) || e2.altKey || e2.shiftKey)
+          return;
+        const key = e2.key.toLowerCase();
+        if (key === "c" && selectedBlock) {
+          copiedBlock = selectedBlock;
+        } else if (key === "v" && copiedBlock) {
+          addCopy(copiedBlock);
+        } else {
+          return;
+        }
+        e2.preventDefault();
+        e2.stopPropagation();
+      },
+      children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex gap-1 border-b border-gray-100 p-2", children: [
+          /* @__PURE__ */ jsx(
+            ToolbarButton,
+            {
+              icon: faPlus,
+              title: "New block",
+              onClick: () => {
+                setEditingBlock(createBlock(newBlockName()));
+              }
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            ToolbarButton,
+            {
+              icon: faCopy,
+              title: "Copy block",
+              disabled: !selectedBlock,
+              onClick: () => {
+                if (selectedBlock)
+                  addCopy(selectedBlock);
+              }
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            ToolbarButton,
+            {
+              icon: faTrash,
+              title: "Delete block",
+              danger: true,
+              disabled: !selectedBlock,
+              onClick: () => {
+                if (selectedBlockId === void 0)
+                  return;
+                if ((selectedBlock == null ? void 0 : selectedBlock.javaScript.trim()) === "" && selectedBlockUses === 0)
+                  removeBlock(selectedBlockId);
+                else
+                  setConfirmDeleteOpen(true);
+              }
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsx(
+          ConfirmationModal,
+          {
+            header: "Delete block?",
+            open: confirmDeleteOpen,
+            onCancel: () => {
+              setConfirmDeleteOpen(false);
+            },
+            onConfirm: () => {
+              if (selectedBlockId !== void 0)
+                removeBlock(selectedBlockId);
+              setConfirmDeleteOpen(false);
+            },
+            children: selectedBlockUses > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
+              '"',
+              selectedBlock == null ? void 0 : selectedBlock.name,
+              '" will also be removed from the timeline (used ',
+              selectedBlockUses,
+              " time",
+              selectedBlockUses === 1 ? "" : "s",
+              ")."
+            ] })
+          }
+        ),
+        /* @__PURE__ */ jsx("div", { className: "flex min-h-0 flex-1 flex-wrap content-start gap-1.5 overflow-y-auto p-2", children: blocks.map((b2) => {
+          const empty2 = b2.javaScript.trim() === "";
+          return /* @__PURE__ */ jsxs(
+            "div",
+            {
+              role: "button",
+              tabIndex: 0,
+              className: clsx(
+                "flex max-w-full cursor-grab items-baseline gap-1.5 rounded-xl border px-2.5 py-1.5 text-sm focus:outline-none",
+                empty2 ? "border-dashed border-gray-400 bg-white text-gray-400" : "border-black/15",
+                selectedBlockId === b2.id && "ring-2 ring-indigo-600 ring-offset-2"
+              ),
+              style: { backgroundColor: empty2 ? void 0 : blockColor(b2) },
+              draggable: true,
+              onDragStart: (e2) => {
+                e2.dataTransfer.setData("text/plain", b2.id);
+                e2.dataTransfer.effectAllowed = "copy";
+                if (selectedBlockId !== b2.id)
+                  setEditingBlock(b2.id);
+              },
+              onClick: () => {
+                setEditingBlock(b2.id);
+              },
+              children: [
+                /* @__PURE__ */ jsx("span", { className: "truncate", children: b2.name }),
+                !empty2 && /* @__PURE__ */ jsxs("span", { className: "shrink-0 text-xs tabular-nums text-black/55", children: [
+                  b2.duration.toFixed(1),
+                  " s"
+                ] })
+              ]
+            },
+            b2.id
+          );
+        }) })
+      ]
+    }
+  );
+};
 const IconButton = ({
   icon: icon2,
   text,
@@ -97000,202 +97252,6 @@ const IconButton = ({
   return /* @__PURE__ */ jsxs(Button, { className, onClick, color, type, disabled: disabled2, children: [
     /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: icon2 }),
     text !== "" ? /* @__PURE__ */ jsx("span", { className: "ml-2", children: text }) : null
-  ] });
-};
-var faTrashCan = {
-  prefix: "fas",
-  iconName: "trash-can",
-  icon: [448, 512, [61460, "trash-alt"], "f2ed", "M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z"]
-};
-var faPause = {
-  prefix: "fas",
-  iconName: "pause",
-  icon: [320, 512, [9208], "f04c", "M48 64C21.5 64 0 85.5 0 112V400c0 26.5 21.5 48 48 48H80c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zm192 0c-26.5 0-48 21.5-48 48V400c0 26.5 21.5 48 48 48h32c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H240z"]
-};
-var faArrowsRotate = {
-  prefix: "fas",
-  iconName: "arrows-rotate",
-  icon: [512, 512, [128472, "refresh", "sync"], "f021", "M89.1 202.6c7.7-21.8 20.2-42.3 37.8-59.8c62.5-62.5 163.8-62.5 226.3 0L370.3 160H320c-17.7 0-32 14.3-32 32s14.3 32 32 32H447.5c0 0 0 0 0 0h.4c17.7 0 32-14.3 32-32V64c0-17.7-14.3-32-32-32s-32 14.3-32 32v51.2L398.4 97.6c-87.5-87.5-229.3-87.5-316.8 0C57.2 122 39.6 150.7 28.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5zM23 289.3c-5 1.5-9.8 4.2-13.7 8.2c-4 4-6.7 8.8-8.1 14c-.3 1.2-.6 2.5-.8 3.8c-.3 1.7-.4 3.4-.4 5.1V448c0 17.7 14.3 32 32 32s32-14.3 32-32V396.9l17.6 17.5 0 0c87.5 87.4 229.3 87.4 316.7 0c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.5 62.5-163.8 62.5-226.3 0l-.1-.1L109.6 352H160c17.7 0 32-14.3 32-32s-14.3-32-32-32H32.4c-1.6 0-3.2 .1-4.8 .3s-3.1 .5-4.6 1z"]
-};
-var faSync = faArrowsRotate;
-var faSquare = {
-  prefix: "fas",
-  iconName: "square",
-  icon: [448, 512, [9632, 9723, 9724, 61590], "f0c8", "M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"]
-};
-var faTrash = {
-  prefix: "fas",
-  iconName: "trash",
-  icon: [448, 512, [], "f1f8", "M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"]
-};
-var faGear = {
-  prefix: "fas",
-  iconName: "gear",
-  icon: [512, 512, [9881, "cog"], "f013", "M481.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-30.9 28.1c-7.7 7.1-11.4 17.5-10.9 27.9c.1 2.9 .2 5.8 .2 8.8s-.1 5.9-.2 8.8c-.5 10.5 3.1 20.9 10.9 27.9l30.9 28.1c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-39.7-12.6c-10-3.2-20.8-1.1-29.7 4.6c-4.9 3.1-9.9 6.1-15.1 8.7c-9.3 4.8-16.5 13.2-18.8 23.4l-8.9 40.7c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-8.9-40.7c-2.2-10.2-9.5-18.6-18.8-23.4c-5.2-2.7-10.2-5.6-15.1-8.7c-8.8-5.7-19.7-7.8-29.7-4.6L69.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l30.9-28.1c7.7-7.1 11.4-17.5 10.9-27.9c-.1-2.9-.2-5.8-.2-8.8s.1-5.9 .2-8.8c.5-10.5-3.1-20.9-10.9-27.9L8.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l39.7 12.6c10 3.2 20.8 1.1 29.7-4.6c4.9-3.1 9.9-6.1 15.1-8.7c9.3-4.8 16.5-13.2 18.8-23.4l8.9-40.7c2-9.1 9-16.3 18.2-17.8C213.3 1.2 227.5 0 242 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l8.9 40.7c2.2 10.2 9.4 18.6 18.8 23.4c5.2 2.7 10.2 5.6 15.1 8.7c8.8 5.7 19.7 7.7 29.7 4.6l39.7-12.6c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM242 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"]
-};
-var faDownload = {
-  prefix: "fas",
-  iconName: "download",
-  icon: [512, 512, [], "f019", "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"]
-};
-var faUpload = {
-  prefix: "fas",
-  iconName: "upload",
-  icon: [512, 512, [], "f093", "M288 109.3V352c0 17.7-14.3 32-32 32s-32-14.3-32-32V109.3l-73.4 73.4c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l128-128c12.5-12.5 32.8-12.5 45.3 0l128 128c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L288 109.3zM64 352H192c0 35.3 28.7 64 64 64s64-28.7 64-64H448c35.3 0 64 28.7 64 64v32c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V416c0-35.3 28.7-64 64-64zM432 456a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"]
-};
-var faPlay = {
-  prefix: "fas",
-  iconName: "play",
-  icon: [384, 512, [9654], "f04b", "M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"]
-};
-var faChevronDown = {
-  prefix: "fas",
-  iconName: "chevron-down",
-  icon: [448, 512, [], "f078", "M201.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 338.7 54.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"]
-};
-var faCopy = {
-  prefix: "fas",
-  iconName: "copy",
-  icon: [512, 512, [], "f0c5", "M224 0c-35.3 0-64 28.7-64 64V288c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H224zM64 160c-35.3 0-64 28.7-64 64V448c0 35.3 28.7 64 64 64H288c35.3 0 64-28.7 64-64V384H288v64H64V224h64V160H64z"]
-};
-var faPlus = {
-  prefix: "fas",
-  iconName: "plus",
-  icon: [448, 512, [10133, 61543, "add"], "2b", "M240 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H176V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H384c17.7 0 32-14.3 32-32s-14.3-32-32-32H240V80z"]
-};
-var faChevronRight = {
-  prefix: "fas",
-  iconName: "chevron-right",
-  icon: [320, 512, [9002], "f054", "M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"]
-};
-var faCirclePlus = {
-  prefix: "fas",
-  iconName: "circle-plus",
-  icon: [512, 512, ["plus-circle"], "f055", "M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"]
-};
-var faPlusCircle = faCirclePlus;
-var faTriangleExclamation = {
-  prefix: "fas",
-  iconName: "triangle-exclamation",
-  icon: [512, 512, [9888, "exclamation-triangle", "warning"], "f071", "M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"]
-};
-var faCircleXmark = {
-  prefix: "fas",
-  iconName: "circle-xmark",
-  icon: [512, 512, [61532, "times-circle", "xmark-circle"], "f057", "M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"]
-};
-var faXmarkCircle = faCircleXmark;
-const ConfirmationModal = ({ open: open2, onCancel, onConfirm, header, children }) => {
-  return /* @__PURE__ */ jsxs(Modal, { show: open2, onClose: onCancel, children: [
-    /* @__PURE__ */ jsx(Modal.Header, { children: header }),
-    children && /* @__PURE__ */ jsx(Modal.Body, { children }),
-    /* @__PURE__ */ jsxs(Modal.Footer, { children: [
-      /* @__PURE__ */ jsx(Button, { color: "gray", onClick: onCancel, children: "Cancel" }),
-      /* @__PURE__ */ jsx(Button, { color: "failure", onClick: onConfirm, children: "Confirm" })
-    ] })
-  ] });
-};
-const BlockManagerPanel = () => {
-  const blocks = useRobartState((state2) => Object.values(state2.blocks));
-  const removeBlock = useRobartState((state2) => state2.removeBlock);
-  const createBlock = useRobartState((state2) => state2.createBlock);
-  const copyBlock = useRobartState((state2) => state2.copyBlock);
-  const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
-  const setEditingBlock = useRobartState((state2) => state2.setEditingBlock);
-  const selectedBlock = useRobartState((state2) => state2.blocks[selectedBlockId ?? ""]);
-  const selectedBlockUses = useRobartState((state2) => Object.values(state2.timelineState.groups).flatMap((group) => Object.values(group.items)).filter((item) => item.blockId === selectedBlockId).length);
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = reactExports.useState(false);
-  return /* @__PURE__ */ jsxs("div", { className: "flex h-full flex-col", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap gap-2 p-2", children: [
-      /* @__PURE__ */ jsx(
-        IconButton,
-        {
-          icon: faPlusCircle,
-          text: "New",
-          onClick: () => {
-            const id2 = createBlock(newBlockName());
-            setEditingBlock(id2);
-          }
-        }
-      ),
-      /* @__PURE__ */ jsx(
-        IconButton,
-        {
-          icon: faCopy,
-          text: "Copy",
-          onClick: () => {
-            if (selectedBlockId === void 0)
-              return;
-            const id2 = copyBlock(selectedBlockId);
-            setEditingBlock(id2);
-          }
-        }
-      ),
-      /* @__PURE__ */ jsx(
-        IconButton,
-        {
-          color: "failure",
-          icon: faTrash,
-          text: "Delete",
-          onClick: () => {
-            if (selectedBlockId === void 0)
-              return;
-            if ((selectedBlock == null ? void 0 : selectedBlock.javaScript.trim()) === "" && selectedBlockUses === 0)
-              removeBlock(selectedBlockId);
-            else
-              setConfirmDeleteOpen(true);
-          }
-        }
-      )
-    ] }),
-    /* @__PURE__ */ jsx(
-      ConfirmationModal,
-      {
-        header: "Delete block?",
-        open: confirmDeleteOpen,
-        onCancel: () => {
-          setConfirmDeleteOpen(false);
-        },
-        onConfirm: () => {
-          if (selectedBlockId !== void 0)
-            removeBlock(selectedBlockId);
-          setConfirmDeleteOpen(false);
-        },
-        children: selectedBlockUses > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
-          '"',
-          selectedBlock == null ? void 0 : selectedBlock.name,
-          '" will also be removed from the timeline (used ',
-          selectedBlockUses,
-          " time",
-          selectedBlockUses === 1 ? "" : "s",
-          ")."
-        ] })
-      }
-    ),
-    /* @__PURE__ */ jsx("div", { className: "flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto p-2", children: blocks.map((b2) => /* @__PURE__ */ jsx(
-      "div",
-      {
-        className: `flex ${selectedBlockId === b2.id ? "border-4 border-cyan-500 rounded-lg" : ""}`,
-        draggable: true,
-        onDragStart: (e2) => {
-          e2.dataTransfer.setData("text/plain", b2.id);
-          e2.dataTransfer.effectAllowed = "copy";
-          if (selectedBlockId !== b2.id)
-            setEditingBlock(b2.id);
-        },
-        children: /* @__PURE__ */ jsx(
-          Button,
-          {
-            onClick: () => {
-              setEditingBlock(b2.id);
-            },
-            color: "success",
-            children: b2.name
-          }
-        )
-      },
-      b2.id
-    )) })
   ] });
 };
 function __awaiter(thisArg, _arguments, P2, generator) {
@@ -145969,6 +146025,7 @@ const TimelineBlock = ({ item, scale }) => {
     var _a3;
     return (_a3 = state2.blocks[item.blockId]) == null ? void 0 : _a3.name;
   });
+  const color = useRobartState((state2) => state2.blocks[item.blockId] ? blockColor(state2.blocks[item.blockId]) : void 0);
   const removeItem = useRobartState((state2) => state2.removeTimelineItem);
   const updateItem = useRobartState((state2) => state2.updateBlockInTimeline);
   const moveItem = useRobartState((state2) => state2.moveTimelineItem);
@@ -146002,10 +146059,11 @@ const TimelineBlock = ({ item, scale }) => {
     {
       tabIndex: 0,
       className: clsx(
-        "absolute top-1/2 flex h-5/6 -translate-y-1/2 cursor-move items-center justify-center rounded-xl touch-none select-none focus:outline-none focus:ring-2 focus:ring-purple-800",
-        drag && !drag.valid ? "bg-red-400" : "bg-purple-400"
+        "absolute top-1/2 flex h-5/6 -translate-y-1/2 cursor-move items-center justify-center rounded-xl border border-black/15 touch-none select-none focus:outline-none focus:ring-2 focus:ring-indigo-600",
+        drag && !drag.valid && "bg-red-400"
       ),
       style: {
+        backgroundColor: drag && !drag.valid ? void 0 : color,
         width: pixelsPerSecond * scale * item.duration,
         minWidth: minItemWidth,
         left: timeToX(item.startTime, scale),
