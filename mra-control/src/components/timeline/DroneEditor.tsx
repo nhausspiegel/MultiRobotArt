@@ -78,40 +78,46 @@ export const DroneEditor = () => {
 	const deleteRobot = useRobartState((state) => state.deleteRobot);
 	const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
-	if (robot === undefined) return null;
 	const close = () => {
 		setEditingRobotId(undefined);
 	};
 
+	// The modals stay mounted and are shown/hidden. flowbite's Modal removes its portal container when unmounted, and
+	// React StrictMode's dev-only remount runs that cleanup right after mounting, so a freshly mounted modal rendered
+	// into a detached container (invisible) until its next re-render: every other "+ New drone" showed nothing.
 	return (
 		<>
-			<Modal show onClose={close} size="md">
-				<Modal.Header>
-					<RenamableText
-						text={robot.name}
-						className="text-xl font-extrabold"
-						updateText={(newText) => {
-							if (newText.trim() !== '') saveRobot(robot.id, {name: newText.trim()});
-						}}
-					/>
-				</Modal.Header>
-				<Modal.Body>
-					<div className="flex flex-col gap-4">
-						<StartingPosition key={robot.id} robotId={robot.id} />
-						<GroupSelect robotId={robot.id} />
-					</div>
-				</Modal.Body>
-				<Modal.Footer>
-					<div className="flex w-full justify-between">
-						<Button color="failure" onClick={() => {
-							setConfirmDeleteOpen(true);
-						}}>Delete drone</Button>
-						<Button onClick={close}>Done</Button>
-					</div>
-				</Modal.Footer>
+			<Modal show={robot !== undefined} onClose={close} size="md">
+				{robot && (
+					<>
+						<Modal.Header>
+							<RenamableText
+								text={robot.name}
+								className="text-xl font-extrabold"
+								updateText={(newText) => {
+									if (newText.trim() !== '') saveRobot(robot.id, {name: newText.trim()});
+								}}
+							/>
+						</Modal.Header>
+						<Modal.Body>
+							<div className="flex flex-col gap-4">
+								<StartingPosition key={robot.id} robotId={robot.id} />
+								<GroupSelect robotId={robot.id} />
+							</div>
+						</Modal.Body>
+						<Modal.Footer>
+							<div className="flex w-full justify-between">
+								<Button color="failure" onClick={() => {
+									setConfirmDeleteOpen(true);
+								}}>Delete drone</Button>
+								<Button onClick={close}>Done</Button>
+							</div>
+						</Modal.Footer>
+					</>
+				)}
 			</Modal>
 			<ConfirmationModal
-				header={`Delete ${robot.name}?`}
+				header={`Delete ${robot?.name ?? ''}?`}
 				open={confirmDeleteOpen}
 				onCancel={() => {
 					setConfirmDeleteOpen(false);
@@ -119,7 +125,7 @@ export const DroneEditor = () => {
 				onConfirm={() => {
 					setConfirmDeleteOpen(false);
 					close();
-					deleteRobot(robot.id);
+					if (robot) deleteRobot(robot.id);
 				}}
 			/>
 		</>
