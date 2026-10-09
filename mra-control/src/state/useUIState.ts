@@ -41,7 +41,6 @@ export const useUIState = create<UIStoreState>()((set, get) => ({
 		set({openSimulation: !get().openSimulation});
 	},
 	toggleRGModal: () => {
-		console.log(get().RGModalOpen)
 		set({RGModalOpen: !get().RGModalOpen});
 	},
 }));

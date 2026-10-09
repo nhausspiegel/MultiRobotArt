@@ -553,7 +553,6 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					},
 					removeGroup: (groupId: string) => {
 						const groups = {...get().timelineState.groups};
-						console.log("hi")
 						delete groups[groupId];
 						set((state) => {
 							state.timelineState.groups = {...groups};

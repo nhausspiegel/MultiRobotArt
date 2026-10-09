@@ -1,51 +1,56 @@
-import { Modal, Tabs } from 'flowbite-react';
+import { Modal } from 'flowbite-react';
 import {CancelButton} from '../../components/buttons/CancelButton';
 import {useRobartState} from '../../state/useRobartState';
 import {useUIState} from '../../state/useUIState';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { IconButton } from '../buttons/IconButton';
-import { faSync, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
 export const RemoveGroupModal = () => {
 	const RGModalOpen = useUIState((state) => state.RGModalOpen);
 	const toggleRGModal = useUIState((state) => state.toggleRGModal);
-    const groups = useRobartState((state) => state.timelineState.groups);
-  // Add a new state variable for groupsToRemove
-  const [groupsToRemove, setGroupsToRemove] = useState<string[]>([]);
+	const groups = useRobartState((state) => state.timelineState.groups);
+	const removeGroups = useRobartState((state) => state.removeGroups);
+	const [groupsToRemove, setGroupsToRemove] = useState<string[]>([]);
 
-  const robartState = useRobartState();
-  // Function to handle checkbox change
-  const handleCheckboxChange = (event:  React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      setGroupsToRemove([...groupsToRemove, event.target.name]);
-    } else {
-      setGroupsToRemove(groupsToRemove.filter(group => group !== event.target.name));
-    }
-  };
+	const close = () => {
+		setGroupsToRemove([]);
+		toggleRGModal();
+	};
 
 	return (
 		<>
-			<Modal show={RGModalOpen} onClose={() => toggleRGModal()}>
+			<Modal show={RGModalOpen} onClose={close}>
 				<Modal.Header>Remove Groups</Modal.Header>
 				<Modal.Body>
-				 <div>
-					{Object.keys(groups).map((groupKey) => (
-					<div key={groupKey}>
-						<label>
-				 			 <input type="checkbox" name={groupKey} onChange={handleCheckboxChange} />
-				  			<span style={{ marginLeft: '10px' }}>{groupKey}</span>
-						</label>
-			  	</div>
-			))}
-		  </div>
-
+					<div>
+						{/* All CFs can't be removed: every new robot is added to it */}
+						{Object.values(groups).filter((group) => group.id !== 'groupAllCFs').map((group) => (
+							<div key={group.id}>
+								<label>
+									<input
+										type="checkbox"
+										checked={groupsToRemove.includes(group.id)}
+										onChange={(event) => {
+											setGroupsToRemove(event.target.checked
+												? [...groupsToRemove, group.id]
+												: groupsToRemove.filter((id) => id !== group.id));
+										}}
+									/>
+									<span style={{ marginLeft: '10px' }}>{group.name}</span>
+								</label>
+							</div>
+						))}
+					</div>
 				</Modal.Body>
 				<Modal.Footer>
-					<CancelButton onClick={toggleRGModal} />
+					<CancelButton onClick={close} />
 					<IconButton color="warning" text="Remove" icon={faTrashCan} onClick={() => {
-						console.log(groupsToRemove)
-					robartState.removeGroups(groupsToRemove)}} />
-
-                    </Modal.Footer>
-                    </Modal>
-                    </>)};
+						removeGroups(groupsToRemove);
+						close();
+					}} />
+				</Modal.Footer>
+			</Modal>
+		</>
+	);
+};
