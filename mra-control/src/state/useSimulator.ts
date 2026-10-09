@@ -62,11 +62,6 @@ export type SimulatorState = {
    * Warnings tab as playback reaches them.
    */
 	timedWarnings: TimedWarning[];
-	/**
-   * Furthest time played or scrubbed to since Run Sim. The corner list and Warnings tab show warnings up to here, so scrubbing back
-   * keeps them; Run Sim clears it.
-   */
-	warningsShownUntil: number;
 	showPaths: boolean;
 	// Outline of the work area (Settings) in the 3D view
 	showWorkArea: boolean;
@@ -90,7 +85,6 @@ const defaultSimulatorState: SimulatorState = {
 	showCoordinates: false,
 	plannedPaths: {},
 	timedWarnings: [],
-	warningsShownUntil: 0,
 	showPaths: true,
 	showWorkArea: false,
 	trajectoryQueue: new Queue<string>(),
@@ -177,7 +171,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		play: () => {
 			// Also resets robots to their initial positions
 			get().measureShowLength();
-			set({ status: 'RUNNING', lastStepTime: performance.now(), warningsShownUntil: 0 });
+			set({ status: 'RUNNING', lastStepTime: performance.now() });
 		},
 		// Warnings come from measuring the whole show (measureShowLength), not from what has played so far
 		pause: () => {
@@ -202,13 +196,8 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				get().advance(deltaT);
 				remaining -= deltaT;
 			}
-			set({ lastStepTime: currentTime, warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
-			if (isFinished(get().robots)) {
-				get().halt();
-				// The whole show has played. Warnings are timed in measuring's 1/fps steps, which can land just after the
-				// moment playback (in screen frames) finished, so they would never show.
-				set({ warningsShownUntil: Infinity });
-			}
+			set({ lastStepTime: currentTime });
+			if (isFinished(get().robots)) get().halt();
 		},
 		advance: (deltaT) => {
 			const newSimTime = get().time + deltaT;
@@ -340,7 +329,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			while (get().time < targetTime - 1e-6) {
 				get().advance(Math.min(1 / fps, targetTime - get().time));
 			}
-			set({ status: wasRunning ? 'RUNNING' : 'PAUSED', lastStepTime: performance.now(), warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
+			set({ status: wasRunning ? 'RUNNING' : 'PAUSED', lastStepTime: performance.now() });
 		},
 		measureShowLength: () => {
 			get().executeSimulation(0);
@@ -621,7 +610,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			pendingItems.length = 0;
 		},
 		reset: () => {
-			set({ status: 'STOPPED', endTime: 0, plannedPaths: {}, timedWarnings: [], warningsShownUntil: 0 });
+			set({ status: 'STOPPED', endTime: 0, plannedPaths: {}, timedWarnings: [] });
 			get().executeSimulation(0);
 			get().cancelSimulation();
 		},

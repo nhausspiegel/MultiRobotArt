@@ -7,7 +7,7 @@ import {useReachedWarnings} from './simulation/SimulationWarnings';
 const useWarningLines = () => {
 	// Notes from loading the project, e.g. robots moved out of extra groups
 	const notices = useRobartState((state) => state.notices);
-	// The same warnings as the simulation's corner list: those reached since Run Sim
+	// The same warnings as the simulation's corner list: those up to the playhead
 	const reached = useReachedWarnings();
 	return [...(notices ?? []), ...reached.map((warning) => warning.full)];
 };

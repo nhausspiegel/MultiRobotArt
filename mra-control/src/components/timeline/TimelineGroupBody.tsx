@@ -28,21 +28,21 @@ const everyAtLeast = (secondWidth: number, minWidth: number) => roundSeconds.fin
 /**
  * Tick marks as a repeating background, not elements: thousands of tick elements made zooming slow. A major tick every
  * second, or every few seconds when zoomed out (every second merged into a black band); subdivision ticks in between
- * when there's room. Heights are how far down (or up, from the bottom) each kind reaches. Each layer is one repeating
+ * when there's room. Heights are how far down each kind reaches. Each layer is one repeating
  * gradient placed from time 0 onward (a tiled image would also repeat backwards into the start padding).
  */
-export const tickBackground = (scale: number, majorHeight: string, minorHeight: string, from: 'top' | 'bottom' = 'top', color = 'black') => {
+const tickBackground = (scale: number, majorHeight: string, minorHeight: string) => {
 	const secondWidth = convertSecondsToPixels(1, scale);
 	const majorWidth = everyAtLeast(secondWidth, 6) * secondWidth;
 	const minorWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
-	const ticks = (spacing: number) => `repeating-linear-gradient(to right, ${color} 0 1.5px, transparent 1.5px ${spacing}px)`;
+	const ticks = (spacing: number) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
 	const area = `calc(100% - ${timelineStartPadding}px)`;
 	const layers = [{image: ticks(majorWidth), height: majorHeight}];
 	if (majorWidth === secondWidth && minorWidth >= 6) layers.push({image: ticks(minorWidth), height: minorHeight});
 	return {
 		backgroundImage: layers.map((layer) => layer.image).join(', '),
 		backgroundSize: layers.map((layer) => `${area} ${layer.height}`).join(', '),
-		backgroundPosition: `${timelineStartPadding}px ${from}`,
+		backgroundPosition: `${timelineStartPadding}px 0`,
 		backgroundRepeat: 'no-repeat',
 	};
 };

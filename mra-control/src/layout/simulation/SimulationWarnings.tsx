@@ -1,5 +1,5 @@
 import {useRobartState} from '@MRAControl/state/useRobartState';
-import {useSimulator} from '@MRAControl/state/useSimulator';
+import {fps, useSimulator} from '@MRAControl/state/useSimulator';
 import {laneOverlapWarnings} from '@MRAControl/state/warnings';
 import {faTriangleExclamation} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -7,15 +7,18 @@ import React, {useEffect, useRef} from 'react';
 
 import {formatTime} from '../timeline/SimulationOptions';
 
-// The warnings playback has reached since Run Sim, oldest first. Both this corner list and the Warnings tab show these.
+// The warnings up to the playhead, oldest first, so scrubbing back hides later ones. Both this corner list and the
+// Warnings tab show these.
 export const useReachedWarnings = () => {
-	const shownUntil = useSimulator((state) => state.warningsShownUntil);
+	const time = useSimulator((state) => state.time);
 	const atStart = useSimulator((state) => state.status === 'STOPPED' && state.time === 0);
 	const timedWarnings = useSimulator((state) => state.timedWarnings);
 	const overlapWarnings = useRobartState(laneOverlapWarnings);
 	if (atStart) return [];
 	return [...timedWarnings, ...overlapWarnings]
-		.filter((warning) => warning.time <= shownUntil)
+		// One step of slack: warnings are timed in measuring's 1/fps steps, and playback (in screen frames) can finish a
+		// moment before the step a warning at the very end landed on
+		.filter((warning) => warning.time <= time + 1 / fps)
 		.sort((a, b) => a.time - b.time);
 };
 
