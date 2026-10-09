@@ -201,14 +201,11 @@ export const moveCircleArcVel = (groupState: SimulatorGroupState, radius: number
 	return [duration, trajectories];
 };
 
-export const makeParametricTrajectory = (groupState: SimulatorGroupState, x: string, y: string, z: string, yaw: string, startTime: number, endTime: number, timeScaling: number): [number, Map<string, Trajectory>] => {
+export const makeParametricTrajectory = (groupState: SimulatorGroupState, x: string, y: string, z: string, startT: number, endT: number, duration: number): [number, Map<string, Trajectory>] => {
 	const robots = useSimulator.getState().robots;
-	let trajectories: Map<string, Trajectory> = new Map<string, Trajectory>;
-	let duration = (endTime - startTime) * timeScaling;
+	const trajectories: Map<string, Trajectory> = new Map<string, Trajectory>();
 	groupState.robotIDs.forEach((robotId) => {
-		const initPos = robots[robotId].pos;
-		let trajectory = new ParametricTrajectory(initPos, x, y, z, yaw, startTime, endTime, timeScaling);
-		trajectories.set(robotId, trajectory);
+		trajectories.set(robotId, new ParametricTrajectory(robots[robotId].pos, x, y, z, startT, endT, duration));
 	});
 	return [duration, trajectories];
 };

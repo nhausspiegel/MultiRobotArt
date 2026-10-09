@@ -242,6 +242,42 @@ def circle(groupState, radius, velocity, radians, direction):
     #     cf.notifySetpointsStop()
 
 
+# Names parametric expressions can use; same as the simulator (parametricScope in trajectories.ts)
+_parametric_names = {
+    "sin": np.sin, "cos": np.cos, "tan": np.tan, "asin": np.arcsin, "acos": np.arccos, "atan": np.arctan,
+    "atan2": np.arctan2, "sinh": np.sinh, "cosh": np.cosh, "tanh": np.tanh, "sqrt": np.sqrt, "abs": np.abs,
+    "exp": np.exp, "log": np.log, "pow": np.power, "floor": np.floor, "ceil": np.ceil, "min": min, "max": max,
+    "pi": np.pi, "e": np.e,
+}
+
+
+def _parametric_function(expression):
+    code = compile(expression, "<parametric>", "eval")
+    return lambda t: float(eval(code, {"__builtins__": {}}, {**_parametric_names, "t": t}))
+
+
+def parametric(groupState, x, y, z, start_t, end_t, duration):
+    """Flies the path (x(t), y(t), z(t)) for t from start_t to end_t over `duration` seconds, shifted so it starts
+    where each drone is. Streams positions like circle(), then hands control back to the high-level commander."""
+    crazyflies = groupState.crazyflies
+    timeHelper = groupState.timeHelper
+    functions = [_parametric_function(expression) for expression in (x, y, z)]
+    path_at = lambda t: np.array([f(t) for f in functions])
+    path_start = path_at(start_t)
+    initialPositions = [np.array(_safe_cf_position(cf), dtype=float) for cf in crazyflies]
+
+    for elapsed in list(np.arange(0, duration, 1 / Hz)) + [duration]:
+        offset = path_at(start_t + (end_t - start_t) * elapsed / duration) - path_start
+        for initPos, cf in zip(initialPositions, crazyflies):
+            cf.cmdPosition(initPos + offset)
+        timeHelper.sleepForRate(Hz)
+
+    # Like execute_commands: stop streaming, then hold the end position with the high-level commander
+    for initPos, cf in zip(initialPositions, crazyflies):
+        cf.notifySetpointsStop()
+        cf.goTo(initPos + path_at(end_t) - path_start, 0, 2.0)
+
+
 # Trajectory Modifiers...
 
 

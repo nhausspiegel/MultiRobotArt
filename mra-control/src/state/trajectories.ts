@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import Sandbox from '@nyariv/sandboxjs';
 
+// The browser build exports the class directly; the Node build (used by checks/) puts it on .default
+const SandboxClass: typeof Sandbox = (Sandbox as unknown as {default?: typeof Sandbox}).default ?? Sandbox;
+
 export abstract class Trajectory {
 	constructor(public duration: number) {
 		this.duration = duration;
@@ -167,55 +170,68 @@ export class ComponentTrajectory extends Trajectory {
 	}
 }
 
+// Names parametric expressions can use, e.g. "sin(t) * 2" or "pow(t, 2)". Same names as parametric() in the exported
+// Python. (The expression sandbox has no ** operator, so powers use pow.)
+const parametricScope = {
+	sin: Math.sin, cos: Math.cos, tan: Math.tan, asin: Math.asin, acos: Math.acos, atan: Math.atan, atan2: Math.atan2,
+	sinh: Math.sinh, cosh: Math.cosh, tanh: Math.tanh, sqrt: Math.sqrt, abs: Math.abs, exp: Math.exp, log: Math.log,
+	pow: Math.pow, floor: Math.floor, ceil: Math.ceil, min: Math.min, max: Math.max, pi: Math.PI, e: Math.E,
+};
+
+// A typo or unknown name gives 0 instead of throwing, which would stop the simulation
+export const compileExpression = (expression: string): ((t: number) => number) => {
+	try {
+		const run = new SandboxClass().compile<number>(`return (${expression});`);
+		return (t: number) => {
+			try {
+				const value = Number(run({...parametricScope, t}).run());
+				return Number.isFinite(value) ? value : 0;
+			} catch {
+				return 0;
+			}
+		};
+	} catch {
+		console.warn(`Could not read the expression "${expression}"; using 0`);
+		return () => 0;
+	}
+};
+
+// For the block's text fields: rejects what the simulator can't evaluate (typos, unknown names, the ** operator), so
+// it never reaches the exported Python either. ^ is rejected too: it's bitwise in both languages, not a power.
+export const isValidExpression = (expression: string): boolean => {
+	if (expression.trim() === '' || expression.includes('^')) return false;
+	try {
+		new SandboxClass().compile(`return (${expression});`)({...parametricScope, t: 0}).run();
+		return true;
+	} catch {
+		return false;
+	}
+};
+
+/**
+ * The path (x(t), y(t), z(t)) for t from startT to endT, shifted so it starts at the initial position.
+ */
 export class ParametricTrajectory extends Trajectory {
-	duration: number;
-	startTime: number;
-	endTime: number;
-	timeScaling: number;
-	xFunction: (t: number) => number;
-	yFunction: (t: number) => number;
-	zFunction: (t: number) => number;
-	yawFunction: (t: number) => number;
-	initPos: THREE.Vector3;
+	functions: Array<(t: number) => number>;
+	startT: number;
+	endT: number;
 	offset: THREE.Vector3;
 
-	constructor(initPos: THREE.Vector3, x: string, y: string, z: string, yaw: string, startTime: number, endTime: number, timeScaling: number) {
-		const duration = (endTime - startTime) * timeScaling;
+	constructor(initPos: THREE.Vector3, x: string, y: string, z: string, startT: number, endT: number, duration: number) {
 		super(duration);
-		this.initPos = initPos;
-		this.duration = duration;
-		this.startTime = startTime;
-		this.endTime = endTime;
-		this.timeScaling = timeScaling;
-		this.xFunction = this.strToFunction(x);
-		this.yFunction = this.strToFunction(y);
-		this.zFunction = this.strToFunction(z);
-		this.yawFunction = this.strToFunction(yaw);
-
-		// Make sure the function always starts at the correct position.
-		this.offset = initPos.sub(new THREE.Vector3(this.xFunction(startTime), this.yFunction(startTime), this.zFunction(startTime)));
+		this.functions = [x, y, z].map(compileExpression);
+		this.startT = startT;
+		this.endT = endT;
+		this.offset = initPos.clone().sub(this.pathAt(startT));
 	}
-	
-	strToFunction(functionPlainText: string): (t: number) => number {
-		const functionLambda = ((t: number) => {
-			const regexMatch = /(?<![a-zA-Z])t(?![a-zA-Z])/g;
-			//TODO append imports like cos, sin, tan, ...etc.
-			// eslint-disable-next-line @typescript-eslint/naming-convention
-			const plainTextWithTInserted = functionPlainText.replaceAll(regexMatch, String(t));
-			const sandbox = new Sandbox();
-			const exec = sandbox.compile(plainTextWithTInserted);
-			const result = exec().run();
-			// TODO Sanity checks, or at least fail gracefully...
-			return result as number;
-		});
-		return functionLambda;
+
+	pathAt(t: number): THREE.Vector3 {
+		const [x, y, z] = this.functions.map((f) => f(t));
+		return new THREE.Vector3(x, y, z);
 	}
 
 	evaluate(t: number): THREE.Vector3 {
-		const x = this.xFunction(t);
-		const y = this.yFunction(t);
-		const z = this.zFunction(t);
-		return new THREE.Vector3(x, y, z);
+		return this.pathAt(this.startT + (t * (this.endT - this.startT))).add(this.offset);
 	}
 }
 
