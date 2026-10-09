@@ -75921,6 +75921,34 @@ const blockParametricPath = {
 `;
   }
 };
+const blockRepeat = {
+  name: "repeat",
+  block: {
+    init: function() {
+      this.appendDummyInput().appendField("repeat").appendField(new FieldNumber(10, 0, 1e3, 1), "times");
+      this.appendStatementInput("body");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour("#FFAB19");
+      this.setTooltip("Repeat commands a given number of times.");
+      this.setHelpUrl("");
+    }
+  },
+  pythonGenerator: (block, python2) => {
+    const body = python2.statementToCode(block, "body");
+    if (body.trim() === "")
+      return "";
+    return `for _ in range(${block.getFieldValue("times")}):
+${body}`;
+  },
+  javascriptGenerator: (block, js) => {
+    const lines = js.statementToCode(block, "body").split("\n").map((line) => line.trim()).filter((line) => line !== "");
+    if (lines.length === 0)
+      return "";
+    return lines.map((line) => `${line}
+`).join("").repeat(block.getFieldValue("times"));
+  }
+};
 const CUSTOM_BLOCKS = {
   //  blockGoTo_xyz,
   blockGoToSpeed,
@@ -75945,7 +75973,8 @@ const CUSTOM_BLOCKS = {
   blockRotateTrajectoryRadians,
   blockTranslateTrajectory,
   blockParametricPath,
-  blockRandomColor
+  blockRandomColor,
+  blockRepeat
 };
 Object.values(CUSTOM_BLOCKS).forEach((block) => {
   Blocks[block.name] = block.block;
@@ -76000,6 +76029,13 @@ const blocklyToolboxConfiguration = {
         blockToToolbox(CUSTOM_BLOCKS.blockColor),
         blockToToolbox(CUSTOM_BLOCKS.blockRandomColor),
         blockToToolbox(CUSTOM_BLOCKS.blockColorOff)
+      ]
+    },
+    {
+      kind: "category",
+      name: "Loops",
+      contents: [
+        blockToToolbox(CUSTOM_BLOCKS.blockRepeat)
       ]
     },
     {
