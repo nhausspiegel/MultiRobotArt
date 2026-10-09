@@ -81697,8 +81697,10 @@ const useSimulator = create$2()(
       const currentTime = performance.now();
       get().advance((currentTime - get().lastStepTime) / 1e3 * get().timeDilation);
       set({ lastStepTime: currentTime, warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
-      if (isFinished(get().robots))
+      if (isFinished(get().robots)) {
         get().halt();
+        set({ warningsShownUntil: Infinity });
+      }
     },
     advance: (deltaT) => {
       const newSimTime = get().time + deltaT;
@@ -81759,7 +81761,7 @@ const useSimulator = create$2()(
           return;
         }
         const trajectoryTime = get().robots[robotId].timeAlongTrajectory + deltaT / ((_b2 = get().robots[robotId].trajectory) == null ? void 0 : _b2.duration);
-        const newPos = get().robots[robotId].trajectory.evaluate(trajectoryTime);
+        const newPos = get().robots[robotId].trajectory.evaluate(Math.min(trajectoryTime, 1));
         itemEndTimes[runningItemIds[robotId]] = newSimTime;
         const offset = newPos.clone().sub(get().robots[robotId].pos);
         robots[robotId] = {
@@ -146401,8 +146403,10 @@ const Timeline = () => {
     const remeasure = () => {
       clearTimeout(timer2);
       timer2 = setTimeout(() => {
-        if (useSimulator.getState().status === "STOPPED")
-          useSimulator.getState().measureShowLength();
+        const { status, time: time2, measureShowLength, seek } = useSimulator.getState();
+        measureShowLength();
+        if (status !== "STOPPED")
+          seek(time2);
       }, 300);
     };
     remeasure();
