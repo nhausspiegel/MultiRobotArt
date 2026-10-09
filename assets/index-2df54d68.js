@@ -81701,7 +81701,6 @@ const defaultSimulatorState = {
   showCoordinates: false,
   plannedPaths: {},
   timedWarnings: [],
-  warningsShownUntil: 0,
   showPaths: true,
   showWorkArea: false,
   trajectoryQueue: new Queue_1(),
@@ -81726,7 +81725,7 @@ const useSimulator = create$2()(
     ...defaultSimulatorState,
     play: () => {
       get().measureShowLength();
-      set({ status: "RUNNING", lastStepTime: performance.now(), warningsShownUntil: 0 });
+      set({ status: "RUNNING", lastStepTime: performance.now() });
     },
     // Warnings come from measuring the whole show (measureShowLength), not from what has played so far
     pause: () => {
@@ -81749,11 +81748,9 @@ const useSimulator = create$2()(
         get().advance(deltaT2);
         remaining -= deltaT2;
       }
-      set({ lastStepTime: currentTime, warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
-      if (isFinished(get().robots)) {
+      set({ lastStepTime: currentTime });
+      if (isFinished(get().robots))
         get().halt();
-        set({ warningsShownUntil: Infinity });
-      }
     },
     advance: (deltaT) => {
       const newSimTime = get().time + deltaT;
@@ -81859,7 +81856,7 @@ const useSimulator = create$2()(
       while (get().time < targetTime - 1e-6) {
         get().advance(Math.min(1 / fps, targetTime - get().time));
       }
-      set({ status: wasRunning ? "RUNNING" : "PAUSED", lastStepTime: performance.now(), warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
+      set({ status: wasRunning ? "RUNNING" : "PAUSED", lastStepTime: performance.now() });
     },
     measureShowLength: () => {
       get().executeSimulation(0);
@@ -82068,7 +82065,7 @@ const useSimulator = create$2()(
       pendingItems.length = 0;
     },
     reset: () => {
-      set({ status: "STOPPED", endTime: 0, plannedPaths: {}, timedWarnings: [], warningsShownUntil: 0 });
+      set({ status: "STOPPED", endTime: 0, plannedPaths: {}, timedWarnings: [] });
       get().executeSimulation(0);
       get().cancelSimulation();
     }
@@ -145642,13 +145639,13 @@ const SimulationOptions = () => {
   ] });
 };
 const useReachedWarnings = () => {
-  const shownUntil = useSimulator((state2) => state2.warningsShownUntil);
+  const time2 = useSimulator((state2) => state2.time);
   const atStart = useSimulator((state2) => state2.status === "STOPPED" && state2.time === 0);
   const timedWarnings = useSimulator((state2) => state2.timedWarnings);
   const overlapWarnings = useRobartState(laneOverlapWarnings);
   if (atStart)
     return [];
-  return [...timedWarnings, ...overlapWarnings].filter((warning) => warning.time <= shownUntil).sort((a2, b2) => a2.time - b2.time);
+  return [...timedWarnings, ...overlapWarnings].filter((warning) => warning.time <= time2 + 1 / fps).sort((a2, b2) => a2.time - b2.time);
 };
 const SimulationWarnings = () => {
   const reached = useReachedWarnings();
@@ -146221,11 +146218,11 @@ const roomAfterLastBlock = 30;
 const minTimelineLength = 120;
 const roundSeconds = [1, 2, 5, 10, 15, 30, 60];
 const everyAtLeast = (secondWidth, minWidth) => roundSeconds.find((seconds) => seconds * secondWidth >= minWidth) ?? 60;
-const tickBackground = (scale, majorHeight, minorHeight, from = "top", color = "black") => {
+const tickBackground = (scale, majorHeight, minorHeight) => {
   const secondWidth = convertSecondsToPixels(1, scale);
   const majorWidth = everyAtLeast(secondWidth, 6) * secondWidth;
   const minorWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
-  const ticks = (spacing) => `repeating-linear-gradient(to right, ${color} 0 1.5px, transparent 1.5px ${spacing}px)`;
+  const ticks = (spacing) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
   const area2 = `calc(100% - ${timelineStartPadding}px)`;
   const layers2 = [{ image: ticks(majorWidth), height: majorHeight }];
   if (majorWidth === secondWidth && minorWidth >= 6)
@@ -146233,7 +146230,7 @@ const tickBackground = (scale, majorHeight, minorHeight, from = "top", color = "
   return {
     backgroundImage: layers2.map((layer2) => layer2.image).join(", "),
     backgroundSize: layers2.map((layer2) => `${area2} ${layer2.height}`).join(", "),
-    backgroundPosition: `${timelineStartPadding}px ${from}`,
+    backgroundPosition: `${timelineStartPadding}px 0`,
     backgroundRepeat: "no-repeat"
   };
 };
@@ -146390,7 +146387,7 @@ const TimelineMarker = () => {
       {
         ...bind(),
         className: "absolute left-0 top-0 h-3 cursor-pointer touch-none rounded-sm bg-blue-200/60",
-        style: { width: timeToX(length, scale), ...tickBackground(scale, "60%", "30%", "bottom", "rgb(59 130 246 / 0.25)") }
+        style: { width: timeToX(length, scale) }
       }
     ),
     /* @__PURE__ */ jsxs(
@@ -146721,7 +146718,6 @@ const Timeline = () => {
       timer2 = setTimeout(() => {
         const { status, time: time2, measureShowLength, seek } = useSimulator.getState();
         measureShowLength();
-        useSimulator.setState({ warningsShownUntil: status === "STOPPED" ? 0 : time2 });
         if (status !== "STOPPED")
           seek(time2);
       }, 300);
