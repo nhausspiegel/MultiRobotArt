@@ -7897,13 +7897,13 @@ function $d6f7e4c3aa9e02d7$export$96a40be80fb6c3c8(id2) {
 function $d6f7e4c3aa9e02d7$export$8d0cd3c32ddc045e() {
   return Array.from(document.querySelectorAll(`[data-panel-resize-handle-id]`));
 }
-function $d6f7e4c3aa9e02d7$export$ae14931f0a0256a3(groupId2) {
-  return Array.from(document.querySelectorAll(`[data-panel-resize-handle-id][data-panel-group-id="${groupId2}"]`));
+function $d6f7e4c3aa9e02d7$export$ae14931f0a0256a3(groupId) {
+  return Array.from(document.querySelectorAll(`[data-panel-resize-handle-id][data-panel-group-id="${groupId}"]`));
 }
-function $d6f7e4c3aa9e02d7$export$68d3a33c21dfbe27(groupId2, handleId, panelsArray) {
+function $d6f7e4c3aa9e02d7$export$68d3a33c21dfbe27(groupId, handleId, panelsArray) {
   var _panelsArray_index, _panelsArray_;
   const handle = $d6f7e4c3aa9e02d7$export$2e27d3a347680388(handleId);
-  const handles = $d6f7e4c3aa9e02d7$export$ae14931f0a0256a3(groupId2);
+  const handles = $d6f7e4c3aa9e02d7$export$ae14931f0a0256a3(groupId);
   const index2 = handles.indexOf(handle);
   var _panelsArray_index_id;
   const idBefore = (_panelsArray_index_id = (_panelsArray_index = panelsArray[index2]) === null || _panelsArray_index === void 0 ? void 0 : _panelsArray_index.id) !== null && _panelsArray_index_id !== void 0 ? _panelsArray_index_id : null;
@@ -7950,12 +7950,12 @@ function $8f51c2d77bf1da88$export$ec391ce65b083ed4(event, handleId, direction, i
   const elementOffset = isHorizontal ? rect.left : rect.top;
   return pointerOffset - elementOffset - initialOffset;
 }
-function $8f51c2d77bf1da88$export$354b17c0684607ed(event, groupId2, handleId, panelsArray, direction, prevSizes, initialDragState) {
+function $8f51c2d77bf1da88$export$354b17c0684607ed(event, groupId, handleId, panelsArray, direction, prevSizes, initialDragState) {
   const { dragOffset = 0, dragHandleRect, sizes: initialSizes } = initialDragState || {};
   const baseSizes = initialSizes || prevSizes;
   if ($8f51c2d77bf1da88$export$e7bf60a870f429b0(event)) {
     const isHorizontal = direction === "horizontal";
-    const groupElement = $d6f7e4c3aa9e02d7$export$5e67632cf3550a9c(groupId2);
+    const groupElement = $d6f7e4c3aa9e02d7$export$5e67632cf3550a9c(groupId);
     const rect = groupElement.getBoundingClientRect();
     const groupSizeInPixels = isHorizontal ? rect.width : rect.height;
     const denominator = event.shiftKey ? 10 : 100;
@@ -7981,7 +7981,7 @@ function $8f51c2d77bf1da88$export$354b17c0684607ed(event, groupId2, handleId, pa
         movement = -groupSizeInPixels;
         break;
     }
-    const [idBefore, idAfter] = $d6f7e4c3aa9e02d7$export$68d3a33c21dfbe27(groupId2, handleId, panelsArray);
+    const [idBefore, idAfter] = $d6f7e4c3aa9e02d7$export$68d3a33c21dfbe27(groupId, handleId, panelsArray);
     const targetPanelId = movement < 0 ? idBefore : idAfter;
     const targetPanelIndex = panelsArray.findIndex((panel) => panel.id === targetPanelId);
     const targetPanel = panelsArray[targetPanelIndex];
@@ -8003,16 +8003,16 @@ function $8f51c2d77bf1da88$export$764db16956f554f8(event) {
 function $8f51c2d77bf1da88$export$c4dfce035d43d1e0(event) {
   return event.type.startsWith("touch");
 }
-function $4a90471e7083b52f$export$d9fcbe062527d159({ committedValuesRef, groupId: groupId2, panels, setSizes, sizes, panelSizeBeforeCollapse }) {
+function $4a90471e7083b52f$export$d9fcbe062527d159({ committedValuesRef, groupId, panels, setSizes, sizes, panelSizeBeforeCollapse }) {
   reactExports.useEffect(() => {
     const { direction, panels: panels2 } = committedValuesRef.current;
-    const groupElement = $d6f7e4c3aa9e02d7$export$5e67632cf3550a9c(groupId2);
+    const groupElement = $d6f7e4c3aa9e02d7$export$5e67632cf3550a9c(groupId);
     const { height, width } = groupElement.getBoundingClientRect();
-    const handles = $d6f7e4c3aa9e02d7$export$ae14931f0a0256a3(groupId2);
+    const handles = $d6f7e4c3aa9e02d7$export$ae14931f0a0256a3(groupId);
     const cleanupFunctions = handles.map((handle) => {
       const handleId = handle.getAttribute("data-panel-resize-handle-id");
       const panelsArray = $d6f7e4c3aa9e02d7$export$a861c0ad45885494(panels2);
-      const [idBefore, idAfter] = $d6f7e4c3aa9e02d7$export$68d3a33c21dfbe27(groupId2, handleId, panelsArray);
+      const [idBefore, idAfter] = $d6f7e4c3aa9e02d7$export$68d3a33c21dfbe27(groupId, handleId, panelsArray);
       if (idBefore == null || idAfter == null)
         return () => {
         };
@@ -8074,7 +8074,7 @@ function $4a90471e7083b52f$export$d9fcbe062527d159({ committedValuesRef, groupId
       cleanupFunctions.forEach((cleanupFunction) => cleanupFunction());
     };
   }, [
-    groupId2,
+    groupId,
     panels,
     sizes
   ]);
@@ -8180,7 +8180,7 @@ const $3daa5d4c086ea816$var$defaultStorage = {
   setItem: typeof localStorage !== "undefined" ? (name2, value) => localStorage.setItem(name2, value) : $3daa5d4c086ea816$var$throwServerError
 };
 function $3daa5d4c086ea816$export$1d05749f6f573bb({ autoSaveId, children = null, className: classNameFromProps = "", direction, disablePointerEventsDuringResize = false, id: idFromProps = null, onLayout = null, storage = $3daa5d4c086ea816$var$defaultStorage, style: styleFromProps = {}, tagName: Type = "div" }) {
-  const groupId2 = $e504a2438473eda9$export$2e2bcd8739ae039(idFromProps);
+  const groupId = $e504a2438473eda9$export$2e2bcd8739ae039(idFromProps);
   const [activeHandleId, setActiveHandleId] = reactExports.useState(null);
   const [panels, setPanels] = reactExports.useState(/* @__PURE__ */ new Map());
   const initialDragStateRef = reactExports.useRef(null);
@@ -8205,7 +8205,7 @@ function $3daa5d4c086ea816$export$1d05749f6f573bb({ autoSaveId, children = null,
   });
   $4a90471e7083b52f$export$d9fcbe062527d159({
     committedValuesRef,
-    groupId: groupId2,
+    groupId,
     panels,
     setSizes,
     sizes,
@@ -8323,13 +8323,13 @@ function $3daa5d4c086ea816$export$1d05749f6f573bb({ autoSaveId, children = null,
       event.preventDefault();
       const { direction: direction2, panels: panels2, sizes: prevSizes } = committedValuesRef.current;
       const panelsArray = $d6f7e4c3aa9e02d7$export$a861c0ad45885494(panels2);
-      const [idBefore, idAfter] = $d6f7e4c3aa9e02d7$export$68d3a33c21dfbe27(groupId2, handleId, panelsArray);
+      const [idBefore, idAfter] = $d6f7e4c3aa9e02d7$export$68d3a33c21dfbe27(groupId, handleId, panelsArray);
       if (idBefore == null || idAfter == null)
         return;
-      const movement = $8f51c2d77bf1da88$export$354b17c0684607ed(event, groupId2, handleId, panelsArray, direction2, prevSizes, initialDragStateRef.current);
+      const movement = $8f51c2d77bf1da88$export$354b17c0684607ed(event, groupId, handleId, panelsArray, direction2, prevSizes, initialDragStateRef.current);
       if (movement === 0)
         return;
-      const groupElement = $d6f7e4c3aa9e02d7$export$5e67632cf3550a9c(groupId2);
+      const groupElement = $d6f7e4c3aa9e02d7$export$5e67632cf3550a9c(groupId);
       const rect = groupElement.getBoundingClientRect();
       const isHorizontal = direction2 === "horizontal";
       const size = isHorizontal ? rect.width : rect.height;
@@ -8355,7 +8355,7 @@ function $3daa5d4c086ea816$export$1d05749f6f573bb({ autoSaveId, children = null,
     };
     return resizeHandler;
   }, [
-    groupId2
+    groupId
   ]);
   const unregisterPanel = reactExports.useCallback((id2) => {
     setPanels((prevPanels) => {
@@ -8449,7 +8449,7 @@ function $3daa5d4c086ea816$export$1d05749f6f573bb({ autoSaveId, children = null,
     direction,
     expandPanel,
     getPanelStyle,
-    groupId: groupId2,
+    groupId,
     registerPanel,
     registerResizeHandle,
     resizePanel,
@@ -8476,7 +8476,7 @@ function $3daa5d4c086ea816$export$1d05749f6f573bb({ autoSaveId, children = null,
     direction,
     expandPanel,
     getPanelStyle,
-    groupId2,
+    groupId,
     registerPanel,
     registerResizeHandle,
     resizePanel,
@@ -8495,7 +8495,7 @@ function $3daa5d4c086ea816$export$1d05749f6f573bb({ autoSaveId, children = null,
       className: classNameFromProps,
       "data-panel-group": "",
       "data-panel-group-direction": direction,
-      "data-panel-group-id": groupId2,
+      "data-panel-group-id": groupId,
       style: {
         ...style,
         ...styleFromProps
@@ -8510,7 +8510,7 @@ function $971f2c37f9d2b98e$export$8829ecf6b6b15484({ children = null, className:
   const panelGroupContext = reactExports.useContext($af466b485b9d515d$export$7d8c6d083caec74a);
   if (panelGroupContext === null)
     throw Error(`PanelResizeHandle components must be rendered within a PanelGroup container`);
-  const { activeHandleId, direction, groupId: groupId2, registerResizeHandle, startDragging, stopDragging } = panelGroupContext;
+  const { activeHandleId, direction, groupId, registerResizeHandle, startDragging, stopDragging } = panelGroupContext;
   const resizeHandleId = $e504a2438473eda9$export$2e2bcd8739ae039(idFromProps);
   const isDragging = activeHandleId === resizeHandleId;
   const [isFocused, setIsFocused] = reactExports.useState(false);
@@ -8574,7 +8574,7 @@ function $971f2c37f9d2b98e$export$8829ecf6b6b15484({ children = null, className:
     className: classNameFromProps,
     "data-resize-handle-active": isDragging ? "pointer" : isFocused ? "keyboard" : void 0,
     "data-panel-group-direction": direction,
-    "data-panel-group-id": groupId2,
+    "data-panel-group-id": groupId,
     "data-panel-resize-handle-enabled": !disabled2,
     "data-panel-resize-handle-id": resizeHandleId,
     onBlur: () => setIsFocused(false),
@@ -40952,10 +40952,10 @@ const exportToROS = async (projectState, fileName) => {
       return a2[1].startTime - b2[1].startTime;
     });
     for (let [block, blockState] of sortedItems) {
-      const startTime2 = blockState.startTime;
+      const startTime = blockState.startTime;
       const pythonCode = projectState.blocks[blockState.blockId].python;
       pythonBlocks += "        # Block Name: " + projectState.blocks[blockState.blockId].name + "\n";
-      pythonBlocks += `        start_time = ${startTime2}
+      pythonBlocks += `        start_time = ${startTime}
 `;
       pythonBlocks += "        self.timeHelper.sleepUntil(start_time)\n";
       var pythonLines = pythonCode.split("\n");
@@ -48664,24 +48664,24 @@ let Plane$1 = class Plane2 {
   projectPoint(point, target2) {
     return target2.copy(point).addScaledVector(this.normal, -this.distanceToPoint(point));
   }
-  intersectLine(line2, target2) {
-    const direction = line2.delta(_vector1);
+  intersectLine(line, target2) {
+    const direction = line.delta(_vector1);
     const denominator = this.normal.dot(direction);
     if (denominator === 0) {
-      if (this.distanceToPoint(line2.start) === 0) {
-        return target2.copy(line2.start);
+      if (this.distanceToPoint(line.start) === 0) {
+        return target2.copy(line.start);
       }
       return null;
     }
-    const t2 = -(line2.start.dot(this.normal) + this.constant) / denominator;
+    const t2 = -(line.start.dot(this.normal) + this.constant) / denominator;
     if (t2 < 0 || t2 > 1) {
       return null;
     }
-    return target2.copy(line2.start).addScaledVector(direction, t2);
+    return target2.copy(line.start).addScaledVector(direction, t2);
   }
-  intersectsLine(line2) {
-    const startSign = this.distanceToPoint(line2.start);
-    const endSign = this.distanceToPoint(line2.end);
+  intersectsLine(line) {
+    const startSign = this.distanceToPoint(line.start);
+    const endSign = this.distanceToPoint(line.end);
     return startSign < 0 && endSign > 0 || endSign < 0 && startSign > 0;
   }
   intersectsBox(box) {
@@ -52217,12 +52217,12 @@ function parseUniform(activeInfo, addr, container) {
       break;
     } else {
       const map = container.map;
-      let next = map[id2];
-      if (next === void 0) {
-        next = new StructuredUniform(id2);
-        addUniform(container, next);
+      let next2 = map[id2];
+      if (next2 === void 0) {
+        next2 = new StructuredUniform(id2);
+        addUniform(container, next2);
       }
-      container = next;
+      container = next2;
     }
   }
 }
@@ -52272,15 +52272,15 @@ function WebGLShader(gl2, type, string2) {
 }
 let programIdCount = 0;
 function handleSource(string2, errorLine) {
-  const lines2 = string2.split("\n");
-  const lines22 = [];
+  const lines = string2.split("\n");
+  const lines2 = [];
   const from = Math.max(errorLine - 6, 0);
-  const to = Math.min(errorLine + 6, lines2.length);
+  const to = Math.min(errorLine + 6, lines.length);
   for (let i2 = from; i2 < to; i2++) {
-    const line2 = i2 + 1;
-    lines22.push(`${line2 === errorLine ? ">" : " "} ${line2}: ${lines2[i2]}`);
+    const line = i2 + 1;
+    lines2.push(`${line === errorLine ? ">" : " "} ${line}: ${lines[i2]}`);
   }
-  return lines22.join("\n");
+  return lines2.join("\n");
 }
 function getEncodingComponents(encoding) {
   switch (encoding) {
@@ -61669,20 +61669,20 @@ function earcutLinked(ear, triangles, dim, minX, minY, invSize, pass) {
     return;
   if (!pass && invSize)
     indexCurve(ear, minX, minY, invSize);
-  let stop = ear, prev, next;
+  let stop = ear, prev, next2;
   while (ear.prev !== ear.next) {
     prev = ear.prev;
-    next = ear.next;
+    next2 = ear.next;
     if (invSize ? isEarHashed(ear, minX, minY, invSize) : isEar(ear)) {
       triangles.push(prev.i / dim | 0);
       triangles.push(ear.i / dim | 0);
-      triangles.push(next.i / dim | 0);
+      triangles.push(next2.i / dim | 0);
       removeNode(ear);
-      ear = next.next;
-      stop = next.next;
+      ear = next2.next;
+      stop = next2.next;
       continue;
     }
-    ear = next;
+    ear = next2;
     if (ear === stop) {
       if (!pass) {
         earcutLinked(filterPoints(ear), triangles, dim, minX, minY, invSize, 1);
@@ -64238,10 +64238,10 @@ class KeyframeTrack {
   }
   // removes keyframes before and after animation without changing any values within the range [startTime, endTime].
   // IMPORTANT: We do not shift around keys to the start of the track time, because for interpolated keys this will change their values
-  trim(startTime2, endTime) {
+  trim(startTime, endTime) {
     const times = this.times, nKeys = times.length;
     let from = 0, to = nKeys - 1;
-    while (from !== nKeys && times[from] < startTime2) {
+    while (from !== nKeys && times[from] < startTime) {
       ++from;
     }
     while (to !== -1 && times[to] > endTime) {
@@ -68284,9 +68284,9 @@ class AnimationAction {
       this._updateWeight(time2);
       return;
     }
-    const startTime2 = this._startTime;
-    if (startTime2 !== null) {
-      const timeRunning = (time2 - startTime2) * timeDirection;
+    const startTime = this._startTime;
+    if (startTime !== null) {
+      const timeRunning = (time2 - startTime) * timeDirection;
       if (timeRunning < 0 || timeDirection === 0) {
         deltaTime = 0;
       } else {
@@ -69196,9 +69196,9 @@ class Line3 {
     this.end.copy(end2);
     return this;
   }
-  copy(line2) {
-    this.start.copy(line2.start);
-    this.end.copy(line2.end);
+  copy(line) {
+    this.start.copy(line.start);
+    this.end.copy(line.end);
     return this;
   }
   getCenter(target2) {
@@ -69236,8 +69236,8 @@ class Line3 {
     this.end.applyMatrix4(matrix2);
     return this;
   }
-  equals(line2) {
-    return line2.start.equals(this.start) && line2.end.equals(this.end);
+  equals(line) {
+    return line.start.equals(this.start) && line.end.equals(this.end);
   }
   clone() {
     return new this.constructor().copy(this);
@@ -70846,20 +70846,20 @@ class LinkedList {
     if (checkDuplicates && this.isDuplicate(val)) {
       return false;
     }
-    let newItem2 = new LinkedListItem(val);
+    let newItem = new LinkedListItem(val);
     let currentItem = this._head;
     if (!currentItem) {
       return false;
     } else {
       while (true) {
         if (currentItem.value === previousItem) {
-          newItem2.next = currentItem.next;
-          newItem2.prev = currentItem;
-          currentItem.next = newItem2;
-          if (newItem2.next) {
-            newItem2.next.prev = newItem2;
+          newItem.next = currentItem.next;
+          newItem.prev = currentItem;
+          currentItem.next = newItem;
+          if (newItem.next) {
+            newItem.next.prev = newItem;
           } else {
-            this._tail = newItem2;
+            this._tail = newItem;
           }
           this._length++;
           return true;
@@ -70878,13 +70878,13 @@ class LinkedList {
     if (checkDuplicates && this.isDuplicate(val)) {
       return false;
     }
-    let newItem2 = new LinkedListItem(val);
+    let newItem = new LinkedListItem(val);
     if (!this._tail) {
-      this._head = this._tail = newItem2;
+      this._head = this._tail = newItem;
     } else {
-      this._tail.next = newItem2;
-      newItem2.prev = this._tail;
-      this._tail = newItem2;
+      this._tail.next = newItem;
+      newItem.prev = this._tail;
+      this._tail = newItem;
     }
     this._length++;
     return true;
@@ -70894,13 +70894,13 @@ class LinkedList {
     if (checkDuplicates && this.isDuplicate(val)) {
       return false;
     }
-    let newItem2 = new LinkedListItem(val);
+    let newItem = new LinkedListItem(val);
     if (!this._head) {
-      this._head = this._tail = newItem2;
+      this._head = this._tail = newItem;
     } else {
-      newItem2.next = this._head;
-      this._head.prev = newItem2;
-      this._head = newItem2;
+      newItem.next = this._head;
+      this._head.prev = newItem;
+      this._head = newItem;
     }
     this._length++;
     return true;
@@ -72859,7 +72859,7 @@ setLispType(["createArray", "createObject", "group", "arrayProp", "call"], (cons
       i2++;
     }
   }
-  const next = ["value", "modifier", "prop", "incrementerBefore", "expEnd"];
+  const next2 = ["value", "modifier", "prop", "incrementerBefore", "expEnd"];
   let l2;
   let funcFound;
   switch (type) {
@@ -72869,7 +72869,7 @@ setLispType(["createArray", "createObject", "group", "arrayProp", "call"], (cons
       break;
     case "call":
     case "createArray":
-      l2 = arg.map((e2) => lispify(constants2, e2, [...next, "spreadArray"]));
+      l2 = arg.map((e2) => lispify(constants2, e2, [...next2, "spreadArray"]));
       break;
     case "createObject":
       l2 = arg.map((str) => {
@@ -72882,7 +72882,7 @@ setLispType(["createArray", "createObject", "group", "arrayProp", "call"], (cons
           value = lispify(constants2, new CodeString("function " + str.toString().replace(key, "")));
         } else {
           const extract2 = restOfExp(constants2, str, [/^:/]);
-          key = lispify(constants2, extract2, [...next, "spreadObject"]);
+          key = lispify(constants2, extract2, [...next2, "spreadObject"]);
           if (key[0] === 1) {
             key = key[2];
           }
@@ -72989,19 +72989,19 @@ const opTypes = {
   "%": 51
 };
 setLispType(["opHigh", "op", "comparitor", "bitwise"], (constants2, type, part, res, expect, ctx) => {
-  const next = [expectTypes.inlineIf.types.inlineIf, inlineIfElse];
+  const next2 = [expectTypes.inlineIf.types.inlineIf, inlineIfElse];
   switch (type) {
     case "opHigh":
-      next.push(expectTypes.splitter.types.opHigh);
+      next2.push(expectTypes.splitter.types.opHigh);
     case "op":
-      next.push(expectTypes.splitter.types.op);
+      next2.push(expectTypes.splitter.types.op);
     case "comparitor":
-      next.push(expectTypes.splitter.types.comparitor);
+      next2.push(expectTypes.splitter.types.comparitor);
     case "bitwise":
-      next.push(expectTypes.splitter.types.bitwise);
-      next.push(expectTypes.splitter.types.boolOp);
+      next2.push(expectTypes.splitter.types.bitwise);
+      next2.push(expectTypes.splitter.types.boolOp);
   }
-  const extract = restOfExp(constants2, part.substring(res[0].length), next);
+  const extract = restOfExp(constants2, part.substring(res[0].length), next2);
   ctx.lispTree = lispify(constants2, part.substring(extract.length + res[0].length), restOfExp.next, createLisp({
     op: opTypes[res[0]],
     a: ctx.lispTree,
@@ -74151,8 +74151,8 @@ class ComponentTrajectory extends Trajectory {
   }
 }
 class ParametricTrajectory extends Trajectory {
-  constructor(initPos, x2, y2, z2, yaw, startTime2, endTime, timeScaling) {
-    const duration2 = (endTime - startTime2) * timeScaling;
+  constructor(initPos, x2, y2, z2, yaw, startTime, endTime, timeScaling) {
+    const duration2 = (endTime - startTime) * timeScaling;
     super(duration2);
     __publicField2(this, "duration");
     __publicField2(this, "startTime");
@@ -74166,14 +74166,14 @@ class ParametricTrajectory extends Trajectory {
     __publicField2(this, "offset");
     this.initPos = initPos;
     this.duration = duration2;
-    this.startTime = startTime2;
+    this.startTime = startTime;
     this.endTime = endTime;
     this.timeScaling = timeScaling;
     this.xFunction = this.strToFunction(x2);
     this.yFunction = this.strToFunction(y2);
     this.zFunction = this.strToFunction(z2);
     this.yawFunction = this.strToFunction(yaw);
-    this.offset = initPos.sub(new Vector3(this.xFunction(startTime2), this.yFunction(startTime2), this.zFunction(startTime2)));
+    this.offset = initPos.sub(new Vector3(this.xFunction(startTime), this.yFunction(startTime), this.zFunction(startTime)));
   }
   strToFunction(functionPlainText) {
     const functionLambda = (t2) => {
@@ -74424,13 +74424,13 @@ const moveCircleArcVel = (groupState2, radius, velocity, degreesStart, degreesEn
   });
   return [duration2, trajectories];
 };
-const makeParametricTrajectory = (groupState2, x2, y2, z2, yaw, startTime2, endTime, timeScaling) => {
+const makeParametricTrajectory = (groupState2, x2, y2, z2, yaw, startTime, endTime, timeScaling) => {
   const robots2 = useSimulator.getState().robots;
   let trajectories = /* @__PURE__ */ new Map();
-  let duration2 = (endTime - startTime2) * timeScaling;
+  let duration2 = (endTime - startTime) * timeScaling;
   groupState2.robotIDs.forEach((robotId2) => {
     const initPos = robots2[robotId2].pos;
-    let trajectory = new ParametricTrajectory(initPos, x2, y2, z2, yaw, startTime2, endTime, timeScaling);
+    let trajectory = new ParametricTrajectory(initPos, x2, y2, z2, yaw, startTime, endTime, timeScaling);
     trajectories.set(robotId2, trajectory);
   });
   return [duration2, trajectories];
@@ -74609,7 +74609,9 @@ const defaultSimulatorState = {
 };
 const nullTrajectory = new PolynomialTrajectory(-1, []);
 const pendingItems = [];
-const maxShowLength = 60 * 60;
+const runningItemIds = {};
+let itemEndTimes = {};
+const maxShowLength = 10 * 60;
 const isFinished = (robots2) => pendingItems.length === 0 && Object.values(robots2).every((robot) => {
   var _a3;
   return robot.trajectoryQueue.length === 0 && !(((_a3 = robot.trajectory) == null ? void 0 : _a3.duration) > 0);
@@ -74656,9 +74658,9 @@ const useSimulator = create$2()(
       const newSimTime = get().time + deltaT;
       while (pendingItems.length > 0 && pendingItems[0].time <= newSimTime) {
         const item = pendingItems.shift();
-        item.lines.forEach((line2) => {
+        item.lines.forEach((line) => {
           item.robotIds.forEach((robotId2) => {
-            get().addTrajectory(robotId2, line2);
+            get().addTrajectory(robotId2, line, item.itemId);
           });
         });
       }
@@ -74680,7 +74682,9 @@ const useSimulator = create$2()(
           let newTraj;
           let duration = 0;
           if (robots[robotId].trajectoryQueue.length > 0) {
-            [duration, newTraj] = eval(robots[robotId].trajectoryQueue.dequeue());
+            const next = robots[robotId].trajectoryQueue.dequeue();
+            runningItemIds[robotId] = next.itemId;
+            [duration, newTraj] = eval(next.line);
             get().updateTrajectory(robotId, newTraj.get(robotId), duration);
           } else {
             get().updateTrajectory(robotId, new NullTrajectory(), -1);
@@ -74688,7 +74692,9 @@ const useSimulator = create$2()(
         } else if (robots[robotId].trajectoryQueue.length > 0 && robots[robotId].trajectory.duration <= 0) {
           let newTraj;
           let duration = 0;
-          [duration, newTraj] = eval(robots[robotId].trajectoryQueue.dequeue());
+          const next = robots[robotId].trajectoryQueue.dequeue();
+          runningItemIds[robotId] = next.itemId;
+          [duration, newTraj] = eval(next.line);
           get().updateTrajectory(robotId, newTraj.get(robotId), duration);
         }
         if (((_a3 = get().robots[robotId]) == null ? void 0 : _a3.trajectory.duration) === void 0 || get().robots[robotId].trajectory.duration <= 0) {
@@ -74696,6 +74702,7 @@ const useSimulator = create$2()(
         }
         const trajectoryTime = get().robots[robotId].timeAlongTrajectory + deltaT / ((_b2 = get().robots[robotId].trajectory) == null ? void 0 : _b2.duration);
         const newPos = get().robots[robotId].trajectory.evaluate(trajectoryTime);
+        itemEndTimes[runningItemIds[robotId]] = newSimTime;
         const offset = newPos.clone().sub(get().robots[robotId].pos);
         robots[robotId] = {
           ...robots[robotId],
@@ -74745,8 +74752,17 @@ const useSimulator = create$2()(
         get().advance(1 / fps);
       }
       const endTime = get().time;
+      const { groups, scale } = useRobartState.getState().timelineState;
+      const durations = {};
+      Object.values(groups).forEach((group) => {
+        Object.values(group.items).forEach((item) => {
+          if (itemEndTimes[item.id] !== void 0)
+            durations[item.id] = Math.max(0.1, itemEndTimes[item.id] / scale - item.startTime);
+        });
+      });
       get().executeSimulation(0);
       set({ endTime });
+      useRobartState.getState().setMeasuredDurations(durations);
     },
     setTimeDilation: (timeDilation) => {
       set({ timeDilation });
@@ -74802,10 +74818,10 @@ const useSimulator = create$2()(
         state2.robots[robotId2].trajectoryStartTime = state2.time;
       });
     },
-    addTrajectory: (robotId2, javascriptLine) => {
+    addTrajectory: (robotId2, javascriptLine, itemId) => {
       set((state2) => {
         if (state2.robots[robotId2] !== void 0)
-          state2.robots[robotId2].trajectoryQueue.enqueue(javascriptLine);
+          state2.robots[robotId2].trajectoryQueue.enqueue({ line: javascriptLine, itemId });
       });
     },
     getMostRecentTrajectory: (robotId2, time2) => {
@@ -74840,26 +74856,28 @@ const useSimulator = create$2()(
       const trajectory = new CircleTrajectory(duration2, robot.pos, radius, axes, radians, clockwise);
       return trajectory;
     },
-    executeSimulation: (startTime2) => {
+    executeSimulation: (startTime) => {
       const timeline = useRobartState.getState().timelineState;
       const blocks2 = useRobartState.getState().blocks;
       const robartRobots = useRobartState.getState().robots;
-      if (startTime2 === 0) {
+      if (startTime === 0) {
         set({ time: 0, trajectoryMarkers: [] });
         get().setRobots(robartRobots);
         useRobartState.getState().warnings = [];
         useCrazyflieConstraintState.setState({ positionHistory: [] });
+        itemEndTimes = {};
       }
       pendingItems.length = 0;
       Object.values(timeline.groups).forEach((group) => {
         Object.values(group.items).forEach((timelineItem) => {
           const itemTime = timelineItem.startTime * timeline.scale;
-          if (itemTime < startTime2)
+          if (itemTime < startTime)
             return;
           pendingItems.push({
+            itemId: timelineItem.id,
             time: itemTime,
             robotIds: Object.keys(group.robots),
-            lines: blocks2[timelineItem.blockId].javaScript.split("\n").filter((line2) => line2.length > 0)
+            lines: blocks2[timelineItem.blockId].javaScript.split("\n").filter((line) => line.length > 0)
           });
         });
       });
@@ -74870,7 +74888,6 @@ const useSimulator = create$2()(
     }
   }))
 );
-const simulator = SIM;
 const defaultRobartState = {
   blocks: {},
   projectName: "New Robart Project",
@@ -74951,46 +74968,46 @@ const useRobartState = create$2()(
   immer(
     subscribeWithSelector(
       persist(
-        (set, get) => ({
+        (set2, get2) => ({
           ...defaultRobartState,
           loadProject: (file) => {
             const newState = loadProjectFromFile(file);
-            set(newState);
+            set2(newState);
           },
           saveProject: (fileName) => {
             const state2 = {
-              blocks: get().blocks,
+              blocks: get2().blocks,
               editingBlockId: void 0,
-              projectName: get().projectName,
-              timelineState: get().timelineState,
+              projectName: get2().projectName,
+              timelineState: get2().timelineState,
               version: ROBART_VERSION,
-              robots: get().robots,
-              warnings: get().warnings
+              robots: get2().robots,
+              warnings: get2().warnings
             };
             saveProjectToFile(state2, fileName);
           },
           exportToROS: (fileName) => {
             const state2 = {
-              blocks: get().blocks,
+              blocks: get2().blocks,
               editingBlockId: void 0,
-              projectName: get().projectName,
-              timelineState: get().timelineState,
+              projectName: get2().projectName,
+              timelineState: get2().timelineState,
               version: ROBART_VERSION,
-              robots: get().robots,
-              warnings: get().warnings
+              robots: get2().robots,
+              warnings: get2().warnings
             };
             exportROS(state2);
           },
           getWarnings: () => {
-            return get().warnings.join("");
+            return get2().warnings.join("");
           },
           resetProject: () => {
-            set(defaultRobartState);
+            set2(defaultRobartState);
           },
           setProjectName: (name2) => {
-            set({ projectName: name2 });
+            set2({ projectName: name2 });
           },
-          saveGroup: (groupId2, group) => {
+          saveGroup: (groupId, group) => {
           },
           createGroup: (name2) => {
             const id2 = uuid$2();
@@ -75001,97 +75018,67 @@ const useRobartState = create$2()(
               robots: {},
               duration: 120
             };
-            set((state2) => {
+            set2((state2) => {
               state2.timelineState.groups[id2] = group;
             });
             return id2;
           },
           addBlockToTimeline: (groupId, blockId, startTime, isTrajectory) => {
-            const groupState = {
-              robotIDs: Object.keys(get().timelineState.groups[groupId].robots)
-            };
-            ({
-              blocks: get().blocks,
-              editingBlockId: void 0,
-              projectName: get().projectName,
-              timelineState: get().timelineState,
-              version: ROBART_VERSION,
-              robots: get().robots,
-              warnings: get().warnings
-            });
-            var duration = 0;
-            if (groupId === "This doesnt run") {
-              console.log(groupState);
-            }
-            let lines = get().blocks[blockId].javaScript.split("\n");
-            lines.forEach((line) => {
-              if (line.length !== 0) {
-                try {
-                  let [dur, trajectoryRecord] = eval(line);
-                  duration += dur;
-                  if (line.length === 1e4) {
-                    console.log(simulator);
-                  }
-                } catch (error) {
-                  console.error("Error in adding block to timeline", error);
-                }
-              }
-            });
-            duration = Math.max(0.1, duration);
+            const duration2 = get2().blocks[blockId].duration;
             const newItem = {
               id: uuid$2(),
               groupId,
               blockId,
               startTime,
               isTrajectory,
-              duration
+              duration: duration2
             };
-            const oldItems = { ...get().timelineState.groups[groupId].items };
+            const oldItems = { ...get2().timelineState.groups[groupId].items };
             oldItems[newItem.id] = newItem;
-            set((state2) => {
+            set2((state2) => {
               state2.timelineState.groups[groupId].items = oldItems;
             });
           },
           addWarning: (warning) => {
-            const state2 = get();
+            const state2 = get2();
             const newWarnings = [...state2.warnings, warning];
-            set({ ...state2, warnings: newWarnings });
+            set2({ ...state2, warnings: newWarnings });
           },
-          updateBlockInTimeline: (groupId2, itemId, startTime2) => {
-            const newItem2 = {
-              ...get().timelineState.groups[groupId2].items[itemId],
-              startTime: startTime2
+          updateBlockInTimeline: (groupId, itemId, startTime) => {
+            const newItem = {
+              ...get2().timelineState.groups[groupId].items[itemId],
+              startTime
             };
-            const oldItems2 = { ...get().timelineState.groups[groupId2].items };
-            oldItems2[newItem2.id] = newItem2;
-            set((state2) => {
-              state2.timelineState.groups[groupId2].items = oldItems2;
+            const oldItems = { ...get2().timelineState.groups[groupId].items };
+            oldItems[newItem.id] = newItem;
+            set2((state2) => {
+              state2.timelineState.groups[groupId].items = oldItems;
             });
           },
-          saveBlock: (blockId2, block) => {
-            if (get().blocks[blockId2] === void 0)
+          saveBlock: (blockId, block) => {
+            if (get2().blocks[blockId] === void 0)
               return;
-            set((state2) => {
-              state2.blocks[blockId2] = {
-                ...state2.blocks[blockId2],
+            set2((state2) => {
+              state2.blocks[blockId] = {
+                ...state2.blocks[blockId],
                 ...block
               };
             });
           },
           removeBlock: (id2) => {
             var _a3;
-            const newBlocks = Object.fromEntries(Object.entries(get().blocks).filter(([key, _2]) => key !== id2));
-            const itemsToRemove = Object.values(get().timelineState.groups).map(
+            const newBlocks = Object.fromEntries(Object.entries(get2().blocks).filter(([key, _2]) => key !== id2));
+            const itemsToRemove = Object.values(get2().timelineState.groups).map(
               (group) => Object.values(group.items).filter((item) => item.blockId === id2)
             );
             itemsToRemove.flat().forEach((item) => {
-              get().removeTimelineItem(item.groupId, item.id);
+              get2().removeTimelineItem(item.groupId, item.id);
             });
             const selectedBlockId = (_a3 = Object.values(newBlocks).at(-1)) == null ? void 0 : _a3.id;
-            set({ blocks: newBlocks, editingBlockId: selectedBlockId });
+            set2({ blocks: newBlocks, editingBlockId: selectedBlockId });
           },
           renameBlock: (name2) => {
-            set((state2) => {
+            set2((state2) => {
               state2.blocks[state2.editingBlockId].name = name2;
             });
           },
@@ -75104,52 +75091,68 @@ const useRobartState = create$2()(
               javaScript: "",
               duration: 1
             };
-            set((state2) => {
+            set2((state2) => {
               state2.blocks[block.id] = block;
             });
             return block.id;
           },
-          copyBlock: (blockId2) => {
+          copyBlock: (blockId) => {
             const newBlock = {
-              ...get().blocks[blockId2],
+              ...get2().blocks[blockId],
               id: uuid$2(),
-              name: `Copy of ${get().blocks[blockId2].name}`
+              name: `Copy of ${get2().blocks[blockId].name}`
             };
-            set((state2) => {
+            set2((state2) => {
               state2.blocks[newBlock.id] = newBlock;
             });
             return newBlock.id;
           },
-          setDuration: (blockId2, duration2) => {
-            set((state2) => {
-              state2.blocks[blockId2].duration = duration2;
+          setDuration: (blockId, duration2) => {
+            set2((state2) => {
+              state2.blocks[blockId].duration = duration2;
             });
           },
-          setEditingBlock: (blockId2) => {
-            const oldEditingBlockId = get().editingBlockId;
-            set({ editingBlockId: void 0 });
-            if (blockId2 != oldEditingBlockId)
-              set({ editingBlockId: blockId2 });
-          },
-          addRobotToGroup: (groupId2, robotId2) => {
-            set((state2) => {
-              state2.timelineState.groups[groupId2].robots[robotId2] = state2.robots[robotId2];
+          setMeasuredDurations: (durations) => {
+            const items = Object.values(get2().timelineState.groups).flatMap((group) => Object.values(group.items));
+            if (!items.some((item) => durations[item.id] !== void 0 && Math.abs(durations[item.id] - item.duration) > 1e-3))
+              return;
+            set2((state2) => {
+              Object.values(state2.timelineState.groups).forEach((group) => {
+                Object.values(group.items).forEach((item) => {
+                  if (durations[item.id] === void 0)
+                    return;
+                  item.duration = durations[item.id];
+                  if (state2.blocks[item.blockId])
+                    state2.blocks[item.blockId].duration = durations[item.id];
+                });
+              });
             });
           },
-          removeRobotFromGroup: (groupId2, robotId2) => {
-            set((state2) => {
+          setEditingBlock: (blockId) => {
+            const oldEditingBlockId = get2().editingBlockId;
+            set2({ editingBlockId: void 0 });
+            if (blockId != oldEditingBlockId)
+              set2({ editingBlockId: blockId });
+          },
+          addRobotToGroup: (groupId, robotId2) => {
+            set2((state2) => {
+              state2.timelineState.groups[groupId].robots[robotId2] = state2.robots[robotId2];
+            });
+          },
+          removeRobotFromGroup: (groupId, robotId2) => {
+            set2((state2) => {
               const { timelineState } = state2;
               const { groups } = timelineState;
               const updatedRobots = Object.fromEntries(
-                Object.entries(groups[groupId2].robots).filter(([key, value]) => key !== robotId2 && value !== void 0)
+                Object.entries(groups[groupId].robots).filter(([key, value]) => key !== robotId2 && value !== void 0)
               );
-              groups[groupId2].robots = updatedRobots;
+              groups[groupId].robots = updatedRobots;
             });
           },
           createRobot: () => {
             const id2 = uuid$2();
-            const numRobots = Object.keys(get().robots).length;
-            set((state2) => {
+            const numRobots = Object.keys(get2().robots).length;
+            set2((state2) => {
               state2.robots[id2] = {
                 id: id2,
                 name: `CF ${numRobots + 1}`,
@@ -75161,7 +75164,7 @@ const useRobartState = create$2()(
             return id2;
           },
           saveRobot: (id2, robot) => {
-            set((state2) => {
+            set2((state2) => {
               state2.robots[id2] = {
                 ...state2.robots[id2],
                 ...robot
@@ -75169,52 +75172,52 @@ const useRobartState = create$2()(
             });
           },
           deleteRobot: (id2) => {
-            const newRobots = { ...get().robots };
+            const newRobots = { ...get2().robots };
             delete newRobots[id2];
-            set({ robots: newRobots });
+            set2({ robots: newRobots });
           },
-          removeTimelineItem: (groupId2, itemId) => {
-            const newItems = { ...get().timelineState.groups[groupId2].items };
+          removeTimelineItem: (groupId, itemId) => {
+            const newItems = { ...get2().timelineState.groups[groupId].items };
             delete newItems[itemId];
-            set((state2) => {
-              state2.timelineState.groups[groupId2].items = newItems;
+            set2((state2) => {
+              state2.timelineState.groups[groupId].items = newItems;
             });
           },
-          renameGroup: (groupId2, groupName) => {
-            const groups = get().timelineState.groups;
-            groups[groupId2].name = groupName;
-            set((state2) => {
+          renameGroup: (groupId, groupName) => {
+            const groups = get2().timelineState.groups;
+            groups[groupId].name = groupName;
+            set2((state2) => {
               state2.timelineState.groups = groups;
             });
           },
           addGroup: (groupName) => {
-            const groups = get().timelineState.groups;
-            const groupId2 = groupName.replace(/\s/g, "");
+            const groups = get2().timelineState.groups;
+            const groupId = groupName.replace(/\s/g, "");
             const newGroups = {
               ...groups,
-              [groupId2]: {
-                id: groupId2,
+              [groupId]: {
+                id: groupId,
                 name: groupName,
                 items: {},
                 robots: {},
                 duration: 120
               }
             };
-            set((state2) => {
+            set2((state2) => {
               state2.timelineState.groups = newGroups;
             });
           },
-          removeGroup: (groupId2) => {
-            const groups = { ...get().timelineState.groups };
+          removeGroup: (groupId) => {
+            const groups = { ...get2().timelineState.groups };
             console.log("hi");
-            delete groups[groupId2];
-            set((state2) => {
+            delete groups[groupId];
+            set2((state2) => {
               state2.timelineState.groups = { ...groups };
             });
           },
           removeGroups: (groupsToRemove) => {
             for (let i2 = 0; i2 < groupsToRemove.length; i2++) {
-              get().removeGroup(groupsToRemove[i2]);
+              get2().removeGroup(groupsToRemove[i2]);
             }
           }
         }),
@@ -77437,7 +77440,7 @@ function onNode(node) {
     }
   });
 }
-function resolveIcons(next) {
+function resolveIcons(next2) {
   return function(maybeIconDefinition) {
     let params = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
     const iconDefinition = (maybeIconDefinition || {}).icon ? maybeIconDefinition : findIconDefinition(maybeIconDefinition || {});
@@ -77447,7 +77450,7 @@ function resolveIcons(next) {
     if (mask) {
       mask = (mask || {}).icon ? mask : findIconDefinition(mask || {});
     }
-    return next(iconDefinition, {
+    return next2(iconDefinition, {
       ...params,
       mask
     });
@@ -80787,13 +80790,13 @@ function contains$1(parent, child) {
   if (parent.contains(child)) {
     return true;
   } else if (rootNode && isShadowRoot(rootNode)) {
-    let next = child;
+    let next2 = child;
     do {
-      if (next && parent === next) {
+      if (next2 && parent === next2) {
         return true;
       }
-      next = next.parentNode || next.host;
-    } while (next);
+      next2 = next2.parentNode || next2.host;
+    } while (next2);
   }
   return false;
 }
@@ -98429,8 +98432,8 @@ class LineGeometry extends LineSegmentsGeometry {
     super.setColors(colors, itemSize);
     return this;
   }
-  fromLine(line2) {
-    const geometry = line2.geometry;
+  fromLine(line) {
+    const geometry = line.geometry;
     this.setPositions(geometry.attributes.position.array);
     return this;
   }
@@ -103702,7 +103705,7 @@ function createTypesetter(resolveFonts, bidi) {
       let lineXOffset = textIndent;
       let prevRunEndX = 0;
       let currentLine = new TextLine();
-      const lines2 = [currentLine];
+      const lines = [currentLine];
       runs.forEach((run2) => {
         const { fontObj } = run2;
         const { ascender, descender, unitsPerEm, lineGap, capHeight, xHeight } = fontObj;
@@ -103777,7 +103780,7 @@ function createTypesetter(resolveFonts, bidi) {
             if (nextLine) {
               currentLine.isSoftWrapped = true;
               currentLine = nextLine;
-              lines2.push(currentLine);
+              lines.push(currentLine);
               maxLineWidth = maxWidth;
             }
           }
@@ -103790,40 +103793,40 @@ function createTypesetter(resolveFonts, bidi) {
           fly.fontData = fontData2;
           if (char === "\n") {
             currentLine = new TextLine();
-            lines2.push(currentLine);
+            lines.push(currentLine);
             lineXOffset = -(glyphX + glyphWidth + letterSpacing * fontSize) + textIndent;
           }
         });
         prevRunEndX = prevGlyphX + prevGlyphObj.advanceWidth * fontSizeMult + letterSpacing * fontSize;
       });
       let totalHeight = 0;
-      lines2.forEach((line2) => {
+      lines.forEach((line) => {
         let isTrailingWhitespace = true;
-        for (let i2 = line2.count; i2--; ) {
-          const glyphInfo = line2.glyphAt(i2);
+        for (let i2 = line.count; i2--; ) {
+          const glyphInfo = line.glyphAt(i2);
           if (isTrailingWhitespace && !glyphInfo.glyphObj.isWhitespace) {
-            line2.width = glyphInfo.x + glyphInfo.width;
-            if (line2.width > maxLineWidth) {
-              maxLineWidth = line2.width;
+            line.width = glyphInfo.x + glyphInfo.width;
+            if (line.width > maxLineWidth) {
+              maxLineWidth = line.width;
             }
             isTrailingWhitespace = false;
           }
           let { lineHeight: lineHeight2, capHeight, xHeight, baseline } = glyphInfo.fontData;
-          if (lineHeight2 > line2.lineHeight)
-            line2.lineHeight = lineHeight2;
-          const baselineDiff = baseline - line2.baseline;
+          if (lineHeight2 > line.lineHeight)
+            line.lineHeight = lineHeight2;
+          const baselineDiff = baseline - line.baseline;
           if (baselineDiff < 0) {
-            line2.baseline += baselineDiff;
-            line2.cap += baselineDiff;
-            line2.ex += baselineDiff;
+            line.baseline += baselineDiff;
+            line.cap += baselineDiff;
+            line.ex += baselineDiff;
           }
-          line2.cap = Math.max(line2.cap, line2.baseline + capHeight);
-          line2.ex = Math.max(line2.ex, line2.baseline + xHeight);
+          line.cap = Math.max(line.cap, line.baseline + capHeight);
+          line.ex = Math.max(line.ex, line.baseline + xHeight);
         }
-        line2.baseline -= totalHeight;
-        line2.cap -= totalHeight;
-        line2.ex -= totalHeight;
-        totalHeight += line2.lineHeight;
+        line.baseline -= totalHeight;
+        line.cap -= totalHeight;
+        line.ex -= totalHeight;
+        totalHeight += line.lineHeight;
       });
       let anchorXOffset = 0;
       let anchorYOffset = 0;
@@ -103838,7 +103841,7 @@ function createTypesetter(resolveFonts, bidi) {
         if (typeof anchorY === "number") {
           anchorYOffset = -anchorY;
         } else if (typeof anchorY === "string") {
-          anchorYOffset = anchorY === "top" ? 0 : anchorY === "top-baseline" ? -lines2[0].baseline : anchorY === "top-cap" ? -lines2[0].cap : anchorY === "top-ex" ? -lines2[0].ex : anchorY === "middle" ? totalHeight / 2 : anchorY === "bottom" ? totalHeight : anchorY === "bottom-baseline" ? -lines2[lines2.length - 1].baseline : parsePercent(anchorY) * totalHeight;
+          anchorYOffset = anchorY === "top" ? 0 : anchorY === "top-baseline" ? -lines[0].baseline : anchorY === "top-cap" ? -lines[0].cap : anchorY === "top-ex" ? -lines[0].ex : anchorY === "middle" ? totalHeight / 2 : anchorY === "bottom" ? totalHeight : anchorY === "bottom-baseline" ? -lines[lines.length - 1].baseline : parsePercent(anchorY) * totalHeight;
         }
       }
       if (!metricsOnly) {
@@ -103860,11 +103863,11 @@ function createTypesetter(resolveFonts, bidi) {
         let colorCharIndex = -1;
         let chunk;
         let currentColor;
-        lines2.forEach((line2, lineIndex) => {
-          let { count: lineGlyphCount, width: lineWidth } = line2;
+        lines.forEach((line, lineIndex) => {
+          let { count: lineGlyphCount, width: lineWidth } = line;
           if (lineGlyphCount > 0) {
             let trailingWhitespaceCount = 0;
-            for (let i2 = lineGlyphCount; i2-- && line2.glyphAt(i2).glyphObj.isWhitespace; ) {
+            for (let i2 = lineGlyphCount; i2-- && line.glyphAt(i2).glyphObj.isWhitespace; ) {
               trailingWhitespaceCount++;
             }
             let lineXOffset2 = 0;
@@ -103873,10 +103876,10 @@ function createTypesetter(resolveFonts, bidi) {
               lineXOffset2 = (maxLineWidth - lineWidth) / 2;
             } else if (textAlign === "right") {
               lineXOffset2 = maxLineWidth - lineWidth;
-            } else if (textAlign === "justify" && line2.isSoftWrapped) {
+            } else if (textAlign === "justify" && line.isSoftWrapped) {
               let whitespaceCount = 0;
               for (let i2 = lineGlyphCount - trailingWhitespaceCount; i2--; ) {
-                if (line2.glyphAt(i2).glyphObj.isWhitespace) {
+                if (line.glyphAt(i2).glyphObj.isWhitespace) {
                   whitespaceCount++;
                 }
               }
@@ -103885,7 +103888,7 @@ function createTypesetter(resolveFonts, bidi) {
             if (justifyAdjust || lineXOffset2) {
               let justifyOffset = 0;
               for (let i2 = 0; i2 < lineGlyphCount; i2++) {
-                let glyphInfo = line2.glyphAt(i2);
+                let glyphInfo = line.glyphAt(i2);
                 const glyphObj2 = glyphInfo.glyphObj;
                 glyphInfo.x += lineXOffset2 + justifyOffset;
                 if (justifyAdjust !== 0 && glyphObj2.isWhitespace && i2 < lineGlyphCount - trailingWhitespaceCount) {
@@ -103897,17 +103900,17 @@ function createTypesetter(resolveFonts, bidi) {
             const flips = bidi.getReorderSegments(
               text,
               bidiLevelsResult,
-              line2.glyphAt(0).charIndex,
-              line2.glyphAt(line2.count - 1).charIndex
+              line.glyphAt(0).charIndex,
+              line.glyphAt(line.count - 1).charIndex
             );
             for (let fi2 = 0; fi2 < flips.length; fi2++) {
               const [start, end2] = flips[fi2];
               let left = Infinity, right = -Infinity;
               for (let i2 = 0; i2 < lineGlyphCount; i2++) {
-                if (line2.glyphAt(i2).charIndex >= start) {
+                if (line.glyphAt(i2).charIndex >= start) {
                   let startInLine = i2, endInLine = i2;
                   for (; endInLine < lineGlyphCount; endInLine++) {
-                    let info = line2.glyphAt(endInLine);
+                    let info = line.glyphAt(endInLine);
                     if (info.charIndex > end2) {
                       break;
                     }
@@ -103917,7 +103920,7 @@ function createTypesetter(resolveFonts, bidi) {
                     }
                   }
                   for (let j2 = startInLine; j2 < endInLine; j2++) {
-                    const glyphInfo = line2.glyphAt(j2);
+                    const glyphInfo = line.glyphAt(j2);
                     glyphInfo.x = right - (glyphInfo.x + glyphInfo.width - left);
                   }
                   break;
@@ -103927,7 +103930,7 @@ function createTypesetter(resolveFonts, bidi) {
             let glyphObj;
             const setGlyphObj = (g2) => glyphObj = g2;
             for (let i2 = 0; i2 < lineGlyphCount; i2++) {
-              const glyphInfo = line2.glyphAt(i2);
+              const glyphInfo = line.glyphAt(i2);
               glyphObj = glyphInfo.glyphObj;
               const glyphId = glyphObj.index;
               const rtl = bidiLevelsResult.levels[glyphInfo.charIndex] & 1;
@@ -103943,8 +103946,8 @@ function createTypesetter(resolveFonts, bidi) {
                 const caretRight = glyphInfo.x + glyphInfo.width + anchorXOffset;
                 caretPositions[charIndex * 4] = rtl ? caretRight : caretLeft;
                 caretPositions[charIndex * 4 + 1] = rtl ? caretLeft : caretRight;
-                caretPositions[charIndex * 4 + 2] = line2.baseline + fontData2.caretBottom + anchorYOffset;
-                caretPositions[charIndex * 4 + 3] = line2.baseline + fontData2.caretTop + anchorYOffset;
+                caretPositions[charIndex * 4 + 2] = line.baseline + fontData2.caretBottom + anchorYOffset;
+                caretPositions[charIndex * 4 + 3] = line.baseline + fontData2.caretTop + anchorYOffset;
                 const ligCount = charIndex - prevCharIndex;
                 if (ligCount > 1) {
                   fillLigatureCaretPositions(caretPositions, prevCharIndex, ligCount);
@@ -103971,7 +103974,7 @@ function createTypesetter(resolveFonts, bidi) {
                   };
                 }
                 const glyphX = glyphInfo.x + anchorXOffset;
-                const glyphY = glyphInfo.y + line2.baseline + anchorYOffset;
+                const glyphY = glyphInfo.y + line.baseline + anchorYOffset;
                 glyphPositions[idx * 2] = glyphX;
                 glyphPositions[idx * 2 + 1] = glyphY;
                 const visX0 = glyphX + glyphObj.xMin * fontSizeMult;
@@ -104044,7 +104047,7 @@ function createTypesetter(resolveFonts, bidi) {
         //total rects per (n=chunkedBoundsSize) consecutive glyphs
         fontSize,
         //calculated em height
-        topBaseline: anchorYOffset + lines2[0].baseline,
+        topBaseline: anchorYOffset + lines[0].baseline,
         //y coordinate of the top line's baseline
         blockBounds: [
           //bounds for the whole block of text, including vertical padding for lineHeight
@@ -108503,21 +108506,21 @@ class TreeNode {
   nextChild(i2, dir, pos, side, mode = 0) {
     for (let parent = this; ; ) {
       for (let { children, positions } = parent._tree, e2 = dir > 0 ? children.length : -1; i2 != e2; i2 += dir) {
-        let next = children[i2], start = positions[i2] + parent.from;
-        if (!checkSide(side, pos, start, start + next.length))
+        let next2 = children[i2], start = positions[i2] + parent.from;
+        if (!checkSide(side, pos, start, start + next2.length))
           continue;
-        if (next instanceof TreeBuffer) {
+        if (next2 instanceof TreeBuffer) {
           if (mode & IterMode.ExcludeBuffers)
             continue;
-          let index2 = next.findChild(0, next.buffer.length, dir, pos - start, side);
+          let index2 = next2.findChild(0, next2.buffer.length, dir, pos - start, side);
           if (index2 > -1)
-            return new BufferNode(new BufferContext(parent, next, i2, start), null, index2);
-        } else if (mode & IterMode.IncludeAnonymous || (!next.type.isAnonymous || hasChild(next))) {
+            return new BufferNode(new BufferContext(parent, next2, i2, start), null, index2);
+        } else if (mode & IterMode.IncludeAnonymous || (!next2.type.isAnonymous || hasChild(next2))) {
           let mounted;
-          if (!(mode & IterMode.IgnoreMounts) && next.props && (mounted = next.prop(NodeProp.mounted)) && !mounted.overlay)
+          if (!(mode & IterMode.IgnoreMounts) && next2.props && (mounted = next2.prop(NodeProp.mounted)) && !mounted.overlay)
             return new TreeNode(mounted.tree, start, i2, parent);
-          let inner = new TreeNode(next, start, i2, parent);
-          return mode & IterMode.IncludeAnonymous || !inner.type.isAnonymous ? inner : inner.nextChild(dir < 0 ? next.children.length - 1 : 0, dir, pos, side);
+          let inner = new TreeNode(next2, start, i2, parent);
+          return mode & IterMode.IncludeAnonymous || !inner.type.isAnonymous ? inner : inner.nextChild(dir < 0 ? next2.children.length - 1 : 0, dir, pos, side);
         }
       }
       if (mode & IterMode.IncludeAnonymous || !parent.type.isAnonymous)
@@ -109617,13 +109620,13 @@ class Stack {
   }
   // Apply a shift action
   /// @internal
-  shift(action, next, nextEnd) {
+  shift(action, next2, nextEnd) {
     let start = this.pos;
     if (action & 131072) {
       this.pushState(action & 65535, this.pos);
     } else if ((action & 262144) == 0) {
       let nextState = action, { parser: parser2 } = this.p;
-      if (nextEnd > this.pos || next <= parser2.maxNode) {
+      if (nextEnd > this.pos || next2 <= parser2.maxNode) {
         this.pos = nextEnd;
         if (!parser2.stateFlag(
           nextState,
@@ -109633,27 +109636,27 @@ class Stack {
           this.reducePos = nextEnd;
       }
       this.pushState(nextState, start);
-      this.shiftContext(next, start);
-      if (next <= parser2.maxNode)
-        this.buffer.push(next, start, nextEnd, 4);
+      this.shiftContext(next2, start);
+      if (next2 <= parser2.maxNode)
+        this.buffer.push(next2, start, nextEnd, 4);
     } else {
       this.pos = nextEnd;
-      this.shiftContext(next, start);
-      if (next <= this.p.parser.maxNode)
-        this.buffer.push(next, start, nextEnd, 4);
+      this.shiftContext(next2, start);
+      if (next2 <= this.p.parser.maxNode)
+        this.buffer.push(next2, start, nextEnd, 4);
     }
   }
   // Apply an action
   /// @internal
-  apply(action, next, nextEnd) {
+  apply(action, next2, nextEnd) {
     if (action & 65536)
       this.reduce(action);
     else
-      this.shift(action, next, nextEnd);
+      this.shift(action, next2, nextEnd);
   }
   // Add a prebuilt (reused) node into the buffer.
   /// @internal
-  useNode(value, next) {
+  useNode(value, next2) {
     let index2 = this.p.reused.length - 1;
     if (index2 < 0 || this.p.reused[index2] != value) {
       this.p.reused.push(value);
@@ -109661,7 +109664,7 @@ class Stack {
     }
     let start = this.pos;
     this.reducePos = this.pos = start + value.length;
-    this.pushState(next, start);
+    this.pushState(next2, start);
     this.buffer.push(
       index2,
       start,
@@ -109688,10 +109691,10 @@ class Stack {
   }
   // Try to recover from an error by 'deleting' (ignoring) one token.
   /// @internal
-  recoverByDelete(next, nextEnd) {
-    let isNode = next <= this.p.parser.maxNode;
+  recoverByDelete(next2, nextEnd) {
+    let isNode = next2 <= this.p.parser.maxNode;
     if (isNode)
-      this.storeNode(next, this.pos, nextEnd, 4);
+      this.storeNode(next2, this.pos, nextEnd, 4);
     this.storeNode(0, this.pos, nextEnd, isNode ? 8 : 4);
     this.pos = this.reducePos = nextEnd;
     this.score -= 190;
@@ -109717,14 +109720,14 @@ class Stack {
   // Apply up to Recover.MaxNext recovery actions that conceptually
   // inserts some missing token or rule.
   /// @internal
-  recoverByInsert(next) {
+  recoverByInsert(next2) {
     if (this.stack.length >= 300)
       return [];
     let nextStates = this.p.parser.nextStates(this.state);
     if (nextStates.length > 4 << 1 || this.stack.length >= 120) {
       let best = [];
       for (let i2 = 0, s2; i2 < nextStates.length; i2 += 2) {
-        if ((s2 = nextStates[i2 + 1]) != this.state && this.p.parser.hasAction(s2, next))
+        if ((s2 = nextStates[i2 + 1]) != this.state && this.p.parser.hasAction(s2, next2))
           best.push(nextStates[i2], s2);
       }
       if (this.stack.length < 120)
@@ -109923,11 +109926,11 @@ class StackBufferCursor {
     return new StackBufferCursor(stack, pos, pos - stack.bufferBase);
   }
   maybeNext() {
-    let next = this.stack.parent;
-    if (next != null) {
-      this.index = this.stack.bufferBase - next.bufferBase;
-      this.stack = next;
-      this.buffer = next.buffer;
+    let next2 = this.stack.parent;
+    if (next2 != null) {
+      this.index = this.stack.bufferBase - next2.bufferBase;
+      this.stack = next2;
+      this.buffer = next2.buffer;
     }
   }
   get id() {
@@ -109959,16 +109962,16 @@ function decodeArray(input, Type = Uint16Array) {
   for (let pos = 0, out = 0; pos < input.length; ) {
     let value = 0;
     for (; ; ) {
-      let next = input.charCodeAt(pos++), stop = false;
-      if (next == 126) {
+      let next2 = input.charCodeAt(pos++), stop = false;
+      if (next2 == 126) {
         value = 65535;
         break;
       }
-      if (next >= 92)
-        next--;
-      if (next >= 34)
-        next--;
-      let digit = next - 32;
+      if (next2 >= 92)
+        next2--;
+      if (next2 >= 34)
+        next2--;
+      let digit = next2 - 32;
       if (digit >= 46) {
         digit -= 46;
         stop = true;
@@ -110021,16 +110024,16 @@ class InputStream {
     while (pos < range.from) {
       if (!index2)
         return null;
-      let next = this.ranges[--index2];
-      pos -= range.from - next.to;
-      range = next;
+      let next2 = this.ranges[--index2];
+      pos -= range.from - next2.to;
+      range = next2;
     }
     while (assoc < 0 ? pos > range.to : pos >= range.to) {
       if (index2 == this.ranges.length - 1)
         return null;
-      let next = this.ranges[++index2];
-      pos += next.from - range.to;
-      range = next;
+      let next2 = this.ranges[++index2];
+      pos += next2.from - range.to;
+      range = next2;
     }
     return pos;
   }
@@ -110250,7 +110253,7 @@ function readToken(data, input, stack, group, precTable, precOffset) {
             break;
           }
         }
-      let next = input.next, low = 0, high = data[state2 + 2];
+      let next2 = input.next, low = 0, high = data[state2 + 2];
       if (input.next < 0 && high > low && data[accEnd + high * 3 - 3] == 65535 && data[accEnd + high * 3 - 3] == 65535) {
         state2 = data[accEnd + high * 3 - 1];
         continue scan;
@@ -110259,9 +110262,9 @@ function readToken(data, input, stack, group, precTable, precOffset) {
         let mid = low + high >> 1;
         let index2 = accEnd + mid + (mid << 1);
         let from = data[index2], to = data[index2 + 1] || 65536;
-        if (next < from)
+        if (next2 < from)
           high = mid;
-        else if (next >= to)
+        else if (next2 >= to)
           low = mid + 1;
         else {
           state2 = data[index2 + 2];
@@ -110273,8 +110276,8 @@ function readToken(data, input, stack, group, precTable, precOffset) {
     }
 }
 function findOffset(data, start, term) {
-  for (let i2 = start, next; (next = data[i2]) != 65535; i2++)
-    if (next == term)
+  for (let i2 = start, next2; (next2 = data[i2]) != 65535; i2++)
+    if (next2 == term)
       return i2 - start;
   return -1;
 }
@@ -110363,32 +110366,32 @@ class FragmentCursor {
         this.index.pop();
         continue;
       }
-      let next = top2.children[index2];
+      let next2 = top2.children[index2];
       let start = this.start[last] + top2.positions[index2];
       if (start > pos) {
         this.nextStart = start;
         return null;
       }
-      if (next instanceof Tree) {
+      if (next2 instanceof Tree) {
         if (start == pos) {
           if (start < this.safeFrom)
             return null;
-          let end2 = start + next.length;
+          let end2 = start + next2.length;
           if (end2 <= this.safeTo) {
-            let lookAhead = next.prop(NodeProp.lookAhead);
+            let lookAhead = next2.prop(NodeProp.lookAhead);
             if (!lookAhead || end2 + lookAhead < this.fragment.to)
-              return next;
+              return next2;
           }
         }
         this.index[last]++;
-        if (start + next.length >= Math.max(this.safeFrom, pos)) {
-          this.trees.push(next);
+        if (start + next2.length >= Math.max(this.safeFrom, pos)) {
+          this.trees.push(next2);
           this.start.push(start);
           this.index.push(0);
         }
       } else {
         this.index[last]++;
-        this.nextStart = start + next.length;
+        this.nextStart = start + next2.length;
       }
     }
   }
@@ -110847,12 +110850,12 @@ class LRParser extends Parser {
         if (typeof prop == "string")
           prop = NodeProp[prop];
         for (let i2 = 1; i2 < propSpec.length; ) {
-          let next = propSpec[i2++];
-          if (next >= 0) {
-            setProp(next, prop, propSpec[i2++]);
+          let next2 = propSpec[i2++];
+          if (next2 >= 0) {
+            setProp(next2, prop, propSpec[i2++]);
           } else {
-            let value = propSpec[i2 + -next];
-            for (let j2 = -next; j2 > 0; j2--)
+            let value = propSpec[i2 + -next2];
+            for (let j2 = -next2; j2 > 0; j2--)
               setProp(propSpec[i2++], prop, value);
             i2++;
           }
@@ -110922,16 +110925,16 @@ class LRParser extends Parser {
         state2,
         set2 ? 2 : 1
         /* ParseState.Actions */
-      ), next; ; i2 += 3) {
-        if ((next = data[i2]) == 65535) {
+      ), next2; ; i2 += 3) {
+        if ((next2 = data[i2]) == 65535) {
           if (data[i2 + 1] == 1)
-            next = data[i2 = pair(data, i2 + 2)];
+            next2 = data[i2 = pair(data, i2 + 2)];
           else if (data[i2 + 1] == 2)
             return pair(data, i2 + 2);
           else
             break;
         }
-        if (next == terminal || next == 0)
+        if (next2 == terminal || next2 == 0)
           return pair(data, i2 + 1);
       }
     }
@@ -111207,12 +111210,12 @@ function styleTags(spec) {
           pos += m2[0].length;
           if (pos == part.length)
             break;
-          let next = part[pos++];
-          if (pos == part.length && next == "!") {
+          let next2 = part[pos++];
+          if (pos == part.length && next2 == "!") {
             mode = 0;
             break;
           }
-          if (next != "/")
+          if (next2 != "/")
             throw new RangeError("Invalid path: " + part);
           rest = part.slice(pos);
         }
@@ -111227,11 +111230,11 @@ function styleTags(spec) {
 }
 const ruleNodeProp = new NodeProp();
 class Rule {
-  constructor(tags2, mode, context2, next) {
+  constructor(tags2, mode, context2, next2) {
     this.tags = tags2;
     this.mode = mode;
     this.context = context2;
-    this.next = next;
+    this.next = next2;
   }
   get opaque() {
     return this.mode == 0;
@@ -111337,8 +111340,8 @@ class HighlightBuilder {
       let innerHighlighters = this.highlighters.filter((h2) => !h2.scope || h2.scope(mounted.tree.type));
       let hasChild2 = cursor2.firstChild();
       for (let i2 = 0, pos = start; ; i2++) {
-        let next = i2 < mounted.overlay.length ? mounted.overlay[i2] : null;
-        let nextPos = next ? next.from + start : end2;
+        let next2 = i2 < mounted.overlay.length ? mounted.overlay[i2] : null;
+        let nextPos = next2 ? next2.from + start : end2;
         let rangeFrom = Math.max(from, pos), rangeTo = Math.min(to, nextPos);
         if (rangeFrom < rangeTo && hasChild2) {
           while (cursor2.from < rangeTo) {
@@ -111348,11 +111351,11 @@ class HighlightBuilder {
               break;
           }
         }
-        if (!next || nextPos > to)
+        if (!next2 || nextPos > to)
           break;
-        pos = next.to + start;
+        pos = next2.to + start;
         if (pos > from) {
-          this.highlightRange(inner.cursor(), Math.max(from, next.from + start), Math.min(to, pos), inheritedClass, innerHighlighters);
+          this.highlightRange(inner.cursor(), Math.max(from, next2.from + start), Math.min(to, pos), inheritedClass, innerHighlighters);
           this.startSpan(pos, cls);
         }
       }
@@ -111712,10 +111715,10 @@ const legacyPrint = new ExternalTokenizer((input) => {
   if (/\w/.test(String.fromCharCode(input.next)))
     return;
   for (let off = 0; ; off++) {
-    let next = input.peek(off);
-    if (next == space$1 || next == tab)
+    let next2 = input.peek(off);
+    if (next2 == space$1 || next2 == tab)
       continue;
-    if (next != parenOpen && next != dot && next != newline$2 && next != carriageReturn && next != hash)
+    if (next2 != parenOpen && next2 != dot && next2 != newline$2 && next2 != carriageReturn && next2 != hash)
       input.acceptToken(printKeyword);
     return;
   }
@@ -111906,9 +111909,9 @@ class Text {
   deserialized again via [`Text.of`](https://codemirror.net/6/docs/ref/#state.Text^of)).
   */
   toJSON() {
-    let lines2 = [];
-    this.flatten(lines2);
-    return lines2;
+    let lines = [];
+    this.flatten(lines);
+    return lines;
   }
   /**
   Create a `Text` instance for the given array of lines.
@@ -111933,13 +111936,13 @@ class TextLeaf extends Text {
   get children() {
     return null;
   }
-  lineInner(target2, isLine, line2, offset2) {
+  lineInner(target2, isLine, line, offset2) {
     for (let i2 = 0; ; i2++) {
       let string2 = this.text[i2], end2 = offset2 + string2.length;
-      if ((isLine ? line2 : end2) >= target2)
-        return new Line(offset2, end2, line2, string2);
+      if ((isLine ? line : end2) >= target2)
+        return new Line(offset2, end2, line, string2);
       offset2 = end2 + 1;
-      line2++;
+      line++;
     }
   }
   decompose(from, to, target2, open2) {
@@ -111960,36 +111963,36 @@ class TextLeaf extends Text {
   replace(from, to, text) {
     if (!(text instanceof TextLeaf))
       return super.replace(from, to, text);
-    let lines2 = appendText(this.text, appendText(text.text, sliceText(this.text, 0, from)), to);
+    let lines = appendText(this.text, appendText(text.text, sliceText(this.text, 0, from)), to);
     let newLen = this.length + text.length - (to - from);
-    if (lines2.length <= 32)
-      return new TextLeaf(lines2, newLen);
-    return TextNode.from(TextLeaf.split(lines2, []), newLen);
+    if (lines.length <= 32)
+      return new TextLeaf(lines, newLen);
+    return TextNode.from(TextLeaf.split(lines, []), newLen);
   }
   sliceString(from, to = this.length, lineSep = "\n") {
     let result = "";
     for (let pos = 0, i2 = 0; pos <= to && i2 < this.text.length; i2++) {
-      let line2 = this.text[i2], end2 = pos + line2.length;
+      let line = this.text[i2], end2 = pos + line.length;
       if (pos > from && i2)
         result += lineSep;
       if (from < end2 && to > pos)
-        result += line2.slice(Math.max(0, from - pos), to - pos);
+        result += line.slice(Math.max(0, from - pos), to - pos);
       pos = end2 + 1;
     }
     return result;
   }
   flatten(target2) {
-    for (let line2 of this.text)
-      target2.push(line2);
+    for (let line of this.text)
+      target2.push(line);
   }
   scanIdentical() {
     return 0;
   }
   static split(text, target2) {
     let part = [], len = -1;
-    for (let line2 of text) {
-      part.push(line2);
-      len += line2.length + 1;
+    for (let line of text) {
+      part.push(line);
+      len += line.length + 1;
       if (part.length == 32) {
         target2.push(new TextLeaf(part, len));
         part = [];
@@ -112010,13 +112013,13 @@ class TextNode extends Text {
     for (let child of children)
       this.lines += child.lines;
   }
-  lineInner(target2, isLine, line2, offset2) {
+  lineInner(target2, isLine, line, offset2) {
     for (let i2 = 0; ; i2++) {
-      let child = this.children[i2], end2 = offset2 + child.length, endLine = line2 + child.lines - 1;
+      let child = this.children[i2], end2 = offset2 + child.length, endLine = line + child.lines - 1;
       if ((isLine ? endLine : end2) >= target2)
-        return child.lineInner(target2, isLine, line2, offset2);
+        return child.lineInner(target2, isLine, line, offset2);
       offset2 = end2 + 1;
-      line2 = endLine + 1;
+      line = endLine + 1;
     }
   }
   decompose(from, to, target2, open2) {
@@ -112081,10 +112084,10 @@ class TextNode extends Text {
     }
   }
   static from(children, length = children.reduce((l2, ch2) => l2 + ch2.length + 1, -1)) {
-    let lines2 = 0;
+    let lines = 0;
     for (let ch2 of children)
-      lines2 += ch2.lines;
-    if (lines2 < 32) {
+      lines += ch2.lines;
+    if (lines < 32) {
       let flat = [];
       for (let ch2 of children)
         ch2.flatten(flat);
@@ -112092,7 +112095,7 @@ class TextNode extends Text {
     }
     let chunk = Math.max(
       32,
-      lines2 >> 5
+      lines >> 5
       /* Tree.BranchShift */
     ), maxChunk = chunk << 1, minChunk = chunk >> 1;
     let chunked = [], currentLines = 0, currentLen = -1, currentChunk = [];
@@ -112132,23 +112135,23 @@ class TextNode extends Text {
 Text.empty = /* @__PURE__ */ new TextLeaf([""], 0);
 function textLength(text) {
   let length = -1;
-  for (let line2 of text)
-    length += line2.length + 1;
+  for (let line of text)
+    length += line.length + 1;
   return length;
 }
 function appendText(text, target2, from = 0, to = 1e9) {
   for (let pos = 0, i2 = 0, first2 = true; i2 < text.length && pos <= to; i2++) {
-    let line2 = text[i2], end2 = pos + line2.length;
+    let line = text[i2], end2 = pos + line.length;
     if (end2 >= from) {
       if (end2 > to)
-        line2 = line2.slice(0, to - pos);
+        line = line.slice(0, to - pos);
       if (pos < from)
-        line2 = line2.slice(from - pos);
+        line = line.slice(from - pos);
       if (first2) {
-        target2[target2.length - 1] += line2;
+        target2[target2.length - 1] += line;
         first2 = false;
       } else
-        target2.push(line2);
+        target2.push(line);
     }
     pos = end2 + 1;
   }
@@ -112191,23 +112194,23 @@ class RawTextCursor {
         }
         skip--;
       } else if (top2 instanceof TextLeaf) {
-        let next = top2.text[offset2 + (dir < 0 ? -1 : 0)];
+        let next2 = top2.text[offset2 + (dir < 0 ? -1 : 0)];
         this.offsets[last] += dir;
-        if (next.length > Math.max(0, skip)) {
-          this.value = skip == 0 ? next : dir > 0 ? next.slice(skip) : next.slice(0, next.length - skip);
+        if (next2.length > Math.max(0, skip)) {
+          this.value = skip == 0 ? next2 : dir > 0 ? next2.slice(skip) : next2.slice(0, next2.length - skip);
           return this;
         }
-        skip -= next.length;
+        skip -= next2.length;
       } else {
-        let next = top2.children[offset2 + (dir < 0 ? -1 : 0)];
-        if (skip > next.length) {
-          skip -= next.length;
+        let next2 = top2.children[offset2 + (dir < 0 ? -1 : 0)];
+        if (skip > next2.length) {
+          skip -= next2.length;
           this.offsets[last] += dir;
         } else {
           if (dir < 0)
             this.offsets[last]--;
-          this.nodes.push(next);
-          this.offsets.push(dir > 0 ? 1 : (next instanceof TextLeaf ? next.text.length : next.children.length) << 1);
+          this.nodes.push(next2);
+          this.offsets.push(dir > 0 ? 1 : (next2 instanceof TextLeaf ? next2.text.length : next2.children.length) << 1);
         }
       }
     }
@@ -112335,11 +112338,11 @@ function nextClusterBreak(str, pos, includeExtending) {
   let prev = codePointAt(str, pos);
   pos += codePointSize(prev);
   while (pos < str.length) {
-    let next = codePointAt(str, pos);
-    if (prev == ZWJ || next == ZWJ || includeExtending && isExtendingChar(next)) {
-      pos += codePointSize(next);
-      prev = next;
-    } else if (isRegionalIndicator(next)) {
+    let next2 = codePointAt(str, pos);
+    if (prev == ZWJ || next2 == ZWJ || includeExtending && isExtendingChar(next2)) {
+      pos += codePointSize(next2);
+      prev = next2;
+    } else if (isRegionalIndicator(next2)) {
       let countBefore = 0, i2 = pos - 2;
       while (i2 >= 0 && isRegionalIndicator(codePointAt(str, i2))) {
         countBefore++;
@@ -112657,11 +112660,11 @@ class ChangeSet extends ChangeDesc {
     let iter = new SectionIter(this);
     done:
       for (let i2 = 0, pos = 0; ; ) {
-        let next = i2 == ranges.length ? 1e9 : ranges[i2++];
-        while (pos < next || pos == next && iter.len == 0) {
+        let next2 = i2 == ranges.length ? 1e9 : ranges[i2++];
+        while (pos < next2 || pos == next2 && iter.len == 0) {
           if (iter.done)
             break done;
-          let len = Math.min(iter.len, next - pos);
+          let len = Math.min(iter.len, next2 - pos);
           addSection(filteredSections, len, -1);
           let ins = iter.ins == -1 ? -1 : iter.off == 0 ? iter.ins : 0;
           addSection(resultSections, len, ins);
@@ -114298,10 +114301,10 @@ class EditorState {
       start = prev;
     }
     while (end2 < length) {
-      let next = findClusterBreak(text, end2);
-      if (cat(text.slice(end2, next)) != CharCategory.Word)
+      let next2 = findClusterBreak(text, end2);
+      if (cat(text.slice(end2, next2)) != CharCategory.Word)
         break;
-      end2 = next;
+      end2 = next2;
     }
     return start == end2 ? null : EditorSelection.range(start + from, end2 + from);
   }
@@ -114541,8 +114544,8 @@ class RangeSet {
         }
       }
     }
-    let next = this.nextLayer.map(changes);
-    return chunks.length == 0 ? next : new RangeSet(chunkPos, chunks, next || RangeSet.empty, maxPoint);
+    let next2 = this.nextLayer.map(changes);
+    return chunks.length == 0 ? next2 : new RangeSet(chunkPos, chunks, next2 || RangeSet.empty, maxPoint);
   }
   /**
   Iterate over the ranges that touch the region `from` to `to`,
@@ -114759,12 +114762,12 @@ class RangeSetBuilder {
   /**
   @internal
   */
-  finishInner(next) {
+  finishInner(next2) {
     if (this.from.length)
       this.finishChunk(false);
     if (this.chunks.length == 0)
-      return next;
-    let result = RangeSet.create(this.chunkPos, this.chunks, this.nextLayer ? this.nextLayer.finishInner(next) : next, this.setMaxPoint);
+      return next2;
+    let result = RangeSet.create(this.chunkPos, this.chunks, this.nextLayer ? this.nextLayer.finishInner(next2) : next2, this.setMaxPoint);
     this.from = null;
     return result;
   }
@@ -114804,8 +114807,8 @@ class LayerCursor {
   }
   gotoInner(pos, side, forward) {
     while (this.chunkIndex < this.layer.chunk.length) {
-      let next = this.layer.chunk[this.chunkIndex];
-      if (!(this.skip && this.skip.has(next) || this.layer.chunkEnd(this.chunkIndex) < pos || next.maxPoint < this.minPoint))
+      let next2 = this.layer.chunk[this.chunkIndex];
+      if (!(this.skip && this.skip.has(next2) || this.layer.chunkEnd(this.chunkIndex) < pos || next2.maxPoint < this.minPoint))
         break;
       this.chunkIndex++;
       forward = false;
@@ -115688,33 +115691,33 @@ class ContentView {
   sync(view, track) {
     if (this.dirty & 2) {
       let parent = this.dom;
-      let prev = null, next;
+      let prev = null, next2;
       for (let child of this.children) {
         if (child.dirty) {
-          if (!child.dom && (next = prev ? prev.nextSibling : parent.firstChild)) {
-            let contentView = ContentView.get(next);
+          if (!child.dom && (next2 = prev ? prev.nextSibling : parent.firstChild)) {
+            let contentView = ContentView.get(next2);
             if (!contentView || !contentView.parent && contentView.canReuseDOM(child))
-              child.reuseDOM(next);
+              child.reuseDOM(next2);
           }
           child.sync(view, track);
           child.dirty = 0;
         }
-        next = prev ? prev.nextSibling : parent.firstChild;
-        if (track && !track.written && track.node == parent && next != child.dom)
+        next2 = prev ? prev.nextSibling : parent.firstChild;
+        if (track && !track.written && track.node == parent && next2 != child.dom)
           track.written = true;
         if (child.dom.parentNode == parent) {
-          while (next && next != child.dom)
-            next = rm$1(next);
+          while (next2 && next2 != child.dom)
+            next2 = rm$1(next2);
         } else {
-          parent.insertBefore(child.dom, next);
+          parent.insertBefore(child.dom, next2);
         }
         prev = child.dom;
       }
-      next = prev ? prev.nextSibling : parent.firstChild;
-      if (next && track && track.node == parent)
+      next2 = prev ? prev.nextSibling : parent.firstChild;
+      if (next2 && track && track.node == parent)
         track.written = true;
-      while (next)
-        next = rm$1(next);
+      while (next2)
+        next2 = rm$1(next2);
     } else if (this.dirty & 1) {
       for (let child of this.children)
         if (child.dirty) {
@@ -115878,9 +115881,9 @@ class ContentView {
 }
 ContentView.prototype.breakAfter = 0;
 function rm$1(dom2) {
-  let next = dom2.nextSibling;
+  let next2 = dom2.nextSibling;
   dom2.parentNode.removeChild(dom2);
-  return next;
+  return next2;
 }
 class ChildCursor {
   constructor(children, pos, i2) {
@@ -115895,8 +115898,8 @@ class ChildCursor {
         this.off = pos - this.pos;
         return this;
       }
-      let next = this.children[--this.i];
-      this.pos -= next.length + next.breakAfter;
+      let next2 = this.children[--this.i];
+      this.pos -= next2.length + next2.breakAfter;
     }
   }
 }
@@ -116354,9 +116357,9 @@ function inlineSiblingRect(view, side) {
   let parent = view.parent, index2 = parent ? parent.children.indexOf(view) : -1;
   while (parent && index2 >= 0) {
     if (side < 0 ? index2 > 0 : index2 < parent.children.length) {
-      let next = parent.children[index2 + side];
-      if (next instanceof TextView) {
-        let nextRect = next.coordsAt(side < 0 ? next.length : 0, side);
+      let next2 = parent.children[index2 + side];
+      if (next2 instanceof TextView) {
+        let nextRect = next2.coordsAt(side < 0 ? next2.length : 0, side);
         if (nextRect)
           return nextRect;
       }
@@ -116391,9 +116394,9 @@ function inlineDOMAtPos(parent, pos) {
       return prev.domAtPos(prev.length);
   }
   for (let j2 = i2; j2 < children.length; j2++) {
-    let next = children[j2];
-    if (next.dom.parentNode == dom2)
-      return next.domAtPos(0);
+    let next2 = children[j2];
+    if (next2.dom.parentNode == dom2)
+      return next2.domAtPos(0);
   }
   return new DOMPos(dom2, 0);
 }
@@ -117028,15 +117031,15 @@ class ContentBuilder {
         let view = WidgetView.create(deco.widget || new NullWidget("span"), len, len ? 0 : deco.startSide);
         let cursorBefore = this.atCursorPos && !view.isEditable && openStart <= active.length && (from < to || deco.startSide > 0);
         let cursorAfter = !view.isEditable && (from < to || openStart > active.length || deco.startSide <= 0);
-        let line2 = this.getLine();
+        let line = this.getLine();
         if (this.pendingBuffer == 2 && !cursorBefore)
           this.pendingBuffer = 0;
         this.flushBuffer(active);
         if (cursorBefore) {
-          line2.append(wrapMarks(new WidgetBufferView(1), active), openStart);
+          line.append(wrapMarks(new WidgetBufferView(1), active), openStart);
           openStart = active.length + Math.max(0, openStart - active.length);
         }
-        line2.append(wrapMarks(view, active), openStart);
+        line.append(wrapMarks(view, active), openStart);
         this.atCursorPos = cursorAfter;
         this.pendingBuffer = !cursorAfter ? 0 : from < to || openStart > active.length ? 1 : 2;
         if (this.pendingBuffer)
@@ -117244,8 +117247,8 @@ class ChangedRange {
       return diff;
     let result = [];
     for (let dI = 0, rI = 0, posA = 0, posB = 0; ; dI++) {
-      let next = dI == diff.length ? null : diff[dI], off = posA - posB;
-      let end2 = next ? next.fromB : 1e9;
+      let next2 = dI == diff.length ? null : diff[dI], off = posA - posB;
+      let end2 = next2 ? next2.fromB : 1e9;
       while (rI < ranges.length && ranges[rI] < end2) {
         let from = ranges[rI], to = ranges[rI + 1];
         let fromB = Math.max(posB, from), toB = Math.min(end2, to);
@@ -117256,11 +117259,11 @@ class ChangedRange {
         else
           rI += 2;
       }
-      if (!next)
+      if (!next2)
         return result;
-      new ChangedRange(next.fromA, next.toA, next.fromB, next.toB).addToSet(result);
-      posA = next.toA;
-      posB = next.toB;
+      new ChangedRange(next2.fromA, next2.toA, next2.fromB, next2.toB).addToSet(result);
+      posA = next2.toA;
+      posB = next2.toB;
     }
   }
 }
@@ -117396,12 +117399,12 @@ class BidiSpan {
   }
 }
 const types = [];
-function computeOrder(line2, direction) {
-  let len = line2.length, outerType = direction == LTR ? 1 : 2, oppositeType = direction == LTR ? 2 : 1;
-  if (!line2 || outerType == 1 && !BidiRE.test(line2))
+function computeOrder(line, direction) {
+  let len = line.length, outerType = direction == LTR ? 1 : 2, oppositeType = direction == LTR ? 2 : 1;
+  if (!line || outerType == 1 && !BidiRE.test(line))
     return trivialOrder(len);
   for (let i2 = 0, prev = outerType, prevStrong = outerType; i2 < len; i2++) {
-    let type = charType(line2.charCodeAt(i2));
+    let type = charType(line.charCodeAt(i2));
     if (type == 512)
       type = prev;
     else if (type == 8 && prevStrong == 4)
@@ -117434,7 +117437,7 @@ function computeOrder(line2, direction) {
       prevStrong = type;
   }
   for (let i2 = 0, sI = 0, context2 = 0, ch2, br, type; i2 < len; i2++) {
-    if (br = Brackets[ch2 = line2.charCodeAt(i2)]) {
+    if (br = Brackets[ch2 = line.charCodeAt(i2)]) {
       if (br < 0) {
         for (let sJ = sI - 3; sJ >= 0; sJ -= 3) {
           if (BracketStack[sJ + 1] == -br) {
@@ -117514,17 +117517,17 @@ function trivialOrder(length) {
   return [new BidiSpan(0, length, 0)];
 }
 let movedOver = "";
-function moveVisually(line2, order, dir, start, forward) {
+function moveVisually(line, order, dir, start, forward) {
   var _a3;
-  let startIndex = start.head - line2.from, spanI = -1;
+  let startIndex = start.head - line.from, spanI = -1;
   if (startIndex == 0) {
-    if (!forward || !line2.length)
+    if (!forward || !line.length)
       return null;
     if (order[0].level != dir) {
       startIndex = order[0].side(false, dir);
       spanI = 0;
     }
-  } else if (startIndex == line2.length) {
+  } else if (startIndex == line.length) {
     if (forward)
       return null;
     let last = order[order.length - 1];
@@ -117541,16 +117544,16 @@ function moveVisually(line2, order, dir, start, forward) {
     startIndex = span.side(!forward, dir);
   }
   let indexForward = forward == (span.dir == dir);
-  let nextIndex = findClusterBreak(line2.text, startIndex, indexForward);
-  movedOver = line2.text.slice(Math.min(startIndex, nextIndex), Math.max(startIndex, nextIndex));
+  let nextIndex = findClusterBreak(line.text, startIndex, indexForward);
+  movedOver = line.text.slice(Math.min(startIndex, nextIndex), Math.max(startIndex, nextIndex));
   if (nextIndex != span.side(forward, dir))
-    return EditorSelection.cursor(nextIndex + line2.from, indexForward ? -1 : 1, span.level);
+    return EditorSelection.cursor(nextIndex + line.from, indexForward ? -1 : 1, span.level);
   let nextSpan = spanI == (forward ? order.length - 1 : 0) ? null : order[spanI + (forward ? 1 : -1)];
   if (!nextSpan && span.level != dir)
-    return EditorSelection.cursor(forward ? line2.to : line2.from, forward ? -1 : 1, dir);
+    return EditorSelection.cursor(forward ? line.to : line.from, forward ? -1 : 1, dir);
   if (nextSpan && nextSpan.level < span.level)
-    return EditorSelection.cursor(nextSpan.side(!forward, dir) + line2.from, forward ? 1 : -1, nextSpan.level);
-  return EditorSelection.cursor(nextIndex + line2.from, forward ? -1 : 1, span.level);
+    return EditorSelection.cursor(nextSpan.side(!forward, dir) + line.from, forward ? 1 : -1, nextSpan.level);
+  return EditorSelection.cursor(nextIndex + line.from, forward ? -1 : 1, span.level);
 }
 const LineBreakPlaceholder = "￿";
 class DOMReader {
@@ -117572,13 +117575,13 @@ class DOMReader {
     for (let cur2 = start; ; ) {
       this.findPointBefore(parent, cur2);
       this.readNode(cur2);
-      let next = cur2.nextSibling;
-      if (next == end2)
+      let next2 = cur2.nextSibling;
+      if (next2 == end2)
         break;
-      let view = ContentView.get(cur2), nextView = ContentView.get(next);
-      if (view && nextView ? view.breakAfter : (view ? view.breakAfter : isBlockElement(cur2)) || isBlockElement(next) && (cur2.nodeName != "BR" || cur2.cmIgnore))
+      let view = ContentView.get(cur2), nextView = ContentView.get(next2);
+      if (view && nextView ? view.breakAfter : (view ? view.breakAfter : isBlockElement(cur2)) || isBlockElement(next2) && (cur2.nodeName != "BR" || cur2.cmIgnore))
         this.lineBreak();
-      cur2 = next;
+      cur2 = next2;
     }
     this.findPointBefore(parent, end2);
     return this;
@@ -117631,9 +117634,9 @@ class DOMReader {
       this.readRange(node.firstChild, null);
     }
   }
-  findPointBefore(node, next) {
+  findPointBefore(node, next2) {
     for (let point of this.points)
-      if (point.node == node && node.childNodes[point.offset] == next)
+      if (point.node == node && node.childNodes[point.offset] == next2)
         point.pos = this.text.length;
   }
   findPointInside(node, maxLen) {
@@ -117734,10 +117737,10 @@ class DocView extends ContentView {
   updateChildren(changes, oldLength) {
     let cursor2 = this.childCursor(oldLength);
     for (let i2 = changes.length - 1; ; i2--) {
-      let next = i2 >= 0 ? changes[i2] : null;
-      if (!next)
+      let next2 = i2 >= 0 ? changes[i2] : null;
+      if (!next2)
         break;
-      let { fromA, toA, fromB, toB } = next;
+      let { fromA, toA, fromB, toB } = next2;
       let { content: content2, breakAtStart, openStart, openEnd } = ContentBuilder.build(this.view.state.doc, fromB, toB, this.decorations, this.dynamicDecorationMap);
       let { i: toI, off: toOff } = cursor2.findPos(toA, 1);
       let { i: fromI, off: fromOff } = cursor2.findPos(fromA, -1);
@@ -117812,11 +117815,11 @@ class DocView extends ContentView {
     let { anchorNode, anchorOffset } = view.observer.selectionRange;
     if (!sel || !cursor2.empty || !cursor2.assoc || !sel.modify)
       return;
-    let line2 = LineView.find(this, cursor2.head);
-    if (!line2)
+    let line = LineView.find(this, cursor2.head);
+    if (!line)
       return;
-    let lineStart = line2.posAtStart;
-    if (cursor2.head == lineStart || cursor2.head == lineStart + line2.length)
+    let lineStart = line.posAtStart;
+    if (cursor2.head == lineStart || cursor2.head == lineStart + line.length)
       return;
     let before = this.coordsAt(cursor2.head, -1), after = this.coordsAt(cursor2.head, 1);
     if (!before || !after || before.bottom > after.top)
@@ -117932,8 +117935,8 @@ class DocView extends ContentView {
   computeBlockGapDeco() {
     let deco = [], vs = this.view.viewState;
     for (let pos = 0, i2 = 0; ; i2++) {
-      let next = i2 == vs.viewports.length ? null : vs.viewports[i2];
-      let end2 = next ? next.from - 1 : this.length;
+      let next2 = i2 == vs.viewports.length ? null : vs.viewports[i2];
+      let end2 = next2 ? next2.from - 1 : this.length;
       if (end2 > pos) {
         let height = vs.lineBlockAt(end2).bottom - vs.lineBlockAt(pos).top;
         deco.push(Decoration.replace({
@@ -117943,9 +117946,9 @@ class DocView extends ContentView {
           isBlockGap: true
         }).range(pos, end2));
       }
-      if (!next)
+      if (!next2)
         break;
-      pos = next.to + 1;
+      pos = next2.to + 1;
     }
     return Decoration.set(deco);
   }
@@ -118141,32 +118144,32 @@ function inUneditable(node, inside2) {
 }
 function groupAt(state2, pos, bias = 1) {
   let categorize = state2.charCategorizer(pos);
-  let line2 = state2.doc.lineAt(pos), linePos = pos - line2.from;
-  if (line2.length == 0)
+  let line = state2.doc.lineAt(pos), linePos = pos - line.from;
+  if (line.length == 0)
     return EditorSelection.cursor(pos);
   if (linePos == 0)
     bias = 1;
-  else if (linePos == line2.length)
+  else if (linePos == line.length)
     bias = -1;
   let from = linePos, to = linePos;
   if (bias < 0)
-    from = findClusterBreak(line2.text, linePos, false);
+    from = findClusterBreak(line.text, linePos, false);
   else
-    to = findClusterBreak(line2.text, linePos);
-  let cat = categorize(line2.text.slice(from, to));
+    to = findClusterBreak(line.text, linePos);
+  let cat = categorize(line.text.slice(from, to));
   while (from > 0) {
-    let prev = findClusterBreak(line2.text, from, false);
-    if (categorize(line2.text.slice(prev, from)) != cat)
+    let prev = findClusterBreak(line.text, from, false);
+    if (categorize(line.text.slice(prev, from)) != cat)
       break;
     from = prev;
   }
-  while (to < line2.length) {
-    let next = findClusterBreak(line2.text, to);
-    if (categorize(line2.text.slice(to, next)) != cat)
+  while (to < line.length) {
+    let next2 = findClusterBreak(line.text, to);
+    if (categorize(line.text.slice(to, next2)) != cat)
       break;
-    to = next;
+    to = next2;
   }
-  return EditorSelection.range(from + line2.from, to + line2.from);
+  return EditorSelection.range(from + line.from, to + line.from);
 }
 function getdx(x2, rect) {
   return rect.left > x2 ? rect.left - x2 : Math.max(0, x2 - rect.right);
@@ -118319,10 +118322,10 @@ function posAtCoords(view, coords, precise, bias = -1) {
     }
   }
   if (!node || !view.docView.dom.contains(node)) {
-    let line2 = LineView.find(view.docView, lineStart);
-    if (!line2)
+    let line = LineView.find(view.docView, lineStart);
+    if (!line)
       return yOffset > block.top + block.height / 2 ? block.to : block.from;
-    ({ node, offset: offset2 } = domPosAtCoords(line2.dom, x2, y2));
+    ({ node, offset: offset2 } = domPosAtCoords(line.dom, x2, y2));
   }
   let nearest = view.docView.nearest(node);
   if (!nearest)
@@ -118337,8 +118340,8 @@ function posAtCoords(view, coords, precise, bias = -1) {
 function posAtCoordsImprecise(view, contentRect, block, x2, y2) {
   let into = Math.round((x2 - contentRect.left) * view.defaultCharacterWidth);
   if (view.lineWrapping && block.height > view.defaultLineHeight * 1.5) {
-    let line2 = Math.floor((y2 - block.top) / view.defaultLineHeight);
-    into += line2 * view.viewState.heightOracle.lineLength;
+    let line = Math.floor((y2 - block.top) / view.defaultLineHeight);
+    into += line * view.viewState.heightOracle.lineLength;
   }
   let content2 = view.state.sliceDoc(block.from, block.to);
   return block.from + findColumn(content2, into, view.state.tabSize);
@@ -118347,8 +118350,8 @@ function isSuspiciousSafariCaretResult(node, offset2, x2) {
   let len;
   if (node.nodeType != 3 || offset2 != (len = node.nodeValue.length))
     return false;
-  for (let next = node.nextSibling; next; next = next.nextSibling)
-    if (next.nodeType != 1 || next.nodeName != "BR")
+  for (let next2 = node.nextSibling; next2; next2 = next2.nextSibling)
+    if (next2.nodeType != 1 || next2.nodeName != "BR")
       return false;
   return textRange(node, len - 1, len).getBoundingClientRect().left > x2;
 }
@@ -118367,11 +118370,11 @@ function isSuspiciousChromeCaretResult(node, offset2, x2) {
   return x2 - rect.left > 5;
 }
 function moveToLineBoundary(view, start, forward, includeWrap) {
-  let line2 = view.state.doc.lineAt(start.head);
-  let coords = !includeWrap || !view.lineWrapping ? null : view.coordsAtPos(start.assoc < 0 && start.head > line2.from ? start.head - 1 : start.head);
+  let line = view.state.doc.lineAt(start.head);
+  let coords = !includeWrap || !view.lineWrapping ? null : view.coordsAtPos(start.assoc < 0 && start.head > line.from ? start.head - 1 : start.head);
   if (coords) {
     let editorRect = view.dom.getBoundingClientRect();
-    let direction = view.textDirectionAt(line2.from);
+    let direction = view.textDirectionAt(line.from);
     let pos = view.posAtCoords({
       x: forward == (direction == Direction.LTR) ? editorRect.right - 1 : editorRect.left + 1,
       y: (coords.top + coords.bottom) / 2
@@ -118380,37 +118383,37 @@ function moveToLineBoundary(view, start, forward, includeWrap) {
       return EditorSelection.cursor(pos, forward ? -1 : 1);
   }
   let lineView = LineView.find(view.docView, start.head);
-  let end2 = lineView ? forward ? lineView.posAtEnd : lineView.posAtStart : forward ? line2.to : line2.from;
+  let end2 = lineView ? forward ? lineView.posAtEnd : lineView.posAtStart : forward ? line.to : line.from;
   return EditorSelection.cursor(end2, forward ? -1 : 1);
 }
 function moveByChar(view, start, forward, by) {
-  let line2 = view.state.doc.lineAt(start.head), spans = view.bidiSpans(line2);
-  let direction = view.textDirectionAt(line2.from);
+  let line = view.state.doc.lineAt(start.head), spans = view.bidiSpans(line);
+  let direction = view.textDirectionAt(line.from);
   for (let cur2 = start, check = null; ; ) {
-    let next = moveVisually(line2, spans, direction, cur2, forward), char = movedOver;
-    if (!next) {
-      if (line2.number == (forward ? view.state.doc.lines : 1))
+    let next2 = moveVisually(line, spans, direction, cur2, forward), char = movedOver;
+    if (!next2) {
+      if (line.number == (forward ? view.state.doc.lines : 1))
         return cur2;
       char = "\n";
-      line2 = view.state.doc.line(line2.number + (forward ? 1 : -1));
-      spans = view.bidiSpans(line2);
-      next = EditorSelection.cursor(forward ? line2.from : line2.to);
+      line = view.state.doc.line(line.number + (forward ? 1 : -1));
+      spans = view.bidiSpans(line);
+      next2 = EditorSelection.cursor(forward ? line.from : line.to);
     }
     if (!check) {
       if (!by)
-        return next;
+        return next2;
       check = by(char);
     } else if (!check(char)) {
       return cur2;
     }
-    cur2 = next;
+    cur2 = next2;
   }
 }
 function byGroup(view, pos, start) {
   let categorize = view.state.charCategorizer(pos);
   let cat = categorize(start);
-  return (next) => {
-    let nextCat = categorize(next);
+  return (next2) => {
+    let nextCat = categorize(next2);
     if (cat == CharCategory.Space)
       cat = nextCat;
     return cat == nextCat;
@@ -118428,10 +118431,10 @@ function moveVertically(view, start, forward, distance) {
       goal = startCoords.left - rect.left;
     startY = dir < 0 ? startCoords.top : startCoords.bottom;
   } else {
-    let line2 = view.viewState.lineBlockAt(startPos);
+    let line = view.viewState.lineBlockAt(startPos);
     if (goal == null)
-      goal = Math.min(rect.right - rect.left, view.defaultCharacterWidth * (startPos - line2.from));
-    startY = (dir < 0 ? line2.top : line2.bottom) + docTop;
+      goal = Math.min(rect.right - rect.left, view.defaultCharacterWidth * (startPos - line.from));
+    startY = (dir < 0 ? line.top : line.bottom) + docTop;
   }
   let resolvedGoal = rect.left + goal;
   let dist3 = distance !== null && distance !== void 0 ? distance : view.defaultLineHeight >> 1;
@@ -118782,22 +118785,22 @@ function doPaste(view, input) {
   if (linewise) {
     let lastLine = -1;
     changes = state2.changeByRange((range) => {
-      let line2 = state2.doc.lineAt(range.from);
-      if (line2.from == lastLine)
+      let line = state2.doc.lineAt(range.from);
+      if (line.from == lastLine)
         return { range };
-      lastLine = line2.from;
+      lastLine = line.from;
       let insert2 = state2.toText((byLine ? text.line(i2++).text : input) + state2.lineBreak);
       return {
-        changes: { from: line2.from, insert: insert2 },
+        changes: { from: line.from, insert: insert2 },
         range: EditorSelection.cursor(range.from + insert2.length)
       };
     });
   } else if (byLine) {
     changes = state2.changeByRange((range) => {
-      let line2 = text.line(i2++);
+      let line = text.line(i2++);
       return {
-        changes: { from: range.from, to: range.to, insert: line2.text },
-        range: EditorSelection.cursor(range.from + line2.length)
+        changes: { from: range.from, to: range.to, insert: line.text },
+        range: EditorSelection.cursor(range.from + line.length)
       };
     });
   } else {
@@ -118850,9 +118853,9 @@ function rangeForClick(view, pos, bias, type) {
   } else if (type == 2) {
     return groupAt(view.state, pos, bias);
   } else {
-    let visual = LineView.find(view.docView, pos), line2 = view.state.doc.lineAt(visual ? visual.posAtEnd : pos);
-    let from = visual ? visual.posAtStart : line2.from, to = visual ? visual.posAtEnd : line2.to;
-    if (to < view.state.doc.length && to == line2.to)
+    let visual = LineView.find(view.docView, pos), line = view.state.doc.lineAt(visual ? visual.posAtEnd : pos);
+    let from = visual ? visual.posAtStart : line.from, to = visual ? visual.posAtEnd : line.to;
+    if (to < view.state.doc.length && to == line.to)
       to++;
     return EditorSelection.range(from, to);
   }
@@ -118860,18 +118863,18 @@ function rangeForClick(view, pos, bias, type) {
 let insideY = (y2, rect) => y2 >= rect.top && y2 <= rect.bottom;
 let inside = (x2, y2, rect) => insideY(y2, rect) && x2 >= rect.left && x2 <= rect.right;
 function findPositionSide(view, pos, x2, y2) {
-  let line2 = LineView.find(view.docView, pos);
-  if (!line2)
+  let line = LineView.find(view.docView, pos);
+  if (!line)
     return 1;
-  let off = pos - line2.posAtStart;
+  let off = pos - line.posAtStart;
   if (off == 0)
     return 1;
-  if (off == line2.length)
+  if (off == line.length)
     return -1;
-  let before = line2.coordsAt(off, -1);
+  let before = line.coordsAt(off, -1);
   if (before && inside(x2, y2, before))
     return -1;
-  let after = line2.coordsAt(off, 1);
+  let after = line.coordsAt(off, 1);
   if (after && inside(x2, y2, after))
     return 1;
   return before && insideY(y2, before) ? -1 : 1;
@@ -119015,12 +119018,12 @@ function copiedRange(state2) {
   if (!content2.length) {
     let upto = -1;
     for (let { from } of state2.selection.ranges) {
-      let line2 = state2.doc.lineAt(from);
-      if (line2.number > upto) {
-        content2.push(line2.text);
-        ranges.push({ from: line2.from, to: Math.min(state2.doc.length, line2.to + 1) });
+      let line = state2.doc.lineAt(from);
+      if (line.number > upto) {
+        content2.push(line.text);
+        ranges.push({ from: line.from, to: Math.min(state2.doc.length, line.to + 1) });
       }
-      upto = line2.number;
+      upto = line.number;
     }
     linewise = true;
   }
@@ -119131,16 +119134,16 @@ class HeightOracle {
     this.heightChanged = false;
   }
   heightForGap(from, to) {
-    let lines2 = this.doc.lineAt(to).number - this.doc.lineAt(from).number + 1;
+    let lines = this.doc.lineAt(to).number - this.doc.lineAt(from).number + 1;
     if (this.lineWrapping)
-      lines2 += Math.max(0, Math.ceil((to - from - lines2 * this.lineLength * 0.5) / this.lineLength));
-    return this.lineHeight * lines2;
+      lines += Math.max(0, Math.ceil((to - from - lines * this.lineLength * 0.5) / this.lineLength));
+    return this.lineHeight * lines;
   }
   heightForLine(length) {
     if (!this.lineWrapping)
       return this.lineHeight;
-    let lines2 = 1 + Math.max(0, Math.ceil((length - this.lineLength) / (this.lineLength - 5)));
-    return lines2 * this.lineHeight;
+    let lines = 1 + Math.max(0, Math.ceil((length - this.lineLength) / (this.lineLength - 5)));
+    return lines * this.lineHeight;
   }
   setDoc(doc2) {
     this.doc = doc2;
@@ -119317,13 +119320,13 @@ class HeightMap {
           break;
         }
       } else if (before < after) {
-        let next = nodes[i2++];
-        if (next)
-          before += next.size;
+        let next2 = nodes[i2++];
+        if (next2)
+          before += next2.size;
       } else {
-        let next = nodes[--j2];
-        if (next)
-          after += next.size;
+        let next2 = nodes[--j2];
+        if (next2)
+          after += next2.size;
       }
     }
     let brk = 0;
@@ -119401,14 +119404,14 @@ class HeightMapGap extends HeightMap {
   }
   heightMetrics(oracle, offset2) {
     let firstLine = oracle.doc.lineAt(offset2).number, lastLine = oracle.doc.lineAt(offset2 + this.length).number;
-    let lines2 = lastLine - firstLine + 1;
+    let lines = lastLine - firstLine + 1;
     let perLine, perChar = 0;
     if (oracle.lineWrapping) {
-      let totalPerLine = Math.min(this.height, oracle.lineHeight * lines2);
-      perLine = totalPerLine / lines2;
-      perChar = (this.height - totalPerLine) / (this.length - lines2 - 1);
+      let totalPerLine = Math.min(this.height, oracle.lineHeight * lines);
+      perLine = totalPerLine / lines;
+      perChar = (this.height - totalPerLine) / (this.length - lines - 1);
     } else {
-      perLine = this.height / lines2;
+      perLine = this.height / lines;
     }
     return { firstLine, lastLine, perLine, perChar };
   }
@@ -119416,13 +119419,13 @@ class HeightMapGap extends HeightMap {
     let { firstLine, lastLine, perLine, perChar } = this.heightMetrics(oracle, offset2);
     if (oracle.lineWrapping) {
       let guess = offset2 + Math.round(Math.max(0, Math.min(1, (height - top2) / this.height)) * this.length);
-      let line2 = oracle.doc.lineAt(guess), lineHeight = perLine + line2.length * perChar;
+      let line = oracle.doc.lineAt(guess), lineHeight = perLine + line.length * perChar;
       let lineTop = Math.max(top2, height - lineHeight / 2);
-      return new BlockInfo(line2.from, line2.length, lineTop, lineHeight, BlockType.Text);
+      return new BlockInfo(line.from, line.length, lineTop, lineHeight, BlockType.Text);
     } else {
-      let line2 = Math.max(0, Math.min(lastLine - firstLine, Math.floor((height - top2) / perLine)));
-      let { from, length } = oracle.doc.line(firstLine + line2);
-      return new BlockInfo(from, length, top2 + perLine * line2, perLine, BlockType.Text);
+      let line = Math.max(0, Math.min(lastLine - firstLine, Math.floor((height - top2) / perLine)));
+      let { from, length } = oracle.doc.line(firstLine + line);
+      return new BlockInfo(from, length, top2 + perLine * line, perLine, BlockType.Text);
     }
   }
   lineAt(value, type, oracle, top2, offset2) {
@@ -119433,25 +119436,25 @@ class HeightMapGap extends HeightMap {
       return new BlockInfo(from, to - from, 0, 0, BlockType.Text);
     }
     let { firstLine, perLine, perChar } = this.heightMetrics(oracle, offset2);
-    let line2 = oracle.doc.lineAt(value), lineHeight = perLine + line2.length * perChar;
-    let linesAbove = line2.number - firstLine;
-    let lineTop = top2 + perLine * linesAbove + perChar * (line2.from - offset2 - linesAbove);
-    return new BlockInfo(line2.from, line2.length, Math.max(top2, Math.min(lineTop, top2 + this.height - lineHeight)), lineHeight, BlockType.Text);
+    let line = oracle.doc.lineAt(value), lineHeight = perLine + line.length * perChar;
+    let linesAbove = line.number - firstLine;
+    let lineTop = top2 + perLine * linesAbove + perChar * (line.from - offset2 - linesAbove);
+    return new BlockInfo(line.from, line.length, Math.max(top2, Math.min(lineTop, top2 + this.height - lineHeight)), lineHeight, BlockType.Text);
   }
   forEachLine(from, to, oracle, top2, offset2, f2) {
     from = Math.max(from, offset2);
     to = Math.min(to, offset2 + this.length);
     let { firstLine, perLine, perChar } = this.heightMetrics(oracle, offset2);
     for (let pos = from, lineTop = top2; pos <= to; ) {
-      let line2 = oracle.doc.lineAt(pos);
+      let line = oracle.doc.lineAt(pos);
       if (pos == from) {
-        let linesAbove = line2.number - firstLine;
+        let linesAbove = line.number - firstLine;
         lineTop += perLine * linesAbove + perChar * (from - offset2 - linesAbove);
       }
-      let lineHeight = perLine + perChar * line2.length;
-      f2(new BlockInfo(line2.from, line2.length, lineTop, lineHeight, BlockType.Text));
+      let lineHeight = perLine + perChar * line.length;
+      f2(new BlockInfo(line.from, line.length, lineTop, lineHeight, BlockType.Text));
       lineTop += lineHeight;
-      pos = line2.to + 1;
+      pos = line.to + 1;
     }
   }
   replace(from, to, nodes) {
@@ -119493,9 +119496,9 @@ class HeightMapGap extends HeightMap {
           singleHeight = height;
         else if (Math.abs(height - singleHeight) >= Epsilon)
           singleHeight = -2;
-        let line2 = new HeightMapText(len, height);
-        line2.outdated = false;
-        nodes.push(line2);
+        let line = new HeightMapText(len, height);
+        line.outdated = false;
+        nodes.push(line);
         pos += len + 1;
       }
       if (pos <= end2)
@@ -119710,9 +119713,9 @@ class NodeBuilder {
     let last = this.nodes.length ? this.nodes[this.nodes.length - 1] : null;
     if (last instanceof HeightMapText)
       return last;
-    let line2 = new HeightMapText(0, -1);
-    this.nodes.push(line2);
-    return line2;
+    let line = new HeightMapText(0, -1);
+    this.nodes.push(line);
+    return line;
   }
   addBlock(block) {
     this.enterLine();
@@ -119724,10 +119727,10 @@ class NodeBuilder {
       this.covering = block;
   }
   addLineDeco(height, length) {
-    let line2 = this.ensureLine();
-    line2.length += length;
-    line2.collapsed += length;
-    line2.widgetHeight = Math.max(line2.widgetHeight, height);
+    let line = this.ensureLine();
+    line.length += length;
+    line.collapsed += length;
+    line.widgetHeight = Math.max(line.widgetHeight, height);
     this.writtenTo = this.pos = this.pos + length;
   }
   finish(from) {
@@ -120077,7 +120080,7 @@ class ViewState {
     if (this.defaultTextDirection != Direction.LTR && !wrapping)
       return [];
     let gaps = [];
-    let addGap = (from, to, line2, structure) => {
+    let addGap = (from, to, line, structure) => {
       if (to - from < halfMargin)
         return;
       let sel = this.state.selection.main, avoid = [sel.from];
@@ -120085,26 +120088,26 @@ class ViewState {
         avoid.push(sel.to);
       for (let pos of avoid) {
         if (pos > from && pos < to) {
-          addGap(from, pos - 10, line2, structure);
-          addGap(pos + 10, to, line2, structure);
+          addGap(from, pos - 10, line, structure);
+          addGap(pos + 10, to, line, structure);
           return;
         }
       }
-      let gap = find(current, (gap2) => gap2.from >= line2.from && gap2.to <= line2.to && Math.abs(gap2.from - from) < halfMargin && Math.abs(gap2.to - to) < halfMargin && !avoid.some((pos) => gap2.from < pos && gap2.to > pos));
+      let gap = find(current, (gap2) => gap2.from >= line.from && gap2.to <= line.to && Math.abs(gap2.from - from) < halfMargin && Math.abs(gap2.to - to) < halfMargin && !avoid.some((pos) => gap2.from < pos && gap2.to > pos));
       if (!gap) {
-        if (to < line2.to && mayMeasure && wrapping && mayMeasure.visibleRanges.some((r2) => r2.from <= to && r2.to >= to)) {
+        if (to < line.to && mayMeasure && wrapping && mayMeasure.visibleRanges.some((r2) => r2.from <= to && r2.to >= to)) {
           let lineStart = mayMeasure.moveToLineBoundary(EditorSelection.cursor(to), false, true).head;
           if (lineStart > from)
             to = lineStart;
         }
-        gap = new LineGap(from, to, this.gapSize(line2, from, to, structure));
+        gap = new LineGap(from, to, this.gapSize(line, from, to, structure));
       }
       gaps.push(gap);
     };
-    for (let line2 of this.viewportLines) {
-      if (line2.length < doubleMargin)
+    for (let line of this.viewportLines) {
+      if (line.length < doubleMargin)
         continue;
-      let structure = lineStructure(line2.from, line2.to, this.stateDeco);
+      let structure = lineStructure(line.from, line.to, this.stateDeco);
       if (structure.total < doubleMargin)
         continue;
       let target2 = this.scrollTarget ? this.scrollTarget.range.head : null;
@@ -120114,12 +120117,12 @@ class ViewState {
         let top2, bot;
         if (target2 != null) {
           let targetFrac = findFraction(structure, target2);
-          let spaceFrac = ((this.visibleBottom - this.visibleTop) / 2 + marginHeight) / line2.height;
+          let spaceFrac = ((this.visibleBottom - this.visibleTop) / 2 + marginHeight) / line.height;
           top2 = targetFrac - spaceFrac;
           bot = targetFrac + spaceFrac;
         } else {
-          top2 = (this.visibleTop - line2.top - marginHeight) / line2.height;
-          bot = (this.visibleBottom - line2.top + marginHeight) / line2.height;
+          top2 = (this.visibleTop - line.top - marginHeight) / line.height;
+          bot = (this.visibleBottom - line.top + marginHeight) / line.height;
         }
         viewFrom = findPosition(structure, top2);
         viewTo = findPosition(structure, bot);
@@ -120139,17 +120142,17 @@ class ViewState {
         viewFrom = findPosition(structure, left);
         viewTo = findPosition(structure, right);
       }
-      if (viewFrom > line2.from)
-        addGap(line2.from, viewFrom, line2, structure);
-      if (viewTo < line2.to)
-        addGap(viewTo, line2.to, line2, structure);
+      if (viewFrom > line.from)
+        addGap(line.from, viewFrom, line, structure);
+      if (viewTo < line.to)
+        addGap(viewTo, line.to, line, structure);
     }
     return gaps;
   }
-  gapSize(line2, from, to, structure) {
+  gapSize(line, from, to, structure) {
     let fraction = findFraction(structure, to) - findFraction(structure, from);
     if (this.heightOracle.lineWrapping) {
-      return line2.height * fraction;
+      return line.height * fraction;
     } else {
       return structure.total * this.heightOracle.charWidth * fraction;
     }
@@ -121721,8 +121724,8 @@ class EditorView {
     let rect = this.docView.coordsAt(pos, side);
     if (!rect || rect.left == rect.right)
       return rect;
-    let line2 = this.state.doc.lineAt(pos), order = this.bidiSpans(line2);
-    let span = order[BidiSpan.find(order, pos - line2.from, -1, side)];
+    let line = this.state.doc.lineAt(pos), order = this.bidiSpans(line);
+    let span = order[BidiSpan.find(order, pos - line.from, -1, side)];
     return flattenRect(rect, span.dir == Direction.LTR == side > 0);
   }
   /**
@@ -121781,15 +121784,15 @@ class EditorView {
   left-to-right, the leftmost spans come first, otherwise the
   rightmost spans come first.
   */
-  bidiSpans(line2) {
-    if (line2.length > MaxBidiLine)
-      return trivialOrder(line2.length);
-    let dir = this.textDirectionAt(line2.from);
+  bidiSpans(line) {
+    if (line.length > MaxBidiLine)
+      return trivialOrder(line.length);
+    let dir = this.textDirectionAt(line.from);
     for (let entry of this.bidiCache)
-      if (entry.from == line2.from && entry.dir == dir)
+      if (entry.from == line.from && entry.dir == dir)
         return entry.order;
-    let order = computeOrder(line2.text, dir);
-    this.bidiCache.push(new CachedOrder(line2.from, line2.to, dir, order));
+    let order = computeOrder(line.text, dir);
+    this.bidiCache.push(new CachedOrder(line.from, line.to, dir, order));
     return order;
   }
   /**
@@ -122185,13 +122188,13 @@ function wrappedLine(view, pos, inside2) {
   };
 }
 function blockAt(view, pos) {
-  let line2 = view.lineBlockAt(pos);
-  if (Array.isArray(line2.type))
-    for (let l2 of line2.type) {
-      if (l2.to > pos || l2.to == pos && (l2.to == line2.to || l2.type == BlockType.Text))
+  let line = view.lineBlockAt(pos);
+  if (Array.isArray(line.type))
+    for (let l2 of line.type) {
+      if (l2.to > pos || l2.to == pos && (l2.to == line.to || l2.type == BlockType.Text))
         return l2;
     }
-  return line2;
+  return line;
 }
 function rectanglesForRange(view, className, range) {
   if (range.to <= view.viewport.from || range.from >= view.viewport.to)
@@ -122239,11 +122242,11 @@ function rectanglesForRange(view, className, range) {
       pieces2.push(piece(horizontal[i2], top2, horizontal[i2 + 1], bottom));
     return pieces2;
   }
-  function drawForLine(from2, to2, line2) {
+  function drawForLine(from2, to2, line) {
     let top2 = 1e9, bottom = -1e9, horizontal = [];
     function addSpan(from3, fromOpen, to3, toOpen, dir) {
-      let fromCoords = view.coordsAtPos(from3, from3 == line2.to ? -2 : 2);
-      let toCoords = view.coordsAtPos(to3, to3 == line2.from ? 2 : -2);
+      let fromCoords = view.coordsAtPos(from3, from3 == line.to ? -2 : 2);
+      let toCoords = view.coordsAtPos(to3, to3 == line.from ? 2 : -2);
       top2 = Math.min(fromCoords.top, toCoords.top, top2);
       bottom = Math.max(fromCoords.bottom, toCoords.bottom, bottom);
       if (dir == Direction.LTR)
@@ -122251,7 +122254,7 @@ function rectanglesForRange(view, className, range) {
       else
         horizontal.push(!ltr && toOpen ? leftSide : toCoords.left, !ltr && fromOpen ? rightSide : fromCoords.right);
     }
-    let start = from2 !== null && from2 !== void 0 ? from2 : line2.from, end2 = to2 !== null && to2 !== void 0 ? to2 : line2.to;
+    let start = from2 !== null && from2 !== void 0 ? from2 : line.from, end2 = to2 !== null && to2 !== void 0 ? to2 : line.to;
     for (let r2 of view.visibleRanges)
       if (r2.to > start && r2.from < end2) {
         for (let pos = Math.max(r2.from, start), endPos = Math.min(r2.to, end2); ; ) {
@@ -122325,9 +122328,9 @@ class LayerView {
         }
       }
       while (old) {
-        let next = old.nextSibling;
+        let next2 = old.nextSibling;
         old.remove();
-        old = next;
+        old = next2;
       }
       this.drawn = markers;
     }
@@ -122689,8 +122692,8 @@ function specialCharPlugin() {
           let { doc: doc2 } = view.state;
           let code2 = codePointAt(m2[0], 0);
           if (code2 == 9) {
-            let line2 = doc2.lineAt(pos);
-            let size = view.state.tabSize, col = countColumn(line2.text, size, pos - line2.from);
+            let line = doc2.lineAt(pos);
+            let size = view.state.tabSize, col = countColumn(line.text, size, pos - line.from);
             return Decoration.replace({ widget: new TabWidget((size - col % size) * this.view.defaultCharacterWidth) });
           }
           return this.decorationCache[code2] || (this.decorationCache[code2] = Decoration.replace({ widget: new SpecialCharWidget(conf, code2) }));
@@ -122779,10 +122782,10 @@ const activeLineHighlighter = /* @__PURE__ */ ViewPlugin.fromClass(class {
   getDeco(view) {
     let lastLineStart = -1, deco = [];
     for (let r2 of view.state.selection.ranges) {
-      let line2 = view.lineBlockAt(r2.head);
-      if (line2.from > lastLineStart) {
-        deco.push(lineDeco.range(line2.from));
-        lastLineStart = line2.from;
+      let line = view.lineBlockAt(r2.head);
+      if (line.from > lastLineStart) {
+        deco.push(lineDeco.range(line.from));
+        lastLineStart = line.from;
       }
     }
     return Decoration.set(deco);
@@ -122828,20 +122831,20 @@ function rectangleFor(state2, a2, b2) {
   if (a2.off > MaxOff || b2.off > MaxOff || a2.col < 0 || b2.col < 0) {
     let startOff = Math.min(a2.off, b2.off), endOff = Math.max(a2.off, b2.off);
     for (let i2 = startLine; i2 <= endLine; i2++) {
-      let line2 = state2.doc.line(i2);
-      if (line2.length <= endOff)
-        ranges.push(EditorSelection.range(line2.from + startOff, line2.to + endOff));
+      let line = state2.doc.line(i2);
+      if (line.length <= endOff)
+        ranges.push(EditorSelection.range(line.from + startOff, line.to + endOff));
     }
   } else {
     let startCol = Math.min(a2.col, b2.col), endCol = Math.max(a2.col, b2.col);
     for (let i2 = startLine; i2 <= endLine; i2++) {
-      let line2 = state2.doc.line(i2);
-      let start = findColumn(line2.text, startCol, state2.tabSize, true);
+      let line = state2.doc.line(i2);
+      let start = findColumn(line.text, startCol, state2.tabSize, true);
       if (start < 0) {
-        ranges.push(EditorSelection.cursor(line2.to));
+        ranges.push(EditorSelection.cursor(line.to));
       } else {
-        let end2 = findColumn(line2.text, endCol, state2.tabSize);
-        ranges.push(EditorSelection.range(line2.from + start, line2.from + end2));
+        let end2 = findColumn(line.text, endCol, state2.tabSize);
+        ranges.push(EditorSelection.range(line.from + start, line.from + end2));
       }
     }
   }
@@ -122853,9 +122856,9 @@ function absoluteColumn(view, x2) {
 }
 function getPos(view, event) {
   let offset2 = view.posAtCoords({ x: event.clientX, y: event.clientY }, false);
-  let line2 = view.state.doc.lineAt(offset2), off = offset2 - line2.from;
-  let col = off > MaxOff ? -1 : off == line2.length ? absoluteColumn(view, event.clientX) : countColumn(line2.text, view.state.tabSize, offset2 - line2.from);
-  return { line: line2.number, col, off };
+  let line = view.state.doc.lineAt(offset2), off = offset2 - line.from;
+  let col = off > MaxOff ? -1 : off == line.length ? absoluteColumn(view, event.clientX) : countColumn(line.text, view.state.tabSize, offset2 - line.from);
+  return { line: line.number, col, off };
 }
 function rectangleSelectionStyle(view, event) {
   let start = getPos(view, event), startSel = view.state.selection;
@@ -123603,9 +123606,9 @@ class PanelGroup {
   }
 }
 function rm(node) {
-  let next = node.nextSibling;
+  let next2 = node.nextSibling;
   node.remove();
-  return next;
+  return next2;
 }
 const showPanel = /* @__PURE__ */ Facet.define({
   enables: panelPlugin
@@ -123701,22 +123704,22 @@ const gutterView = /* @__PURE__ */ ViewPlugin.fromClass(class {
     let lineClasses = RangeSet.iter(this.view.state.facet(gutterLineClass), this.view.viewport.from);
     let classSet = [];
     let contexts = this.gutters.map((gutter2) => new UpdateContext(gutter2, this.view.viewport, -this.view.documentPadding.top));
-    for (let line2 of this.view.viewportLineBlocks) {
+    for (let line of this.view.viewportLineBlocks) {
       let text;
-      if (Array.isArray(line2.type)) {
-        for (let b2 of line2.type)
+      if (Array.isArray(line.type)) {
+        for (let b2 of line.type)
           if (b2.type == BlockType.Text) {
             text = b2;
             break;
           }
       } else {
-        text = line2.type == BlockType.Text ? line2 : void 0;
+        text = line.type == BlockType.Text ? line : void 0;
       }
       if (!text)
         continue;
       if (classSet.length)
         classSet = [];
-      advanceCursor(lineClasses, classSet, line2.from);
+      advanceCursor(lineClasses, classSet, line.from);
       for (let cx of contexts)
         cx.line(this.view, text, classSet);
     }
@@ -123785,26 +123788,26 @@ class UpdateContext {
     this.i = 0;
     this.cursor = RangeSet.iter(gutter2.markers, viewport.from);
   }
-  line(view, line2, extraMarkers) {
+  line(view, line, extraMarkers) {
     let localMarkers = [];
-    advanceCursor(this.cursor, localMarkers, line2.from);
+    advanceCursor(this.cursor, localMarkers, line.from);
     if (extraMarkers.length)
       localMarkers = localMarkers.concat(extraMarkers);
-    let forLine = this.gutter.config.lineMarker(view, line2, localMarkers);
+    let forLine = this.gutter.config.lineMarker(view, line, localMarkers);
     if (forLine)
       localMarkers.unshift(forLine);
     let gutter2 = this.gutter;
     if (localMarkers.length == 0 && !gutter2.config.renderEmptyElements)
       return;
-    let above = line2.top - this.height;
+    let above = line.top - this.height;
     if (this.i == gutter2.elements.length) {
-      let newElt = new GutterElement(view, line2.height, above, localMarkers);
+      let newElt = new GutterElement(view, line.height, above, localMarkers);
       gutter2.elements.push(newElt);
       gutter2.dom.appendChild(newElt.dom);
     } else {
-      gutter2.elements[this.i].update(view, line2.height, above, localMarkers);
+      gutter2.elements[this.i].update(view, line.height, above, localMarkers);
     }
-    this.height = line2.bottom;
+    this.height = line.bottom;
     this.i++;
   }
   finish() {
@@ -123835,8 +123838,8 @@ class SingleGutterView {
         } else {
           y2 = event.clientY;
         }
-        let line2 = view.lineBlockAtHeight(y2 - view.documentTop);
-        if (config2.domEventHandlers[prop](view, line2, event))
+        let line = view.lineBlockAtHeight(y2 - view.documentTop);
+        if (config2.domEventHandlers[prop](view, line, event))
           event.preventDefault();
       });
     }
@@ -123898,9 +123901,9 @@ class GutterElement {
         skipTo = this.markers.length;
       }
       while (iOld < skipTo) {
-        let next = this.markers[iOld++];
-        if (next.toDOM) {
-          next.destroy(domPos);
+        let next2 = this.markers[iOld++];
+        if (next2.toDOM) {
+          next2.destroy(domPos);
           let after = domPos.nextSibling;
           domPos.remove();
           domPos = after;
@@ -123940,7 +123943,7 @@ const lineNumberConfig = /* @__PURE__ */ Facet.define({
         let result = Object.assign({}, a2);
         for (let event in b2) {
           let exists = result[event], add2 = b2[event];
-          result[event] = exists ? (view, line2, event2) => exists(view, line2, event2) || add2(view, line2, event2) : add2;
+          result[event] = exists ? (view, line, event2) => exists(view, line, event2) || add2(view, line, event2) : add2;
         }
         return result;
       }
@@ -123968,10 +123971,10 @@ const lineNumberGutter = /* @__PURE__ */ activeGutters.compute([lineNumberConfig
   markers(view) {
     return view.state.facet(lineNumberMarkers);
   },
-  lineMarker(view, line2, others) {
+  lineMarker(view, line, others) {
     if (others.some((m2) => m2.toDOM))
       return null;
-    return new NumberMarker(formatNumber(view, view.state.doc.lineAt(line2.from).number));
+    return new NumberMarker(formatNumber(view, view.state.doc.lineAt(line.from).number));
   },
   lineMarkerChange: (update) => update.startState.facet(lineNumberConfig) != update.state.facet(lineNumberConfig),
   initialSpacer(view) {
@@ -123990,9 +123993,9 @@ function lineNumbers(config2 = {}) {
     lineNumberGutter
   ];
 }
-function maxLineNumber(lines2) {
+function maxLineNumber(lines) {
   let last = 9;
-  while (last < lines2)
+  while (last < lines)
     last = last * 10 + 9;
   return last;
 }
@@ -124602,17 +124605,17 @@ class IndentContext {
   after the break is used.
   */
   lineAt(pos, bias = 1) {
-    let line2 = this.state.doc.lineAt(pos);
+    let line = this.state.doc.lineAt(pos);
     let { simulateBreak, simulateDoubleBreak } = this.options;
-    if (simulateBreak != null && simulateBreak >= line2.from && simulateBreak <= line2.to) {
+    if (simulateBreak != null && simulateBreak >= line.from && simulateBreak <= line.to) {
       if (simulateDoubleBreak && simulateBreak == pos)
         return { text: "", from: pos };
       else if (bias < 0 ? simulateBreak < pos : simulateBreak <= pos)
-        return { text: line2.text.slice(simulateBreak - line2.from), from: simulateBreak };
+        return { text: line.text.slice(simulateBreak - line.from), from: simulateBreak };
       else
-        return { text: line2.text.slice(0, simulateBreak - line2.from), from: line2.from };
+        return { text: line.text.slice(0, simulateBreak - line.from), from: line.from };
     }
-    return line2;
+    return line;
   }
   /**
   Get the text directly after `pos`, either the entire line
@@ -124639,8 +124642,8 @@ class IndentContext {
   Find the column position (taking tabs into account) of the given
   position in the given string.
   */
-  countColumn(line2, pos = line2.length) {
-    return countColumn(line2, this.state.tabSize, pos);
+  countColumn(line, pos = line.length) {
+    return countColumn(line, this.state.tabSize, pos);
   }
   /**
   Find the indentation column of the line at the given point.
@@ -124721,16 +124724,16 @@ class TreeIndentContext extends IndentContext {
   on if it is covered by another such node.
   */
   get baseIndent() {
-    let line2 = this.state.doc.lineAt(this.node.from);
+    let line = this.state.doc.lineAt(this.node.from);
     for (; ; ) {
-      let atBreak = this.node.resolve(line2.from);
+      let atBreak = this.node.resolve(line.from);
       while (atBreak.parent && atBreak.parent.from == atBreak.from)
         atBreak = atBreak.parent;
       if (isParent(atBreak, this.node))
         break;
-      line2 = this.state.doc.lineAt(atBreak.from);
+      line = this.state.doc.lineAt(atBreak.from);
     }
-    return this.lineIndent(line2.from);
+    return this.lineIndent(line.from);
   }
   /**
   Continue looking for indentations in the node's parent nodes,
@@ -124756,12 +124759,12 @@ function bracketedAligned(context2) {
   let openLine = context2.state.doc.lineAt(openToken.from);
   let lineEnd = sim == null || sim <= openLine.from ? openLine.to : Math.min(openLine.to, sim);
   for (let pos = openToken.to; ; ) {
-    let next = tree.childAfter(pos);
-    if (!next || next == last)
+    let next2 = tree.childAfter(pos);
+    if (!next2 || next2 == last)
       return null;
-    if (!next.type.isSkipped)
-      return next.from < lineEnd ? openToken : null;
-    pos = next.to;
+    if (!next2.type.isSkipped)
+      return next2.from < lineEnd ? openToken : null;
+    pos = next2.to;
   }
 }
 function delimitedIndent({ closing: closing2, align = true, units = 1 }) {
@@ -124790,25 +124793,25 @@ function indentOnInput() {
     let rules = tr.startState.languageDataAt("indentOnInput", tr.startState.selection.main.head);
     if (!rules.length)
       return tr;
-    let doc2 = tr.newDoc, { head } = tr.newSelection.main, line2 = doc2.lineAt(head);
-    if (head > line2.from + DontIndentBeyond)
+    let doc2 = tr.newDoc, { head } = tr.newSelection.main, line = doc2.lineAt(head);
+    if (head > line.from + DontIndentBeyond)
       return tr;
-    let lineStart = doc2.sliceString(line2.from, head);
+    let lineStart = doc2.sliceString(line.from, head);
     if (!rules.some((r2) => r2.test(lineStart)))
       return tr;
     let { state: state2 } = tr, last = -1, changes = [];
     for (let { head: head2 } of state2.selection.ranges) {
-      let line3 = state2.doc.lineAt(head2);
-      if (line3.from == last)
+      let line2 = state2.doc.lineAt(head2);
+      if (line2.from == last)
         continue;
-      last = line3.from;
-      let indent2 = getIndentation(state2, line3.from);
+      last = line2.from;
+      let indent2 = getIndentation(state2, line2.from);
       if (indent2 == null)
         continue;
-      let cur2 = /^\s*/.exec(line3.text)[0];
+      let cur2 = /^\s*/.exec(line2.text)[0];
       let norm = indentString(state2, indent2);
       if (cur2 != norm)
-        changes.push({ from: line3.from, to: line3.from + cur2.length, insert: norm });
+        changes.push({ from: line2.from, to: line2.from + cur2.length, insert: norm });
     }
     return changes.length ? [tr, { changes, sequential: true }] : tr;
   });
@@ -124858,13 +124861,13 @@ function mapRange(range, mapping) {
 const foldEffect = /* @__PURE__ */ StateEffect.define({ map: mapRange });
 const unfoldEffect = /* @__PURE__ */ StateEffect.define({ map: mapRange });
 function selectedLines(view) {
-  let lines2 = [];
+  let lines = [];
   for (let { head } of view.state.selection.ranges) {
-    if (lines2.some((l2) => l2.from <= head && l2.to >= head))
+    if (lines.some((l2) => l2.from <= head && l2.to >= head))
       continue;
-    lines2.push(view.lineBlockAt(head));
+    lines.push(view.lineBlockAt(head));
   }
-  return lines2;
+  return lines;
 }
 const foldState = /* @__PURE__ */ StateField.define({
   create() {
@@ -124939,8 +124942,8 @@ function maybeEnable(state2, other) {
   return state2.field(foldState, false) ? other : other.concat(StateEffect.appendConfig.of(codeFolding()));
 }
 const foldCode = (view) => {
-  for (let line2 of selectedLines(view)) {
-    let range = foldable(view.state, line2.from, line2.to);
+  for (let line of selectedLines(view)) {
+    let range = foldable(view.state, line.from, line.to);
     if (range) {
       view.dispatch({ effects: maybeEnable(view.state, [foldEffect.of(range), announceFold(view, range)]) });
       return true;
@@ -124952,8 +124955,8 @@ const unfoldCode = (view) => {
   if (!view.state.field(foldState, false))
     return false;
   let effects = [];
-  for (let line2 of selectedLines(view)) {
-    let folded = findFold(view.state, line2.from, line2.to);
+  for (let line of selectedLines(view)) {
+    let folded = findFold(view.state, line.from, line.to);
     if (folded)
       effects.push(unfoldEffect.of(folded), announceFold(view, folded, false));
   }
@@ -124968,10 +124971,10 @@ function announceFold(view, range, fold = true) {
 const foldAll = (view) => {
   let { state: state2 } = view, effects = [];
   for (let pos = 0; pos < state2.doc.length; ) {
-    let line2 = view.lineBlockAt(pos), range = foldable(state2, line2.from, line2.to);
+    let line = view.lineBlockAt(pos), range = foldable(state2, line.from, line.to);
     if (range)
       effects.push(foldEffect.of(range));
-    pos = (range ? view.lineBlockAt(range.to) : line2).to + 1;
+    pos = (range ? view.lineBlockAt(range.to) : line).to + 1;
   }
   if (effects.length)
     view.dispatch({ effects: maybeEnable(view.state, effects) });
@@ -125013,8 +125016,8 @@ const foldWidget = /* @__PURE__ */ Decoration.replace({ widget: /* @__PURE__ */ 
   toDOM(view) {
     let { state: state2 } = view, conf = state2.facet(foldConfig);
     let onclick = (event) => {
-      let line2 = view.lineBlockAt(view.posAtDOM(event.target));
-      let folded = findFold(view.state, line2.from, line2.to);
+      let line = view.lineBlockAt(view.posAtDOM(event.target));
+      let folded = findFold(view.state, line.from, line.to);
       if (folded)
         view.dispatch({ effects: unfoldEffect.of(folded) });
       event.preventDefault();
@@ -125069,10 +125072,10 @@ function foldGutter(config2 = {}) {
     }
     buildMarkers(view) {
       let builder = new RangeSetBuilder();
-      for (let line2 of view.viewportLineBlocks) {
-        let mark = findFold(view.state, line2.from, line2.to) ? canUnfold : foldable(view.state, line2.from, line2.to) ? canFold : null;
+      for (let line of view.viewportLineBlocks) {
+        let mark = findFold(view.state, line.from, line.to) ? canUnfold : foldable(view.state, line.from, line.to) ? canFold : null;
         if (mark)
-          builder.add(line2.from, line2.from, mark);
+          builder.add(line.from, line.from, mark);
       }
       return builder.finish();
     }
@@ -125089,15 +125092,15 @@ function foldGutter(config2 = {}) {
       initialSpacer() {
         return new FoldMarker(fullConfig, false);
       },
-      domEventHandlers: Object.assign(Object.assign({}, domEventHandlers), { click: (view, line2, event) => {
-        if (domEventHandlers.click && domEventHandlers.click(view, line2, event))
+      domEventHandlers: Object.assign(Object.assign({}, domEventHandlers), { click: (view, line, event) => {
+        if (domEventHandlers.click && domEventHandlers.click(view, line, event))
           return true;
-        let folded = findFold(view.state, line2.from, line2.to);
+        let folded = findFold(view.state, line.from, line.to);
         if (folded) {
           view.dispatch({ effects: unfoldEffect.of(folded) });
           return true;
         }
-        let range = foldable(view.state, line2.from, line2.to);
+        let range = foldable(view.state, line.from, line.to);
         if (range) {
           view.dispatch({ effects: foldEffect.of(range) });
           return true;
@@ -125520,9 +125523,9 @@ class CompletionContext {
   cursor.
   */
   matchBefore(expr) {
-    let line2 = this.state.doc.lineAt(this.pos);
-    let start = Math.max(line2.from, this.pos - 250);
-    let str = line2.text.slice(start - line2.from, this.pos - line2.from);
+    let line = this.state.doc.lineAt(this.pos);
+    let start = Math.max(line.from, this.pos - 250);
+    let str = line.text.slice(start - line.from, this.pos - line.from);
     let found = str.search(ensureAnchor(expr, false));
     return found < 0 ? null : { from: start + found, to: this.pos, text: str.slice(found) };
   }
@@ -125678,10 +125681,10 @@ class FuzzyMatcher {
     let len = chars.length, anyTo = 0;
     if (direct < 0) {
       for (let i2 = 0, e2 = Math.min(word.length, 200); i2 < e2 && anyTo < len; ) {
-        let next = codePointAt(word, i2);
-        if (next == chars[anyTo] || next == folded[anyTo])
+        let next2 = codePointAt(word, i2);
+        if (next2 == chars[anyTo] || next2 == folded[anyTo])
           any[anyTo++] = i2;
-        i2 += codePointSize(next);
+        i2 += codePointSize(next2);
       }
       if (anyTo < len)
         return null;
@@ -125691,12 +125694,12 @@ class FuzzyMatcher {
     let adjacentTo = 0, adjacentStart = -1, adjacentEnd = -1;
     let hasLower = /[a-z]/.test(word), wordAdjacent = true;
     for (let i2 = 0, e2 = Math.min(word.length, 200), prevType = 0; i2 < e2 && byWordTo < len; ) {
-      let next = codePointAt(word, i2);
+      let next2 = codePointAt(word, i2);
       if (direct < 0) {
-        if (preciseTo < len && next == chars[preciseTo])
+        if (preciseTo < len && next2 == chars[preciseTo])
           precise[preciseTo++] = i2;
         if (adjacentTo < len) {
-          if (next == chars[adjacentTo] || next == folded[adjacentTo]) {
+          if (next2 == chars[adjacentTo] || next2 == folded[adjacentTo]) {
             if (adjacentTo == 0)
               adjacentStart = i2;
             adjacentEnd = i2 + 1;
@@ -125706,15 +125709,15 @@ class FuzzyMatcher {
           }
         }
       }
-      let ch2, type = next < 255 ? next >= 48 && next <= 57 || next >= 97 && next <= 122 ? 2 : next >= 65 && next <= 90 ? 1 : 0 : (ch2 = fromCodePoint(next)) != ch2.toLowerCase() ? 1 : ch2 != ch2.toUpperCase() ? 2 : 0;
+      let ch2, type = next2 < 255 ? next2 >= 48 && next2 <= 57 || next2 >= 97 && next2 <= 122 ? 2 : next2 >= 65 && next2 <= 90 ? 1 : 0 : (ch2 = fromCodePoint(next2)) != ch2.toLowerCase() ? 1 : ch2 != ch2.toUpperCase() ? 2 : 0;
       if (!i2 || type == 1 && hasLower || prevType == 0 && type != 0) {
-        if (chars[byWordTo] == next || folded[byWordTo] == next && (byWordFolded = true))
+        if (chars[byWordTo] == next2 || folded[byWordTo] == next2 && (byWordFolded = true))
           byWord[byWordTo++] = i2;
         else if (byWord.length)
           wordAdjacent = false;
       }
       prevType = type;
-      i2 += codePointSize(next);
+      i2 += codePointSize(next2);
     }
     if (byWordTo == len && byWord[0] == 0 && wordAdjacent)
       return this.result(-100 + (byWordFolded ? -200 : 0), byWord, word);
@@ -126636,9 +126639,9 @@ const baseTheme$3 = /* @__PURE__ */ EditorView.baseTheme({
   }
 });
 class FieldPos {
-  constructor(field, line2, from, to) {
+  constructor(field, line, from, to) {
     this.field = field;
-    this.line = line2;
+    this.line = line;
     this.from = from;
     this.to = to;
   }
@@ -126656,32 +126659,32 @@ class FieldRange {
   }
 }
 class Snippet {
-  constructor(lines2, fieldPositions) {
-    this.lines = lines2;
+  constructor(lines, fieldPositions) {
+    this.lines = lines;
     this.fieldPositions = fieldPositions;
   }
   instantiate(state2, pos) {
     let text = [], lineStart = [pos];
     let lineObj = state2.doc.lineAt(pos), baseIndent = /^\s*/.exec(lineObj.text)[0];
-    for (let line2 of this.lines) {
+    for (let line of this.lines) {
       if (text.length) {
-        let indent2 = baseIndent, tabs = /^\t*/.exec(line2)[0].length;
+        let indent2 = baseIndent, tabs = /^\t*/.exec(line)[0].length;
         for (let i2 = 0; i2 < tabs; i2++)
           indent2 += state2.facet(indentUnit);
         lineStart.push(pos + indent2.length - tabs);
-        line2 = indent2 + line2.slice(tabs);
+        line = indent2 + line.slice(tabs);
       }
-      text.push(line2);
-      pos += line2.length + 1;
+      text.push(line);
+      pos += line.length + 1;
     }
     let ranges = this.fieldPositions.map((pos2) => new FieldRange(pos2.field, lineStart[pos2.line] + pos2.from, lineStart[pos2.line] + pos2.to));
     return { text, ranges };
   }
   static parse(template) {
     let fields = [];
-    let lines2 = [], positions = [], m2;
-    for (let line2 of template.split(/\r\n?|\n/)) {
-      while (m2 = /[#$]\{(?:(\d+)(?::([^}]*))?|([^}]*))\}/.exec(line2)) {
+    let lines = [], positions = [], m2;
+    for (let line of template.split(/\r\n?|\n/)) {
+      while (m2 = /[#$]\{(?:(\d+)(?::([^}]*))?|([^}]*))\}/.exec(line)) {
         let seq = m2[1] ? +m2[1] : null, name2 = m2[2] || m2[3] || "", found = -1;
         for (let i2 = 0; i2 < fields.length; i2++) {
           if (seq != null ? fields[i2].seq == seq : name2 ? fields[i2].name == name2 : false)
@@ -126697,20 +126700,20 @@ class Snippet {
             if (pos.field >= found)
               pos.field++;
         }
-        positions.push(new FieldPos(found, lines2.length, m2.index, m2.index + name2.length));
-        line2 = line2.slice(0, m2.index) + name2 + line2.slice(m2.index + m2[0].length);
+        positions.push(new FieldPos(found, lines.length, m2.index, m2.index + name2.length));
+        line = line.slice(0, m2.index) + name2 + line.slice(m2.index + m2[0].length);
       }
-      for (let esc; esc = /\\([{}])/.exec(line2); ) {
-        line2 = line2.slice(0, esc.index) + esc[1] + line2.slice(esc.index + esc[0].length);
+      for (let esc; esc = /\\([{}])/.exec(line); ) {
+        line = line.slice(0, esc.index) + esc[1] + line.slice(esc.index + esc[0].length);
         for (let pos of positions)
-          if (pos.line == lines2.length && pos.from > esc.index) {
+          if (pos.line == lines.length && pos.from > esc.index) {
             pos.from--;
             pos.to--;
           }
       }
-      lines2.push(line2);
+      lines.push(line);
     }
-    return new Snippet(lines2, positions);
+    return new Snippet(lines, positions);
   }
 }
 let fieldMarker = /* @__PURE__ */ Decoration.widget({ widget: /* @__PURE__ */ new class extends WidgetType {
@@ -126797,10 +126800,10 @@ function moveField(dir) {
     let active = state2.field(snippetState, false);
     if (!active || dir < 0 && active.active == 0)
       return false;
-    let next = active.active + dir, last = dir > 0 && !active.ranges.some((r2) => r2.field == next + dir);
+    let next2 = active.active + dir, last = dir > 0 && !active.ranges.some((r2) => r2.field == next2 + dir);
     dispatch(state2.update({
-      selection: fieldSelection(active.ranges, next),
-      effects: setActive.of(last ? null : new ActiveSnippet(active.ranges, next))
+      selection: fieldSelection(active.ranges, next2),
+      effects: setActive.of(last ? null : new ActiveSnippet(active.ranges, next2))
     }));
     return true;
   };
@@ -126955,8 +126958,8 @@ function closedBracketAt(state2, pos) {
   return found;
 }
 function nextChar(doc2, pos) {
-  let next = doc2.sliceString(pos, pos + 2);
-  return next.slice(0, codePointSize(codePointAt(next, 0)));
+  let next2 = doc2.sliceString(pos, pos + 2);
+  return next2.slice(0, codePointSize(codePointAt(next2, 0)));
 }
 function prevChar(doc2, pos) {
   let prev = doc2.sliceString(pos - 2, pos);
@@ -126970,8 +126973,8 @@ function handleOpen(state2, open2, close, closeBefore) {
         effects: closeBracketEffect.of(range.to + open2.length),
         range: EditorSelection.range(range.anchor + open2.length, range.head + open2.length)
       };
-    let next = nextChar(state2.doc, range.head);
-    if (!next || /\s/.test(next) || closeBefore.indexOf(next) > -1)
+    let next2 = nextChar(state2.doc, range.head);
+    if (!next2 || /\s/.test(next2) || closeBefore.indexOf(next2) > -1)
       return {
         changes: { insert: open2 + close, from: range.head },
         effects: closeBracketEffect.of(range.head + open2.length),
@@ -127005,8 +127008,8 @@ function handleSame(state2, token, allowTriple, config2) {
         effects: closeBracketEffect.of(range.to + token.length),
         range: EditorSelection.range(range.anchor + token.length, range.head + token.length)
       };
-    let pos = range.head, next = nextChar(state2.doc, pos), start;
-    if (next == token) {
+    let pos = range.head, next2 = nextChar(state2.doc, pos), start;
+    if (next2 == token) {
       if (nodeStart(state2, pos)) {
         return {
           changes: { insert: token + token, from: pos },
@@ -127026,7 +127029,7 @@ function handleSame(state2, token, allowTriple, config2) {
         effects: closeBracketEffect.of(pos + token.length),
         range: EditorSelection.cursor(pos + token.length)
       };
-    } else if (state2.charCategorizer(pos)(next) != CharCategory.Word) {
+    } else if (state2.charCategorizer(pos)(next2) != CharCategory.Word) {
       if (canStartStringAt(state2, pos, stringPrefixes) > -1 && !probablyInString(state2, pos, token, stringPrefixes))
         return {
           changes: { insert: token + token, from: pos },
@@ -127410,8 +127413,8 @@ const snippets$1 = [
 const globalCompletion = /* @__PURE__ */ ifNotIn(dontComplete$1, /* @__PURE__ */ completeFromList(/* @__PURE__ */ globals.concat(snippets$1)));
 function indentBody(context2, node) {
   let base2 = context2.lineIndent(node.from);
-  let line2 = context2.lineAt(context2.pos, -1), to = line2.from + line2.text.length;
-  if (!/\S/.test(line2.text) && context2.node.to < to + 100 && !/\S/.test(context2.state.sliceDoc(to, context2.node.to)) && context2.lineIndent(context2.pos, -1) <= base2)
+  let line = context2.lineAt(context2.pos, -1), to = line.from + line.text.length;
+  if (!/\S/.test(line.text) && context2.node.to < to + 100 && !/\S/.test(context2.state.sliceDoc(to, context2.node.to)) && context2.lineIndent(context2.pos, -1) <= base2)
     return null;
   if (/^\s*(else:|elif |except |finally:)/.test(context2.textAfter) && context2.lineIndent(context2.pos, -1) > base2)
     return null;
@@ -127504,7 +127507,7 @@ function _objectWithoutPropertiesLoose(source, excluded) {
   return target2;
 }
 const toggleComment = (target2) => {
-  let { state: state2 } = target2, line2 = state2.doc.lineAt(state2.selection.main.head), config2 = getConfig(target2.state, line2.from);
+  let { state: state2 } = target2, line = state2.doc.lineAt(state2.selection.main.head), config2 = getConfig(target2.state, line.from);
   return config2.line ? toggleLineComment(target2) : config2.block ? toggleBlockCommentByLine(target2) : false;
 };
 function command(f2, option) {
@@ -127608,47 +127611,47 @@ function changeBlockComment(option, state2, ranges = state2.selection.ranges) {
   return null;
 }
 function changeLineComment(option, state2, ranges = state2.selection.ranges) {
-  let lines2 = [];
+  let lines = [];
   let prevLine = -1;
   for (let { from, to } of ranges) {
-    let startI = lines2.length, minIndent = 1e9;
+    let startI = lines.length, minIndent = 1e9;
     for (let pos = from; pos <= to; ) {
-      let line2 = state2.doc.lineAt(pos);
-      if (line2.from > prevLine && (from == to || to > line2.from)) {
-        prevLine = line2.from;
-        let token = getConfig(state2, line2.from).line;
+      let line = state2.doc.lineAt(pos);
+      if (line.from > prevLine && (from == to || to > line.from)) {
+        prevLine = line.from;
+        let token = getConfig(state2, line.from).line;
         if (!token)
           continue;
-        let indent2 = /^\s*/.exec(line2.text)[0].length;
-        let empty2 = indent2 == line2.length;
-        let comment2 = line2.text.slice(indent2, indent2 + token.length) == token ? indent2 : -1;
-        if (indent2 < line2.text.length && indent2 < minIndent)
+        let indent2 = /^\s*/.exec(line.text)[0].length;
+        let empty2 = indent2 == line.length;
+        let comment2 = line.text.slice(indent2, indent2 + token.length) == token ? indent2 : -1;
+        if (indent2 < line.text.length && indent2 < minIndent)
           minIndent = indent2;
-        lines2.push({ line: line2, comment: comment2, token, indent: indent2, empty: empty2, single: false });
+        lines.push({ line, comment: comment2, token, indent: indent2, empty: empty2, single: false });
       }
-      pos = line2.to + 1;
+      pos = line.to + 1;
     }
     if (minIndent < 1e9) {
-      for (let i2 = startI; i2 < lines2.length; i2++)
-        if (lines2[i2].indent < lines2[i2].line.text.length)
-          lines2[i2].indent = minIndent;
+      for (let i2 = startI; i2 < lines.length; i2++)
+        if (lines[i2].indent < lines[i2].line.text.length)
+          lines[i2].indent = minIndent;
     }
-    if (lines2.length == startI + 1)
-      lines2[startI].single = true;
+    if (lines.length == startI + 1)
+      lines[startI].single = true;
   }
-  if (option != 2 && lines2.some((l2) => l2.comment < 0 && (!l2.empty || l2.single))) {
+  if (option != 2 && lines.some((l2) => l2.comment < 0 && (!l2.empty || l2.single))) {
     let changes = [];
-    for (let { line: line2, token, indent: indent2, empty: empty2, single } of lines2)
+    for (let { line, token, indent: indent2, empty: empty2, single } of lines)
       if (single || !empty2)
-        changes.push({ from: line2.from + indent2, insert: token + " " });
+        changes.push({ from: line.from + indent2, insert: token + " " });
     let changeSet = state2.changes(changes);
     return { changes: changeSet, selection: state2.selection.map(changeSet, 1) };
-  } else if (option != 1 && lines2.some((l2) => l2.comment >= 0)) {
+  } else if (option != 1 && lines.some((l2) => l2.comment >= 0)) {
     let changes = [];
-    for (let { line: line2, comment: comment2, token } of lines2)
+    for (let { line, comment: comment2, token } of lines)
       if (comment2 >= 0) {
-        let from = line2.from + comment2, to = from + token.length;
-        if (line2.text[to - line2.from] == " ")
+        let from = line.from + comment2, to = from + token.length;
+        if (line.text[to - line.from] == " ")
           to++;
         changes.push({ from, to });
       }
@@ -127967,13 +127970,13 @@ function moveBySyntax(state2, start, forward) {
   let pos = syntaxTree(state2).resolveInner(start.head);
   let bracketProp = forward ? NodeProp.closedBy : NodeProp.openedBy;
   for (let at2 = start.head; ; ) {
-    let next = forward ? pos.childAfter(at2) : pos.childBefore(at2);
-    if (!next)
+    let next2 = forward ? pos.childAfter(at2) : pos.childBefore(at2);
+    if (!next2)
       break;
-    if (interestingNode(state2, next, bracketProp))
-      pos = next;
+    if (interestingNode(state2, next2, bracketProp))
+      pos = next2;
     else
-      at2 = forward ? next.to : next.from;
+      at2 = forward ? next2.to : next2.from;
   }
   let bracket2 = pos.type.prop(bracketProp), match, newPos2;
   if (bracket2 && (match = forward ? matchBrackets(state2, pos.from, 1) : matchBrackets(state2, pos.to, -1)) && match.matched)
@@ -128037,13 +128040,13 @@ function cursorByPage(view, forward) {
 const cursorPageUp = (view) => cursorByPage(view, false);
 const cursorPageDown = (view) => cursorByPage(view, true);
 function moveByLineBoundary(view, start, forward) {
-  let line2 = view.lineBlockAt(start.head), moved = view.moveToLineBoundary(start, forward);
-  if (moved.head == start.head && moved.head != (forward ? line2.to : line2.from))
+  let line = view.lineBlockAt(start.head), moved = view.moveToLineBoundary(start, forward);
+  if (moved.head == start.head && moved.head != (forward ? line.to : line.from))
     moved = view.moveToLineBoundary(start, forward, false);
-  if (!forward && moved.head == line2.from && line2.length) {
-    let space2 = /^\s*/.exec(view.state.sliceDoc(line2.from, Math.min(line2.from + 100, line2.to)))[0].length;
-    if (space2 && start.head != line2.from + space2)
-      moved = EditorSelection.cursor(line2.from + space2);
+  if (!forward && moved.head == line.from && line.length) {
+    let space2 = /^\s*/.exec(view.state.sliceDoc(line.from, Math.min(line.from + 100, line.to)))[0].length;
+    if (space2 && start.head != line.from + space2)
+      moved = EditorSelection.cursor(line.from + space2);
   }
   return moved;
 }
@@ -128195,8 +128198,8 @@ function skipAtomic(target2, pos, forward) {
   return pos;
 }
 const deleteByChar = (target2, forward) => deleteBy(target2, (pos) => {
-  let { state: state2 } = target2, line2 = state2.doc.lineAt(pos), before, targetPos;
-  if (!forward && pos > line2.from && pos < line2.from + 200 && !/[^ \t]/.test(before = line2.text.slice(0, pos - line2.from))) {
+  let { state: state2 } = target2, line = state2.doc.lineAt(pos), before, targetPos;
+  if (!forward && pos > line.from && pos < line.from + 200 && !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
     if (before[before.length - 1] == "	")
       return pos - 1;
     let col = countColumn(before, state2.tabSize), drop = col % getIndentUnit(state2) || getIndentUnit(state2);
@@ -128204,8 +128207,8 @@ const deleteByChar = (target2, forward) => deleteBy(target2, (pos) => {
       pos--;
     targetPos = pos;
   } else {
-    targetPos = findClusterBreak(line2.text, pos - line2.from, forward, forward) + line2.from;
-    if (targetPos == pos && line2.number != (forward ? state2.doc.lines : 1))
+    targetPos = findClusterBreak(line.text, pos - line.from, forward, forward) + line.from;
+    if (targetPos == pos && line.number != (forward ? state2.doc.lines : 1))
       targetPos += forward ? 1 : -1;
   }
   return targetPos;
@@ -128213,22 +128216,22 @@ const deleteByChar = (target2, forward) => deleteBy(target2, (pos) => {
 const deleteCharBackward = (view) => deleteByChar(view, false);
 const deleteCharForward = (view) => deleteByChar(view, true);
 const deleteByGroup = (target2, forward) => deleteBy(target2, (start) => {
-  let pos = start, { state: state2 } = target2, line2 = state2.doc.lineAt(pos);
+  let pos = start, { state: state2 } = target2, line = state2.doc.lineAt(pos);
   let categorize = state2.charCategorizer(pos);
   for (let cat = null; ; ) {
-    if (pos == (forward ? line2.to : line2.from)) {
-      if (pos == start && line2.number != (forward ? state2.doc.lines : 1))
+    if (pos == (forward ? line.to : line.from)) {
+      if (pos == start && line.number != (forward ? state2.doc.lines : 1))
         pos += forward ? 1 : -1;
       break;
     }
-    let next = findClusterBreak(line2.text, pos - line2.from, forward) + line2.from;
-    let nextChar2 = line2.text.slice(Math.min(pos, next) - line2.from, Math.max(pos, next) - line2.from);
+    let next2 = findClusterBreak(line.text, pos - line.from, forward) + line.from;
+    let nextChar2 = line.text.slice(Math.min(pos, next2) - line.from, Math.max(pos, next2) - line.from);
     let nextCat = categorize(nextChar2);
     if (cat != null && nextCat != cat)
       break;
     if (nextChar2 != " " || pos != start)
       cat = nextCat;
-    pos = next;
+    pos = next2;
   }
   return pos;
 });
@@ -128260,9 +128263,9 @@ const transposeChars = ({ state: state2, dispatch }) => {
   let changes = state2.changeByRange((range) => {
     if (!range.empty || range.from == 0 || range.from == state2.doc.length)
       return { range };
-    let pos = range.from, line2 = state2.doc.lineAt(pos);
-    let from = pos == line2.from ? pos - 1 : findClusterBreak(line2.text, pos - line2.from, false) + line2.from;
-    let to = pos == line2.to ? pos + 1 : findClusterBreak(line2.text, pos - line2.from, true) + line2.from;
+    let pos = range.from, line = state2.doc.lineAt(pos);
+    let from = pos == line.from ? pos - 1 : findClusterBreak(line.text, pos - line.from, false) + line.from;
+    let to = pos == line.to ? pos + 1 : findClusterBreak(line.text, pos - line.from, true) + line.from;
     return {
       changes: { from, to, insert: state2.doc.slice(pos, to).append(state2.doc.slice(from, pos)) },
       range: EditorSelection.cursor(to)
@@ -128366,23 +128369,23 @@ function newlineAndIndent(atEof) {
     if (state2.readOnly)
       return false;
     let changes = state2.changeByRange((range) => {
-      let { from, to } = range, line2 = state2.doc.lineAt(from);
+      let { from, to } = range, line = state2.doc.lineAt(from);
       let explode = !atEof && from == to && isBetweenBrackets(state2, from);
       if (atEof)
-        from = to = (to <= line2.to ? line2 : state2.doc.lineAt(to)).to;
+        from = to = (to <= line.to ? line : state2.doc.lineAt(to)).to;
       let cx = new IndentContext(state2, { simulateBreak: from, simulateDoubleBreak: !!explode });
       let indent2 = getIndentation(cx, from);
       if (indent2 == null)
         indent2 = /^\s*/.exec(state2.doc.lineAt(from).text)[0].length;
-      while (to < line2.to && /\s/.test(line2.text[to - line2.from]))
+      while (to < line.to && /\s/.test(line.text[to - line.from]))
         to++;
       if (explode)
         ({ from, to } = explode);
-      else if (from > line2.from && from < line2.from + 100 && !/\S/.test(line2.text.slice(0, from)))
-        from = line2.from;
+      else if (from > line.from && from < line.from + 100 && !/\S/.test(line.text.slice(0, from)))
+        from = line.from;
       let insert2 = ["", indentString(state2, indent2)];
       if (explode)
-        insert2.push(indentString(state2, cx.lineIndent(line2.from, -1)));
+        insert2.push(indentString(state2, cx.lineIndent(line.from, -1)));
       return {
         changes: { from, to, insert: Text.of(insert2) },
         range: EditorSelection.cursor(from + 1 + insert2[1].length)
@@ -128397,12 +128400,12 @@ function changeBySelectedLine(state2, f2) {
   return state2.changeByRange((range) => {
     let changes = [];
     for (let pos = range.from; pos <= range.to; ) {
-      let line2 = state2.doc.lineAt(pos);
-      if (line2.number > atLine && (range.empty || range.to > line2.from)) {
-        f2(line2, changes, range);
-        atLine = line2.number;
+      let line = state2.doc.lineAt(pos);
+      if (line.number > atLine && (range.empty || range.to > line.from)) {
+        f2(line, changes, range);
+        atLine = line.number;
       }
-      pos = line2.to + 1;
+      pos = line.to + 1;
     }
     let changeSet = state2.changes(changes);
     return {
@@ -128419,17 +128422,17 @@ const indentSelection = ({ state: state2, dispatch }) => {
     let found = updated[start];
     return found == null ? -1 : found;
   } });
-  let changes = changeBySelectedLine(state2, (line2, changes2, range) => {
-    let indent2 = getIndentation(context2, line2.from);
+  let changes = changeBySelectedLine(state2, (line, changes2, range) => {
+    let indent2 = getIndentation(context2, line.from);
     if (indent2 == null)
       return;
-    if (!/\S/.test(line2.text))
+    if (!/\S/.test(line.text))
       indent2 = 0;
-    let cur2 = /^\s*/.exec(line2.text)[0];
+    let cur2 = /^\s*/.exec(line.text)[0];
     let norm = indentString(state2, indent2);
-    if (cur2 != norm || range.from < line2.from + cur2.length) {
-      updated[line2.from] = indent2;
-      changes2.push({ from: line2.from, to: line2.from + cur2.length, insert: norm });
+    if (cur2 != norm || range.from < line.from + cur2.length) {
+      updated[line.from] = indent2;
+      changes2.push({ from: line.from, to: line.from + cur2.length, insert: norm });
     }
   });
   if (!changes.changes.empty)
@@ -128439,23 +128442,23 @@ const indentSelection = ({ state: state2, dispatch }) => {
 const indentMore = ({ state: state2, dispatch }) => {
   if (state2.readOnly)
     return false;
-  dispatch(state2.update(changeBySelectedLine(state2, (line2, changes) => {
-    changes.push({ from: line2.from, insert: state2.facet(indentUnit) });
+  dispatch(state2.update(changeBySelectedLine(state2, (line, changes) => {
+    changes.push({ from: line.from, insert: state2.facet(indentUnit) });
   }), { userEvent: "input.indent" }));
   return true;
 };
 const indentLess = ({ state: state2, dispatch }) => {
   if (state2.readOnly)
     return false;
-  dispatch(state2.update(changeBySelectedLine(state2, (line2, changes) => {
-    let space2 = /^\s*/.exec(line2.text)[0];
+  dispatch(state2.update(changeBySelectedLine(state2, (line, changes) => {
+    let space2 = /^\s*/.exec(line.text)[0];
     if (!space2)
       return;
     let col = countColumn(space2, state2.tabSize), keep = 0;
     let insert2 = indentString(state2, Math.max(0, col - getIndentUnit(state2)));
     while (keep < space2.length && keep < insert2.length && space2.charCodeAt(keep) == insert2.charCodeAt(keep))
       keep++;
-    changes.push({ from: line2.from + keep, to: line2.from + space2.length, insert: insert2.slice(keep) });
+    changes.push({ from: line.from + keep, to: line.from + space2.length, insert: insert2.slice(keep) });
   }), { userEvent: "delete.dedent" }));
   return true;
 };
@@ -128526,11 +128529,11 @@ function crelt() {
   var elt = arguments[0];
   if (typeof elt == "string")
     elt = document.createElement(elt);
-  var i2 = 1, next = arguments[1];
-  if (next && typeof next == "object" && next.nodeType == null && !Array.isArray(next)) {
-    for (var name2 in next)
-      if (Object.prototype.hasOwnProperty.call(next, name2)) {
-        var value = next[name2];
+  var i2 = 1, next2 = arguments[1];
+  if (next2 && typeof next2 == "object" && next2.nodeType == null && !Array.isArray(next2)) {
+    for (var name2 in next2)
+      if (Object.prototype.hasOwnProperty.call(next2, name2)) {
+        var value = next2[name2];
         if (typeof value == "string")
           elt.setAttribute(name2, value);
         else if (value != null)
@@ -128612,13 +128615,13 @@ class SearchCursor {
   */
   nextOverlapping() {
     for (; ; ) {
-      let next = this.peek();
-      if (next < 0) {
+      let next2 = this.peek();
+      if (next2 < 0) {
         this.done = true;
         return this;
       }
-      let str = fromCodePoint(next), start = this.bufferStart + this.bufferPos;
-      this.bufferPos += codePointSize(next);
+      let str = fromCodePoint(next2), start = this.bufferStart + this.bufferPos;
+      this.bufferPos += codePointSize(next2);
       let norm = this.normalize(str);
       for (let i2 = 0, pos = start; ; i2++) {
         let code2 = norm.charCodeAt(i2);
@@ -128821,8 +128824,8 @@ function validRegExp(source) {
 function toCharEnd(text, pos) {
   if (pos >= text.length)
     return pos;
-  let line2 = text.lineAt(pos), next;
-  while (pos < line2.to && (next = line2.text.charCodeAt(pos - line2.from)) >= 56320 && next < 57344)
+  let line = text.lineAt(pos), next2;
+  while (pos < line.to && (next2 = line.text.charCodeAt(pos - line.from)) >= 56320 && next2 < 57344)
     pos++;
   return pos;
 }
@@ -128852,16 +128855,16 @@ function createLineDialog(view) {
     let { state: state2 } = view, startLine = state2.doc.lineAt(state2.selection.main.head);
     let [, sign2, ln, cl2, percent] = match;
     let col = cl2 ? +cl2.slice(1) : 0;
-    let line2 = ln ? +ln : startLine.number;
+    let line = ln ? +ln : startLine.number;
     if (ln && percent) {
-      let pc2 = line2 / 100;
+      let pc2 = line / 100;
       if (sign2)
         pc2 = pc2 * (sign2 == "-" ? -1 : 1) + startLine.number / state2.doc.lines;
-      line2 = Math.round(state2.doc.lines * pc2);
+      line = Math.round(state2.doc.lines * pc2);
     } else if (ln && sign2) {
-      line2 = line2 * (sign2 == "-" ? -1 : 1) + startLine.number;
+      line = line * (sign2 == "-" ? -1 : 1) + startLine.number;
     }
-    let docLine = state2.doc.line(Math.max(1, Math.min(state2.doc.lines, line2)));
+    let docLine = state2.doc.line(Math.max(1, Math.min(state2.doc.lines, line)));
     view.dispatch({
       effects: dialogEffect.of(false),
       selection: EditorSelection.cursor(docLine.from + Math.max(0, Math.min(col, docLine.length))),
@@ -129280,13 +129283,13 @@ function searchCommand(f2) {
 }
 const findNext = /* @__PURE__ */ searchCommand((view, { query: query2 }) => {
   let { to } = view.state.selection.main;
-  let next = query2.nextMatch(view.state, to, to);
-  if (!next)
+  let next2 = query2.nextMatch(view.state, to, to);
+  if (!next2)
     return false;
   view.dispatch({
-    selection: { anchor: next.from, head: next.to },
+    selection: { anchor: next2.from, head: next2.to },
     scrollIntoView: true,
-    effects: announceMatch(view, next),
+    effects: announceMatch(view, next2),
     userEvent: "select.search"
   });
   return true;
@@ -129337,21 +129340,21 @@ const replaceNext = /* @__PURE__ */ searchCommand((view, { query: query2 }) => {
   let { state: state2 } = view, { from, to } = state2.selection.main;
   if (state2.readOnly)
     return false;
-  let next = query2.nextMatch(state2, from, from);
-  if (!next)
+  let next2 = query2.nextMatch(state2, from, from);
+  if (!next2)
     return false;
   let changes = [], selection2, replacement;
   let announce = [];
-  if (next.from == from && next.to == to) {
-    replacement = state2.toText(query2.getReplacement(next));
-    changes.push({ from: next.from, to: next.to, insert: replacement });
-    next = query2.nextMatch(state2, next.from, next.to);
+  if (next2.from == from && next2.to == to) {
+    replacement = state2.toText(query2.getReplacement(next2));
+    changes.push({ from: next2.from, to: next2.to, insert: replacement });
+    next2 = query2.nextMatch(state2, next2.from, next2.to);
     announce.push(EditorView.announce.of(state2.phrase("replaced match on line $", state2.doc.lineAt(from).number) + "."));
   }
-  if (next) {
-    let off = changes.length == 0 || changes[0].from >= next.to ? 0 : next.to - next.from - replacement.length;
-    selection2 = { anchor: next.from - off, head: next.to - off };
-    announce.push(announceMatch(view, next));
+  if (next2) {
+    let off = changes.length == 0 || changes[0].from >= next2.to ? 0 : next2.to - next2.from - replacement.length;
+    selection2 = { anchor: next2.from - off, head: next2.to - off };
+    announce.push(announceMatch(view, next2));
   }
   view.dispatch({
     changes,
@@ -129564,10 +129567,10 @@ function phrase(view, phrase2) {
 const AnnounceMargin = 30;
 const Break = /[\s\.,:;?!]/;
 function announceMatch(view, { from, to }) {
-  let line2 = view.state.doc.lineAt(from), lineEnd = view.state.doc.lineAt(to).to;
-  let start = Math.max(line2.from, from - AnnounceMargin), end2 = Math.min(lineEnd, to + AnnounceMargin);
+  let line = view.state.doc.lineAt(from), lineEnd = view.state.doc.lineAt(to).to;
+  let start = Math.max(line.from, from - AnnounceMargin), end2 = Math.min(lineEnd, to + AnnounceMargin);
   let text = view.state.sliceDoc(start, end2);
-  if (start != line2.from) {
+  if (start != line.from) {
     for (let i2 = 0; i2 < AnnounceMargin; i2++)
       if (!Break.test(text[i2 + 1]) && Break.test(text[i2])) {
         text = text.slice(i2);
@@ -129581,7 +129584,7 @@ function announceMatch(view, { from, to }) {
         break;
       }
   }
-  return EditorView.announce.of(`${view.state.phrase("current match")}. ${text} ${view.state.phrase("on line")} ${line2.number}.`);
+  return EditorView.announce.of(`${view.state.phrase("current match")}. ${text} ${view.state.phrase("on line")} ${line.number}.`);
 }
 const baseTheme$2 = /* @__PURE__ */ EditorView.baseTheme({
   ".cm-panel.cm-search": {
@@ -129759,13 +129762,13 @@ const nextDiagnostic = (view) => {
   let field = view.state.field(lintState, false);
   if (!field)
     return false;
-  let sel = view.state.selection.main, next = field.diagnostics.iter(sel.to + 1);
-  if (!next.value) {
-    next = field.diagnostics.iter(0);
-    if (!next.value || next.from == sel.from && next.to == sel.to)
+  let sel = view.state.selection.main, next2 = field.diagnostics.iter(sel.to + 1);
+  if (!next2.value) {
+    next2 = field.diagnostics.iter(0);
+    if (!next2.value || next2.from == sel.from && next2.to == sel.to)
       return false;
   }
-  view.dispatch({ selection: { anchor: next.from, head: next.to }, scrollIntoView: true });
+  view.dispatch({ selection: { anchor: next2.from, head: next2.to }, scrollIntoView: true });
   return true;
 };
 const lintKeymap = [
@@ -130771,24 +130774,24 @@ const trackNewline = new ContextTracker({
   strict: false
 });
 const insertSemicolon = new ExternalTokenizer((input, stack) => {
-  let { next } = input;
-  if ((next == braceR || next == -1 || stack.context) && stack.canShift(insertSemi))
+  let { next: next2 } = input;
+  if ((next2 == braceR || next2 == -1 || stack.context) && stack.canShift(insertSemi))
     input.acceptToken(insertSemi);
 }, { contextual: true, fallback: true });
 const noSemicolon = new ExternalTokenizer((input, stack) => {
-  let { next } = input, after;
-  if (space.indexOf(next) > -1)
+  let { next: next2 } = input, after;
+  if (space.indexOf(next2) > -1)
     return;
-  if (next == slash && ((after = input.peek(1)) == slash || after == star))
+  if (next2 == slash && ((after = input.peek(1)) == slash || after == star))
     return;
-  if (next != braceR && next != semicolon && next != -1 && !stack.context && stack.canShift(noSemi))
+  if (next2 != braceR && next2 != semicolon && next2 != -1 && !stack.context && stack.canShift(noSemi))
     input.acceptToken(noSemi);
 }, { contextual: true });
 const incdecToken = new ExternalTokenizer((input, stack) => {
-  let { next } = input;
-  if (next == plus || next == minus) {
+  let { next: next2 } = input;
+  if (next2 == plus || next2 == minus) {
     input.advance();
-    if (next == input.next) {
+    if (next2 == input.next) {
       input.advance();
       let mayPostfix = !stack.context && stack.canShift(incdec);
       input.acceptToken(mayPostfix ? incdec : incdecPrefix);
@@ -131186,10 +131189,10 @@ const RightPanel = () => {
     ] })
   ] }) });
 };
-const HoverTimelineBlock = ({ scale, startTime: startTime2, isOverlapping }) => {
+const HoverTimelineBlock = ({ scale, startTime, isOverlapping }) => {
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
   const selectedBlock = useRobartState((state2) => state2.blocks[selectedBlockId ?? ""]);
-  if (startTime2 === void 0 || !selectedBlockId)
+  if (startTime === void 0 || !selectedBlockId)
     return /* @__PURE__ */ jsx(Fragment, {});
   return /* @__PURE__ */ jsx(
     "div",
@@ -131200,7 +131203,7 @@ const HoverTimelineBlock = ({ scale, startTime: startTime2, isOverlapping }) => 
       ),
       style: {
         width: pixelsPerSecond * scale * selectedBlock.duration,
-        left: pixelsPerSecond * scale * startTime2
+        left: pixelsPerSecond * scale * startTime
       },
       children: isOverlapping ? /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faXmarkCircle }) : /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faPlusCircle })
     }
@@ -131221,8 +131224,10 @@ const TimelineBlock = ({ item, scale }) => {
   const bind = useDrag(({ delta: [x2, _2] }) => {
     const secondsDelta = convertPixelsToSeconds(x2, scale);
     const newStartTime = item.startTime + secondsDelta;
-    if (!blockOverlaps(groups[item.groupId], blocks2, newStartTime, correspondingBlock, item.id)) {
-      updateItem(item.groupId, item.id, newStartTime);
+    const group = groups[item.groupId];
+    const alreadyOverlapping = blockOverlaps(group, item.startTime, item.duration, item.id);
+    if (alreadyOverlapping || !blockOverlaps(group, newStartTime, item.duration, item.id)) {
+      updateItem(item.groupId, item.id, Math.max(0, newStartTime));
     }
   }, { pointer: { keys: false } });
   let duration2 = 0;
@@ -131260,39 +131265,40 @@ const convertPixelsToSeconds = (distance, scale) => {
 const convertSecondsToPixels = (duration2, scale) => {
   return duration2 * pixelsPerSecond * scale;
 };
-const blockOverlaps = (group, blocks2, startTime2, selectedBlock, id2) => startTime2 === void 0 || startTime2 < 0 || Object.values(group.items).some((items) => {
+const blockOverlaps = (group, startTime, duration2, id2) => startTime === void 0 || startTime < 0 || Object.values(group.items).some((items) => {
   if (items === void 0) {
     return false;
   }
   const currItemStart = items.startTime;
   const currItemEnd = items.startTime + items.duration;
-  const newBlockStart = startTime2;
-  const newBlockEnd = startTime2 + selectedBlock.duration;
+  const newBlockStart = startTime;
+  const newBlockEnd = startTime + duration2;
   if (id2 !== void 0 && id2 === items.id)
     return false;
   return !(currItemEnd < newBlockStart || newBlockEnd < currItemStart);
 });
 const TimelineGroupBody = ({ group }) => {
+  var _a3;
   const addBlockToTimeline = useRobartState((state2) => state2.addBlockToTimeline);
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
   const blocks2 = useRobartState((state2) => state2.blocks);
   const scale = useRobartState((state2) => state2.timelineState.scale);
   const [hoverX, setHoverX] = reactExports.useState();
   const laneBodyRef = reactExports.useRef(null);
-  const computeTimelineBlockOffset = (clientX, blockId2) => {
-    var _a3, _b2;
+  const computeTimelineBlockOffset = (clientX, blockId) => {
+    var _a4, _b2;
     if (clientX === void 0)
       return;
     if (laneBodyRef.current) {
-      const parentOffsetX = (_a3 = laneBodyRef.current.offsetParent) == null ? void 0 : _a3.offsetLeft;
+      const parentOffsetX = (_a4 = laneBodyRef.current.offsetParent) == null ? void 0 : _a4.offsetLeft;
       const parentScrollOffsetX = (_b2 = laneBodyRef.current.parentElement) == null ? void 0 : _b2.scrollLeft;
       const offsetX = clientX - parentOffsetX;
-      if (blockId2 === void 0 || parentScrollOffsetX === void 0)
+      if (blockId === void 0 || parentScrollOffsetX === void 0)
         return;
-      if (blocks2[blockId2] === void 0)
+      if (blocks2[blockId] === void 0)
         return;
-      const startTime2 = (offsetX + parentScrollOffsetX) / (pixelsPerSecond * scale) - blocks2[blockId2].duration / 2;
-      return startTime2;
+      const startTime = (offsetX + parentScrollOffsetX) / (pixelsPerSecond * scale) - blocks2[blockId].duration / 2;
+      return startTime;
     }
   };
   const handleDragOver = (e2) => {
@@ -131301,23 +131307,23 @@ const TimelineGroupBody = ({ group }) => {
     setHoverX(e2.clientX);
   };
   const handleDragLeave = (e2) => {
-    var _a3;
-    if (!((_a3 = laneBodyRef.current) == null ? void 0 : _a3.contains(e2.relatedTarget)))
+    var _a4;
+    if (!((_a4 = laneBodyRef.current) == null ? void 0 : _a4.contains(e2.relatedTarget)))
       setHoverX(void 0);
   };
   const handleDrop = (e2) => {
     e2.preventDefault();
     setHoverX(void 0);
-    const blockId2 = e2.dataTransfer.getData("text/plain");
-    if (blocks2[blockId2] === void 0)
+    const blockId = e2.dataTransfer.getData("text/plain");
+    if (blocks2[blockId] === void 0)
       return;
-    const startTime2 = computeTimelineBlockOffset(e2.clientX, blockId2);
-    if (startTime2 !== void 0 && !blockOverlaps(group, blocks2, startTime2, blocks2[blockId2])) {
+    const startTime = computeTimelineBlockOffset(e2.clientX, blockId);
+    if (startTime !== void 0 && !blockOverlaps(group, startTime, blocks2[blockId].duration)) {
       var isTraj = false;
-      if (blocks2[blockId2].javaScript.includes("circle")) {
+      if (blocks2[blockId].javaScript.includes("circle")) {
         isTraj = true;
       }
-      addBlockToTimeline(group.id, blockId2, startTime2, isTraj);
+      addBlockToTimeline(group.id, blockId, startTime, isTraj);
     }
   };
   return /* @__PURE__ */ jsxs(
@@ -131337,7 +131343,7 @@ const TimelineGroupBody = ({ group }) => {
           {
             scale,
             startTime: computeTimelineBlockOffset(hoverX, selectedBlockId),
-            isOverlapping: blockOverlaps(group, blocks2, computeTimelineBlockOffset(hoverX, selectedBlockId), blocks2[selectedBlockId ?? ""])
+            isOverlapping: blockOverlaps(group, computeTimelineBlockOffset(hoverX, selectedBlockId), ((_a3 = blocks2[selectedBlockId ?? ""]) == null ? void 0 : _a3.duration) ?? 0)
           }
         )
       ]
@@ -131609,6 +131615,26 @@ const Timeline = () => {
   const timelineState = useRobartState((state2) => state2.timelineState);
   const groups = Object.values(timelineState.groups);
   const toggleRobotManagerModal = useUIState((state2) => state2.toggleRobotManager);
+  reactExports.useEffect(() => {
+    let timer2;
+    const remeasure = () => {
+      clearTimeout(timer2);
+      timer2 = setTimeout(() => {
+        if (useSimulator.getState().status === "STOPPED")
+          useSimulator.getState().measureShowLength();
+      }, 300);
+    };
+    remeasure();
+    const unsubscribe = useRobartState.subscribe((state2, previous) => {
+      if (state2.timelineState.groups !== previous.timelineState.groups || state2.blocks !== previous.blocks || state2.robots !== previous.robots) {
+        remeasure();
+      }
+    });
+    return () => {
+      clearTimeout(timer2);
+      unsubscribe();
+    };
+  }, []);
   return /* @__PURE__ */ jsxs("div", { className: "flex h-full w-full flex-col gap-2 rounded bg-blue-100", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex", children: [
       /* @__PURE__ */ jsx("div", { className: "flex flex-grow" }),
