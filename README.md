@@ -30,13 +30,13 @@ Coming soon...
 ## TODOs:
 The github issues contain some TODOs and are listed here in order of priority/when they will be done. This does not include bug fixes that are ongoing.
 
-1. Multiple trajectories in one timeline block - compose multiple commands together
-2. All robots (of one type) are added to one group by default - simplifies the `add group` process if testing simple things
-3. Rotation and Translation block modifiers - rotate/translate a trajectory
-4. Hide and add additional timeline lanes
-5. Arbitrary parametric equations block
-6. Nicer robot manager
-7. Trajectory visualization
+1. ~~Multiple trajectories in one timeline block - compose multiple commands together~~ Done: a block runs any sequence of commands, and the Trajectory Modifiers (add, subtract, negate, stretch, rotate, translate) combine them.
+2. ~~All robots (of one type) are added to one group by default - simplifies the `add group` process if testing simple things~~ Done: the All drones lane runs on every drone.
+3. ~~Rotation and Translation block modifiers - rotate/translate a trajectory~~ Done: Rotate Trajectory and Translate Trajectory blocks.
+4. ~~Hide and add additional timeline lanes~~ Done: "+ New group" adds lanes; the chevron on a lane's label collapses it.
+5. ~~Arbitrary parametric equations block~~ Done: the Parametric path block (Curves).
+6. ~~Nicer robot manager~~ Done: drones are added, edited and deleted from the timeline.
+7. ~~Trajectory visualization~~ Done: planned paths are drawn in the simulation ("Paths" checkbox).
 
 
 ## Overall Design Considerations
