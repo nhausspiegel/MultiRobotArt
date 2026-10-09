@@ -26,14 +26,15 @@ const BoundingBoxSizeEditor = () => {
 	}, [size]);
 
 	return (
-		<div className="mt-4">
+		<div>
 			<div className="mb-1 font-bold">Bounding box dimensions (m):</div>
 			<div className="flex gap-3">
 				{['x', 'y', 'z'].map((axis, i) => (
 					<label key={axis} className="flex items-center gap-1">
 						{axis}
 						<input
-							className={clsx('w-20 rounded', isPositiveNumber(values[i]) ? 'border-gray-300' : 'border-2 border-red-500')}
+							// border: preflight zeroes input border widths, so a color alone draws nothing
+							className={clsx('w-20 rounded px-2 py-1', isPositiveNumber(values[i]) ? 'border border-gray-300' : 'border-2 border-red-500')}
 							inputMode="decimal"
 							value={values[i]}
 							onChange={(e) => {
@@ -81,12 +82,14 @@ export const SettingsModal = () => {
 							</div>
 						</Tabs.Item>
 						<Tabs.Item title="Preferences">
-							{/* Controlled, so it shows the current setting when Settings is reopened */}
-							<Checkbox
-								checked={!renderBoundingBoxes}
-								onChange={handleBoundingBoxChange} />
-							<span style={{ marginLeft: '10px' }}>Remove Bounding Boxes</span>
 							<BoundingBoxSizeEditor />
+							<div className="mt-4 flex items-center">
+								{/* Controlled, so it shows the current setting when Settings is reopened */}
+								<Checkbox
+									checked={!renderBoundingBoxes}
+									onChange={handleBoundingBoxChange} />
+								<span style={{ marginLeft: '10px' }}>Remove Bounding Boxes</span>
+							</div>
 						</Tabs.Item>
 						<Tabs.Item title="Utilities">
 							<Button onClick={toggleCurveEditor}>Curve Editor</Button>

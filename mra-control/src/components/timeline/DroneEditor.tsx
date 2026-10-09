@@ -25,7 +25,8 @@ const StartingPosition = ({robotId}: {robotId: string}) => {
 					<label key={axis} className="flex items-center gap-1">
 						{axis}
 						<input
-							className={clsx('w-20 rounded', isNumber(values[i]) ? 'border-gray-300' : 'border-2 border-red-500')}
+							// border: preflight zeroes input border widths, so a color alone draws nothing
+							className={clsx('w-20 rounded px-2 py-1', isNumber(values[i]) ? 'border border-gray-300' : 'border-2 border-red-500')}
 							inputMode="decimal"
 							value={values[i]}
 							onChange={(e) => {
