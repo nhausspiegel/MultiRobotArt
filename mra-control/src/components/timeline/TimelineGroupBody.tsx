@@ -31,11 +31,11 @@ const everyAtLeast = (secondWidth: number, minWidth: number) => roundSeconds.fin
  * when there's room. Heights are how far down (or up, from the bottom) each kind reaches. Each layer is one repeating
  * gradient placed from time 0 onward (a tiled image would also repeat backwards into the start padding).
  */
-export const tickBackground = (scale: number, majorHeight: string, minorHeight: string, from: 'top' | 'bottom' = 'top') => {
+export const tickBackground = (scale: number, majorHeight: string, minorHeight: string, from: 'top' | 'bottom' = 'top', color = 'black') => {
 	const secondWidth = convertSecondsToPixels(1, scale);
 	const majorWidth = everyAtLeast(secondWidth, 6) * secondWidth;
 	const minorWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
-	const ticks = (spacing: number) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
+	const ticks = (spacing: number) => `repeating-linear-gradient(to right, ${color} 0 1.5px, transparent 1.5px ${spacing}px)`;
 	const area = `calc(100% - ${timelineStartPadding}px)`;
 	const layers = [{image: ticks(majorWidth), height: majorHeight}];
 	if (majorWidth === secondWidth && minorWidth >= 6) layers.push({image: ticks(minorWidth), height: minorHeight});

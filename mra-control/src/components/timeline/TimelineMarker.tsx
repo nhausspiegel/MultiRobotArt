@@ -29,8 +29,9 @@ export const TimelineMarker = () => {
 		{/* At the top of the room above the lanes (the scroll area's top padding), as wide as the lanes; ticks along its bottom */}
 		<div
 			{...bind()}
-			className="absolute left-0 top-0 h-3 cursor-pointer touch-none rounded-sm bg-blue-50"
-			style={{width: timeToX(length, scale), ...tickBackground(scale, '60%', '30%', 'bottom')}}
+			className="absolute left-0 top-0 h-3 cursor-pointer touch-none rounded-sm bg-blue-200/60"
+			// Faint ticks (blue-500 at 25%)
+			style={{width: timeToX(length, scale), ...tickBackground(scale, '60%', '30%', 'bottom', 'rgb(59 130 246 / 0.25)')}}
 		/>
 		<div
 			ref={markerRef}
