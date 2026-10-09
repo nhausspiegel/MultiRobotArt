@@ -46,7 +46,9 @@ export const BlockManagerPanel = () => {
 					text="Delete"
 					onClick={() => {
 						if (selectedBlockId === undefined) return;
-						setConfirmDeleteOpen(true);
+						// Nothing to lose when it's empty and not on the timeline, so no confirmation
+						if (selectedBlock?.javaScript.trim() === '' && selectedBlockUses === 0) removeBlock(selectedBlockId);
+						else setConfirmDeleteOpen(true);
 					}}
 				/>
 			</div>
