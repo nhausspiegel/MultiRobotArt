@@ -32,6 +32,20 @@ class FixedScaleFlyout extends Blockly.VerticalFlyout {
 	}
 }
 
+// In multi-select mode, a drag that starts on empty space draws the selection box. Blockly 13 drags whatever is selected
+// when a drag starts, and the multi-select plugin keeps the selected blocks selected there, so they followed the pointer.
+type GestureInternals = {targetBlock?: unknown; startBubble?: unknown; startComment?: unknown; startIcon?: unknown; startWorkspace_?: Blockly.WorkspaceSvg; calledUpdateIsDragging: boolean};
+const gesturePrototype = Blockly.Gesture.prototype as unknown as GestureInternals & {updateIsDragging: (this: GestureInternals, e: PointerEvent) => void};
+const updateIsDragging = gesturePrototype.updateIsDragging;
+gesturePrototype.updateIsDragging = function (e) {
+	const onEmptySpace = !this.targetBlock && !this.startBubble && !this.startComment && !this.startIcon;
+	if (onEmptySpace && this.startWorkspace_ && inMultipleSelectionModeWeakMap.get(this.startWorkspace_)) {
+		this.calledUpdateIsDragging = true;
+		return;
+	}
+	updateIsDragging.call(this, e);
+};
+
 // Space plays/pauses the simulation (TimelineSimulationButtons). Blockly also uses it, besides Enter, to act on the
 // focused block and finish a keyboard move; leave those to Enter.
 for (const name of [Blockly.ShortcutItems.names.PERFORM_ACTION, Blockly.ShortcutItems.names.FINISH_MOVE]) {
@@ -96,6 +110,8 @@ export const BlockEditorPanel = () => {
 			multiselectCopyPaste: {crossTab: true, menu: false}, // Keyboard copy/paste only, no extra menu items
 		});
 
+		const isOn = () => inMultipleSelectionModeWeakMap.get(workspace) === true;
+
 		// Box select only adds. The plugin toggled every block the box touched, so blocks already selected (the one clicked
 		// before Shift, or ones from an earlier box) were deselected when the box passed over them. This reaches into the
 		// plugin's DragSelect, which it creates each time multi-select turns on, and replaces its two handlers.
@@ -108,16 +124,18 @@ export const BlockEditorPanel = () => {
 			dragSelect.setSettings({multiSelectToggling: false});
 			const addedByBox = new Set<string>();
 			const blockOf = ({item}: {item: Element}) => workspace.getBlockById((item.parentElement as HTMLElement | null)?.dataset.id ?? '');
+			// Both only while multi-select is on: turning it off (releasing Shift) clears the box's picks, which reports each as
+			// unselected, and the selection must stay
 			dragSelect.PubSub.subscribers.elementselect = [(event: {item: Element}) => {
 				const block = blockOf(event);
-				if (!block || controls.dragSelection.has(block.id)) return;
+				if (!isOn() || !block || controls.dragSelection.has(block.id)) return;
 				addedByBox.add(block.id);
 				controls.updateDraggables_(block);
 			}];
 			dragSelect.PubSub.subscribers.elementunselect = [(event: {item: Element}) => {
 				const block = blockOf(event);
 				// Only undoes what this box selected, when it shrinks away from the block
-				if (block && addedByBox.delete(block.id)) controls.updateDraggables_(block);
+				if (isOn() && block && addedByBox.delete(block.id)) controls.updateDraggables_(block);
 			}];
 		};
 
@@ -125,7 +143,6 @@ export const BlockEditorPanel = () => {
 		// the timeline). Pass Shift on from the whole page while the pointer is over the editor, without taking focus.
 		const editor = workspace.getInjectionDiv();
 		let pointerInside = false;
-		const isOn = () => inMultipleSelectionModeWeakMap.get(workspace) === true;
 		const onPointerEnter = (event: PointerEvent) => {
 			pointerInside = true;
 			// Shift pressed before the pointer came in
