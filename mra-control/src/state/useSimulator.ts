@@ -62,6 +62,11 @@ export type SimulatorState = {
    * playback reaches them.
    */
 	timedWarnings: TimedWarning[];
+	/**
+   * Furthest time played or scrubbed to since Run Sim. The corner list shows warnings up to here, so scrubbing back
+   * keeps them; Run Sim clears it.
+   */
+	warningsShownUntil: number;
 	showPaths: boolean;
 	trajectoryQueue: Queue<string>;
 	trajectoryMarkers: Array<{ position: THREE.Vector3; color: THREE.Color; id: string }>;
@@ -83,6 +88,7 @@ const defaultSimulatorState: SimulatorState = {
 	showCoordinates: false,
 	plannedPaths: {},
 	timedWarnings: [],
+	warningsShownUntil: 0,
 	showPaths: true,
 	trajectoryQueue: new Queue<string>(),
 	trajectoryMarkers: [],
@@ -167,7 +173,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		play: () => {
 			// Also resets robots to their initial positions
 			get().measureShowLength();
-			set({ status: 'RUNNING', lastStepTime: performance.now() });
+			set({ status: 'RUNNING', lastStepTime: performance.now(), warningsShownUntil: 0 });
 		},
 		// Warnings come from measuring the whole show (measureShowLength), not from what has played so far
 		pause: () => {
@@ -185,7 +191,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			if (get().status !== 'RUNNING') return;
 			const currentTime = performance.now();
 			get().advance((currentTime - get().lastStepTime) / 1000 * get().timeDilation);
-			set({ lastStepTime: currentTime });
+			set({ lastStepTime: currentTime, warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
 			if (isFinished(get().robots)) get().halt();
 		},
 		advance: (deltaT) => {
@@ -315,7 +321,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			while (get().time < targetTime - 1e-6) {
 				get().advance(Math.min(1 / fps, targetTime - get().time));
 			}
-			set({ status: wasRunning ? 'RUNNING' : 'PAUSED', lastStepTime: performance.now() });
+			set({ status: wasRunning ? 'RUNNING' : 'PAUSED', lastStepTime: performance.now(), warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
 		},
 		measureShowLength: () => {
 			get().executeSimulation(0);
@@ -386,7 +392,6 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				plannedPaths,
 				timedWarnings,
 			});
-			// After executeSimulation(0), which clears them
 			useRobartState.setState({ warnings: timedWarnings.map((warning) => warning.full) });
 			useRobartState.getState().setMeasuredDurations(durations, blockLengths);
 		},
@@ -562,7 +567,6 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			if (startTime === 0) {
 				set({ time: 0, trajectoryMarkers: [] });
 				get().setRobots(robartRobots);
-				useRobartState.setState({ warnings: [] }); // setState, not assignment, so the Warnings tab updates
 				// Constraint warnings are computed from this; without the reset they repeat across runs and replays
 				useCrazyflieConstraintState.setState({ positionHistory: [] });
 				itemEndTimes = {};
@@ -594,7 +598,8 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			pendingItems.length = 0;
 		},
 		reset: () => {
-			set({ status: 'STOPPED', endTime: 0, plannedPaths: {}, timedWarnings: [] });
+			set({ status: 'STOPPED', endTime: 0, plannedPaths: {}, timedWarnings: [], warningsShownUntil: 0 });
+			useRobartState.setState({ warnings: [] }); // setState, not assignment, so the Warnings tab updates
 			get().executeSimulation(0);
 			get().cancelSimulation();
 		},
