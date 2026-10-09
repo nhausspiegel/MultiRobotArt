@@ -61,15 +61,11 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 		if (clientX === undefined) return;
 
 		if (laneBodyRef.current) {
-			const parentOffsetX = (laneBodyRef.current.offsetParent as HTMLElement)?.offsetLeft;
-			const parentScrollOffsetX = laneBodyRef.current.parentElement?.scrollLeft;
-			const offsetX = clientX - parentOffsetX;
-
-			if (blockId === undefined || parentScrollOffsetX === undefined) return;
-			if (blocks[blockId] === undefined) return;
-			const startTime = (offsetX + parentScrollOffsetX) / (pixelsPerSecond * scale) - blocks[blockId].duration / 2;
-
-			return startTime;
+			if (blockId === undefined || blocks[blockId] === undefined) return;
+			// The lane's on-screen rect already reflects scrolling
+			const offsetX = clientX - laneBodyRef.current.getBoundingClientRect().left;
+			// Block starts at the pointer (centering long blocks pushed their start before 0); never before 0
+			return Math.max(0, convertPixelsToSeconds(offsetX, scale));
 		}
 	};
 
