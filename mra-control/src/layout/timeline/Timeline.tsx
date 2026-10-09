@@ -5,6 +5,7 @@ import {IconButton} from '../../components/buttons/IconButton';
 import {TimelineGroupBody} from '../../components/timeline/TimelineGroupBody';
 import {TimelineGroupLabel} from '../../components/timeline/TimelineGroupLabel';
 import {useRobartState} from '../../state/useRobartState';
+import {useSimulator} from '../../state/useSimulator';
 import {useUIState} from '../../state/useUIState';
 import {RobotManagerModal} from '../robotManager/RobotManagerModal';
 import {TimelineSimulationButtons} from './TimelineSimulationButtons';
@@ -17,6 +18,28 @@ export const Timeline = () => {
 	const groups = Object.values(timelineState.groups);
 	const toggleRobotManagerModal = useUIState((state) => state.toggleRobotManager);
 
+	// Item lengths come from simulating the show; redo it shortly after the timeline, blocks or robots change.
+	// Only while stopped, since measuring resets the sim to the start.
+	useEffect(() => {
+		let timer: ReturnType<typeof setTimeout>;
+		const remeasure = () => {
+			clearTimeout(timer);
+			timer = setTimeout(() => {
+				if (useSimulator.getState().status === 'STOPPED') useSimulator.getState().measureShowLength();
+			}, 300);
+		};
+
+		remeasure();
+		const unsubscribe = useRobartState.subscribe((state, previous) => {
+			if (state.timelineState.groups !== previous.timelineState.groups || state.blocks !== previous.blocks || state.robots !== previous.robots) {
+				remeasure();
+			}
+		});
+		return () => {
+			clearTimeout(timer);
+			unsubscribe();
+		};
+	}, []);
 
 	return (
 		<div className="flex h-full w-full flex-col gap-2 rounded bg-blue-100">

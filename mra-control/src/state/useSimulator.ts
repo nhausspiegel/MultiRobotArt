@@ -34,7 +34,7 @@ export type RobotSimState = {
 	trajectoryDuration: number;
 	timeAlongTrajectory: number;
 	trajectoryStartTime: number;
-	trajectoryQueue: Queue<string>;
+	trajectoryQueue: Queue<{ line: string; itemId: string }>;
 };
 
 export type TrajectorySimState = {
@@ -80,10 +80,15 @@ const defaultSimulatorState: SimulatorState = {
 const nullTrajectory = new traj.PolynomialTrajectory(-1, []) as traj.Trajectory;
 
 // Timeline items not started yet, sorted by start time (sim seconds). advance() starts them when the sim reaches them.
-const pendingItems: Array<{ time: number; robotIds: string[]; lines: string[] }> = [];
+const pendingItems: Array<{ itemId: string; time: number; robotIds: string[]; lines: string[] }> = [];
 
-// Upper bound when measuring a show's length, in case something never finishes
-const maxShowLength = 60 * 60;
+// Which timeline item each robot's current trajectory came from, and the last sim time each item kept a robot busy.
+// Used to measure how long timeline items really take.
+const runningItemIds: Record<string, string> = {};
+let itemEndTimes: Record<string, number> = {};
+
+// Upper bound when measuring a show's length, in case something never finishes (lanes are 120 s long)
+const maxShowLength = 10 * 60;
 
 // Nothing left to start, queue, or fly
 const isFinished = (robots: Record<string, RobotSimState>) =>
@@ -119,7 +124,7 @@ export type SimulatorActions = {
 	updateRobotBoundingBox: (robotId: string, boundingBox: THREE.Box3) => void;
 	checkCollisions: (robotId: string) => boolean;
 	updateTrajectory: (robotId: string, trajectory: traj.Trajectory, duration: number) => void;
-	addTrajectory: (robotId: string, trajectory: string) => void;
+	addTrajectory: (robotId: string, trajectory: string, itemId: string) => void;
 	getMostRecentTrajectory: (robotId: string, time: number) => [traj.Trajectory | undefined, number];
 	robotGoTo: (robotId: string, position: THREE.Vector3, velocity: THREE.Vector3, acceleration: THREE.Vector3, duration: number) => traj.Trajectory;
 	robotCircle: (robotId: string, radius?: number, axes?: string[], radians?: number, clockwise?: boolean, duration?: number) => traj.Trajectory;
@@ -174,7 +179,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				const item = pendingItems.shift();
 				item.lines.forEach((line) => {
 					item.robotIds.forEach((robotId) => {
-						get().addTrajectory(robotId, line);
+						get().addTrajectory(robotId, line, item.itemId);
 					});
 				});
 			}
@@ -206,7 +211,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					let newTraj: Map<string, traj.Trajectory>;
 					let duration = 0;
 					if (robots[robotId].trajectoryQueue.length > 0) {
-						[duration, newTraj] = eval(robots[robotId].trajectoryQueue.dequeue());
+						const next = robots[robotId].trajectoryQueue.dequeue();
+						runningItemIds[robotId] = next.itemId;
+						[duration, newTraj] = eval(next.line);
 						get().updateTrajectory(robotId, newTraj.get(robotId), duration);
 					} else {
 						get().updateTrajectory(robotId, new traj.NullTrajectory(), -1);
@@ -214,7 +221,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				} else if (robots[robotId].trajectoryQueue.length > 0 && robots[robotId].trajectory.duration <= 0) {
 					let newTraj: Map<string, traj.Trajectory>;
 					let duration = 0;
-					[duration, newTraj] = eval(robots[robotId].trajectoryQueue.dequeue());
+					const next = robots[robotId].trajectoryQueue.dequeue();
+					runningItemIds[robotId] = next.itemId;
+					[duration, newTraj] = eval(next.line);
 					get().updateTrajectory(robotId, newTraj.get(robotId), duration);
 				}
 
@@ -226,6 +235,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 
 				const trajectoryTime = get().robots[robotId].timeAlongTrajectory + deltaT / get().robots[robotId].trajectory?.duration;
 				const newPos = get().robots[robotId].trajectory.evaluate(trajectoryTime);
+				itemEndTimes[runningItemIds[robotId]] = newSimTime;
 
 				const offset = newPos.clone().sub(get().robots[robotId].pos);
 				robots[robotId] = {
@@ -284,8 +294,19 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				get().advance(1 / fps);
 			}
 			const endTime = get().time;
+
+			// Timeline items are drawn this long. Items on lanes without robots never run and keep their old length.
+			const { groups, scale } = useRobartState.getState().timelineState;
+			const durations: Record<string, number> = {};
+			Object.values(groups).forEach((group) => {
+				Object.values(group.items).forEach((item) => {
+					if (itemEndTimes[item.id] !== undefined) durations[item.id] = Math.max(0.1, itemEndTimes[item.id] / scale - item.startTime);
+				});
+			});
+
 			get().executeSimulation(0);
 			set({ endTime });
+			useRobartState.getState().setMeasuredDurations(durations);
 		},
 		setTimeDilation: (timeDilation) => {
 			set({ timeDilation });
@@ -310,7 +331,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					trajectoryDuration: -1,
 					trajectories: new Map<string, traj.Trajectory[]>,
 					trajectoryStartTime: -1,
-					trajectoryQueue: new Queue<string>,
+					trajectoryQueue: new Queue<{ line: string; itemId: string }>,
 					boundingBox: new THREE.Box3(position.clone().sub(bboxSize), position.clone().add(bboxSize)),
 
 				};
@@ -357,11 +378,11 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				state.robots[robotId].trajectoryStartTime = state.time;
 			});
 		},
-		addTrajectory: (robotId, javascriptLine) => {
+		addTrajectory: (robotId, javascriptLine, itemId) => {
 			// Add trajectory to trajectories Map
 			set((state) => {
 				if (state.robots[robotId] !== undefined)
-					state.robots[robotId].trajectoryQueue.enqueue(javascriptLine);
+					state.robots[robotId].trajectoryQueue.enqueue({ line: javascriptLine, itemId });
 			});
 		},
 		getMostRecentTrajectory: (robotId: string, time: number): [traj.Trajectory | undefined, number] => {
@@ -444,6 +465,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				useRobartState.getState().warnings = [];
 				// Constraint warnings are computed from this; without the reset they repeat across runs and replays
 				useCrazyflieConstraintState.setState({ positionHistory: [] });
+				itemEndTimes = {};
 			}
 			pendingItems.length = 0;
 
@@ -460,6 +482,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					if (itemTime < startTime) return;
 
 					pendingItems.push({
+						itemId: timelineItem.id,
 						time: itemTime,
 						robotIds: Object.keys(group.robots),
 						lines: blocks[timelineItem.blockId].javaScript.split('\n').filter((line) => line.length > 0),

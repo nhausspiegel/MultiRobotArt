@@ -18,8 +18,11 @@ export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}
 		const secondsDelta = convertPixelsToSeconds(x, scale);
 		const newStartTime = item.startTime + secondsDelta;
 
-		if (!blockOverlaps(groups[item.groupId], blocks, newStartTime, correspondingBlock, item.id)) {
-			updateItem(item.groupId, item.id, newStartTime);
+		const group = groups[item.groupId];
+		// Measured lengths can make items overlap without being moved; let those be dragged apart
+		const alreadyOverlapping = blockOverlaps(group, item.startTime, item.duration, item.id);
+		if (alreadyOverlapping || !blockOverlaps(group, newStartTime, item.duration, item.id)) {
+			updateItem(item.groupId, item.id, Math.max(0, newStartTime));
 		}
 	// keys: false, otherwise bind() returns its own onKeyDown (arrow-key dragging) that replaces the delete handler below
 	}, {pointer: {keys: false}});

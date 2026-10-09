@@ -11,12 +11,8 @@ import {immer} from 'zustand/middleware/immer';
 import {ROBART_VERSION} from '../config/Version';
 import {exportROS, loadProjectFromFile, saveProjectToFile} from '../tools/projectFileConversion';
 import {useSimulator} from './useSimulator';
-import * as SIM from './simulatorCommands';
-import {type SimulatorGroupState} from './simulatorCommands';
-import {type Trajectory} from './trajectories';
 import {State} from 'blockly/core/utils/aria';
 
-const simulator = SIM;
 export type CodeBlock = {
 	/**
    * Code Block uuid
@@ -122,6 +118,12 @@ export type TimelineActions = {
 	addRobotToGroup: (groupId: string, robotId: string) => void;
 	removeRobotFromGroup: (groupId: string, robotId: string) => void;
 	updateBlockInTimeline: (groupId: string, itemId: string, startTime: number) => void;
+	/**
+   * Stores how long timeline items really take, measured by simulating the show.
+   * Also stores it on each item's block, for the drop preview of new copies.
+   * @param durations Duration in seconds by timeline item id.
+   */
+	setMeasuredDurations: (durations: Record<string, number>) => void;
 	removeGroups: (groupsToRemove: string[]) => void;
 };
 
@@ -331,57 +333,8 @@ export const useRobartState = create<MRAState & MRAActions>()(
 						return id;
 					},
 					addBlockToTimeline: (groupId: string, blockId: string, startTime: number, isTrajectory: boolean) => {
-						// TODO: Check if this causes unintended consequences...
-						// let simState = useSimulator.getState();
-						// simState.executeSimulation(0, startTime);
-						// while (simState.time < startTime) {
-						// 	console.log(simState.time);
-						// 	simState.step();
-						// }
-
-						const groupState: SimulatorGroupState = {
-							robotIDs: Object.keys(get().timelineState.groups[groupId].robots),
-						};
-						const state: MRAState = {
-							blocks: get().blocks,
-							editingBlockId: undefined,
-							projectName: get().projectName,
-							timelineState: get().timelineState,
-							version: ROBART_VERSION,
-							robots: get().robots,
-							warnings: get().warnings,
-						};
- 
-						var duration = 0;
-						if (groupId === 'This doesnt run') {
-							console.log(groupState); // Do not Remove!
-						}
-						
-						// This only kind of works, doesn't work for velo commands because init position will be wrong.
-						// TODO: Run all blocks up until this point in the timeline to get position
-
-						// Loop through every line in the given block, accumulate duration
-						let lines = get().blocks[blockId].javaScript.split('\n'); // Need to return a Record<robotId, Trajectory>...
-						lines.forEach((line) => {
-							if (line.length !== 0) {
-								try {
-									let [dur, trajectoryRecord]: [number, Record<string, Trajectory>] = eval(line); // Return a Trajectory lambda function? Only compute actual trajectory when ready?
-									duration += dur;
-									if (line.length === 10000){
-										console.log(simulator);
-									}
-								}
-								catch (error){
-									console.error('Error in adding block to timeline', error)
-								}
-							}
-						});
-						// eval(get().blocks[blockId].javaScript); 
-						//const currBlock = get().blocks[blockId]
-						//const execute = simulator.dummy //getSimCommand(currBlock)
-						//duration = execute(currBlock, groupState)
-
-						duration = Math.max(0.1, duration);
+						// The block's last measured length; the timeline re-measures by simulating shortly after (setMeasuredDurations)
+						const duration = get().blocks[blockId].duration;
 						const newItem = {
 							id: uuid(),
 							groupId,
@@ -478,6 +431,21 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					setDuration: (blockId, duration) => {
 						set((state) => {
 							state.blocks[blockId].duration = duration;
+						});
+					},
+					setMeasuredDurations: (durations) => {
+						const items = Object.values(get().timelineState.groups).flatMap((group) => Object.values(group.items));
+						// Skip no-op writes: every write to the timeline triggers another measurement
+						if (!items.some((item) => durations[item.id] !== undefined && Math.abs(durations[item.id] - item.duration) > 1e-3)) return;
+
+						set((state) => {
+							Object.values(state.timelineState.groups).forEach((group) => {
+								Object.values(group.items).forEach((item) => {
+									if (durations[item.id] === undefined) return;
+									item.duration = durations[item.id];
+									if (state.blocks[item.blockId]) state.blocks[item.blockId].duration = durations[item.id];
+								});
+							});
 						});
 					},
 					setEditingBlock: (blockId) => {

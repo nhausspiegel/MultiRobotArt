@@ -4,7 +4,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import {type DragEventHandler, useRef, useState} from 'react';
 
-import {type CodeBlock, type TimelineGroupState, useRobartState} from '../../state/useRobartState';
+import {type TimelineGroupState, useRobartState} from '../../state/useRobartState';
 import {HoverTimelineBlock} from './HoverTimelineBlock';
 import {TickMark} from './TickMark';
 import {TimelineBlock} from './TimelineBlock';
@@ -27,9 +27,8 @@ export const convertSecondsToPixels = (duration: number, scale: number) => {
 
 export const blockOverlaps = (
 	group: TimelineGroupState,
-	blocks: Record<string, CodeBlock>,
 	startTime: number | undefined,
-	selectedBlock: CodeBlock,
+	duration: number,
 	id?: string,
 ) =>
 	startTime === undefined ||
@@ -42,7 +41,7 @@ export const blockOverlaps = (
   	const currItemStart = items.startTime;
   	const currItemEnd = items.startTime + items.duration;
   	const newBlockStart = startTime;
-  	const newBlockEnd = startTime + selectedBlock.duration;
+  	const newBlockEnd = startTime + duration;
 
   	if (id !== undefined && id === items.id) return false;
   	return !(currItemEnd < newBlockStart || newBlockEnd < currItemStart);
@@ -95,7 +94,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 
 		const startTime = computeTimelineBlockOffset(e.clientX, blockId);
 
-		if (startTime !== undefined && !blockOverlaps(group, blocks, startTime, blocks[blockId])) {
+		if (startTime !== undefined && !blockOverlaps(group, startTime, blocks[blockId].duration)) {
 			// TODO: Add isTraj appropriately (Currently hardcoded false), find better way to do it...
 			var isTraj = false;
 			if ( blocks[blockId].javaScript.includes('circle')) {
@@ -125,7 +124,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 				<HoverTimelineBlock
 					scale={scale}
 					startTime={computeTimelineBlockOffset(hoverX, selectedBlockId)}
-					isOverlapping={blockOverlaps(group, blocks, computeTimelineBlockOffset(hoverX, selectedBlockId), blocks[selectedBlockId ?? ''])}
+					isOverlapping={blockOverlaps(group, computeTimelineBlockOffset(hoverX, selectedBlockId), blocks[selectedBlockId ?? '']?.duration ?? 0)}
 				/>
 			)}
 		</div>
