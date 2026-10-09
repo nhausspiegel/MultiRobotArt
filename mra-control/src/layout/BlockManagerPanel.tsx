@@ -62,7 +62,7 @@ export const BlockManagerPanel = () => {
 				}}
 			>
 				&quot;{selectedBlock?.name}&quot; will also be removed from the timeline
-				{selectedBlockUses > 0 ? ` (used ${selectedBlockUses} time${selectedBlockUses === 1 ? '' : 's'})` : ''}. This can&apos;t be undone.
+				{selectedBlockUses > 0 ? ` (used ${selectedBlockUses} time${selectedBlockUses === 1 ? '' : 's'})` : ''}.
 			</ConfirmationModal>
 			<div className="flex flex-wrap gap-2 p-2">
 				{blocks.map((b) => (

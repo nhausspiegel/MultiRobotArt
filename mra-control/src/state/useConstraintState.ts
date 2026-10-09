@@ -129,7 +129,7 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 								const robotName = useRobartState.getState().robots[id]?.name ?? 'Deleted robot';
 								warnings.push({
 									time: history[i].timestep,
-									repr: 'robot ' + robotName + ' has violated a workspace constraint at time ' + history[i].timestep.toFixed(2) + '. It\'s position was ' + currentPosition.x.toFixed(2) + ', ' + currentPosition.y.toFixed(2) + ', ' + currentPosition.z.toFixed(2) + '\n',
+									repr: 'robot ' + robotName + ' has violated a workspace constraint at time ' + history[i].timestep.toFixed(2) + '. Its position was ' + currentPosition.x.toFixed(2) + ', ' + currentPosition.y.toFixed(2) + ', ' + currentPosition.z.toFixed(2) + '\n',
 									violationType: 'workspace',
 									robotId: id,
 								});
