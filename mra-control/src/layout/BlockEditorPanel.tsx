@@ -22,7 +22,10 @@ export const BlockEditorPanel = () => {
 
 	const {workspace} = useBlocklyWorkspace({
 		toolboxConfiguration: blocklyToolboxConfiguration,
-		initialXml: '',
+		// Non-empty so react-blockly's one-time initial import runs at once with nothing in it. With '' it waited for its
+		// own debounced xml copy to fill and then imported it on top of the block we had already loaded (domToWorkspace
+		// appends), duplicating the block's contents on every page load.
+		initialXml: '<xml xmlns="https://developers.google.com/blockly/xml"></xml>',
 		workspaceConfiguration: {
 			grid: {
 				spacing: 20,
