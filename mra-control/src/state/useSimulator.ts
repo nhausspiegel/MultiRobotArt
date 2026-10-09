@@ -192,7 +192,12 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			const currentTime = performance.now();
 			get().advance((currentTime - get().lastStepTime) / 1000 * get().timeDilation);
 			set({ lastStepTime: currentTime, warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
-			if (isFinished(get().robots)) get().halt();
+			if (isFinished(get().robots)) {
+				get().halt();
+				// The whole show has played. Warnings are timed in measuring's 1/fps steps, which can land just after the
+				// moment playback (in screen frames) finished, so they would never show.
+				set({ warningsShownUntil: Infinity });
+			}
 		},
 		advance: (deltaT) => {
 			const newSimTime = get().time + deltaT;
@@ -269,7 +274,8 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				}
 
 				const trajectoryTime = get().robots[robotId].timeAlongTrajectory + deltaT / get().robots[robotId].trajectory?.duration;
-				const newPos = get().robots[robotId].trajectory.evaluate(trajectoryTime);
+				// Not past the end: trajectories extrapolate there, so the last step overshot the target (by more for shorter moves)
+				const newPos = get().robots[robotId].trajectory.evaluate(Math.min(trajectoryTime, 1));
 				itemEndTimes[runningItemIds[robotId]] = newSimTime;
 
 				const offset = newPos.clone().sub(get().robots[robotId].pos);

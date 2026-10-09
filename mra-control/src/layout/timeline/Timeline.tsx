@@ -49,13 +49,15 @@ export const Timeline = () => {
 	}, [timelineState.scale]);
 
 	// Item lengths come from simulating the show; redo it shortly after the timeline, blocks or robots change.
-	// Only while stopped, since measuring resets the sim to the start.
 	useEffect(() => {
 		let timer: ReturnType<typeof setTimeout>;
 		const remeasure = () => {
 			clearTimeout(timer);
 			timer = setTimeout(() => {
-				if (useSimulator.getState().status === 'STOPPED') useSimulator.getState().measureShowLength();
+				const {status, time, measureShowLength, seek} = useSimulator.getState();
+				measureShowLength();
+				// Measuring rewinds to the start; put a paused or running simulation back where it was
+				if (status !== 'STOPPED') seek(time);
 			}, 300);
 		};
 
