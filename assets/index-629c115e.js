@@ -146028,6 +146028,7 @@ const TimelineBlock = ({ item, scale }) => {
 const pixelsPerSecond = 100;
 const roomAfterLastBlock = 30;
 const minTimelineLength = 120;
+const timelineLength = (state2) => Math.max(minTimelineLength, lastItemEnd(state2) + roomAfterLastBlock);
 const SUBDIVISIONS_PER_SECOND = 8;
 const minItemWidth = 12;
 const convertPixelsToSeconds = (distance, scale) => {
@@ -146063,7 +146064,7 @@ const TimelineGroupBody = ({ group }) => {
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
   const blocks = useRobartState((state2) => state2.blocks);
   const scale = useRobartState((state2) => state2.timelineState.scale);
-  const timelineLength = useRobartState((state2) => Math.max(minTimelineLength, lastItemEnd(state2) + roomAfterLastBlock));
+  const length = useRobartState(timelineLength);
   const groups = useRobartState((state2) => state2.timelineState.groups);
   const occupiedItems = laneOccupiedItems(groups, group.id);
   const allDronesItems = group.id === allDronesGroupId ? [] : Object.values(((_a3 = groups[allDronesGroupId]) == null ? void 0 : _a3.items) ?? {});
@@ -146129,13 +146130,13 @@ const TimelineGroupBody = ({ group }) => {
       onDragLeave: handleDragLeave,
       onDrop: handleDrop,
       style: {
-        width: `${timeToX(timelineLength, scale)}px`,
+        width: `${timeToX(length, scale)}px`,
         backgroundImage: showSubdivisions ? `${ticks(secondWidth)}, ${ticks(subdivisionWidth)}` : ticks(secondWidth),
         backgroundSize: showSubdivisions ? `${tickArea} 25%, ${tickArea} 16.67%` : `${tickArea} 25%`,
         backgroundPosition: `${timelineStartPadding}px 0`
       },
       children: [
-        !group.collapsed && [...new Array(Math.ceil(timelineLength / labelEvery))].map((_2, index2) => (
+        !group.collapsed && [...new Array(Math.ceil(length / labelEvery))].map((_2, index2) => (
           // Centered on their ticks
           /* @__PURE__ */ jsx("span", { className: "absolute top-1/4 -translate-x-1/2", style: { left: timeToX(index2 * labelEvery, scale) }, children: index2 * labelEvery }, index2)
         )),
@@ -146467,6 +146468,7 @@ const TimelineSimulationButtons = () => {
 const addNewGroup = () => {
   useRobartState.getState().addGroup(nextGroupName(useRobartState.getState().timelineState.groups));
 };
+const maxScale = 10;
 const Timeline = () => {
   const timelineState = useRobartState((state2) => state2.timelineState);
   const groups = Object.values(timelineState.groups);
@@ -146486,7 +146488,13 @@ const Timeline = () => {
     eventOptions: { passive: false },
     // Lets it stop the browser's page zoom
     from: () => [useRobartState.getState().timelineState.scale, 0],
-    scaleBounds: { min: 0.1, max: 10 }
+    // Zooms out only until the whole timeline fits the view
+    scaleBounds: () => {
+      var _a3;
+      const fitWidth = (((_a3 = scrollerRef.current) == null ? void 0 : _a3.clientWidth) ?? 0) - timelineStartPadding;
+      const fitScale = fitWidth / convertSecondsToPixels(timelineLength(useRobartState.getState()), 1);
+      return { min: Math.min(Math.max(fitScale, 0.01), maxScale), max: maxScale };
+    }
   });
   reactExports.useLayoutEffect(() => {
     const scroller = scrollerRef.current;
