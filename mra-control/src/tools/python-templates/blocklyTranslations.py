@@ -217,11 +217,14 @@ def circle(groupState, radius, velocity, radians, direction):
     if direction == "ccw":
         clockwise = -1
 
-    fx = lambda t: 0
-    fy = lambda t: radius * (np.cos(t * velocity) - 1)
-    fz = lambda t: clockwise * radius * np.sin(t * velocity)
+    # velocity is the speed along the circle (m/s), as in the simulator, so the turn rate depends on the radius
+    angular_velocity = velocity / radius
 
-    timesteps = np.arange(0, radians / velocity, 1 / Hz)
+    fx = lambda t: 0
+    fy = lambda t: radius * (np.cos(t * angular_velocity) - 1)
+    fz = lambda t: clockwise * radius * np.sin(t * angular_velocity)
+
+    timesteps = np.arange(0, radians / angular_velocity, 1 / Hz)
 
     # start positions bumped up by 1 meter in z
     initialPositions = [
