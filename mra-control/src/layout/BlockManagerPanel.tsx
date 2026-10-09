@@ -21,7 +21,7 @@ export const BlockManagerPanel = () => {
 	const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
 	return (
-		<div>
+		<div className="flex h-full flex-col">
 			<div className="flex flex-wrap gap-2 p-2">
 				<IconButton
 					icon={faPlusCircle}
@@ -64,7 +64,8 @@ export const BlockManagerPanel = () => {
 				&quot;{selectedBlock?.name}&quot; will also be removed from the timeline
 				{selectedBlockUses > 0 ? ` (used ${selectedBlockUses} time${selectedBlockUses === 1 ? '' : 's'})` : ''}.
 			</ConfirmationModal>
-			<div className="flex flex-wrap gap-2 p-2">
+			{/* Scrolls when there are more blocks than fit; New / Copy / Delete stay above it */}
+			<div className="flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto p-2">
 				{blocks.map((b) => (
 					<div
 						key={b.id}
