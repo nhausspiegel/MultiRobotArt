@@ -4,7 +4,7 @@ import {type TimelineItem, useRobartState} from '@MRAControl/state/useRobartStat
 import {useDrag} from '@use-gesture/react';
 import React from 'react';
 
-import {pixelsPerSecond, blockOverlaps, convertPixelsToSeconds} from './TimelineGroupBody';
+import {pixelsPerSecond, blockOverlaps, convertPixelsToSeconds, minItemWidth} from './TimelineGroupBody';
 
 export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}) => {
 	const blocks = useRobartState((state) => state.blocks);
@@ -40,6 +40,7 @@ export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}
 			className="absolute top-1/2 flex h-5/6 -translate-y-1/2 cursor-move items-center justify-center rounded-xl bg-purple-400 touch-none select-none focus:outline-none focus:ring-2 focus:ring-purple-800"
 			style={{
 				width: pixelsPerSecond * scale * duration,
+				minWidth: minItemWidth,
 				left: pixelsPerSecond * scale * item.startTime,
 			}}
 			onKeyDown={(e) => {

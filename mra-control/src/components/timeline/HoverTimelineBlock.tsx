@@ -4,9 +4,9 @@ import clsx from 'clsx';
 import React from 'react';
 
 import {useRobartState} from '../../state/useRobartState';
-import {pixelsPerSecond} from './TimelineGroupBody';
+import {minItemWidth, pixelsPerSecond} from './TimelineGroupBody';
 
-export const HoverTimelineBlock = ({scale, startTime, isOverlapping}: {scale: number; startTime: number | undefined; isOverlapping: boolean}) => {
+export const HoverTimelineBlock = ({scale, startTime, cannotDrop}: {scale: number; startTime: number | undefined; cannotDrop: boolean}) => {
 	const selectedBlockId = useRobartState((state) => state.editingBlockId);
 	const selectedBlock = useRobartState((state) => state.blocks[selectedBlockId ?? '']);
 
@@ -16,14 +16,15 @@ export const HoverTimelineBlock = ({scale, startTime, isOverlapping}: {scale: nu
 		<div
 			className={clsx(
 				'absolute top-1/2 flex h-5/6 -translate-y-1/2 items-center justify-center rounded-xl border border-dashed',
-				isOverlapping ? 'border-red-500/50 bg-red-300/50 text-red-500/50' : 'border-green-500/50 bg-green-300/50 text-green-500/50',
+				cannotDrop ? 'border-red-500/50 bg-red-300/50 text-red-500/50' : 'border-green-500/50 bg-green-300/50 text-green-500/50',
 			)}
 			style={{
 				width: pixelsPerSecond * scale * selectedBlock.duration,
+				minWidth: minItemWidth,
 				left: pixelsPerSecond * scale * startTime,
 			}}
 		>
-			{isOverlapping ? <FontAwesomeIcon icon={faXmarkCircle} /> : <FontAwesomeIcon icon={faPlusCircle} />}
+			{cannotDrop ? <FontAwesomeIcon icon={faXmarkCircle} /> : <FontAwesomeIcon icon={faPlusCircle} />}
 		</div>
 	);
 };

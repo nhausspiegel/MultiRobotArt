@@ -15,6 +15,8 @@ type TimelineGroupProps = {
 
 export const pixelsPerSecond = 100;
 export const SUBDIVISIONS_PER_SECOND = 8;
+// Display only: very short items (an LED color change is 0.1 s) would be too thin to see or grab
+export const minItemWidth = 12;
 
 export const convertPixelsToSeconds = (distance: number, scale: number) => {
 	return distance / (pixelsPerSecond * scale);
@@ -57,6 +59,9 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 
 	const laneBodyRef = useRef<HTMLDivElement>(null);
 
+	// A block with nothing in it does nothing, so it isn't allowed on the timeline
+	const isEmptyBlock = (blockId: string | undefined) => blocks[blockId ?? '']?.javaScript.trim() === '';
+
 	const computeTimelineBlockOffset = (clientX: number | undefined, blockId: string | undefined) => {
 		if (clientX === undefined) return;
 
@@ -86,6 +91,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 
 		const blockId = e.dataTransfer.getData('text/plain');
 		if (blocks[blockId] === undefined) return; // Not a block from the block list
+		if (isEmptyBlock(blockId)) return;
 
 		const startTime = computeTimelineBlockOffset(e.clientX, blockId);
 
@@ -133,7 +139,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 				<HoverTimelineBlock
 					scale={scale}
 					startTime={computeTimelineBlockOffset(hoverX, selectedBlockId)}
-					isOverlapping={blockOverlaps(group, computeTimelineBlockOffset(hoverX, selectedBlockId), blocks[selectedBlockId ?? '']?.duration ?? 0)}
+					cannotDrop={isEmptyBlock(selectedBlockId) || blockOverlaps(group, computeTimelineBlockOffset(hoverX, selectedBlockId), blocks[selectedBlockId ?? '']?.duration ?? 0)}
 				/>
 			)}
 		</div>
