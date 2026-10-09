@@ -1,9 +1,9 @@
 import {blocklyToolboxConfiguration} from '@MRAControl/config/BlockToolboxConfig';
 import '@MRAControl/config/customBlocks';
 import {useRobartState} from '@MRAControl/state/useRobartState';
-import Blockly from 'blockly';
+import * as Blockly from 'blockly';
 import defaultTheme from 'tailwindcss/defaultTheme';
-import {inMultipleSelectionModeWeakMap, Multiselect, MultiselectBlockDragger} from '@mit-app-inventor/blockly-plugin-workspace-multiselect';
+import {inMultipleSelectionModeWeakMap, Multiselect} from '@mit-app-inventor/blockly-plugin-workspace-multiselect';
 import {javascriptGenerator} from 'blockly/javascript';
 import {pythonGenerator} from 'blockly/python';
 import React, {useEffect, useRef} from 'react';
@@ -32,6 +32,12 @@ class FixedScaleFlyout extends Blockly.VerticalFlyout {
 	}
 }
 
+// Space plays/pauses the simulation (TimelineSimulationButtons). Blockly also uses it, besides Enter, to act on the
+// focused block and finish a keyboard move; leave those to Enter.
+for (const name of [Blockly.ShortcutItems.names.PERFORM_ACTION, Blockly.ShortcutItems.names.FINISH_MOVE]) {
+	Blockly.ShortcutRegistry.registry.removeKeyMapping(String(Blockly.utils.KeyCodes.SPACE), name, true);
+}
+
 export const BlockEditorPanel = () => {
 	const currentBlockId = useRobartState((state) => state.editingBlockId);
 	const saveBlock = useRobartState((state) => state.saveBlock);
@@ -58,9 +64,10 @@ export const BlockEditorPanel = () => {
 			// or every scroll would zoom.
 			zoom: {wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed},
 			move: {wheel: true, drag: true, scrollbars: true},
-			// MultiselectBlockDragger moves all selected blocks together (required by the multiselect plugin)
-			plugins: {flyoutsVerticalToolbox: FixedScaleFlyout, blockDragger: MultiselectBlockDragger},
+			plugins: {flyoutsVerticalToolbox: FixedScaleFlyout},
 			theme: blocklyTheme,
+			renderer: 'geras', // Blockly 9's block look; Blockly 12+ defaults to the flatter 'thrasos'
+			sounds: false, // Blockly 12+ plays a click when a block is dropped
 		},
 		onWorkspaceChange: (workspaceChanged) => {
 			if (!loadedBlockId.current) return;
@@ -80,12 +87,13 @@ export const BlockEditorPanel = () => {
 		if (!workspace) return;
 		const multiselect = new Multiselect(workspace);
 		multiselect.init({
+			workspaceAutoFocus: false, // Its default focuses the editor whenever the pointer enters it, taking focus from text fields
 			multiselectIcon: {hideIcon: true}, // Shift does the same; its default icons load from GitHub
 			bumpNeighbours: true, // Keep Blockly's nudging of overlapping blocks (the plugin turns it off by default)
 			multiselectCopyPaste: {crossTab: true, menu: false}, // Keyboard copy/paste only, no extra menu items
 		});
 
-		// The plugin only hears Shift while the editor has keyboard focus, which it usually doesn't (e.g. after clicking
+		// The plugin only hears Shift while the editor has keyboard focus, which it often doesn't (e.g. after clicking
 		// the timeline). Pass Shift on from the whole page while the pointer is over the editor, without taking focus.
 		const editor = workspace.getInjectionDiv();
 		let pointerInside = false;
@@ -150,7 +158,7 @@ export const BlockEditorPanel = () => {
 			workspace.setVisible(true);
 			const currentBlock = useRobartState.getState().blocks[currentBlockId];
 			if (currentBlock.xml) {
-				var xmlDom = Blockly.Xml.textToDom(currentBlock.xml);
+				var xmlDom = Blockly.utils.xml.textToDom(currentBlock.xml);
 				Blockly.Xml.clearWorkspaceAndLoadFromXml(xmlDom, workspace);
 			} else if (!currentBlock.xml) {
 				workspace.clear();

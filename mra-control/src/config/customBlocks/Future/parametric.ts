@@ -1,7 +1,6 @@
 import {type RobartBlockDefinition} from '../BlockDefinition';
-import Blockly from 'blockly';
+import * as Blockly from 'blockly';
 import * as SIM from '@MRAControl/state/simulatorCommands';
-import {string} from 'blockly/core/utils';
 
 export const parametricBlock: RobartBlockDefinition = {
 	name: 'parametricBlock',

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import {type RobartBlockDefinition} from '../BlockDefinition';
-import Blockly from 'blockly';
+import * as Blockly from 'blockly';
 
 export const blockGetPosition: RobartBlockDefinition = {
 	name: 'get_a_position',

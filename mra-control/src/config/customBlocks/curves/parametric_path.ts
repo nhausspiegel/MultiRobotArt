@@ -1,5 +1,5 @@
 import {type RobartBlockDefinition} from '../BlockDefinition';
-import Blockly from 'blockly';
+import * as Blockly from 'blockly';
 import {isValidExpression} from '@MRAControl/state/trajectories';
 
 // Blockly keeps the previous value when a validator returns null

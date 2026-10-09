@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import {type RobartBlockDefinition} from '../BlockDefinition';
-import Blockly from 'blockly';
+import * as Blockly from 'blockly';
 import * as SIM from '@MRAControl/state/simulatorCommands';
 
 export const blockGoToSpeed: RobartBlockDefinition = {

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-.blocklyToolboxDiv {
+.injectionDiv .blocklyToolbox {
   z-index: 10;
 }
 
@@ -26,7 +26,7 @@ svg[display='none'] {
 
 /* Blockly's toolbox categories, dropdown menus and tooltips set their own fonts (sans-serif, Arial, Helvetica); use the
    page's font like the blocks do (theme in BlockEditorPanel). Extra specificity outranks Blockly's styles. */
-.injectionDiv .blocklyTreeLabel,
+.injectionDiv .blocklyToolboxCategoryLabel,
 body .blocklyWidgetDiv .blocklyMenu,
 body .blocklyDropDownDiv .blocklyMenu,
 body .blocklyTooltipDiv {

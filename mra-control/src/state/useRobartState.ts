@@ -12,7 +12,6 @@ import {ROBART_VERSION} from '../config/Version';
 import {exportROS, loadProjectFromFile, saveProjectToFile} from '../tools/projectFileConversion';
 import {useSimulator} from './useSimulator';
 import {allDronesGroupId, migrateGroups, newGroup} from './groupMigration';
-import {State} from 'blockly/core/utils/aria';
 
 export type CodeBlock = {
 	/**

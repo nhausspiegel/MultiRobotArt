@@ -1,13 +1,7 @@
 
-import type Blockly from 'blockly';
+import type * as Blockly from 'blockly';
 
-export type BlocklyOrder = 'ORDER_ATOMIC';
-
-export type BlocklyGenerator = {
-	valueToCode: (block: Blockly.Block, name: string, order: BlocklyOrder) => any;
-	ORDER_ATOMIC: BlocklyOrder;
-	statementToCode(block: Blockly.Block, arg1: string): string;
-};
+export type BlocklyGenerator = Pick<Blockly.CodeGenerator, 'statementToCode'>;
 
 /**
  * A lightweight wrapping interface for defining custom blocks within Robart.

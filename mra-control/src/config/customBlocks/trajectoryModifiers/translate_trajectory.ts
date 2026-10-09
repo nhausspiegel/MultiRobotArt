@@ -1,5 +1,5 @@
 import {type RobartBlockDefinition} from '../BlockDefinition';
-import Blockly from 'blockly';
+import * as Blockly from 'blockly';
 
 export const blockTranslateTrajectory: RobartBlockDefinition = {
 	name: 'translateTrajectory',

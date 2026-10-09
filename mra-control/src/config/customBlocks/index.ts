@@ -12,7 +12,7 @@ import {blockTakeoff} from './motion/takeoff';
 import {blockGetPosition} from './utility/get_a_position';
 import {blockColor, blockRandomColor} from './colors/color';
 import {blockColorOff} from './colors/colorOff';
-import Blockly from 'blockly';
+import * as Blockly from 'blockly';
 import {multiTraj} from './trajectoryModifiers/multi_traj';
 import {blockCircleArc} from './curves/circleArc';
 import {blockNegate} from './trajectoryModifiers/negate_trajectory';
@@ -55,6 +55,6 @@ export const CUSTOM_BLOCKS = {
 
 Object.values(CUSTOM_BLOCKS).forEach((block) => {
 	Blockly.Blocks[block.name] = block.block;
-	pythonGenerator[block.name] = (b: Blockly.Block) => block.pythonGenerator(b, pythonGenerator);
-	js[block.name] = (b: Blockly.Block) => block.javascriptGenerator(b, js);
+	pythonGenerator.forBlock[block.name] = (b: Blockly.Block) => block.pythonGenerator(b, pythonGenerator);
+	js.forBlock[block.name] = (b: Blockly.Block) => block.javascriptGenerator(b, js);
 });

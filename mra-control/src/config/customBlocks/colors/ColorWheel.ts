@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import * as Blockly from 'blockly/core';
+import {FieldColour} from '@blockly/field-colour';
 import iro from '@jaames/iro';
 import type {ColorPickerProps} from '@jaames/iro/dist/ColorPicker';
 
 /**
  * This is the class for the color wheel.
  */
-export class ColorWheelField extends Blockly.FieldColour {
+export class ColorWheelField extends FieldColour {
 	/**
    * Class for the color picker.
 	*/
@@ -56,7 +57,7 @@ export class ColorWheelField extends Blockly.FieldColour {
 		// eslint-disable-next-line new-cap
 		const colorPicker = iro.ColorPicker(editor, {
 			width: this.width, // controls the size of the color picker
-			color: this.getValue(), // starts the color picker at a certain value,
+			color: this.getValue() ?? undefined, // starts the color picker at a certain value,
 			...this.options, // These options will over ride everything
 		});
 
