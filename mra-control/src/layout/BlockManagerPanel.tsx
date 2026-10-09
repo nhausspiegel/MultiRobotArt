@@ -1,7 +1,8 @@
 import {IconButton} from '@MRAControl/components/buttons/IconButton';
 import {faCopy, faPlusCircle, faTrash} from '@fortawesome/free-solid-svg-icons';
 import {Button} from 'flowbite-react';
-import React from 'react';
+import React, {useState} from 'react';
+import {ConfirmationModal} from '@MRAControl/components/modal/ConfirmationModal';
 import {names} from './BlockEditorHeader';
 
 import {useRobartState} from '../state/useRobartState';
@@ -13,6 +14,11 @@ export const BlockManagerPanel = () => {
 	const copyBlock = useRobartState((state) => state.copyBlock);
 	const selectedBlockId = useRobartState((state) => state.editingBlockId);
 	const setEditingBlock = useRobartState((state) => state.setEditingBlock);
+	const selectedBlock = useRobartState((state) => state.blocks[selectedBlockId ?? '']);
+	const selectedBlockUses = useRobartState((state) => Object.values(state.timelineState.groups)
+		.flatMap((group) => Object.values(group.items))
+		.filter((item) => item.blockId === selectedBlockId).length);
+	const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
 	return (
 		<div>
@@ -40,11 +46,24 @@ export const BlockManagerPanel = () => {
 					text="Delete"
 					onClick={() => {
 						if (selectedBlockId === undefined) return;
-						// TODO: Add a confirmation before removing the block
-						removeBlock(selectedBlockId);
+						setConfirmDeleteOpen(true);
 					}}
 				/>
 			</div>
+			<ConfirmationModal
+				header="Delete block?"
+				open={confirmDeleteOpen}
+				onCancel={() => {
+					setConfirmDeleteOpen(false);
+				}}
+				onConfirm={() => {
+					if (selectedBlockId !== undefined) removeBlock(selectedBlockId);
+					setConfirmDeleteOpen(false);
+				}}
+			>
+				&quot;{selectedBlock?.name}&quot; will also be removed from the timeline
+				{selectedBlockUses > 0 ? ` (used ${selectedBlockUses} time${selectedBlockUses === 1 ? '' : 's'})` : ''}. This can&apos;t be undone.
+			</ConfirmationModal>
 			<div className="flex flex-wrap gap-2 p-2">
 				{blocks.map((b) => (
 					<div
