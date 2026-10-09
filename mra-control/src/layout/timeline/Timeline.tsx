@@ -60,7 +60,8 @@ export const Timeline = () => {
 
 		remeasure();
 		const unsubscribe = useRobartState.subscribe((state, previous) => {
-			if (state.timelineState.groups !== previous.timelineState.groups || state.blocks !== previous.blocks || state.robots !== previous.robots) {
+			if (state.timelineState.groups !== previous.timelineState.groups || state.blocks !== previous.blocks || state.robots !== previous.robots
+				|| state.boundingBoxSize !== previous.boundingBoxSize) {
 				remeasure();
 			}
 		});

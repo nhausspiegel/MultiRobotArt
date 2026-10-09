@@ -1,16 +1,53 @@
 import {faSync} from '@fortawesome/free-solid-svg-icons';
 import {Button, Checkbox, Label, Modal, Tabs, TabsRef, TextInput} from 'flowbite-react';
-import React, {useRef, useState} from 'react';
+import clsx from 'clsx';
+import React, {useEffect, useRef, useState} from 'react';
 
 import {CancelButton} from '../../components/buttons/CancelButton';
 import {IconButton} from '../../components/buttons/IconButton';
 import {ConfirmationModal} from '../../components/modal/ConfirmationModal';
-import {useRobartState} from '../../state/useRobartState';
+import {defaultBoundingBoxSize, useRobartState} from '../../state/useRobartState';
 import {useUIState} from '../../state/useUIState';
 import {CurveEditorModal} from '../curveEditor/CurveEditorModal';
 import {type Group} from 'three';
 import { useSimulator } from '@MRAControl/state/useSimulator';
 import { Crazyflie, CrazyflieProps } from '@MRAControl/components/vector/Crazyflie';
+
+const isPositiveNumber = (value: string) => value.trim() !== '' && Number(value) > 0;
+
+// The boxes keep whatever is typed; the size is only saved while all three are positive numbers
+const BoundingBoxSizeEditor = () => {
+	const size = useRobartState((state) => state.boundingBoxSize ?? defaultBoundingBoxSize);
+	const setSize = useRobartState((state) => state.setBoundingBoxSize);
+	const [values, setValues] = useState(size.map(String));
+	// Follow changes made elsewhere (Reset Project, Load Project), but not the ones typed here
+	useEffect(() => {
+		if (!values.every((value, i) => Number(value) === size[i])) setValues(size.map(String));
+	}, [size]);
+
+	return (
+		<div className="mt-4">
+			<div className="mb-1 font-bold">Bounding box dimensions (m):</div>
+			<div className="flex gap-3">
+				{['x', 'y', 'z'].map((axis, i) => (
+					<label key={axis} className="flex items-center gap-1">
+						{axis}
+						<input
+							className={clsx('w-20 rounded', isPositiveNumber(values[i]) ? 'border-gray-300' : 'border-2 border-red-500')}
+							inputMode="decimal"
+							value={values[i]}
+							onChange={(e) => {
+								const next = values.map((value, j) => (j === i ? e.target.value : value));
+								setValues(next);
+								if (next.every(isPositiveNumber)) setSize(next.map(Number) as [number, number, number]);
+							}}
+						/>
+					</label>
+				))}
+			</div>
+		</div>
+	);
+};
 
 export const SettingsModal = () => {
 	const settingsModalOpen = useUIState((state) => state.settingsModalOpen);
@@ -49,6 +86,7 @@ export const SettingsModal = () => {
 								checked={!renderBoundingBoxes}
 								onChange={handleBoundingBoxChange} />
 							<span style={{ marginLeft: '10px' }}>Remove Bounding Boxes</span>
+							<BoundingBoxSizeEditor />
 						</Tabs.Item>
 						<Tabs.Item title="Utilities">
 							<Button onClick={toggleCurveEditor}>Curve Editor</Button>

@@ -11,7 +11,7 @@ import { useSimulator } from '@MRAControl/state/useSimulator';
 import { Box, Sphere, Text, useAnimations, useGLTF } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import React, { useEffect, useRef, useState } from 'react';
-import { Box3, MeshBasicMaterial, Vector3 } from 'three';
+import { MeshBasicMaterial, Vector3 } from 'three';
 import THREE from 'three';
 
 export type CrazyflieProps = {
@@ -20,7 +20,6 @@ export type CrazyflieProps = {
 };
 
 export function Crazyflie({ robotId, renderBoundingBox }: CrazyflieProps) {
-	const updateRobotBoundingBox = useSimulator((state) => state.updateRobotBoundingBox);
 	const checkCollisions = useSimulator((state) => state.checkCollisions);
 	const robot = useRobartState((state) => state.robots[robotId]);
 	const simRobot = useSimulator((state) => state.robots[robotId]);
@@ -43,21 +42,11 @@ export function Crazyflie({ robotId, renderBoundingBox }: CrazyflieProps) {
 		setIsLoadingCFs(false);
 	}, []);
 
+	// The collision box comes from Settings (bounding box dimensions), so the red boxes match the collision warnings.
+	// It used to be resized here to the model plus padding, which disagreed with the simulator's box.
 	useEffect(() => {
-		if (!group.current) {
-			setIsLoadingWireframes(false);
-			return;
-		}
-
-		if (renderBoundingBox) {
-			const crazyflieBoundingBox = new Box3();
-			crazyflieBoundingBox.setFromObject(group.current);
-			crazyflieBoundingBox.expandByVector(new Vector3(0.05, 0.05, 0.35));
-			updateRobotBoundingBox(robotId, crazyflieBoundingBox);
-		}
-
 		setIsLoadingWireframes(false);
-	}, [group.current, boundingBox === undefined]);
+	}, []);
 	if (isLoadingCFs || isLoadingWireframes) {
 		return <Text fontSize={1}>Loading...</Text>;
 	}

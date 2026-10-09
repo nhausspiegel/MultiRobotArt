@@ -8,7 +8,7 @@ import { immer } from 'zustand/middleware/immer';
 import { Queue } from 'queue-typescript';
 import { type SimulatorGroupState } from './simulatorCommands';
 import * as SIM from './simulatorCommands';
-import { type RobotState, useRobartState } from './useRobartState';
+import { defaultBoundingBoxSize, type RobotState, useRobartState } from './useRobartState';
 import * as traj from './trajectories';
 import { useCrazyflieConstraintState } from './useConstraintState';
 import { type TimedWarning } from './warnings';
@@ -391,7 +391,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		},
 		setRobots: (robots) => {
 			const simRobots: Record<string, RobotSimState> = {};
-			const bboxSize = new THREE.Vector3(0.2, 0.2, 0.35);
+			// Half of the box size set in Settings (the box is centered on the robot)
+			const [boxX, boxY, boxZ] = useRobartState.getState().boundingBoxSize ?? defaultBoundingBoxSize;
+			const bboxSize = new THREE.Vector3(boxX / 2, boxY / 2, boxZ / 2);
 			Object.values(robots).forEach((robot) => {
 				const position = new THREE.Vector3(robot.startingPosition[0], robot.startingPosition[1], robot.startingPosition[2])
 				simRobots[robot.id] = {

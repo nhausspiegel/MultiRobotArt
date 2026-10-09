@@ -104,7 +104,14 @@ export type MRAState = {
    * Notes from loading the project (e.g. robots moved out of extra groups), shown in the Warnings tab.
    */
 	notices?: string[];
+	/**
+   * Full x, y, z size (m) of the box around each robot, centered on it. Overlapping boxes count as a collision.
+   * Set in Settings; unset in older projects (defaultBoundingBoxSize).
+   */
+	boundingBoxSize?: [number, number, number];
 };
+
+export const defaultBoundingBoxSize: [number, number, number] = [0.4, 0.4, 0.7];
 
 export type TimelineActions = {
 	/**
@@ -141,6 +148,7 @@ export type TimelineActions = {
    * Sets the timeline zoom (pixels per second multiplier). Visual only.
    */
 	setTimelineScale: (scale: number) => void;
+	setBoundingBoxSize: (size: [number, number, number]) => void;
 	toggleGroupCollapsed: (groupId: string) => void;
 	/**
    * Stores lengths measured by simulating: how long timeline items take in the show, and how long each block takes
@@ -247,6 +255,7 @@ const defaultRobartState: MRAState = {
 	robots: {[firstDrone.id]: firstDrone},
 	warnings: [],
 	notices: [],
+	boundingBoxSize: defaultBoundingBoxSize,
 };
 
 type MRAActions = MRAGeneralActions & TimelineActions & BlockActions & RobotActions;
@@ -278,7 +287,8 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					loadProject: (file) => {
 						// Older project files can have robots in several groups
 						const newState = migrateGroups(loadProjectFromFile(file));
-						set(newState);
+						// Older files have no box size; don't keep the previous project's
+						set({...newState, boundingBoxSize: newState.boundingBoxSize ?? defaultBoundingBoxSize});
 						useSimulator.getState().reset();
 					},
 					saveProject: (fileName: string | undefined) => {
@@ -290,6 +300,7 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							version: ROBART_VERSION,
 							robots: get().robots,
 							warnings: get().warnings,
+							boundingBoxSize: get().boundingBoxSize,
 						};
 						saveProjectToFile(state, fileName);
 					},
@@ -379,6 +390,9 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							const group = state.timelineState.groups[groupId];
 							group.collapsed = !group.collapsed;
 						});
+					},
+					setBoundingBoxSize: (size) => {
+						set({boundingBoxSize: size});
 					},
 					setTimelineScale: (scale) => {
 						set((state) => {
