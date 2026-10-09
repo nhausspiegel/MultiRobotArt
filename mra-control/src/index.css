@@ -23,3 +23,12 @@ svg[display='none'] {
 .injectionDiv .blocklyFlyout .blocklyScrollbarHandle:hover {
   fill: rgba(0, 0, 0, 0.35);
 }
+
+/* Blockly's toolbox categories, dropdown menus and tooltips set their own fonts (sans-serif, Arial, Helvetica); use the
+   page's font like the blocks do (theme in BlockEditorPanel). Extra specificity outranks Blockly's styles. */
+.injectionDiv .blocklyTreeLabel,
+body .blocklyWidgetDiv .blocklyMenu,
+body .blocklyDropDownDiv .blocklyMenu,
+body .blocklyTooltipDiv {
+  font-family: theme('fontFamily.sans');
+}

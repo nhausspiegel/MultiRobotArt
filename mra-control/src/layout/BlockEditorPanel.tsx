@@ -2,6 +2,7 @@ import {blocklyToolboxConfiguration} from '@MRAControl/config/BlockToolboxConfig
 import '@MRAControl/config/customBlocks';
 import {useRobartState} from '@MRAControl/state/useRobartState';
 import Blockly from 'blockly';
+import defaultTheme from 'tailwindcss/defaultTheme';
 import {javascriptGenerator} from 'blockly/javascript';
 import {pythonGenerator} from 'blockly/python';
 import React, {useEffect, useRef} from 'react';
@@ -10,6 +11,15 @@ import {useBlocklyWorkspace} from 'react-blockly';
 import {BlockEditorHeader} from './BlockEditorHeader';
 
 const zoomScaleSpeed = 1.2;
+
+// Block text in the page's font (Tailwind's sans stack) instead of Blockly's plain sans-serif (Helvetica/Arial).
+// Set through the theme so Blockly also measures text with it. Reused if already registered (module reloads).
+const blocklyTheme = Blockly.registry.getObject(Blockly.registry.Type.THEME, 'robart', false)
+	?? Blockly.Theme.defineTheme('robart', {
+		name: 'robart',
+		base: Blockly.Themes.Classic,
+		fontStyle: {family: defaultTheme.fontFamily.sans.join(', ')},
+	});
 
 // Thinner than the default 15 px; read when the workspace is created. Colors are in index.css.
 Blockly.Scrollbar.scrollbarThickness = 8;
@@ -48,6 +58,7 @@ export const BlockEditorPanel = () => {
 			zoom: {wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed},
 			move: {wheel: true, drag: true, scrollbars: true},
 			plugins: {flyoutsVerticalToolbox: FixedScaleFlyout},
+			theme: blocklyTheme,
 		},
 		onWorkspaceChange: (workspaceChanged) => {
 			if (!loadedBlockId.current) return;
