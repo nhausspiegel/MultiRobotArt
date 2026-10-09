@@ -9,6 +9,8 @@ import {useBlocklyWorkspace} from 'react-blockly';
 
 import {BlockEditorHeader} from './BlockEditorHeader';
 
+const zoomScaleSpeed = 1.2;
+
 export const BlockEditorPanel = () => {
 	const currentBlockId = useRobartState((state) => state.editingBlockId);
 	const saveBlock = useRobartState((state) => state.saveBlock);
@@ -28,6 +30,10 @@ export const BlockEditorPanel = () => {
 				colour: '#ccc',
 				snap: true,
 			},
+			// Pinch (ctrl+wheel in Chrome/Firefox) and cmd+scroll zoom; plain scrolling pans. move.wheel is needed,
+			// or every scroll would zoom.
+			zoom: {wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed},
+			move: {wheel: true, drag: true, scrollbars: true},
 		},
 		onWorkspaceChange: (workspaceChanged) => {
 			if (!loadedBlockId.current) return;
@@ -41,6 +47,31 @@ export const BlockEditorPanel = () => {
 		},
 		ref: workspaceRef,
 	});
+
+	// Safari reports trackpad pinches as gesture events instead of ctrl+wheel, so Blockly's wheel zoom misses them
+	useEffect(() => {
+		const element = workspaceRef.current;
+		if (!workspace || !element) return;
+		let previousScale = 1;
+		const onGestureStart = (event: Event) => {
+			event.preventDefault(); // Otherwise Safari zooms the whole page
+			previousScale = 1;
+		};
+		const onGestureChange = (event: Event) => {
+			event.preventDefault();
+			const {scale, clientX, clientY} = event as Event & {scale: number; clientX: number; clientY: number};
+			const rect = element.getBoundingClientRect();
+			// zoom() counts in steps of scaleSpeed
+			workspace.zoom(clientX - rect.left, clientY - rect.top, Math.log(scale / previousScale) / Math.log(zoomScaleSpeed));
+			previousScale = scale;
+		};
+		element.addEventListener('gesturestart', onGestureStart);
+		element.addEventListener('gesturechange', onGestureChange);
+		return () => {
+			element.removeEventListener('gesturestart', onGestureStart);
+			element.removeEventListener('gesturechange', onGestureChange);
+		};
+	}, [workspace]);
 
 	useEffect(() => {
 		window.dispatchEvent(new Event('resize'));
