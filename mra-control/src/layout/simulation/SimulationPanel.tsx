@@ -2,29 +2,16 @@ import {Canvas} from '@react-three/fiber';
 
 import {Simulation} from './Simulation';
 import {SimulationControls} from './SimulationControls';
-import React, { useState } from 'react';
-import { PerformanceMonitor } from '@react-three/drei';
-
-
+import React from 'react';
 
 export const SimulationPanel = () => {
-	const [dpr, setDpr] = useState(1.5)
-
-	const onPerformanceDecline = (() => {
-		const newDpr = Math.max(dpr - 0.5, 0.5);
-		setDpr(newDpr);
-	});
-
-	const onPerformanceIncline = (() => {
-		const newDpr = Math.min(dpr + 0.5, 2.0);
-		setDpr(newDpr);
-	});
-
 	return (
 		<div className="relative h-full w-full">
-			<Canvas dpr={dpr}>
+			{/* The screen's pixel ratio, between 1 and 2. A PerformanceMonitor used to lower it on frame drops; the busy
+			    first seconds (model load, measuring the show) tripped it, and it rarely raised it back, leaving the view
+			    pixelated. The scene is light enough for full resolution. */}
+			<Canvas dpr={[1, 2]}>
 				<Simulation />
-				<PerformanceMonitor onIncline={onPerformanceIncline} onDecline={onPerformanceDecline}></PerformanceMonitor>
 			</Canvas>
 			<SimulationControls />
 		</div>
