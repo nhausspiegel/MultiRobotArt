@@ -12,6 +12,8 @@ export const RenamableText = ({text, updateText, className}: RenamableTextProps)
 	const [inputValue, setInputValue] = useState('');
 	const [width, setWidth] = useState(0);
 	const span = useRef<HTMLSpanElement>(null);
+	// Set once Enter or Escape has handled the edit, so the blur that follows doesn't apply it again
+	const finished = useRef(false);
 
 	useEffect(() => {
 		if (span.current === null) return;
@@ -25,6 +27,7 @@ export const RenamableText = ({text, updateText, className}: RenamableTextProps)
 		<h2
 			className={clsx(defaultClassName, className)}
 			onClick={() => {
+				finished.current = false;
 				setInputValue(text);
 				setShowRenameInput(true);
 			}}
@@ -35,6 +38,7 @@ export const RenamableText = ({text, updateText, className}: RenamableTextProps)
 		<form
 			onSubmit={(e) => {
 				e.preventDefault();
+				finished.current = true;
 				updateText(inputValue);
 				setShowRenameInput(false);
 			}}
@@ -49,8 +53,16 @@ export const RenamableText = ({text, updateText, className}: RenamableTextProps)
 				onChange={(e) => {
 					setInputValue(e.target.value); 
 				}}
+				// Clicking away saves too (it used to discard the edit, e.g. when clicking Done in a window); Escape cancels
 				onBlur={() => {
-					setShowRenameInput(false); 
+					if (!finished.current) updateText(inputValue);
+					finished.current = true;
+					setShowRenameInput(false);
+				}}
+				onKeyDown={(e) => {
+					if (e.key !== 'Escape') return;
+					finished.current = true;
+					setShowRenameInput(false);
 				}}
 				autoFocus
 			/>
