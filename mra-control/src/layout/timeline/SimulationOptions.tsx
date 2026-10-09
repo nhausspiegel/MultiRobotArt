@@ -37,9 +37,14 @@ export const SimulationOptions = () => {
 
 	return (
 		<div className="flex items-center gap-3 text-sm">
-			<span className="tabular-nums">
-				{formatTime(time)} / {formatTime(showLength)}
-			</span>
+			<label className="flex items-center gap-1">
+				<input type="checkbox" checked={showCoordinates} onChange={toggleCoordinates} />
+				Coordinates
+			</label>
+			<label className="flex items-center gap-1">
+				<input type="checkbox" checked={showPaths} onChange={togglePaths} />
+				Paths
+			</label>
 			<select
 				className="rounded border border-gray-300 bg-white py-1 pl-2 pr-8 text-sm"
 				aria-label="Simulation speed"
@@ -54,14 +59,9 @@ export const SimulationOptions = () => {
 					</option>
 				))}
 			</select>
-			<label className="flex items-center gap-1">
-				<input type="checkbox" checked={showPaths} onChange={togglePaths} />
-				Paths
-			</label>
-			<label className="flex items-center gap-1">
-				<input type="checkbox" checked={showCoordinates} onChange={toggleCoordinates} />
-				Coordinates
-			</label>
+			<span className="tabular-nums">
+				{formatTime(time)} / {formatTime(showLength)}
+			</span>
 		</div>
 	);
 };

@@ -79,8 +79,8 @@ export const Timeline = () => {
 			<div className="flex">
 				<div className="flex flex-grow" />
 				<div className="flex items-center gap-3 pt-2 pr-3">
-					<SimulationOptions />
 					<TimelineSimulationButtons />
+					<SimulationOptions />
 				</div>
 			</div>
 
