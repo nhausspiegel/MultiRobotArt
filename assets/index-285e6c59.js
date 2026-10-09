@@ -146216,7 +146216,7 @@ const TimelineGroupBody = ({ group }) => {
   };
   const secondWidth = convertSecondsToPixels(1, scale);
   const subdivisionWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
-  const ticks = (spacing) => `repeating-linear-gradient(to right, black 0 2px, transparent 2px ${spacing}px)`;
+  const ticks = (spacing) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
   const tickArea = `calc(100% - ${timelineStartPadding}px)`;
   const showSubdivisions = subdivisionWidth >= 6;
   const labelEvery = [1, 2, 5, 10, 15, 30, 60].find((seconds) => seconds * secondWidth >= 32) ?? 60;
