@@ -14,22 +14,22 @@ export const RightPanel = () => {
 		<div className='flex flex-col gap-2 h-full'>
 			<div>
 				<Button.Group>
-					<Button color={selectedTab == 'simulation' ? 'blue' : 'gray'} onClick={() => {
+					<Button color={selectedTab == 'simulation' ? 'info' : 'gray'} onClick={() => {
 						setSelectedTab('simulation'); 
 					}}>
           Simulation
 					</Button>
-					<Button color={selectedTab == 'python' ? 'blue' : 'gray'} onClick={() => {
+					<Button color={selectedTab == 'python' ? 'info' : 'gray'} onClick={() => {
 						setSelectedTab('python'); 
 					}}>
           Python Code
 					</Button>
-					<Button color={selectedTab == 'javascript' ? 'blue' : 'gray'} onClick={() => {
+					<Button color={selectedTab == 'javascript' ? 'info' : 'gray'} onClick={() => {
 						setSelectedTab('javascript'); 
 					}}>
           JavaScript Code
 					</Button>
-					<Button color={selectedTab == 'warnings' ? 'blue' : 'gray'} onClick={() => {
+					<Button color={selectedTab == 'warnings' ? 'info' : 'gray'} onClick={() => {
 						setSelectedTab('warnings'); 
 					}}>
           Warnings{warnings > 0 ? ` (${warnings})` : ''}
