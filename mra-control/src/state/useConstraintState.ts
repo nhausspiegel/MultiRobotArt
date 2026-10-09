@@ -76,22 +76,28 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 				let warnings: ConstraintWarning[] = [];
 				//Check velocity Constraints
 				robotIDs.forEach(id => {
-					// For Each robot Check if currPos - prevPos > maxVel
+					// Warn once per stretch of violation, not once per frame
+					let violating = false;
 					for (let i = 1; i < positions.length; i++) {
 						const currentPosition = positions[i]?.robotPositions[id];
 						const previousPosition = positions[i-1]?.robotPositions[id];
-						if (currentPosition && previousPosition) {
-							const velocity = currentPosition.distanceTo(previousPosition) / get().deltaT;
-							if (currentPosition && previousPosition &&  velocity > get().maxVelocity) {
-								const robotName = useRobartState.getState().robots[id]?.name ?? 'Deleted robot';
-								warnings.push({
-									time: positions[i].timestep,
-									repr: 'robot ' + robotName + ' has violated a velocity constraint at time ' + positions[i].timestep.toFixed(2) + '. It was travelling at ' + velocity.toFixed(2) + ' m/s.\n',
-									violationType: 'velocity',
-									robotId: id,
-								});
-							}
+						// Actual time between steps: it varies with screen refresh rate and sim speed, so a fixed 1/60 s misjudged speeds
+						const timeBetween = positions[i].timestep - positions[i-1].timestep;
+						if (!currentPosition || !previousPosition || timeBetween <= 0) {
+							violating = false;
+							continue;
 						}
+						const velocity = currentPosition.distanceTo(previousPosition) / timeBetween;
+						if (velocity > get().maxVelocity && !violating) {
+							const robotName = useRobartState.getState().robots[id]?.name ?? 'Deleted robot';
+							warnings.push({
+								time: positions[i].timestep,
+								repr: 'robot ' + robotName + ' has violated a velocity constraint at time ' + positions[i].timestep.toFixed(2) + '. It was travelling at ' + velocity.toFixed(2) + ' m/s.\n',
+								violationType: 'velocity',
+								robotId: id,
+							});
+						}
+						violating = velocity > get().maxVelocity;
 					}
 				});
                 
@@ -113,22 +119,22 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 
 					// Check workspace bounds
 					robotIDs.forEach(id => {
-					// For Each robot Check if currPos - prevPos > maxVel
+						// Warn once each time the robot leaves the workspace, not once per frame
+						let outside = false;
 						for (let i = 1; i < history.length; i++) {
 							const currentPosition = history[i]?.robotPositions[id];
-							if (currentPosition) {
-								if (!this.workspaceDimensions.containsPoint(currentPosition)) {
-									const robotName = useRobartState.getState().robots[id]?.name ?? 'Deleted robot';
-									console.log(history[i])
-									warnings.push({
-										time: history[i].timestep,
-										repr: 'robot ' + robotName + ' has violated a workspace constraint at time ' + history[i].timestep.toFixed(2) + '. It\'s position was ' + currentPosition.x.toFixed(2) + ', ' + currentPosition.y.toFixed(2) + ', ' + currentPosition.z.toFixed(2) + '\n',
-										violationType: 'velocity',
-										robotId: id,
-									});
-								}
-
+							if (!currentPosition) continue;
+							const isOutside = !this.workspaceDimensions.containsPoint(currentPosition);
+							if (isOutside && !outside) {
+								const robotName = useRobartState.getState().robots[id]?.name ?? 'Deleted robot';
+								warnings.push({
+									time: history[i].timestep,
+									repr: 'robot ' + robotName + ' has violated a workspace constraint at time ' + history[i].timestep.toFixed(2) + '. It\'s position was ' + currentPosition.x.toFixed(2) + ', ' + currentPosition.y.toFixed(2) + ', ' + currentPosition.z.toFixed(2) + '\n',
+									violationType: 'workspace',
+									robotId: id,
+								});
 							}
+							outside = isOutside;
 						}
 					});
 					return warnings;
