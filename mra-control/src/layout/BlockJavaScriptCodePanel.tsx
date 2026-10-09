@@ -8,7 +8,7 @@ export const BlockJavaScriptCodePanel = () => {
 	const currentBlockId = useRobartState((state) => state.editingBlockId);
 	const currentBlock: CodeBlock | undefined = useRobartState((state) => state.blocks[currentBlockId ?? '']);
 	return (
-		<div className="h-full w-full">
+		<div className="h-full w-full overflow-auto">
 			<CodeMirror value={currentBlock?.javaScript} className="h-full w-full" extensions={[javascript()]} readOnly={true} />
 		</div>
 	);

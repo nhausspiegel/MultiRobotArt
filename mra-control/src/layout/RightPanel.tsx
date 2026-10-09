@@ -35,7 +35,8 @@ export const RightPanel = () => {
 					</Button>
 				</Button.Group>
 			</div>
-			<div className='flex-grow h-full'>
+			{/* min-h-0, not h-full: h-full made this 100% tall plus the tab bar, so the bottom was cut off and code tabs couldn't scroll */}
+			<div className='min-h-0 flex-grow'>
 				{selectedTab == 'simulation' && <SimulationPanel />}
 				{selectedTab == 'python' && <BlockPythonCodePanel />}
 				{selectedTab == 'javascript' && <BlockJavaScriptCodePanel />}
