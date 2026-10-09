@@ -22,7 +22,10 @@ export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}
 			.map((element) => (element as HTMLElement).dataset?.laneId)
 			.find(Boolean) ?? item.groupId;
 		const startTime = Math.max(0, item.startTime + convertPixelsToSeconds(mx, scale));
-		const valid = !blockOverlaps(laneOccupiedItems(groups, laneId), startTime, item.duration, item.id);
+		// Can't move into a lane with no drones; moving within its own lane is fine
+		const laneHasDrones = Object.keys(groups[laneId]?.robots ?? {}).length > 0;
+		const valid = (laneId === item.groupId || laneHasDrones)
+			&& !blockOverlaps(laneOccupiedItems(groups, laneId), startTime, item.duration, item.id);
 
 		if (active) {
 			setDrag({x: mx, y: my, valid});

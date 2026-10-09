@@ -2,6 +2,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-extraneous-dependencies */
+import clsx from 'clsx';
 import {type DragEventHandler, useRef, useState} from 'react';
 
 import {allDronesGroupId} from '../../state/groupMigration';
@@ -71,6 +72,9 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 
 	const laneBodyRef = useRef<HTMLDivElement>(null);
 
+	// A lane with no drones runs nothing, so it takes no new blocks (with no drones at all, that includes All drones)
+	const hasDrones = Object.keys(group.robots).length > 0;
+
 	// A block with nothing in it does nothing, so it isn't allowed on the timeline
 	const isEmptyBlock = (blockId: string | undefined) => blocks[blockId ?? '']?.javaScript.trim() === '';
 
@@ -104,7 +108,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 
 		const blockId = e.dataTransfer.getData('text/plain');
 		if (blocks[blockId] === undefined) return; // Not a block from the block list
-		if (isEmptyBlock(blockId)) return;
+		if (isEmptyBlock(blockId) || !hasDrones) return;
 
 		const startTime = computeTimelineBlockOffset(e.clientX, blockId);
 
@@ -129,7 +133,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 
 	return (
 		<div
-			className="relative h-16 rounded bg-blue-300 bg-repeat-x"
+			className={clsx('relative h-16 rounded bg-repeat-x', hasDrones ? 'bg-blue-300' : 'bg-gray-300')}
 			ref={laneBodyRef}
 			// Found by timeline items dragged between lanes
 			data-lane-id={group.id}
@@ -168,7 +172,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 				<HoverTimelineBlock
 					scale={scale}
 					startTime={computeTimelineBlockOffset(hoverX, selectedBlockId)}
-					cannotDrop={isEmptyBlock(selectedBlockId) || blockOverlaps(occupiedItems, computeTimelineBlockOffset(hoverX, selectedBlockId), blocks[selectedBlockId ?? '']?.duration ?? 0)}
+					cannotDrop={!hasDrones || isEmptyBlock(selectedBlockId) || blockOverlaps(occupiedItems, computeTimelineBlockOffset(hoverX, selectedBlockId), blocks[selectedBlockId ?? '']?.duration ?? 0)}
 				/>
 			)}
 		</div>

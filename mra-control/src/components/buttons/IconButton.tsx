@@ -11,6 +11,7 @@ export const IconButton = ({
 	onClick,
 	className,
 	type,
+	disabled,
 }: {
 	icon: typeof faGear;
 	text: string;
@@ -18,9 +19,10 @@ export const IconButton = ({
 	className?: string;
 	onClick?: ReactEventHandler;
 	type?: 'button' | 'submit' | 'reset';
+	disabled?: boolean;
 }) => {
 	return (
-		<Button className={className} onClick={onClick} color={color} type={type}>
+		<Button className={className} onClick={onClick} color={color} type={type} disabled={disabled}>
 			<FontAwesomeIcon icon={icon} />
 			{text !== '' ? <span className="ml-2">{text}</span> : null}
 		</Button>
