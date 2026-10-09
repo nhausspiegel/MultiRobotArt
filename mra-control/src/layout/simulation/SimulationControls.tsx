@@ -23,7 +23,7 @@ export const SimulationControls = () => {
 		const itemEnds = Object.values(state.timelineState.groups).flatMap((group) =>
 			Object.values(group.items).map((item) => item.startTime + item.duration),
 		);
-		return Math.max(10, ...itemEnds);
+		return Math.max(0, ...itemEnds); // 0 with no blocks: nothing to scrub
 	});
 	// Keep the playhead on the bar if the sim runs slightly past the measured end (frame timing)
 	const maxTime = Math.max(measuredEndTime > 0 ? measuredEndTime : estimatedEndTime, time);
@@ -34,6 +34,7 @@ export const SimulationControls = () => {
 				type="range"
 				className="flex-grow"
 				aria-label="Simulation time"
+				disabled={maxTime === 0}
 				min={0}
 				max={maxTime}
 				step={0.01}
