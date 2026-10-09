@@ -23,10 +23,9 @@ export const SettingsModal = () => {
 	const robots = useSimulator((state) => state.robots);
 
 	const [confirmOpen, setConfirmOpen] = useState(false);
-	let showBoundingBox = false;
+	const renderBoundingBoxes = useSimulator((state) => state.renderBoundingBoxes);
 	const handleBoundingBoxChange = (() => {
-		const renderBB = useSimulator.getState().renderBoundingBoxes;
-		useSimulator.setState({...useSimulator.getState(), renderBoundingBoxes: !renderBB})
+		useSimulator.setState({renderBoundingBoxes: !renderBoundingBoxes});
 	});
 	return (
 		<>
@@ -35,7 +34,6 @@ export const SettingsModal = () => {
 				<Modal.Body>
 					<Tabs.Group style="default">
 						<Tabs.Item active title="Project">
-              Profile content
 							<div>
 								<div className="mb-2 block">
 									<Label value="Project Name" />
@@ -45,10 +43,11 @@ export const SettingsModal = () => {
 								}} />
 							</div>
 						</Tabs.Item>
-						<Tabs.Item title="Blocks">Block Settings</Tabs.Item>
 						<Tabs.Item title="Preferences">
+							{/* Controlled, so it shows the current setting when Settings is reopened */}
 							<Checkbox
-							onChange={handleBoundingBoxChange} />
+								checked={!renderBoundingBoxes}
+								onChange={handleBoundingBoxChange} />
 							<span style={{ marginLeft: '10px' }}>Remove Bounding Boxes</span>
 						</Tabs.Item>
 						<Tabs.Item title="Utilities">
