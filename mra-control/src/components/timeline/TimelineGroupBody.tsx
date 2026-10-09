@@ -6,7 +6,6 @@ import {type DragEventHandler, useRef, useState} from 'react';
 
 import {type TimelineGroupState, useRobartState} from '../../state/useRobartState';
 import {HoverTimelineBlock} from './HoverTimelineBlock';
-import {TickMark} from './TickMark';
 import {TimelineBlock} from './TimelineBlock';
 import React from 'react';
 
@@ -105,17 +104,31 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 		}
 	};
 
+	// Tick marks are a repeating background, not elements: thousands of tick elements made zooming slow.
+	// Second ticks always; subdivision ticks and labels only when far enough apart to read.
+	const secondWidth = convertSecondsToPixels(1, scale);
+	const subdivisionWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
+	const tick = 'linear-gradient(to right, black 2px, transparent 2px)';
+	const showSubdivisions = subdivisionWidth >= 6;
+	const labelEvery = [1, 2, 5, 10, 15, 30, 60].find((seconds) => seconds * secondWidth >= 32) ?? 60;
+
 	return (
 		<div
-			className="relative h-16 rounded bg-blue-300"
+			className="relative h-16 rounded bg-blue-300 bg-repeat-x"
 			ref={laneBodyRef}
 			onDragOver={handleDragOver}
 			onDragLeave={handleDragLeave}
 			onDrop={handleDrop}
-			style={{width: `${convertSecondsToPixels(group.duration, scale)}px`}}
+			style={{
+				width: `${convertSecondsToPixels(group.duration, scale)}px`,
+				backgroundImage: showSubdivisions ? `${tick}, ${tick}` : tick,
+				backgroundSize: showSubdivisions ? `${secondWidth}px 25%, ${subdivisionWidth}px 16.67%` : `${secondWidth}px 25%`,
+			}}
 		>
-			{[...new Array(group.duration * SUBDIVISIONS_PER_SECOND)].map((_, tickNumber) => (
-				<TickMark tickNumber={tickNumber} key={tickNumber} scale={scale} subdivisionsPerSecond={SUBDIVISIONS_PER_SECOND} />
+			{[...new Array(Math.ceil(group.duration / labelEvery))].map((_, index) => (
+				<span key={index} className="absolute top-1/4" style={{left: convertSecondsToPixels(index * labelEvery, scale)}}>
+					{index * labelEvery}
+				</span>
 			))}
 			{Object.values(group.items).map((item) => (
 				<TimelineBlock key={item.id} scale={scale} item={item} />
