@@ -32,10 +32,10 @@ export const TimelineSimulationButtons = () => {
 
 	return (
 		<>
-			{simulationStatus !== 'STOPPED' && <IconButton icon={faSquare} onClick={halt} text="Stop Sim" color="failure" />}
 			{simulationStatus === 'RUNNING' && <IconButton icon={faPause} onClick={pause} text="Pause Sim" color="gray" />}
 			{simulationStatus === 'PAUSED' && <IconButton icon={faPlay} onClick={resume} text="Resume Sim" color="success" />}
 			{simulationStatus === 'STOPPED' && <IconButton icon={faPlay} onClick={play} text="Run Sim" color="success" disabled={!hasDrones} />}
+			{simulationStatus !== 'STOPPED' && <IconButton icon={faSquare} onClick={halt} text="Stop Sim" color="failure" />}
 		</>
 	);
 };

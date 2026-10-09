@@ -108,9 +108,31 @@ export type MRAState = {
    * Set in Settings; unset in older projects (defaultBoundingBoxSize).
    */
 	boundingBoxSize?: [number, number, number];
+	/**
+   * Speed limit and work area that measuring the show warns about. Set in Settings; unset in older projects (defaultLimits).
+   */
+	limits?: Limits;
 };
 
 export const defaultBoundingBoxSize: [number, number, number] = [0.4, 0.4, 0.7];
+
+export type Limits = {
+	speedLimitOn: boolean;
+	/** m/s */
+	speedLimit: number;
+	workAreaOn: boolean;
+	/** Corners of the work area box (m): lowest x, y, z and highest x, y, z */
+	workAreaMin: [number, number, number];
+	workAreaMax: [number, number, number];
+};
+
+export const defaultLimits: Limits = {
+	speedLimitOn: true,
+	speedLimit: 1,
+	workAreaOn: true,
+	workAreaMin: [-4, -2.5, 0],
+	workAreaMax: [2, 2.5, 2.5],
+};
 
 export type TimelineActions = {
 	/**
@@ -148,6 +170,7 @@ export type TimelineActions = {
    */
 	setTimelineScale: (scale: number) => void;
 	setBoundingBoxSize: (size: [number, number, number]) => void;
+	setLimits: (limits: Partial<Limits>) => void;
 	toggleGroupCollapsed: (groupId: string) => void;
 	/**
    * Stores lengths measured by simulating: how long timeline items take in the show, and how long each block takes
@@ -255,6 +278,7 @@ const defaultRobartState: MRAState = {
 	warnings: [],
 	notices: [],
 	boundingBoxSize: defaultBoundingBoxSize,
+	limits: defaultLimits,
 };
 
 type MRAActions = MRAGeneralActions & TimelineActions & BlockActions & RobotActions;
@@ -286,8 +310,8 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					loadProject: (file) => {
 						// Older project files can have robots in several groups
 						const newState = migrateGroups(loadProjectFromFile(file));
-						// Older files have no box size; don't keep the previous project's
-						set({...newState, boundingBoxSize: newState.boundingBoxSize ?? defaultBoundingBoxSize});
+						// Older files have no box size or limits; don't keep the previous project's
+						set({...newState, boundingBoxSize: newState.boundingBoxSize ?? defaultBoundingBoxSize, limits: newState.limits ?? defaultLimits});
 						useSimulator.getState().reset();
 					},
 					saveProject: (fileName: string | undefined) => {
@@ -300,6 +324,7 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							robots: get().robots,
 							warnings: get().warnings,
 							boundingBoxSize: get().boundingBoxSize,
+							limits: get().limits,
 						};
 						saveProjectToFile(state, fileName);
 					},
@@ -392,6 +417,9 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					},
 					setBoundingBoxSize: (size) => {
 						set({boundingBoxSize: size});
+					},
+					setLimits: (limits) => {
+						set({limits: {...(get().limits ?? defaultLimits), ...limits}});
 					},
 					setTimelineScale: (scale) => {
 						set((state) => {

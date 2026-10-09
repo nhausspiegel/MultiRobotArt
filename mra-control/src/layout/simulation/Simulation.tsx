@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Crazyflie } from '@MRAControl/components/vector/Crazyflie';
-import { useRobartState } from '@MRAControl/state/useRobartState';
+import { defaultLimits, useRobartState } from '@MRAControl/state/useRobartState';
 import { useSimulator } from '@MRAControl/state/useSimulator';
 import { CatmullRomLine, GizmoHelper, GizmoViewport, Grid, Line, OrbitControls, Plane, Sphere } from '@react-three/drei';
 import { allDronesGroupId } from '@MRAControl/state/groupMigration';
@@ -12,6 +12,13 @@ import type THREE from 'three';
 import { type Group, type Vector3 } from 'three';
 
 let init = true;
+
+// The 12 edges of the box between two corners, as pairs of points
+const boxEdges = (min: number[], max: number[]) => {
+	const corner = (i: number): [number, number, number] => [i & 1 ? max[0] : min[0], i & 2 ? max[1] : min[1], i & 4 ? max[2] : min[2]];
+	// Each corner joined to the corners one axis away from it
+	return [0, 1, 2, 3, 4, 5, 6, 7].flatMap((i) => [1, 2, 4].filter((axis) => !(i & axis)).flatMap((axis) => [corner(i), corner(i | axis)]));
+};
 export const Simulation = () => {
 	const marker = useRef<Group>(null!);
 	const robots = useSimulator((state) => state.robots);
@@ -74,6 +81,10 @@ export const Simulation = () => {
 
 				</group>
 			))}
+			{simulatorState.showWorkArea && (() => {
+				const { workAreaMin, workAreaMax } = robartState.limits ?? defaultLimits;
+				return <Line points={boxEdges(workAreaMin, workAreaMax)} segments color="white" lineWidth={1} transparent opacity={0.5} />;
+			})()}
 			{/* Each robot's whole planned flight, in its group's color; drones that never move have no line */}
 			{simulatorState.showPaths && Object.entries(simulatorState.plannedPaths)
 				.filter(([, points]) => points.some((point) => !point.equals(points[0])))

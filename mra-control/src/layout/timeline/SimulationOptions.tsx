@@ -34,6 +34,8 @@ export const SimulationOptions = () => {
 	const togglePaths = useSimulator((state) => state.togglePaths);
 	const showCoordinates = useSimulator((state) => state.showCoordinates);
 	const toggleCoordinates = useSimulator((state) => state.toggleCoordinates);
+	const showWorkArea = useSimulator((state) => state.showWorkArea);
+	const toggleWorkArea = useSimulator((state) => state.toggleWorkArea);
 
 	return (
 		<div className="flex items-center gap-3 text-sm">
@@ -44,6 +46,10 @@ export const SimulationOptions = () => {
 			<label className="flex items-center gap-1">
 				<input type="checkbox" checked={showPaths} onChange={togglePaths} />
 				Paths
+			</label>
+			<label className="flex items-center gap-1">
+				<input type="checkbox" checked={showWorkArea} onChange={toggleWorkArea} />
+				Work area
 			</label>
 			<select
 				className="rounded border border-gray-300 bg-white py-1 pl-2 pr-8 text-sm"

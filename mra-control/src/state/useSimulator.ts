@@ -58,16 +58,18 @@ export type SimulatorState = {
    */
 	plannedPaths: Record<string, THREE.Vector3[]>;
 	/**
-   * Speed, work area and collision warnings for the whole show, found when it is measured. Shown in the simulation's corner as
-   * playback reaches them.
+   * Speed, work area and collision warnings for the whole show, found when it is measured. Shown in the simulation's corner and the
+   * Warnings tab as playback reaches them.
    */
 	timedWarnings: TimedWarning[];
 	/**
-   * Furthest time played or scrubbed to since Run Sim. The corner list shows warnings up to here, so scrubbing back
+   * Furthest time played or scrubbed to since Run Sim. The corner list and Warnings tab show warnings up to here, so scrubbing back
    * keeps them; Run Sim clears it.
    */
 	warningsShownUntil: number;
 	showPaths: boolean;
+	// Outline of the work area (Settings) in the 3D view
+	showWorkArea: boolean;
 	trajectoryQueue: Queue<string>;
 	trajectoryMarkers: Array<{ position: THREE.Vector3; color: THREE.Color; id: string }>;
 	markerFrequency: number;
@@ -90,6 +92,7 @@ const defaultSimulatorState: SimulatorState = {
 	timedWarnings: [],
 	warningsShownUntil: 0,
 	showPaths: true,
+	showWorkArea: false,
 	trajectoryQueue: new Queue<string>(),
 	trajectoryMarkers: [],
 	markerFrequency: 0.25,
@@ -147,6 +150,7 @@ export type SimulatorActions = {
 	setTimeDilation: (timeDilation: number) => void;
 	toggleCoordinates: () => void;
 	togglePaths: () => void;
+	toggleWorkArea: () => void;
 	/**
    * Can only be used when simulator is STOPPED mode.
    * @param robots
@@ -398,7 +402,6 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				plannedPaths,
 				timedWarnings,
 			});
-			useRobartState.setState({ warnings: timedWarnings.map((warning) => warning.full) });
 			useRobartState.getState().setMeasuredDurations(durations, blockLengths);
 		},
 		measureBlockLength: (javaScript) => {
@@ -422,6 +425,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		},
 		togglePaths: () => {
 			set({ showPaths: !get().showPaths });
+		},
+		toggleWorkArea: () => {
+			set({ showWorkArea: !get().showWorkArea });
 		},
 		setRobots: (robots) => {
 			const simRobots: Record<string, RobotSimState> = {};
@@ -605,7 +611,6 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		},
 		reset: () => {
 			set({ status: 'STOPPED', endTime: 0, plannedPaths: {}, timedWarnings: [], warningsShownUntil: 0 });
-			useRobartState.setState({ warnings: [] }); // setState, not assignment, so the Warnings tab updates
 			get().executeSimulation(0);
 			get().cancelSimulation();
 		},

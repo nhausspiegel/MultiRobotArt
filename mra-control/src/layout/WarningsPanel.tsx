@@ -1,22 +1,21 @@
 import React from 'react';
 import CodeMirror from '@uiw/react-codemirror';
-import {type MRAState, useRobartState} from '../state/useRobartState';
-import {laneOverlapWarnings} from '../state/warnings';
+import {useRobartState} from '../state/useRobartState';
+import {useReachedWarnings} from './simulation/SimulationWarnings';
 
 // Everything the Warnings tab lists; also counted on the tab's button
-const warningLines = (state: MRAState) => [
+const useWarningLines = () => {
 	// Notes from loading the project, e.g. robots moved out of extra groups
-	...(state.notices ?? []),
-	...laneOverlapWarnings(state).map((warning) => warning.full),
-	// Speed and work area, found when the show is measured
-	...(state.warnings ?? []),
-];
+	const notices = useRobartState((state) => state.notices);
+	// The same warnings as the simulation's corner list: those reached since Run Sim
+	const reached = useReachedWarnings();
+	return [...(notices ?? []), ...reached.map((warning) => warning.full)];
+};
 
-export const warningCount = (state: MRAState) => warningLines(state).length;
+export const useWarningCount = () => useWarningLines().length;
 
 export const WarningsPanel = () => {
-	// Selected from the store so the tab updates while open (it used to read warnings once when opened)
-	const text = useRobartState((state) => warningLines(state).join(''));
+	const text = useWarningLines().join('');
 	return (
 		<div className="overflow-auto h-full w-full ">
 			<CodeMirror value={text} className="h-full w-full" readOnly={true} />

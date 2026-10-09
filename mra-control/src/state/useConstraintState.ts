@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import {create} from 'zustand';
 import {subscribeWithSelector} from 'zustand/middleware';
 import {immer} from 'zustand/middleware/immer';
-import {useRobartState} from './useRobartState';
+import {defaultLimits, useRobartState} from './useRobartState';
 
 type ConstraintViolation = 'velocity' | 'acceleration' | 'workspace';
 
@@ -18,16 +18,9 @@ export type ConstraintWarning = {
 };
 
 export type DynamicConstraintState = {
-	maxVelocity: number;
 	maxAcceleration: number;
 	deltaT: number;
-	setMaxVelocity: (vel: number) => void;
 	setMaxAcceleration: (acc: number) => void;
-};
-
-export type KinematicConstraintState = {
-	workspaceDimensions: THREE.Box3;
-	setWorkspaceDimensions: (dim: THREE.Box3) => void;
 };
 
 export type PositionHistoryEntry = {
@@ -44,29 +37,17 @@ export type ConstraintChecker = {
 	positionHistory: [];
 };
 
-export type ConstraintState = DynamicConstraintState & KinematicConstraintState & ConstraintChecker;
+export type ConstraintState = DynamicConstraintState & ConstraintChecker;
 
 export const useCrazyflieConstraintState = create<ConstraintState>()(
 	subscribeWithSelector(
 		immer((set, get) => ({
-			maxVelocity: 1.0,
 			maxAcceleration: 5.0,
-			workspaceDimensions: new THREE.Box3(new THREE.Vector3(-4, -2.5, -0.01), new THREE.Vector3(2, 2.5, 2.5)),
 			positionHistory: [],
 			deltaT: 1 / 60,
-			setMaxVelocity(vel) {
-				set({
-					maxVelocity: vel,
-				});
-			},
 			setMaxAcceleration(acc) {
 				set({
 					maxAcceleration: acc,
-				});
-			},
-			setWorkspaceDimensions(dim) {
-				set({
-					workspaceDimensions: dim,
 				});
 			},
 			checkDynamicConstraints(robotIDs: string[]) {
@@ -75,6 +56,9 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 					return undefined;
 				}
 
+				// Speed limit from Settings
+				const {speedLimitOn, speedLimit} = useRobartState.getState().limits ?? defaultLimits;
+				if (!speedLimitOn) return [];
 				let warnings: ConstraintWarning[] = [];
 				//Check velocity Constraints
 				robotIDs.forEach(id => {
@@ -90,7 +74,7 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 							continue;
 						}
 						const velocity = currentPosition.distanceTo(previousPosition) / timeBetween;
-						if (velocity > get().maxVelocity && !violating) {
+						if (velocity > speedLimit && !violating) {
 							const robotName = useRobartState.getState().robots[id]?.name ?? 'Deleted robot';
 							warnings.push({
 								time: positions[i].timestep,
@@ -100,7 +84,7 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 								robotId: id,
 							});
 						}
-						violating = velocity > get().maxVelocity;
+						violating = velocity > speedLimit;
 					}
 				});
                 
@@ -118,6 +102,10 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 			checkKinematicConstraints(robotIDs: string[]) {
 				const history = get().positionHistory as PositionHistory;
 				if (history.length > 0) {
+					// Work area from Settings, with 1 cm leeway so a robot resting on the floor (z = 0) counts as inside
+					const {workAreaOn, workAreaMin, workAreaMax} = useRobartState.getState().limits ?? defaultLimits;
+					if (!workAreaOn) return [];
+					const workArea = new THREE.Box3(new THREE.Vector3(...workAreaMin), new THREE.Vector3(...workAreaMax)).expandByScalar(0.01);
 					let warnings: ConstraintWarning[] = [];
 
 					// Check workspace bounds
@@ -127,7 +115,7 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 						for (let i = 1; i < history.length; i++) {
 							const currentPosition = history[i]?.robotPositions[id];
 							if (!currentPosition) continue;
-							const isOutside = !this.workspaceDimensions.containsPoint(currentPosition);
+							const isOutside = !workArea.containsPoint(currentPosition);
 							if (isOutside && !outside) {
 								const robotName = useRobartState.getState().robots[id]?.name ?? 'Deleted robot';
 								warnings.push({

@@ -6,7 +6,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {CancelButton} from '../../components/buttons/CancelButton';
 import {IconButton} from '../../components/buttons/IconButton';
 import {ConfirmationModal} from '../../components/modal/ConfirmationModal';
-import {defaultBoundingBoxSize, useRobartState} from '../../state/useRobartState';
+import {defaultBoundingBoxSize, defaultLimits, useRobartState} from '../../state/useRobartState';
 import {useUIState} from '../../state/useUIState';
 import {CurveEditorModal} from '../curveEditor/CurveEditorModal';
 import {type Group} from 'three';
@@ -46,6 +46,81 @@ const BoundingBoxSizeEditor = () => {
 					</label>
 				))}
 			</div>
+		</div>
+	);
+};
+
+const isNumber = (value: string) => value.trim() !== '' && Number.isFinite(Number(value));
+// border: preflight zeroes input border widths, so a color alone draws nothing
+const fieldClass = (valid: boolean) => clsx('w-20 rounded px-2 py-1 disabled:opacity-50', valid ? 'border border-gray-300' : 'border-2 border-red-500');
+
+// What measuring the show warns about. Like the box size, fields keep whatever is typed and are only saved while valid.
+const LimitsEditor = () => {
+	const limits = useRobartState((state) => state.limits ?? defaultLimits);
+	const setLimits = useRobartState((state) => state.setLimits);
+	const area = [...limits.workAreaMin, ...limits.workAreaMax];
+	const [speed, setSpeed] = useState(String(limits.speedLimit));
+	// Lowest x, y, z, then highest x, y, z
+	const [areaValues, setAreaValues] = useState(area.map(String));
+	// Follow changes made elsewhere (Reset Project, Load Project), but not the ones typed here
+	useEffect(() => {
+		if (Number(speed) !== limits.speedLimit) setSpeed(String(limits.speedLimit));
+	}, [limits.speedLimit]);
+	useEffect(() => {
+		if (!areaValues.every((value, i) => Number(value) === area[i])) setAreaValues(area.map(String));
+	}, [limits.workAreaMin, limits.workAreaMax]);
+	const axisValid = (values: string[], axis: number) =>
+		isNumber(values[axis]) && isNumber(values[axis + 3]) && Number(values[axis]) < Number(values[axis + 3]);
+
+	const areaField = (index: number) => (
+		<input
+			className={fieldClass(axisValid(areaValues, index % 3))}
+			value={areaValues[index]}
+			disabled={!limits.workAreaOn}
+			onChange={(e) => {
+				const next = areaValues.map((value, j) => (j === index ? e.target.value : value));
+				setAreaValues(next);
+				if ([0, 1, 2].every((axis) => axisValid(next, axis))) {
+					setLimits({
+						workAreaMin: next.slice(0, 3).map(Number) as [number, number, number],
+						workAreaMax: next.slice(3).map(Number) as [number, number, number],
+					});
+				}
+			}}
+		/>
+	);
+
+	return (
+		<div className="mt-4 flex flex-col gap-2">
+			<div className="flex items-center gap-2">
+				<label className="flex items-center gap-2">
+					<Checkbox checked={limits.speedLimitOn} onChange={() => {
+						setLimits({speedLimitOn: !limits.speedLimitOn});
+					}} />
+					Speed limit (m/s):
+				</label>
+				<input
+					className={fieldClass(isPositiveNumber(speed))}
+					inputMode="decimal"
+					value={speed}
+					disabled={!limits.speedLimitOn}
+					onChange={(e) => {
+						setSpeed(e.target.value);
+						if (isPositiveNumber(e.target.value)) setLimits({speedLimit: Number(e.target.value)});
+					}}
+				/>
+			</div>
+			<label className="flex items-center gap-2">
+				<Checkbox checked={limits.workAreaOn} onChange={() => {
+					setLimits({workAreaOn: !limits.workAreaOn});
+				}} />
+				Work area (m):
+			</label>
+			{['X', 'Y', 'Z'].map((axis, i) => (
+				<div key={axis} className="ml-6 flex items-center gap-2">
+					{axis} from {areaField(i)} to {areaField(i + 3)}
+				</div>
+			))}
 		</div>
 	);
 };
@@ -90,6 +165,7 @@ export const SettingsModal = () => {
 									onChange={handleBoundingBoxChange} />
 								<span style={{ marginLeft: '10px' }}>Remove Bounding Boxes</span>
 							</div>
+							<LimitsEditor />
 						</Tabs.Item>
 						<Tabs.Item title="Utilities">
 							<Button onClick={toggleCurveEditor}>Curve Editor</Button>

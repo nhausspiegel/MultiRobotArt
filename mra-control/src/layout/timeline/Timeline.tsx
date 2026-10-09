@@ -64,7 +64,7 @@ export const Timeline = () => {
 		remeasure();
 		const unsubscribe = useRobartState.subscribe((state, previous) => {
 			if (state.timelineState.groups !== previous.timelineState.groups || state.blocks !== previous.blocks || state.robots !== previous.robots
-				|| state.boundingBoxSize !== previous.boundingBoxSize) {
+				|| state.boundingBoxSize !== previous.boundingBoxSize || state.limits !== previous.limits) {
 				remeasure();
 			}
 		});
@@ -76,12 +76,9 @@ export const Timeline = () => {
 
 	return (
 		<div className="flex h-full w-full flex-col gap-2 rounded bg-blue-100">
-			<div className="flex">
-				<div className="flex flex-grow" />
-				<div className="flex items-center gap-3 pt-2 pr-3">
-					<TimelineSimulationButtons />
-					<SimulationOptions />
-				</div>
+			<div className="flex items-center gap-3 pl-2 pt-2">
+				<TimelineSimulationButtons />
+				<SimulationOptions />
 			</div>
 
 			<div className="overflow-y-auto">
