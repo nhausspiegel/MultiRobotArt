@@ -41,15 +41,25 @@ export const BlockManagerPanel = () => {
 	const addCopy = (block: CodeBlock) => {
 		setEditingBlock(copyBlock(block));
 	};
+	const deleteSelected = () => {
+		if (selectedBlockId === undefined) return;
+		// Nothing to lose when it's empty and not on the timeline, so no confirmation
+		if (selectedBlock?.javaScript.trim() === '' && selectedBlockUses === 0) removeBlock(selectedBlockId);
+		else setConfirmDeleteOpen(true);
+	};
 
 	return (
 		<div
 			className="flex h-full flex-col"
-			// Copy and paste blocks while something in the list has focus (e.g. after clicking a block)
+			// Copy, paste and delete blocks while something in the list has focus (e.g. after clicking a block)
 			onKeyDown={(e) => {
-				if (!(e.metaKey || e.ctrlKey) || e.altKey || e.shiftKey) return;
 				const key = e.key.toLowerCase();
-				if (key === 'c' && selectedBlock) {
+				// Mac's delete key reports Backspace
+				if ((key === 'delete' || key === 'backspace') && !e.metaKey && !e.ctrlKey && !e.altKey && selectedBlock) {
+					deleteSelected();
+				} else if (!(e.metaKey || e.ctrlKey) || e.altKey || e.shiftKey) {
+					return;
+				} else if (key === 'c' && selectedBlock) {
 					copiedBlock = selectedBlock;
 				} else if (key === 'v' && copiedBlock) {
 					addCopy(copiedBlock);
@@ -57,7 +67,7 @@ export const BlockManagerPanel = () => {
 					return;
 				}
 				e.preventDefault();
-				// Blockly listens on the whole page and would also copy or paste its own selected blocks
+				// Blockly listens on the whole page and would also copy, paste or delete its own selected blocks
 				e.stopPropagation();
 			}}
 		>
@@ -82,12 +92,7 @@ export const BlockManagerPanel = () => {
 					title="Delete block"
 					danger
 					disabled={!selectedBlock}
-					onClick={() => {
-						if (selectedBlockId === undefined) return;
-						// Nothing to lose when it's empty and not on the timeline, so no confirmation
-						if (selectedBlock?.javaScript.trim() === '' && selectedBlockUses === 0) removeBlock(selectedBlockId);
-						else setConfirmDeleteOpen(true);
-					}}
+					onClick={deleteSelected}
 				/>
 			</div>
 			<ConfirmationModal
