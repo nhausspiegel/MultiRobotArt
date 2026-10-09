@@ -1633,6 +1633,9 @@ input:checked + .toggle-bg {
 .rounded-md {
   border-radius: 0.375rem;
 }
+.rounded-sm {
+  border-radius: 0.125rem;
+}
 .rounded-xl {
   border-radius: 0.75rem;
 }
@@ -2158,9 +2161,6 @@ input:checked + .toggle-bg {
 .to-yellow-200 {
   --tw-gradient-to: #FCE96A;
 }
-.bg-no-repeat {
-  background-repeat: no-repeat;
-}
 .fill-blue-600 {
   fill: #1C64F2;
 }
@@ -2325,6 +2325,9 @@ input:checked + .toggle-bg {
 }
 .pt-4 {
   padding-top: 1rem;
+}
+.pt-6 {
+  padding-top: 1.5rem;
 }
 .text-left {
   text-align: left;

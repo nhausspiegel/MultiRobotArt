@@ -146219,6 +146219,24 @@ const TimelineBlock = ({ item, scale }) => {
 const pixelsPerSecond = 100;
 const roomAfterLastBlock = 30;
 const minTimelineLength = 120;
+const roundSeconds = [1, 2, 5, 10, 15, 30, 60];
+const everyAtLeast = (secondWidth, minWidth) => roundSeconds.find((seconds) => seconds * secondWidth >= minWidth) ?? 60;
+const tickBackground = (scale, majorHeight, minorHeight, from = "top") => {
+  const secondWidth = convertSecondsToPixels(1, scale);
+  const majorWidth = everyAtLeast(secondWidth, 6) * secondWidth;
+  const minorWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
+  const ticks = (spacing) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
+  const area2 = `calc(100% - ${timelineStartPadding}px)`;
+  const layers2 = [{ image: ticks(majorWidth), height: majorHeight }];
+  if (majorWidth === secondWidth && minorWidth >= 6)
+    layers2.push({ image: ticks(minorWidth), height: minorHeight });
+  return {
+    backgroundImage: layers2.map((layer2) => layer2.image).join(", "),
+    backgroundSize: layers2.map((layer2) => `${area2} ${layer2.height}`).join(", "),
+    backgroundPosition: `${timelineStartPadding}px ${from}`,
+    backgroundRepeat: "no-repeat"
+  };
+};
 const timelineLength = (state2) => Math.max(minTimelineLength, lastItemEnd(state2) + roomAfterLastBlock);
 const SUBDIVISIONS_PER_SECOND = 8;
 const minItemWidth = 12;
@@ -146302,16 +146320,11 @@ const TimelineGroupBody = ({ group }) => {
       addBlockToTimeline(group.id, blockId, startTime, isTraj);
     }
   };
-  const secondWidth = convertSecondsToPixels(1, scale);
-  const subdivisionWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
-  const ticks = (spacing) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
-  const tickArea = `calc(100% - ${timelineStartPadding}px)`;
-  const showSubdivisions = subdivisionWidth >= 6;
-  const labelEvery = [1, 2, 5, 10, 15, 30, 60].find((seconds) => seconds * secondWidth >= 32) ?? 60;
+  const labelEvery = everyAtLeast(convertSecondsToPixels(1, scale), 32);
   return /* @__PURE__ */ jsxs(
     "div",
     {
-      className: clsx("relative rounded bg-no-repeat", group.collapsed ? "h-7" : "h-16", hasDrones ? "bg-blue-300" : "bg-gray-300"),
+      className: clsx("relative rounded", group.collapsed ? "h-7" : "h-16", hasDrones ? "bg-blue-300" : "bg-gray-300"),
       ref: laneBodyRef,
       "data-lane-id": group.id,
       onDragOver: handleDragOver,
@@ -146319,9 +146332,7 @@ const TimelineGroupBody = ({ group }) => {
       onDrop: handleDrop,
       style: {
         width: `${timeToX(length, scale)}px`,
-        backgroundImage: showSubdivisions ? `${ticks(secondWidth)}, ${ticks(subdivisionWidth)}` : ticks(secondWidth),
-        backgroundSize: showSubdivisions ? `${tickArea} 25%, ${tickArea} 16.67%` : `${tickArea} 25%`,
-        backgroundPosition: `${timelineStartPadding}px 0`
+        ...tickBackground(scale, "25%", "16.67%")
       },
       children: [
         !group.collapsed && [...new Array(Math.ceil(length / labelEvery))].map((_2, index2) => (
@@ -146374,7 +146385,14 @@ const TimelineMarker = () => {
     seek(Math.min(showLength, Math.max(0, convertPixelsToSeconds(contentX - timelineStartPadding, scale))));
   }, { pointer: { keys: false } });
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx("div", { ...bind(), className: "absolute left-0 top-0 h-4 cursor-pointer touch-none rounded bg-blue-200", style: { width: timeToX(length, scale) } }),
+    /* @__PURE__ */ jsx(
+      "div",
+      {
+        ...bind(),
+        className: "absolute left-0 top-0 h-3 cursor-pointer touch-none rounded-sm bg-blue-50",
+        style: { width: timeToX(length, scale), ...tickBackground(scale, "60%", "30%", "bottom") }
+      }
+    ),
     /* @__PURE__ */ jsxs(
       "div",
       {
@@ -146726,11 +146744,11 @@ const Timeline = () => {
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "overflow-y-auto", children: [
       /* @__PURE__ */ jsxs("div", { className: "flex flex-shrink-0 gap-2", children: [
-        /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2 pt-4", children: [
+        /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2 pt-6", children: [
           groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupLabel, { group }, group.id)),
           /* @__PURE__ */ jsx("button", { className: "h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200", onClick: addNewGroup, children: "+ New group" })
         ] }),
-        /* @__PURE__ */ jsxs("div", { ref: scrollerRef, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-4", children: [
+        /* @__PURE__ */ jsxs("div", { ref: scrollerRef, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-6", children: [
           groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group }, group.id)),
           /* @__PURE__ */ jsx(TimelineMarker, {})
         ] })
