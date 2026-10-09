@@ -75747,6 +75747,11 @@ const compileExpression = (expression) => {
 const isValidExpression = (expression) => {
   if (expression.trim() === "" || expression.includes("^"))
     return false;
+  if (!/^[\w\s.+\-*/(),]*$/.test(expression))
+    return false;
+  const names = expression.replace(/\b\d+(\.\d*)?(e[+-]?\d+)?\b/gi, "0").match(/[A-Za-z_]\w*/g) ?? [];
+  if (names.some((name2) => name2 !== "t" && !(name2 in parametricScope)))
+    return false;
   try {
     new SandboxClass().compile(`return (${expression});`)({ ...parametricScope, t: 0 }).run();
     return true;
@@ -80132,7 +80137,18 @@ _parametric_names = {
 
 def _parametric_function(expression):
     code = compile(expression, "<parametric>", "eval")
-    return lambda t: float(eval(code, {"__builtins__": {}}, {**_parametric_names, "t": t}))
+
+    def f(t):
+        # Like the simulator: a value that can't be computed (log(0), sqrt of a negative, overflow) is 0. errstate also
+        # keeps numpy from warning, which fails under the empty builtins.
+        try:
+            with np.errstate(all="ignore"):
+                value = float(eval(code, {"__builtins__": {}}, {**_parametric_names, "t": t}))
+        except (ArithmeticError, ValueError):
+            return 0.0
+        return value if np.isfinite(value) else 0.0
+
+    return f
 
 
 def parametric(groupState, x, y, z, start_t, end_t, duration):
@@ -81691,7 +81707,12 @@ const useSimulator = create$2()(
       if (get().status !== "RUNNING")
         return;
       const currentTime = performance.now();
-      get().advance((currentTime - get().lastStepTime) / 1e3 * get().timeDilation);
+      let remaining = (currentTime - get().lastStepTime) / 1e3 * get().timeDilation;
+      while (remaining > 1e-9 && !isFinished(get().robots)) {
+        const deltaT2 = Math.min(1 / fps, remaining);
+        get().advance(deltaT2);
+        remaining -= deltaT2;
+      }
       set({ lastStepTime: currentTime, warningsShownUntil: Math.max(get().warningsShownUntil, get().time) });
       if (isFinished(get().robots)) {
         get().halt();
@@ -81754,6 +81775,8 @@ const useSimulator = create$2()(
           }
         }
         if (((_a3 = get().robots[robotId]) == null ? void 0 : _a3.trajectory.duration) === void 0 || get().robots[robotId].trajectory.duration <= 0) {
+          if (positionHistory)
+            positionHistory[positionHistory.length - 1].robotPositions[robotId] = robots[robotId].pos;
           return;
         }
         const trajectoryTime = get().robots[robotId].timeAlongTrajectory + deltaT / ((_b2 = get().robots[robotId].trajectory) == null ? void 0 : _b2.duration);
@@ -81993,6 +82016,8 @@ const useSimulator = create$2()(
         Object.values(group.items).forEach((timelineItem) => {
           if (timelineItem.startTime < startTime)
             return;
+          if (!blocks[timelineItem.blockId])
+            return;
           pendingItems.push({
             itemId: timelineItem.id,
             time: timelineItem.startTime,
@@ -82018,8 +82043,11 @@ useSimulator.subscribe((state2) => {
   if (state2.status !== "RUNNING" || frameRequest)
     return;
   const loop = () => {
-    useSimulator.getState().step();
-    frameRequest = useSimulator.getState().status === "RUNNING" ? requestAnimationFrame(loop) : 0;
+    try {
+      useSimulator.getState().step();
+    } finally {
+      frameRequest = useSimulator.getState().status === "RUNNING" ? requestAnimationFrame(loop) : 0;
+    }
   };
   frameRequest = requestAnimationFrame(loop);
 });
@@ -82068,7 +82096,7 @@ const migrateGroups = (state2) => {
       keptIn.set(robotId2, group.name);
       robots2[robotId2] = robot;
     });
-    if (Object.keys(robots2).length === 0 && Object.keys(group.items).length === 0)
+    if (Object.keys(group.robots).length > 0 && Object.keys(robots2).length === 0 && Object.keys(group.items).length === 0)
       return;
     groups[group.id] = { ...group, robots: robots2 };
   });
@@ -82449,7 +82477,8 @@ const useRobartState = create$2()(
 useRobartState.subscribe(
   (state2) => state2.robots,
   (robots2) => {
-    useSimulator.getState().setRobots(robots2);
+    if (useSimulator.getState().status === "STOPPED")
+      useSimulator.getState().setRobots(robots2);
   }
 );
 var defaultTheme$3 = {};
@@ -90152,6 +90181,9 @@ const BlockEditorPanel = () => {
       const python2 = pythonGenerator.workspaceToCode(workspaceChanged);
       const javaScript = javascriptGenerator.workspaceToCode(workspaceChanged);
       const xml = Xml.domToText(Xml.workspaceToDom(workspaceChanged));
+      const saved = useRobartState.getState().blocks[loadedBlockId.current];
+      if ((saved == null ? void 0 : saved.xml) === xml && saved.python === python2 && saved.javaScript === javaScript)
+        return;
       saveBlock(loadedBlockId.current, { xml, python: python2, javaScript });
     },
     ref: workspaceRef
@@ -97118,15 +97150,25 @@ const BlockManagerPanel = () => {
   const addCopy = (block) => {
     setEditingBlock(copyBlock(block));
   };
+  const deleteSelected = () => {
+    if (selectedBlockId === void 0)
+      return;
+    if ((selectedBlock == null ? void 0 : selectedBlock.javaScript.trim()) === "" && selectedBlockUses === 0)
+      removeBlock(selectedBlockId);
+    else
+      setConfirmDeleteOpen(true);
+  };
   return /* @__PURE__ */ jsxs(
     "div",
     {
       className: "flex h-full flex-col",
       onKeyDown: (e2) => {
-        if (!(e2.metaKey || e2.ctrlKey) || e2.altKey || e2.shiftKey)
-          return;
         const key = e2.key.toLowerCase();
-        if (key === "c" && selectedBlock) {
+        if ((key === "delete" || key === "backspace") && !e2.metaKey && !e2.ctrlKey && !e2.altKey && selectedBlock) {
+          deleteSelected();
+        } else if (!(e2.metaKey || e2.ctrlKey) || e2.altKey || e2.shiftKey) {
+          return;
+        } else if (key === "c" && selectedBlock) {
           copiedBlock = selectedBlock;
         } else if (key === "v" && copiedBlock) {
           addCopy(copiedBlock);
@@ -97167,14 +97209,7 @@ const BlockManagerPanel = () => {
               title: "Delete block",
               danger: true,
               disabled: !selectedBlock,
-              onClick: () => {
-                if (selectedBlockId === void 0)
-                  return;
-                if ((selectedBlock == null ? void 0 : selectedBlock.javaScript.trim()) === "" && selectedBlockUses === 0)
-                  removeBlock(selectedBlockId);
-                else
-                  setConfirmDeleteOpen(true);
-              }
+              onClick: deleteSelected
             }
           )
         ] }),
@@ -146111,10 +146146,7 @@ const blockOverlaps = (occupiedItems, startTime, duration2, id2) => startTime ==
 });
 const laneOccupiedItems = (groups, laneId) => {
   var _a3, _b2;
-  return [
-    ...Object.values(((_a3 = groups[laneId]) == null ? void 0 : _a3.items) ?? {}),
-    ...laneId === allDronesGroupId ? [] : Object.values(((_b2 = groups[allDronesGroupId]) == null ? void 0 : _b2.items) ?? {})
-  ];
+  return laneId === allDronesGroupId ? Object.values(groups).flatMap((group) => Object.values(group.items)) : [...Object.values(((_a3 = groups[laneId]) == null ? void 0 : _a3.items) ?? {}), ...Object.values(((_b2 = groups[allDronesGroupId]) == null ? void 0 : _b2.items) ?? {})];
 };
 const TimelineGroupBody = ({ group }) => {
   var _a3, _b2;
@@ -146569,6 +146601,7 @@ const Timeline = () => {
       timer2 = setTimeout(() => {
         const { status, time: time2, measureShowLength, seek } = useSimulator.getState();
         measureShowLength();
+        useSimulator.setState({ warningsShownUntil: status === "STOPPED" ? 0 : time2 });
         if (status !== "STOPPED")
           seek(time2);
       }, 300);
