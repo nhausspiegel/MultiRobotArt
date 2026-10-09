@@ -4,17 +4,21 @@ import {usePinch} from '@use-gesture/react';
 
 import {DroneEditor} from '../../components/timeline/DroneEditor';
 import {convertPixelsToSeconds, convertSecondsToPixels, TimelineGroupBody} from '../../components/timeline/TimelineGroupBody';
-import {TimelineGroupLabel, UngroupedRobots} from '../../components/timeline/TimelineGroupLabel';
+import {TimelineGroupLabel} from '../../components/timeline/TimelineGroupLabel';
 import {useRobartState} from '../../state/useRobartState';
+import {nextGroupName} from '../../state/groupMigration';
 import {useSimulator} from '../../state/useSimulator';
+import {useUIState} from '../../state/useUIState';
 import {TimelineSimulationButtons} from './TimelineSimulationButtons';
 import React, {useEffect, useLayoutEffect, useRef} from 'react';
 
 const addNewGroup = () => {
-	const groups = Object.values(useRobartState.getState().timelineState.groups);
-	// One more than the highest "Group N"; counting lanes repeats names after a lane is removed
-	const highest = Math.max(0, ...groups.map((group) => Number(/^group (\d+)$/i.exec(group.name)?.[1] ?? 0)));
-	useRobartState.getState().addGroup(`Group ${highest + 1}`);
+	useRobartState.getState().addGroup(nextGroupName(useRobartState.getState().timelineState.groups));
+};
+
+// Into the top-most group (Group 1 is created if there is none), then opens its window to set its position
+const addNewDrone = () => {
+	useUIState.getState().setEditingRobotId(useRobartState.getState().createRobot());
 };
 
 
@@ -89,6 +93,9 @@ export const Timeline = () => {
 						<button className="h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200" onClick={addNewGroup}>
 							+ New group
 						</button>
+						<button className="h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200" onClick={addNewDrone}>
+							+ New drone
+						</button>
 					</div>
 					<div ref={scrollerRef} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto">
 						{groups.map((group) => (
@@ -98,7 +105,6 @@ export const Timeline = () => {
 						<TimelineMarker />
 					</div>
 				</div>
-				<UngroupedRobots />
 				<DroneEditor />
 			</div>
 		</div>

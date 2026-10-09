@@ -44,7 +44,7 @@ const StartingPosition = ({robotId}: {robotId: string}) => {
 const GroupSelect = ({robotId}: {robotId: string}) => {
 	const groups = useRobartState((state) => state.timelineState.groups);
 	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
-	// A drone is in at most one group besides All drones
+	// Every drone is in exactly one group besides All drones
 	const otherGroups = Object.values(groups).filter((group) => group.id !== allDronesGroupId);
 	const currentGroup = otherGroups.find((group) => robotId in group.robots);
 
@@ -55,12 +55,11 @@ const GroupSelect = ({robotId}: {robotId: string}) => {
 				id="drone-group"
 				className="rounded border-gray-300"
 				style={{borderLeft: `8px solid ${currentGroup?.color ?? '#9ca3af'}`}}
-				value={currentGroup?.id ?? ''}
+				value={currentGroup?.id}
 				onChange={(e) => {
-					setRobotGroup(robotId, e.target.value || undefined);
+					setRobotGroup(robotId, e.target.value);
 				}}
 			>
-				<option value="">No group</option>
 				{otherGroups.map((group) => (
 					<option key={group.id} value={group.id}>{group.name}</option>
 				))}

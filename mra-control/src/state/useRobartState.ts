@@ -11,7 +11,7 @@ import {immer} from 'zustand/middleware/immer';
 import {ROBART_VERSION} from '../config/Version';
 import {exportROS, loadProjectFromFile, saveProjectToFile} from '../tools/projectFileConversion';
 import {useSimulator} from './useSimulator';
-import {allDronesGroupId, migrateGroups, nextGroupColor} from './groupMigration';
+import {allDronesGroupId, migrateGroups, newGroup, nextGroupName} from './groupMigration';
 import {State} from 'blockly/core/utils/aria';
 
 export type CodeBlock = {
@@ -125,10 +125,9 @@ export type TimelineActions = {
 	removeTimelineItem: (groupId: string, itemId: string) => void;
 
 	/**
-   * Moves a robot into a group, out of any other group (All drones always keeps it).
-   * @param groupId The group to move it to, or undefined for no group.
+   * Moves a robot into a group, out of its old one (All drones always keeps it). Every robot is in exactly one group.
    */
-	setRobotGroup: (robotId: string, groupId: string | undefined) => void;
+	setRobotGroup: (robotId: string, groupId: string) => void;
 	updateBlockInTimeline: (groupId: string, itemId: string, startTime: number) => void;
 	/**
    * Moves a timeline item to another lane, at a new start time.
@@ -190,7 +189,11 @@ export type BlockActions = {
 };
 
 export type RobotActions = {
-	createRobot: () => string;
+	/**
+   * Creates a robot in the given group, or the top-most group (creating Group 1 if there is none).
+   * @returns The new robot's id.
+   */
+	createRobot: (groupId?: string) => string;
 	saveRobot: (id: string, robot: Partial<RobotState>) => void;
 	deleteRobot: (id: string) => void;
 };
@@ -203,8 +206,14 @@ export type MRAGeneralActions = {
 	exportToROS: (filename: string) => void;
 	getWarnings: () => string;
 	addWarning: (warning: string) => void;
-	addGroup: (groupId: string) => void;
+	/**
+   * @returns The new group's id.
+   */
+	addGroup: (groupName: string) => string;
 	renameGroup: (groupId: string, groupName: string) => void;
+	/**
+   * Removes a group with its blocks and its robots.
+   */
 	removeGroup: (groupId: string) => void;
 };
 
@@ -454,11 +463,14 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							Object.values(state.timelineState.groups).forEach((group) => {
 								if (group.id !== allDronesGroupId) delete group.robots[robotId];
 							});
-							if (groupId !== undefined) state.timelineState.groups[groupId].robots[robotId] = state.robots[robotId];
+							state.timelineState.groups[groupId].robots[robotId] = state.robots[robotId];
 						});
 					},
-					createRobot: () => {
+					createRobot: (groupId) => {
 						const id = uuid();
+						const targetGroupId = groupId
+							?? Object.values(get().timelineState.groups).find((group) => group.id !== allDronesGroupId)?.id
+							?? get().addGroup(nextGroupName(get().timelineState.groups));
 						const robots = Object.values(get().robots);
 						// First free grid spot and unused name. A shared counter restarted on reload (stacking robots at the
 						// origin) and repeated names after deletes.
@@ -481,8 +493,8 @@ export const useRobartState = create<MRAState & MRAActions>()(
 								type: 'crazyflie',
 								startingPosition,
 							};
-							// Add to group with all CFs
 							state.timelineState.groups[allDronesGroupId].robots[id] = state.robots[id];
+							state.timelineState.groups[targetGroupId].robots[id] = state.robots[id];
 						});
 						return id;
 					},
@@ -519,31 +531,23 @@ export const useRobartState = create<MRAState & MRAActions>()(
 						});
 					},
 					addGroup: (groupName: string) => {
-						const groups = get().timelineState.groups;
-						// The id is also the exported Python module name (<id>_node), so letters, digits and _ only, not starting with a digit.
-						// It must be unique, or the new lane replaces an existing one and wipes its blocks and robots.
-						let baseId = groupName.replace(/\W/g, '');
-						if (!/^[A-Za-z_]/.test(baseId)) baseId = 'group' + baseId;
-						let groupId = baseId;
-						for (let i = 2; groupId in groups; i++) groupId = `${baseId}_${i}`;
-						const newGroups = {...groups, 
-							[groupId]: {id: groupId,
-								name: groupName,
-								items: {},
-								robots: {},
-								duration: 120,
-								color: nextGroupColor(groups)},
-						};
+						const group = newGroup(groupName, get().timelineState.groups);
 						set((state) => {
-							state.timelineState.groups = newGroups;
+							state.timelineState.groups[group.id] = group;
 						});
+						return group.id;
 					},
 					removeGroup: (groupId: string) => {
-						const groups = {...get().timelineState.groups};
-						delete groups[groupId];
+						const robotIds = Object.keys(get().timelineState.groups[groupId].robots);
 						set((state) => {
-							state.timelineState.groups = {...groups};
+							delete state.timelineState.groups[groupId];
+							// Every robot is in a group, so its robots go with it
+							robotIds.forEach((robotId) => {
+								delete state.robots[robotId];
+								delete state.timelineState.groups[allDronesGroupId].robots[robotId];
+							});
 						});
+						if (robotIds.length > 0) useSimulator.getState().reset();
 					},
 				}),
 				{

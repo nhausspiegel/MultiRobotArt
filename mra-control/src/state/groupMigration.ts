@@ -11,10 +11,27 @@ export const nextGroupColor = (groups: Record<string, TimelineGroupState>) => {
 	return groupColors.find((color) => !usedColors.includes(color)) ?? groupColors[Object.keys(groups).length % groupColors.length];
 };
 
+// One past the highest "Group N"; counting lanes repeats names after a lane is removed
+export const nextGroupName = (groups: Record<string, TimelineGroupState>) => {
+	const highest = Math.max(0, ...Object.values(groups).map((group) => Number(/^group (\d+)$/i.exec(group.name)?.[1] ?? 0)));
+	return `Group ${highest + 1}`;
+};
+
+export const newGroup = (name: string, groups: Record<string, TimelineGroupState>): TimelineGroupState => {
+	// The id is also the exported Python module name (<id>_node), so letters, digits and _ only, not starting with a digit.
+	// It must be unique, or the new lane replaces an existing one and wipes its blocks and robots.
+	let baseId = name.replace(/\W/g, '');
+	if (!/^[A-Za-z_]/.test(baseId)) baseId = 'group' + baseId;
+	let id = baseId;
+	for (let i = 2; id in groups; i++) id = `${baseId}_${i}`;
+	return {id, name, items: {}, robots: {}, duration: 120, color: nextGroupColor(groups)};
+};
+
 /**
- * Brings a project to "one group per robot": the All drones lane holds every robot, and each robot is in at most one
- * other group. Robots in several groups stay in the top-most one. Empty lanes (no robots, no blocks) are dropped,
- * groups get colors, and robots that no longer exist are removed from lanes. Safe to run on an already-migrated project.
+ * Brings a project to "one group per robot": the All drones lane holds every robot, and each robot is in exactly one
+ * other group. Robots in several groups stay in the top-most one; robots in none join the top-most group (Group 1 is
+ * created if there is none). Empty lanes (no robots, no blocks) are dropped, groups get colors, and robots that no
+ * longer exist are removed from lanes. Safe to run on an already-migrated project.
  * @returns The migrated state, plus notes about robots that were moved, for the Warnings tab.
  */
 export const migrateGroups = <T extends Pick<MRAState, 'robots' | 'timelineState'>>(state: T): T & {notices: string[]} => {
@@ -47,6 +64,20 @@ export const migrateGroups = <T extends Pick<MRAState, 'robots' | 'timelineState
 	Object.values(groups).forEach((group) => {
 		if (group.id !== allDronesGroupId && group.color === undefined) group.color = nextGroupColor(groups);
 	});
+
+	const ungrouped = Object.values(state.robots).filter((robot) => !keptIn.has(robot.id));
+	if (ungrouped.length > 0) {
+		let target = Object.values(groups).find((group) => group.id !== allDronesGroupId);
+		if (target === undefined) {
+			target = newGroup(nextGroupName(groups), groups);
+			groups[target.id] = target;
+		}
+
+		ungrouped.forEach((robot) => {
+			target!.robots[robot.id] = robot;
+			notices.push(`${robot.name} had no group: added to ${target!.name}.\n`);
+		});
+	}
 
 	return {...state, timelineState: {...state.timelineState, groups}, notices};
 };

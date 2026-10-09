@@ -9,7 +9,7 @@ import {RenamableText} from '../utils/RenamableText';
 
 // Drag data type for robot name tags. Lanes accept blocks (text/plain) and ignore it.
 const robotDragType = 'application/x-robart-robot';
-const noGroupColor = '#9ca3af';
+const defaultGroupColor = '#9ca3af';
 
 const acceptRobotDrop = (onRobot: (robotId: string) => void) => ({
 	onDragOver: (e: DragEvent) => {
@@ -68,20 +68,21 @@ const GroupMembersModal = ({open, onClose, group}: {open: boolean; onClose: () =
 							<input
 								type="checkbox"
 								checked={currentGroup?.id === group.id}
-								onChange={(e) => {
-									setRobotGroup(robot.id, e.target.checked ? group.id : undefined);
+								// Every drone is in a group: it leaves this one only by joining another
+								disabled={currentGroup?.id === group.id}
+								onChange={() => {
+									setRobotGroup(robot.id, group.id);
 								}}
 							/>
 							{robot.name}
 							{currentGroup && currentGroup.id !== group.id && (
 								<span className="text-sm" style={{color: currentGroup.color}}>(in {currentGroup.name})</span>
 							)}
-							{!currentGroup && <span className="text-sm text-gray-400">(no group)</span>}
 						</label>
 					);
 				})}
 				<button className="mt-2 font-bold text-blue-900 hover:underline" onClick={() => {
-					setRobotGroup(createRobot(), group.id);
+					createRobot(group.id);
 				}}>
 					+ New drone
 				</button>
@@ -108,7 +109,7 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 		);
 	}
 
-	const color = group.color ?? noGroupColor;
+	const color = group.color ?? defaultGroupColor;
 	const robotIds = Object.keys(group.robots);
 	return (
 		<div
@@ -150,7 +151,8 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 				setMembersOpen(false);
 			}} group={group} />
 			<ConfirmationModal
-				header={`Remove ${group.name}?`}
+				// Its drones are deleted with it, so say so
+				header={robotIds.length === 0 ? `Remove ${group.name}?` : `Remove ${group.name} and its ${robotIds.length} drone${robotIds.length === 1 ? '' : 's'}?`}
 				open={confirmRemoveOpen}
 				onCancel={() => {
 					setConfirmRemoveOpen(false);
@@ -160,37 +162,6 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 					setConfirmRemoveOpen(false);
 				}}
 			/>
-		</div>
-	);
-};
-
-// Robots that are only in All drones, and where new drones are created. Also a drop target for taking a robot out of
-// its group. Always shown, since it holds the only "+ New drone" outside a group's checklist.
-export const UngroupedRobots = () => {
-	const robots = useRobartState((state) => state.robots);
-	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
-	const createRobot = useRobartState((state) => state.createRobot);
-	const setEditingRobotId = useUIState((state) => state.setEditingRobotId);
-	const groupOf = useGroupOf();
-
-	const ungrouped = Object.values(robots).filter((robot) => groupOf(robot.id) === undefined);
-	return (
-		<div
-			className="mx-2 mb-2 flex items-center gap-2 rounded border border-dashed border-gray-400 bg-gray-100 px-2 py-1 text-sm"
-			{...acceptRobotDrop((robotId) => {
-				setRobotGroup(robotId, undefined);
-			})}
-		>
-			<span>Not in a group:</span>
-			{ungrouped.length === 0 && Object.keys(robots).length > 0
-				&& <span className="text-gray-400">none (drag a drone here to take it out of its group)</span>}
-			{ungrouped.map((robot) => <RobotTag key={robot.id} robotId={robot.id} color={noGroupColor} />)}
-			{/* Opens the new drone's window, to set its starting position */}
-			<button className="ml-2 rounded border border-blue-600 px-2 text-blue-900 hover:bg-blue-100" onClick={() => {
-				setEditingRobotId(createRobot());
-			}}>
-				+ New drone
-			</button>
 		</div>
 	);
 };
