@@ -146221,11 +146221,11 @@ const roomAfterLastBlock = 30;
 const minTimelineLength = 120;
 const roundSeconds = [1, 2, 5, 10, 15, 30, 60];
 const everyAtLeast = (secondWidth, minWidth) => roundSeconds.find((seconds) => seconds * secondWidth >= minWidth) ?? 60;
-const tickBackground = (scale, majorHeight, minorHeight, from = "top") => {
+const tickBackground = (scale, majorHeight, minorHeight, from = "top", color = "black") => {
   const secondWidth = convertSecondsToPixels(1, scale);
   const majorWidth = everyAtLeast(secondWidth, 6) * secondWidth;
   const minorWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
-  const ticks = (spacing) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
+  const ticks = (spacing) => `repeating-linear-gradient(to right, ${color} 0 1.5px, transparent 1.5px ${spacing}px)`;
   const area2 = `calc(100% - ${timelineStartPadding}px)`;
   const layers2 = [{ image: ticks(majorWidth), height: majorHeight }];
   if (majorWidth === secondWidth && minorWidth >= 6)
@@ -146389,8 +146389,8 @@ const TimelineMarker = () => {
       "div",
       {
         ...bind(),
-        className: "absolute left-0 top-0 h-3 cursor-pointer touch-none rounded-sm bg-blue-50",
-        style: { width: timeToX(length, scale), ...tickBackground(scale, "60%", "30%", "bottom") }
+        className: "absolute left-0 top-0 h-3 cursor-pointer touch-none rounded-sm bg-blue-200/60",
+        style: { width: timeToX(length, scale), ...tickBackground(scale, "60%", "30%", "bottom", "rgb(59 130 246 / 0.25)") }
       }
     ),
     /* @__PURE__ */ jsxs(
