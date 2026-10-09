@@ -145459,7 +145459,6 @@ const SimulationOptions = () => {
     ] })
   ] });
 };
-const maxShown = 4;
 const useReachedWarnings = () => {
   const shownUntil = useSimulator((state2) => state2.warningsShownUntil);
   const atStart = useSimulator((state2) => state2.status === "STOPPED" && state2.time === 0);
@@ -145473,13 +145472,13 @@ const SimulationWarnings = () => {
   const reached = useReachedWarnings();
   if (reached.length === 0)
     return null;
-  return /* @__PURE__ */ jsxs("div", { className: "pointer-events-none absolute right-2 top-2 max-w-xs rounded bg-black/60 px-2 py-1 text-xs text-white", children: [
+  return /* @__PURE__ */ jsxs("div", { className: "absolute right-2 top-2 max-h-[calc(100%-1rem)] max-w-xs overflow-y-auto rounded bg-black/60 px-2 py-1 text-xs text-white", children: [
     /* @__PURE__ */ jsxs("div", { className: "font-bold text-yellow-300", children: [
       /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faTriangleExclamation }),
       " ",
       reached.length
     ] }),
-    reached.slice(-maxShown).reverse().map((warning, i2) => /* @__PURE__ */ jsxs("div", { className: "truncate", children: [
+    reached.slice().reverse().map((warning, i2) => /* @__PURE__ */ jsxs("div", { className: "truncate", children: [
       /* @__PURE__ */ jsx("span", { className: "tabular-nums text-gray-300", children: formatTime(warning.time) }),
       " ",
       warning.short
