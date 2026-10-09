@@ -3,12 +3,14 @@ import {SimulationPanel} from './simulation/SimulationPanel';
 import {Button} from 'flowbite-react';
 import {BlockJavaScriptCodePanel} from './BlockJavaScriptCodePanel';
 import {useState} from 'react';
-import {WarningsPanel} from './WarningsPanel';
+import {warningCount, WarningsPanel} from './WarningsPanel';
+import {useRobartState} from '../state/useRobartState';
 import React from 'react';
 
 type TabName = 'simulation' | 'python' | 'javascript' | 'warnings';
 export const RightPanel = () => {
 	const [selectedTab, setSelectedTab] = useState<TabName>('simulation');
+	const warnings = useRobartState(warningCount);
 	return  <>
 		<div className='flex flex-col gap-2 h-full'>
 			<div>
@@ -31,7 +33,7 @@ export const RightPanel = () => {
 					<Button color={selectedTab == 'warnings' ? 'blue' : 'gray'} onClick={() => {
 						setSelectedTab('warnings'); 
 					}}>
-          Warnings
+          Warnings{warnings > 0 ? ` (${warnings})` : ''}
 					</Button>
 				</Button.Group>
 			</div>

@@ -4,7 +4,7 @@ import React from 'react';
 
 const speeds = [0.5, 1, 2, 4, 8];
 
-const formatTime = (seconds: number) => {
+export const formatTime = (seconds: number) => {
 	const wholeSeconds = Math.floor(seconds);
 	return `${Math.floor(wholeSeconds / 60)}:${String(wholeSeconds % 60).padStart(2, '0')}`;
 };

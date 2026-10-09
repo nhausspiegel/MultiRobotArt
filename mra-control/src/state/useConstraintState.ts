@@ -11,6 +11,8 @@ type ConstraintViolation = 'velocity' | 'acceleration' | 'workspace';
 export type ConstraintWarning = {
 	time: number;
 	repr: string;
+	// One-line version for the simulation's corner list
+	short: string;
 	violationType: ConstraintViolation;
 	robotId: string;
 };
@@ -93,6 +95,7 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 							warnings.push({
 								time: positions[i].timestep,
 								repr: 'robot ' + robotName + ' has violated a velocity constraint at time ' + positions[i].timestep.toFixed(2) + '. It was travelling at ' + velocity.toFixed(2) + ' m/s.\n',
+								short: `${robotName} too fast (${velocity.toFixed(1)} m/s)`,
 								violationType: 'velocity',
 								robotId: id,
 							});
@@ -130,6 +133,7 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 								warnings.push({
 									time: history[i].timestep,
 									repr: 'robot ' + robotName + ' has violated a workspace constraint at time ' + history[i].timestep.toFixed(2) + '. Its position was ' + currentPosition.x.toFixed(2) + ', ' + currentPosition.y.toFixed(2) + ', ' + currentPosition.z.toFixed(2) + '\n',
+									short: `${robotName} outside the work area`,
 									violationType: 'workspace',
 									robotId: id,
 								});

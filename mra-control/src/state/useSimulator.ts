@@ -10,7 +10,8 @@ import { type SimulatorGroupState } from './simulatorCommands';
 import * as SIM from './simulatorCommands';
 import { type RobotState, useRobartState } from './useRobartState';
 import * as traj from './trajectories';
-import { type ConstraintWarning, useCrazyflieConstraintState } from './useConstraintState';
+import { useCrazyflieConstraintState } from './useConstraintState';
+import { type TimedWarning } from './warnings';
 export const fps = 60;
 
 // type TrajectoryPolynomial =
@@ -56,6 +57,11 @@ export type SimulatorState = {
    * Each robot's whole flight path (sampled), recorded when the show is measured. Drawn in the 3D view.
    */
 	plannedPaths: Record<string, THREE.Vector3[]>;
+	/**
+   * Speed and work area warnings for the whole show, found when it is measured. Shown in the simulation's corner as
+   * playback reaches them.
+   */
+	timedWarnings: TimedWarning[];
 	showPaths: boolean;
 	trajectoryQueue: Queue<string>;
 	trajectoryMarkers: Array<{ position: THREE.Vector3; color: THREE.Color; id: string }>;
@@ -76,6 +82,7 @@ const defaultSimulatorState: SimulatorState = {
 	renderBoundingBoxes: true,
 	showCoordinates: false,
 	plannedPaths: {},
+	timedWarnings: [],
 	showPaths: true,
 	trajectoryQueue: new Queue<string>(),
 	trajectoryMarkers: [],
@@ -162,14 +169,8 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			get().measureShowLength();
 			set({ status: 'RUNNING', lastStepTime: performance.now() });
 		},
+		// Warnings come from measuring the whole show (measureShowLength), not from what has played so far
 		pause: () => {
-			const warnings: ConstraintWarning[] | undefined = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots));
-			let reprs = warnings?.map((warning) => {
-				return warning.repr;
-			});
-			const state = useRobartState.getState();
-			useRobartState.setState({ warnings: reprs ?? [] }); // undefined when nothing was recorded; the Warnings tab joins this list
-
 			set({ status: 'PAUSED' });
 		},
 		resume: () => {
@@ -177,13 +178,6 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			set({ status: 'RUNNING', lastStepTime: performance.now() });
 		},
 		halt: () => {
-			const warnings: ConstraintWarning[] | undefined = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots));
-			let reprs = warnings?.map((warning) => {
-				return warning.repr;
-			});
-			const state = useRobartState.getState();
-			useRobartState.setState({ warnings: reprs ?? [] }); // undefined when nothing was recorded; the Warnings tab joins this list
-
 			set({ status: 'STOPPED' });
 			get().cancelSimulation();
 		},
@@ -353,6 +347,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				});
 			});
 
+			// Speed and work area, from the positions just recorded (before block measuring and the reset overwrite them)
+			const constraintWarnings = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots)) ?? [];
+
 			// Each block's own length, so the drop preview is right before the block is on the timeline
 			const blockLengths: Record<string, number> = {};
 			Object.values(useRobartState.getState().blocks).forEach((block) => {
@@ -361,7 +358,13 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			});
 
 			get().executeSimulation(0);
-			set({ endTime, plannedPaths });
+			set({
+				endTime,
+				plannedPaths,
+				timedWarnings: constraintWarnings.map((warning) => ({ time: warning.time, short: warning.short, full: warning.repr })),
+			});
+			// After executeSimulation(0), which clears them
+			useRobartState.setState({ warnings: constraintWarnings.map((warning) => warning.repr) });
 			useRobartState.getState().setMeasuredDurations(durations, blockLengths);
 		},
 		measureBlockLength: (javaScript) => {
@@ -566,7 +569,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			pendingItems.length = 0;
 		},
 		reset: () => {
-			set({ status: 'STOPPED', endTime: 0, plannedPaths: {} });
+			set({ status: 'STOPPED', endTime: 0, plannedPaths: {}, timedWarnings: [] });
 			get().executeSimulation(0);
 			get().cancelSimulation();
 		},
