@@ -30,3 +30,22 @@ export const laneOverlapWarnings = (state: Pick<MRAState, 'robots' | 'timelineSt
 	});
 	return warnings;
 };
+
+type Position = {x: number; y: number; z: number};
+
+// Pairs of robots whose bounding boxes overlap. Each box is boxSize (x, y, z) centered on its robot, so two boxes
+// overlap when the robots are closer than one box size on every axis.
+export const overlappingPairs = (positions: Record<string, Position>, [sizeX, sizeY, sizeZ]: number[]): Array<[string, string]> => {
+	const ids = Object.keys(positions);
+	return ids.flatMap((a, i) => ids.slice(i + 1)
+		.filter((b) => Math.abs(positions[a].x - positions[b].x) < sizeX
+			&& Math.abs(positions[a].y - positions[b].y) < sizeY
+			&& Math.abs(positions[a].z - positions[b].z) < sizeZ)
+		.map((b): [string, string] => [a, b]));
+};
+
+export const collisionWarning = (time: number, nameA: string, nameB: string): TimedWarning => ({
+	time,
+	short: `${nameA} and ${nameB} too close`,
+	full: `robots ${nameA} and ${nameB} came too close at time ${time.toFixed(2)} (their bounding boxes overlapped).\n`,
+});
