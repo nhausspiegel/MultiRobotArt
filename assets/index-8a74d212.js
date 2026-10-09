@@ -131218,12 +131218,6 @@ const HoverTimelineBlock = ({ scale, startTime, isOverlapping }) => {
     }
   );
 };
-const TickMark = ({ tickNumber, subdivisionsPerSecond, scale }) => {
-  return /* @__PURE__ */ jsxs("div", { className: "absolute h-full", style: { left: `${convertSecondsToPixels(tickNumber / subdivisionsPerSecond, scale)}px` }, children: [
-    /* @__PURE__ */ jsx("div", { className: clsx("w-[2px] bg-black self-start", tickNumber % subdivisionsPerSecond === 0 ? "h-1/4" : "h-1/6") }),
-    tickNumber % subdivisionsPerSecond === 0 ? /* @__PURE__ */ jsx("span", { children: tickNumber / subdivisionsPerSecond }) : null
-  ] });
-};
 const TimelineBlock = ({ item, scale }) => {
   const blocks2 = useRobartState((state2) => state2.blocks);
   const removeItem = useRobartState((state2) => state2.removeTimelineItem);
@@ -131335,17 +131329,26 @@ const TimelineGroupBody = ({ group }) => {
       addBlockToTimeline(group.id, blockId, startTime, isTraj);
     }
   };
+  const secondWidth = convertSecondsToPixels(1, scale);
+  const subdivisionWidth = secondWidth / SUBDIVISIONS_PER_SECOND;
+  const tick = "linear-gradient(to right, black 2px, transparent 2px)";
+  const showSubdivisions = subdivisionWidth >= 6;
+  const labelEvery = [1, 2, 5, 10, 15, 30, 60].find((seconds) => seconds * secondWidth >= 32) ?? 60;
   return /* @__PURE__ */ jsxs(
     "div",
     {
-      className: "relative h-16 rounded bg-blue-300",
+      className: "relative h-16 rounded bg-blue-300 bg-repeat-x",
       ref: laneBodyRef,
       onDragOver: handleDragOver,
       onDragLeave: handleDragLeave,
       onDrop: handleDrop,
-      style: { width: `${convertSecondsToPixels(group.duration, scale)}px` },
+      style: {
+        width: `${convertSecondsToPixels(group.duration, scale)}px`,
+        backgroundImage: showSubdivisions ? `${tick}, ${tick}` : tick,
+        backgroundSize: showSubdivisions ? `${secondWidth}px 25%, ${subdivisionWidth}px 16.67%` : `${secondWidth}px 25%`
+      },
       children: [
-        [...new Array(group.duration * SUBDIVISIONS_PER_SECOND)].map((_2, tickNumber) => /* @__PURE__ */ jsx(TickMark, { tickNumber, scale, subdivisionsPerSecond: SUBDIVISIONS_PER_SECOND }, tickNumber)),
+        [...new Array(Math.ceil(group.duration / labelEvery))].map((_2, index2) => /* @__PURE__ */ jsx("span", { className: "absolute top-1/4", style: { left: convertSecondsToPixels(index2 * labelEvery, scale) }, children: index2 * labelEvery }, index2)),
         Object.values(group.items).map((item) => /* @__PURE__ */ jsx(TimelineBlock, { scale, item }, item.id)),
         hoverX !== void 0 && /* @__PURE__ */ jsx(
           HoverTimelineBlock,
