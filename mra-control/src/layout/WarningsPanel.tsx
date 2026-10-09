@@ -17,7 +17,7 @@ const laneOverlapWarnings = (state: MRAState) => {
 				const start = Math.max(a.item.startTime, b.item.startTime);
 				const end = Math.min(a.item.startTime + a.item.duration, b.item.startTime + b.item.duration);
 				if (start < end) {
-					warnings.push(`robot ${robot.name} is in lanes ${a.group.name} and ${b.group.name}, which both have blocks between ${start.toFixed(2)} s and ${end.toFixed(2)} s. The simulator runs them one after the other, but on the real drones the later one takes over mid-flight.\n`);
+					warnings.push(`robot ${robot.name} is in lanes ${a.group.name} and ${b.group.name}, which both have blocks between ${start.toFixed(2)} s and ${end.toFixed(2)} s.\n`);
 				}
 			});
 		});
