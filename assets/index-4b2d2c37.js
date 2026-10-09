@@ -90203,11 +90203,40 @@ const BlockEditorPanel = () => {
       multiselectCopyPaste: { crossTab: true, menu: false }
       // Keyboard copy/paste only, no extra menu items
     });
+    const controls = multiselect.controls_;
+    const enableMultiselect = controls.enableMultiselect.bind(controls);
+    controls.enableMultiselect = (...args) => {
+      enableMultiselect(...args);
+      const dragSelect = controls.dragSelect_;
+      if (!dragSelect)
+        return;
+      dragSelect.setSettings({ multiSelectToggling: false });
+      const addedByBox = /* @__PURE__ */ new Set();
+      const blockOf = ({ item }) => {
+        var _a3;
+        return workspace.getBlockById(((_a3 = item.parentElement) == null ? void 0 : _a3.dataset.id) ?? "");
+      };
+      dragSelect.PubSub.subscribers.elementselect = [(event) => {
+        const block = blockOf(event);
+        if (!block || controls.dragSelection.has(block.id))
+          return;
+        addedByBox.add(block.id);
+        controls.updateDraggables_(block);
+      }];
+      dragSelect.PubSub.subscribers.elementunselect = [(event) => {
+        const block = blockOf(event);
+        if (block && addedByBox.delete(block.id))
+          controls.updateDraggables_(block);
+      }];
+    };
     const editor = workspace.getInjectionDiv();
     let pointerInside = false;
     const isOn = () => inMultipleSelectionModeWeakMap.get(workspace) === true;
-    const onPointerEnter = () => {
+    const onPointerEnter = (event) => {
+      var _a3;
       pointerInside = true;
+      if (event.shiftKey && !isOn())
+        (_a3 = multiselect.controls_) == null ? void 0 : _a3.enableMultiselect();
     };
     const onPointerLeave = () => {
       pointerInside = false;
