@@ -146744,11 +146744,11 @@ const Timeline = () => {
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "overflow-y-auto", children: [
       /* @__PURE__ */ jsxs("div", { className: "flex flex-shrink-0 gap-2", children: [
-        /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2 pt-6", children: [
+        /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2 pt-5", children: [
           groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupLabel, { group }, group.id)),
           /* @__PURE__ */ jsx("button", { className: "h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200", onClick: addNewGroup, children: "+ New group" })
         ] }),
-        /* @__PURE__ */ jsxs("div", { ref: scrollerRef, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-6", children: [
+        /* @__PURE__ */ jsxs("div", { ref: scrollerRef, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-5", children: [
           groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group }, group.id)),
           /* @__PURE__ */ jsx(TimelineMarker, {})
         ] })
