@@ -61,8 +61,10 @@ export const BlockManagerPanel = () => {
 					setConfirmDeleteOpen(false);
 				}}
 			>
-				&quot;{selectedBlock?.name}&quot; will also be removed from the timeline
-				{selectedBlockUses > 0 ? ` (used ${selectedBlockUses} time${selectedBlockUses === 1 ? '' : 's'})` : ''}.
+				{/* Only when it's on the timeline; otherwise just the title */}
+				{selectedBlockUses > 0 && <>
+					&quot;{selectedBlock?.name}&quot; will also be removed from the timeline (used {selectedBlockUses} time{selectedBlockUses === 1 ? '' : 's'}).
+				</>}
 			</ConfirmationModal>
 			{/* Scrolls when there are more blocks than fit; New / Copy / Delete stay above it */}
 			<div className="flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto p-2">
