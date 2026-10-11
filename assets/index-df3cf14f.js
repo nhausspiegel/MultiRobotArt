@@ -145594,9 +145594,9 @@ const useShowLength = () => {
   const estimatedEndTime = useRobartState(lastItemEnd);
   return Math.max(measuredEndTime > 0 ? measuredEndTime : estimatedEndTime, time2);
 };
-const SimulationOptions = () => {
-  const time2 = useSimulator((state2) => state2.time);
-  const showLength = useShowLength();
+const SimulationSettings = () => {
+  const [open2, setOpen] = reactExports.useState(false);
+  const menuRef = reactExports.useRef(null);
   const timeDilation = useSimulator((state2) => state2.timeDilation);
   const setTimeDilation = useSimulator((state2) => state2.setTimeDilation);
   const showPaths = useSimulator((state2) => state2.showPaths);
@@ -145605,39 +145605,78 @@ const SimulationOptions = () => {
   const toggleCoordinates = useSimulator((state2) => state2.toggleCoordinates);
   const showWorkArea = useSimulator((state2) => state2.showWorkArea);
   const toggleWorkArea = useSimulator((state2) => state2.toggleWorkArea);
-  return /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 text-sm", children: [
-    /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
-      /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showCoordinates, onChange: toggleCoordinates }),
-      "Coordinates"
-    ] }),
-    /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
-      /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showPaths, onChange: togglePaths }),
-      "Paths"
-    ] }),
-    /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-1", children: [
-      /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showWorkArea, onChange: toggleWorkArea }),
-      "Work area"
-    ] }),
+  reactExports.useEffect(() => {
+    if (!open2)
+      return;
+    const onPointerDown = (event) => {
+      var _a3;
+      if (!((_a3 = menuRef.current) == null ? void 0 : _a3.contains(event.target)))
+        setOpen(false);
+    };
+    const onKeyDown = (event) => {
+      if (event.key === "Escape")
+        setOpen(false);
+    };
+    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open2]);
+  return /* @__PURE__ */ jsxs("div", { ref: menuRef, className: "absolute left-2 top-2 z-10", children: [
     /* @__PURE__ */ jsx(
-      "select",
+      "button",
       {
-        className: "rounded border border-gray-300 bg-white py-1 pl-2 pr-8 text-sm",
-        "aria-label": "Simulation speed",
-        value: timeDilation,
-        onChange: (e2) => {
-          setTimeDilation(Number(e2.target.value));
+        className: clsx("flex h-[30px] w-[30px] items-center justify-center rounded-md text-gray-200", open2 ? "bg-white/30" : "bg-white/15 hover:bg-white/25"),
+        title: "Simulation settings",
+        "aria-expanded": open2,
+        onClick: () => {
+          setOpen(!open2);
         },
-        children: speeds.map((speed) => /* @__PURE__ */ jsxs("option", { value: speed, children: [
-          speed,
-          "×"
-        ] }, speed))
+        children: /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faGear })
       }
     ),
-    /* @__PURE__ */ jsxs("span", { className: "tabular-nums", children: [
-      formatTime(time2),
-      " / ",
-      formatTime(showLength)
+    open2 && /* @__PURE__ */ jsxs("div", { className: "mt-1.5 w-44 rounded-lg bg-white px-2.5 py-2 text-sm shadow-lg", children: [
+      /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 py-0.5", children: [
+        /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showCoordinates, onChange: toggleCoordinates }),
+        "Coordinates"
+      ] }),
+      /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 py-0.5", children: [
+        /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showPaths, onChange: togglePaths }),
+        "Paths"
+      ] }),
+      /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 py-0.5", children: [
+        /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showWorkArea, onChange: toggleWorkArea }),
+        "Work area"
+      ] }),
+      /* @__PURE__ */ jsxs("label", { className: "mt-1 flex items-center justify-between border-t border-gray-100 pt-2", children: [
+        "Speed",
+        /* @__PURE__ */ jsx(
+          "select",
+          {
+            className: "rounded border border-gray-300 bg-white py-0.5 pl-2 pr-8 text-sm",
+            value: timeDilation,
+            onChange: (e2) => {
+              setTimeDilation(Number(e2.target.value));
+            },
+            children: speeds.map((speed) => /* @__PURE__ */ jsxs("option", { value: speed, children: [
+              speed,
+              "×"
+            ] }, speed))
+          }
+        )
+      ] })
     ] })
+  ] });
+};
+const SimulationTime = () => {
+  const time2 = useSimulator((state2) => state2.time);
+  const showLength = useShowLength();
+  return /* @__PURE__ */ jsxs("div", { className: "pointer-events-none absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-xs tabular-nums text-white", children: [
+    formatTime(time2),
+    " / ",
+    formatTime(showLength)
   ] });
 };
 const useReachedWarnings = () => {
@@ -145674,6 +145713,8 @@ const SimulationWarnings = () => {
 const SimulationPanel = () => {
   return /* @__PURE__ */ jsxs("div", { className: "relative h-full w-full", children: [
     /* @__PURE__ */ jsx(Canvas, { dpr: [1, 2], children: /* @__PURE__ */ jsx(Simulation, {}) }),
+    /* @__PURE__ */ jsx(SimulationSettings, {}),
+    /* @__PURE__ */ jsx(SimulationTime, {}),
     /* @__PURE__ */ jsx(SimulationWarnings, {})
   ] });
 };
@@ -146362,7 +146403,8 @@ const TimelineGroupBody = ({ group }) => {
 };
 const rulerNumbersHeight = 15;
 const rulerScrubHeight = 10;
-const lanesTop = rulerNumbersHeight + rulerScrubHeight + 8;
+const rulerHeight = rulerNumbersHeight + rulerScrubHeight;
+const lanesTop = rulerHeight + 8;
 const tickColor = "#334155";
 const TimelineMarker = ({ labelRange }) => {
   const time2 = useSimulator((state2) => state2.time);
@@ -146680,6 +146722,23 @@ const TimelineGroupLabel = ({ group }) => {
     }
   );
 };
+const SimButton = ({ icon: icon2, text, color, onClick, disabled: disabled2 }) => /* @__PURE__ */ jsxs(
+  "button",
+  {
+    className: clsx(
+      "flex h-full flex-1 items-center justify-center gap-1.5 rounded-md border text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50",
+      color === "green" && "border-transparent bg-green-700 text-white enabled:hover:bg-green-800",
+      color === "red" && "border-transparent bg-red-700 text-white hover:bg-red-800",
+      color === "white" && "border-gray-200 bg-white text-gray-900 hover:bg-gray-100"
+    ),
+    onClick,
+    disabled: disabled2,
+    children: [
+      /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: icon2, className: "h-2.5 w-2.5" }),
+      text
+    ]
+  }
+);
 const TimelineSimulationButtons = () => {
   const simulationStatus = useSimulator((state2) => state2.status);
   const play = useSimulator((state2) => state2.play);
@@ -146709,10 +146768,10 @@ const TimelineSimulationButtons = () => {
     };
   }, []);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    simulationStatus === "RUNNING" && /* @__PURE__ */ jsx(IconButton, { icon: faPause, onClick: pause, text: "Pause Sim", color: "gray" }),
-    simulationStatus === "PAUSED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: resume, text: "Resume Sim", color: "success" }),
-    simulationStatus === "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faPlay, onClick: play, text: "Run Sim", color: "success", disabled: !hasDrones }),
-    simulationStatus !== "STOPPED" && /* @__PURE__ */ jsx(IconButton, { icon: faSquare, onClick: halt, text: "Stop Sim", color: "failure" })
+    simulationStatus === "RUNNING" && /* @__PURE__ */ jsx(SimButton, { icon: faPause, onClick: pause, text: "Pause", color: "white" }),
+    simulationStatus === "PAUSED" && /* @__PURE__ */ jsx(SimButton, { icon: faPlay, onClick: resume, text: "Resume", color: "green" }),
+    simulationStatus === "STOPPED" && /* @__PURE__ */ jsx(SimButton, { icon: faPlay, onClick: play, text: "Run", color: "green", disabled: !hasDrones }),
+    simulationStatus !== "STOPPED" && /* @__PURE__ */ jsx(SimButton, { icon: faSquare, onClick: halt, text: "Stop", color: "red" })
   ] });
 };
 const addNewGroup = () => {
@@ -146793,28 +146852,23 @@ const Timeline = () => {
       unsubscribe();
     };
   }, []);
-  return /* @__PURE__ */ jsxs("div", { className: "flex h-full w-full flex-col gap-2 rounded bg-blue-100", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 pl-2 pt-2", children: [
-      /* @__PURE__ */ jsx(TimelineSimulationButtons, {}),
-      /* @__PURE__ */ jsx(SimulationOptions, {})
-    ] }),
-    /* @__PURE__ */ jsxs("div", { className: "overflow-y-auto", children: [
-      /* @__PURE__ */ jsxs("div", { className: "flex flex-shrink-0 gap-2", children: [
-        /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2", style: { paddingTop: lanesTop }, children: [
-          groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupLabel, { group }, group.id)),
-          /* @__PURE__ */ jsx("button", { className: "h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200", onClick: addNewGroup, children: "+ New group" })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "relative w-full min-w-0", children: [
-          /* @__PURE__ */ jsxs("div", { ref: scrollerRef, onScroll: updateLabelRange, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto", style: { paddingTop: lanesTop }, children: [
-            groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group }, group.id)),
-            /* @__PURE__ */ jsx(TimelineMarker, { labelRange })
-          ] }),
-          isEmpty && /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center", style: { top: lanesTop }, children: /* @__PURE__ */ jsx("span", { className: "rounded-md border border-dashed border-gray-400 bg-white/85 px-3 py-1.5 text-sm font-medium text-gray-600", children: "Drag a block here to get started" }) })
-        ] })
+  return /* @__PURE__ */ jsx("div", { className: "flex h-full w-full flex-col gap-2 rounded bg-blue-100", children: /* @__PURE__ */ jsxs("div", { className: "overflow-y-auto pt-2", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-shrink-0 gap-2", children: [
+      /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2", children: [
+        /* @__PURE__ */ jsx("div", { className: "flex w-52 gap-1", style: { height: rulerHeight }, children: /* @__PURE__ */ jsx(TimelineSimulationButtons, {}) }),
+        groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupLabel, { group }, group.id)),
+        /* @__PURE__ */ jsx("button", { className: "h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200", onClick: addNewGroup, children: "+ New group" })
       ] }),
-      /* @__PURE__ */ jsx(DroneEditor, {})
-    ] })
-  ] });
+      /* @__PURE__ */ jsxs("div", { className: "relative w-full min-w-0", children: [
+        /* @__PURE__ */ jsxs("div", { ref: scrollerRef, onScroll: updateLabelRange, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto", style: { paddingTop: lanesTop }, children: [
+          groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group }, group.id)),
+          /* @__PURE__ */ jsx(TimelineMarker, { labelRange })
+        ] }),
+        isEmpty && /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center", style: { top: lanesTop }, children: /* @__PURE__ */ jsx("span", { className: "rounded-md border border-dashed border-gray-400 bg-white/85 px-3 py-1.5 text-sm font-medium text-gray-600", children: "Drag a block here to get started" }) })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsx(DroneEditor, {})
+  ] }) });
 };
 function App() {
   return /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs("div", { className: "flex h-screen w-screen flex-col gap-1", children: [
