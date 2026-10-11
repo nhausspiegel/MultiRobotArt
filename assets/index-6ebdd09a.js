@@ -146472,8 +146472,8 @@ const TimelineMarker = ({ labelRange }) => {
     end2 > 0 && /* @__PURE__ */ jsx(
       "div",
       {
-        className: "pointer-events-none absolute bottom-0 z-[5] w-0.5 -translate-x-1/2 bg-blue-500",
-        style: { left: timeToX(end2, scale), top: lanesTop }
+        className: "pointer-events-none absolute bottom-0 z-[5] w-0.5 bg-blue-500",
+        style: { left: timeToX(end2, scale) + 1, top: lanesTop }
       }
     ),
     /* @__PURE__ */ jsxs(
