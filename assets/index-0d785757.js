@@ -75976,10 +75976,14 @@ const CUSTOM_BLOCKS = {
   blockRandomColor,
   blockRepeat
 };
+const hasEmptySlot = (b2) => b2.inputList.some((input) => {
+  var _a3;
+  return input instanceof inputs.StatementInput && !((_a3 = input.connection) == null ? void 0 : _a3.targetBlock());
+});
 Object.values(CUSTOM_BLOCKS).forEach((block) => {
   Blocks[block.name] = block.block;
-  pythonGenerator.forBlock[block.name] = (b2) => block.pythonGenerator(b2, pythonGenerator);
-  javascriptGenerator.forBlock[block.name] = (b2) => block.javascriptGenerator(b2, javascriptGenerator);
+  pythonGenerator.forBlock[block.name] = (b2) => hasEmptySlot(b2) ? "" : block.pythonGenerator(b2, pythonGenerator);
+  javascriptGenerator.forBlock[block.name] = (b2) => hasEmptySlot(b2) ? "" : block.javascriptGenerator(b2, javascriptGenerator);
 });
 const blockToToolbox = (block) => ({
   kind: "block",
