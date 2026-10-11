@@ -40,4 +40,16 @@ assert.equal(pythonGenerator.workspaceToCode(emptyWorkspace).trim(), '');
 repeat.setFieldValue(0, 'times');
 assert.equal(javascriptGenerator.workspaceToCode(workspace).trim(), '');
 
+// Same for a trajectory modifier with nothing inside, or add with one slot empty
+const modifiers = new Blockly.Workspace();
+modifiers.newBlock('negate');
+assert.equal(javascriptGenerator.workspaceToCode(modifiers).trim(), '');
+assert.equal(pythonGenerator.workspaceToCode(modifiers).trim(), '');
+const add = new Blockly.Workspace();
+const addBlock = add.newBlock('addTrajectories');
+addBlock.getInput('firstTrajectory')!.connection!.connect(add.newBlock('takeoff').previousConnection!);
+assert.equal(javascriptGenerator.workspaceToCode(add).trim(), '');
+addBlock.getInput('secondTrajectory')!.connection!.connect(add.newBlock('land').previousConnection!);
+assert.match(javascriptGenerator.workspaceToCode(add), /^simulator\.addTrajectories\(/);
+
 console.log('repeat ok');
