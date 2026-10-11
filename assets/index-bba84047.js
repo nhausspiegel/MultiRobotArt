@@ -146218,22 +146218,13 @@ const roomAfterLastBlock = 30;
 const minTimelineLength = 120;
 const roundSeconds = [1, 2, 5, 10, 15, 30, 60];
 const everyAtLeast = (secondWidth, minWidth) => roundSeconds.find((seconds) => seconds * secondWidth >= minWidth) ?? 60;
-const tickBackground = (scale, majorHeight, minorHeight) => {
+const tickSpacing = (scale) => {
   const secondWidth = convertSecondsToPixels(1, scale);
-  const majorWidth = everyAtLeast(secondWidth, 10) * secondWidth;
-  const subdivisions = majorWidth === secondWidth ? [8, 4, 2].find((perSecond) => secondWidth / perSecond >= 12) : void 0;
-  const ticks = (spacing) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
-  const area2 = `calc(100% - ${timelineStartPadding}px)`;
-  const layers2 = [{ image: ticks(majorWidth), height: majorHeight }];
-  if (subdivisions)
-    layers2.push({ image: ticks(secondWidth / subdivisions), height: minorHeight });
-  return {
-    backgroundImage: layers2.map((layer2) => layer2.image).join(", "),
-    backgroundSize: layers2.map((layer2) => `${area2} ${layer2.height}`).join(", "),
-    backgroundPosition: `${timelineStartPadding}px 0`,
-    backgroundRepeat: "no-repeat"
-  };
+  const major = everyAtLeast(secondWidth, 10) * secondWidth;
+  const perSecond = major === secondWidth ? [8, 4, 2].find((count2) => secondWidth / count2 >= 12) : void 0;
+  return { major, minor: perSecond ? secondWidth / perSecond : void 0 };
 };
+const tickLayer = (spacing, color, width) => `repeating-linear-gradient(to right, ${color} 0 ${width}px, transparent ${width}px ${spacing}px)`;
 const timelineLength = (state2) => Math.max(minTimelineLength, lastItemEnd(state2) + roomAfterLastBlock);
 const minItemWidth = 12;
 const convertPixelsToSeconds = (distance, scale) => {
@@ -146243,6 +146234,7 @@ const convertSecondsToPixels = (duration2, scale) => {
   return duration2 * pixelsPerSecond * scale;
 };
 const timelineStartPadding = 12;
+const tickArea = `calc(100% - ${timelineStartPadding}px)`;
 const timeToX = (seconds, scale) => timelineStartPadding + convertSecondsToPixels(seconds, scale);
 const blockOverlaps = (occupiedItems, startTime, duration2, id2) => startTime === void 0 || startTime < 0 || occupiedItems.some((items) => {
   if (items === void 0) {
@@ -146260,13 +146252,14 @@ const laneOccupiedItems = (groups, laneId) => {
   var _a3, _b2;
   return laneId === allDronesGroupId ? Object.values(groups).flatMap((group) => Object.values(group.items)) : [...Object.values(((_a3 = groups[laneId]) == null ? void 0 : _a3.items) ?? {}), ...Object.values(((_b2 = groups[allDronesGroupId]) == null ? void 0 : _b2.items) ?? {})];
 };
-const TimelineGroupBody = ({ group, labelRange }) => {
+const TimelineGroupBody = ({ group }) => {
   var _a3, _b2;
   const addBlockToTimeline = useRobartState((state2) => state2.addBlockToTimeline);
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
   const blocks = useRobartState((state2) => state2.blocks);
   const scale = useRobartState((state2) => state2.timelineState.scale);
   const length = useRobartState(timelineLength);
+  const end2 = useRobartState(lastItemEnd);
   const groups = useRobartState((state2) => state2.timelineState.groups);
   const occupiedItems = laneOccupiedItems(groups, group.id);
   const allDronesItems = group.id === allDronesGroupId ? [] : Object.values(((_a3 = groups[allDronesGroupId]) == null ? void 0 : _a3.items) ?? {});
@@ -146316,9 +146309,7 @@ const TimelineGroupBody = ({ group, labelRange }) => {
       addBlockToTimeline(group.id, blockId, startTime, isTraj);
     }
   };
-  const labelEvery = everyAtLeast(convertSecondsToPixels(1, scale), 32);
-  const firstLabel = Math.max(0, Math.floor(labelRange[0] / labelEvery));
-  const labelCount = Math.max(0, Math.min(Math.ceil(length / labelEvery), Math.ceil(labelRange[1] / labelEvery)) - firstLabel);
+  const { major, minor } = tickSpacing(scale);
   return /* @__PURE__ */ jsxs(
     "div",
     {
@@ -146330,13 +146321,13 @@ const TimelineGroupBody = ({ group, labelRange }) => {
       onDrop: handleDrop,
       style: {
         width: `${timeToX(length, scale)}px`,
-        ...tickBackground(scale, "25%", "16.67%")
+        backgroundImage: tickLayer(minor ?? major, "rgb(30 58 138 / 0.14)", 1),
+        backgroundSize: `${tickArea} 100%`,
+        backgroundPosition: `${timelineStartPadding}px 0`,
+        backgroundRepeat: "no-repeat"
       },
       children: [
-        !group.collapsed && [...new Array(labelCount)].map((_2, i2) => (firstLabel + i2) * labelEvery).map((seconds) => (
-          // Centered on their ticks
-          /* @__PURE__ */ jsx("span", { className: "absolute top-1/4 -translate-x-1/2", style: { left: timeToX(seconds, scale) }, children: seconds }, seconds)
-        )),
+        /* @__PURE__ */ jsx("div", { className: clsx("pointer-events-none absolute inset-y-0 right-0 bg-white/45", end2 > 0 ? "rounded-r" : "rounded"), style: { left: end2 > 0 ? timeToX(end2, scale) : 0 } }),
         allDronesItems.map((item) => {
           var _a4;
           return /* @__PURE__ */ jsx(
@@ -146367,12 +146358,17 @@ const TimelineGroupBody = ({ group, labelRange }) => {
     }
   );
 };
-const TimelineMarker = () => {
+const rulerNumbersHeight = 15;
+const rulerScrubHeight = 10;
+const lanesTop = rulerNumbersHeight + rulerScrubHeight + 8;
+const tickColor = "#334155";
+const TimelineMarker = ({ labelRange }) => {
   const time2 = useSimulator((state2) => state2.time);
   const seek = useSimulator((state2) => state2.seek);
   const scale = useRobartState((state2) => state2.timelineState.scale);
   const showLength = useShowLength();
   const length = useRobartState(timelineLength);
+  const end2 = useRobartState(lastItemEnd);
   const markerRef = reactExports.useRef(null);
   const bind = useDrag(({ xy: [x2] }) => {
     var _a3;
@@ -146382,23 +146378,67 @@ const TimelineMarker = () => {
     const contentX = x2 - scroller.getBoundingClientRect().left + scroller.scrollLeft;
     seek(Math.min(showLength, Math.max(0, convertPixelsToSeconds(contentX - timelineStartPadding, scale))));
   }, { pointer: { keys: false } });
+  const width = timeToX(length, scale);
+  const { major, minor } = tickSpacing(scale);
+  const numberEvery = everyAtLeast(convertSecondsToPixels(1, scale), 48);
+  const firstNumber = Math.max(0, Math.floor(labelRange[0] / numberEvery));
+  const numberCount = end2 === 0 ? 0 : Math.max(0, Math.min(Math.ceil(length / numberEvery), Math.ceil(labelRange[1] / numberEvery)) - firstNumber);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
+    end2 > 0 && /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: "pointer-events-none absolute left-0 top-0",
+        style: {
+          width,
+          height: rulerNumbersHeight,
+          backgroundImage: tickLayer(convertSecondsToPixels(numberEvery, scale), tickColor, 1.5),
+          backgroundSize: `${tickArea} 100%`,
+          backgroundPosition: `${timelineStartPadding}px 0`,
+          backgroundRepeat: "no-repeat"
+        },
+        children: [...new Array(numberCount)].map((_2, i2) => (firstNumber + i2) * numberEvery).map((seconds) => /* @__PURE__ */ jsx(
+          "span",
+          {
+            className: "absolute top-0 text-[11px] tabular-nums text-slate-700",
+            style: { left: timeToX(seconds, scale) + 4, lineHeight: `${rulerNumbersHeight}px` },
+            children: seconds
+          },
+          seconds
+        ))
+      }
+    ),
     /* @__PURE__ */ jsx(
       "div",
       {
         ...bind(),
-        className: "absolute left-0 top-0 h-3 cursor-pointer touch-none rounded-sm bg-blue-200/60",
-        style: { width: timeToX(length, scale) }
+        className: "absolute left-0 cursor-pointer touch-none rounded-sm bg-blue-200/90",
+        style: {
+          top: rulerNumbersHeight,
+          width,
+          height: rulerScrubHeight,
+          // Major ticks full height, minor ones half, from the bottom
+          backgroundImage: [tickLayer(major, tickColor, 1.5), ...minor ? [tickLayer(minor, tickColor, 1)] : []].join(", "),
+          backgroundSize: [`${tickArea} 100%`, ...minor ? [`${tickArea} 50%`] : []].join(", "),
+          backgroundPosition: [`${timelineStartPadding}px 0`, ...minor ? [`${timelineStartPadding}px 100%`] : []].join(", "),
+          backgroundRepeat: "no-repeat"
+        }
+      }
+    ),
+    end2 > 0 && /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: "pointer-events-none absolute bottom-0 z-[5] w-0.5 -translate-x-1/2 bg-blue-900",
+        style: { left: timeToX(end2, scale), top: lanesTop }
       }
     ),
     /* @__PURE__ */ jsxs(
       "div",
       {
         ref: markerRef,
-        className: "pointer-events-none absolute inset-y-0 z-10 flex -translate-x-1/2 flex-col items-center",
-        style: { left: timeToX(time2, scale) },
+        className: "pointer-events-none absolute bottom-0 z-10 flex -translate-x-1/2 flex-col items-center",
+        style: { left: timeToX(time2, scale), top: rulerNumbersHeight },
         children: [
-          /* @__PURE__ */ jsx("div", { ...bind(), className: "pointer-events-auto h-3 w-3 shrink-0 cursor-grab touch-none rounded-full bg-black" }),
+          /* @__PURE__ */ jsx("div", { ...bind(), className: "pointer-events-auto h-2.5 w-2.5 shrink-0 cursor-grab touch-none rounded-full bg-black" }),
           /* @__PURE__ */ jsx("div", { className: "w-[3px] flex-1 bg-black" })
         ]
       }
@@ -146680,6 +146720,7 @@ const maxScale = 10;
 const Timeline = () => {
   const timelineState = useRobartState((state2) => state2.timelineState);
   const groups = Object.values(timelineState.groups);
+  const isEmpty = useRobartState((state2) => lastItemEnd(state2) === 0);
   const setTimelineScale = useRobartState((state2) => state2.setTimelineScale);
   const scrollerRef = reactExports.useRef(null);
   const zoomAnchor = reactExports.useRef();
@@ -146757,13 +146798,16 @@ const Timeline = () => {
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "overflow-y-auto", children: [
       /* @__PURE__ */ jsxs("div", { className: "flex flex-shrink-0 gap-2", children: [
-        /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2 pt-5", children: [
+        /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2", style: { paddingTop: lanesTop }, children: [
           groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupLabel, { group }, group.id)),
           /* @__PURE__ */ jsx("button", { className: "h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200", onClick: addNewGroup, children: "+ New group" })
         ] }),
-        /* @__PURE__ */ jsxs("div", { ref: scrollerRef, onScroll: updateLabelRange, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-5", children: [
-          groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group, labelRange }, group.id)),
-          /* @__PURE__ */ jsx(TimelineMarker, {})
+        /* @__PURE__ */ jsxs("div", { className: "relative w-full min-w-0", children: [
+          /* @__PURE__ */ jsxs("div", { ref: scrollerRef, onScroll: updateLabelRange, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto", style: { paddingTop: lanesTop }, children: [
+            groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group }, group.id)),
+            /* @__PURE__ */ jsx(TimelineMarker, { labelRange })
+          ] }),
+          isEmpty && /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center", style: { top: lanesTop }, children: /* @__PURE__ */ jsx("span", { className: "rounded-md border border-dashed border-gray-400 bg-white/85 px-3 py-1.5 text-sm font-medium text-gray-600", children: "Drag a block here to get started" }) })
         ] })
       ] }),
       /* @__PURE__ */ jsx(DroneEditor, {})
