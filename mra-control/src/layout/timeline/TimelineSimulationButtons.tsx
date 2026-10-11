@@ -1,8 +1,26 @@
-import {IconButton} from '@MRAControl/components/buttons/IconButton';
 import {useRobartState} from '@MRAControl/state/useRobartState';
 import {useSimulator} from '@MRAControl/state/useSimulator';
-import {faPause, faPlay, faSquare} from '@fortawesome/free-solid-svg-icons';
+import {faPause, faPlay, faSquare, type IconDefinition} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import clsx from 'clsx';
 import React, {useEffect} from 'react';
+
+// Compact, to fit the timeline's top-left corner (as tall as the ruler); they share its width
+const SimButton = ({icon, text, color, onClick, disabled}: {icon: IconDefinition; text: string; color: 'green' | 'red' | 'white'; onClick: () => void; disabled?: boolean}) => (
+	<button
+		className={clsx(
+			'flex h-full flex-1 items-center justify-center gap-1.5 rounded-md border text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50',
+			color === 'green' && 'border-transparent bg-green-700 text-white enabled:hover:bg-green-800',
+			color === 'red' && 'border-transparent bg-red-700 text-white hover:bg-red-800',
+			color === 'white' && 'border-gray-200 bg-white text-gray-900 hover:bg-gray-100',
+		)}
+		onClick={onClick}
+		disabled={disabled}
+	>
+		<FontAwesomeIcon icon={icon} className="h-2.5 w-2.5" />
+		{text}
+	</button>
+);
 
 export const TimelineSimulationButtons = () => {
 	const simulationStatus = useSimulator((state) => state.status);
@@ -32,10 +50,10 @@ export const TimelineSimulationButtons = () => {
 
 	return (
 		<>
-			{simulationStatus === 'RUNNING' && <IconButton icon={faPause} onClick={pause} text="Pause Sim" color="gray" />}
-			{simulationStatus === 'PAUSED' && <IconButton icon={faPlay} onClick={resume} text="Resume Sim" color="success" />}
-			{simulationStatus === 'STOPPED' && <IconButton icon={faPlay} onClick={play} text="Run Sim" color="success" disabled={!hasDrones} />}
-			{simulationStatus !== 'STOPPED' && <IconButton icon={faSquare} onClick={halt} text="Stop Sim" color="failure" />}
+			{simulationStatus === 'RUNNING' && <SimButton icon={faPause} onClick={pause} text="Pause" color="white" />}
+			{simulationStatus === 'PAUSED' && <SimButton icon={faPlay} onClick={resume} text="Resume" color="green" />}
+			{simulationStatus === 'STOPPED' && <SimButton icon={faPlay} onClick={play} text="Run" color="green" disabled={!hasDrones} />}
+			{simulationStatus !== 'STOPPED' && <SimButton icon={faSquare} onClick={halt} text="Stop" color="red" />}
 		</>
 	);
 };

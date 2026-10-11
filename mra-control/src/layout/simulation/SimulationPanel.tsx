@@ -2,6 +2,7 @@ import {Canvas} from '@react-three/fiber';
 
 import {Simulation} from './Simulation';
 import {SimulationWarnings} from './SimulationWarnings';
+import {SimulationSettings, SimulationTime} from '../timeline/SimulationOptions';
 import React from 'react';
 
 export const SimulationPanel = () => {
@@ -13,6 +14,8 @@ export const SimulationPanel = () => {
 			<Canvas dpr={[1, 2]}>
 				<Simulation />
 			</Canvas>
+			<SimulationSettings />
+			<SimulationTime />
 			<SimulationWarnings />
 		</div>
 	);

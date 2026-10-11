@@ -1,4 +1,4 @@
-import {lanesTop, TimelineMarker} from '@MRAControl/components/timeline/TimelineMarker';
+import {lanesTop, rulerHeight, TimelineMarker} from '@MRAControl/components/timeline/TimelineMarker';
 
 import {usePinch} from '@use-gesture/react';
 
@@ -8,7 +8,7 @@ import {TimelineGroupLabel} from '../../components/timeline/TimelineGroupLabel';
 import {useRobartState} from '../../state/useRobartState';
 import {nextGroupName} from '../../state/groupMigration';
 import {useSimulator} from '../../state/useSimulator';
-import {lastItemEnd, SimulationOptions} from './SimulationOptions';
+import {lastItemEnd} from './SimulationOptions';
 import {TimelineSimulationButtons} from './TimelineSimulationButtons';
 import React, {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
 
@@ -105,15 +105,13 @@ export const Timeline = () => {
 
 	return (
 		<div className="flex h-full w-full flex-col gap-2 rounded bg-blue-100">
-			<div className="flex items-center gap-3 pl-2 pt-2">
-				<TimelineSimulationButtons />
-				<SimulationOptions />
-			</div>
-
-			<div className="overflow-y-auto">
+			<div className="overflow-y-auto pt-2">
 				<div className="flex flex-shrink-0 gap-2">
-					{/* The same top padding on both columns (room for the ruler), so rows stay aligned */}
-					<div className="ml-2 flex h-full flex-col gap-2" style={{paddingTop: lanesTop}}>
+					{/* The sim buttons sit in the corner beside the ruler, as tall as it, so rows stay aligned */}
+					<div className="ml-2 flex h-full flex-col gap-2">
+						<div className="flex w-52 gap-1" style={{height: rulerHeight}}>
+							<TimelineSimulationButtons />
+						</div>
 						{groups.map((group) => (
 							<TimelineGroupLabel group={group} key={group.id} />
 						))}

@@ -9,8 +9,9 @@ import {convertPixelsToSeconds, convertSecondsToPixels, everyAtLeast, tickArea, 
 // Heights (px) of the ruler's rows; the scroll area's top padding (Timeline) is both plus the gap between lanes
 export const rulerNumbersHeight = 15;
 export const rulerScrubHeight = 10;
+export const rulerHeight = rulerNumbersHeight + rulerScrubHeight;
 // Where the lanes start: below the ruler and the same gap as between lanes (gap-2)
-export const lanesTop = rulerNumbersHeight + rulerScrubHeight + 8;
+export const lanesTop = rulerHeight + 8;
 const tickColor = '#334155';
 
 // The ruler above the lanes, as in Logic, and the playhead. The ruler's upper row holds the numbers, each just right of
