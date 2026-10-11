@@ -146370,7 +146370,7 @@ const TimelineGroupBody = ({ group }) => {
         backgroundRepeat: "no-repeat"
       },
       children: [
-        /* @__PURE__ */ jsx("div", { className: clsx("pointer-events-none absolute inset-y-0 right-0 bg-white/45", end2 > 0 ? "rounded-r" : "rounded"), style: { left: end2 > 0 ? timeToX(end2, scale) : 0 } }),
+        /* @__PURE__ */ jsx("div", { className: clsx("pointer-events-none absolute inset-y-0 right-0 bg-white/60", end2 > 0 ? "rounded-r" : "rounded"), style: { left: end2 > 0 ? timeToX(end2, scale) : 0 } }),
         allDronesItems.map((item) => {
           var _a4;
           return /* @__PURE__ */ jsx(
@@ -146401,8 +146401,9 @@ const TimelineGroupBody = ({ group }) => {
     }
   );
 };
-const rulerNumbersHeight = 15;
-const rulerScrubHeight = 10;
+const rulerNumbersHeight = 16;
+const rulerScrubHeight = 20;
+const handleSize = 12;
 const rulerHeight = rulerNumbersHeight + rulerScrubHeight;
 const lanesTop = rulerHeight + 8;
 const tickColor = "#334155";
@@ -146471,7 +146472,7 @@ const TimelineMarker = ({ labelRange }) => {
     end2 > 0 && /* @__PURE__ */ jsx(
       "div",
       {
-        className: "pointer-events-none absolute bottom-0 z-[5] w-0.5 -translate-x-1/2 bg-blue-900",
+        className: "pointer-events-none absolute bottom-0 z-[5] w-0.5 -translate-x-1/2 bg-blue-500",
         style: { left: timeToX(end2, scale), top: lanesTop }
       }
     ),
@@ -146480,9 +146481,9 @@ const TimelineMarker = ({ labelRange }) => {
       {
         ref: markerRef,
         className: "pointer-events-none absolute bottom-0 z-10 flex -translate-x-1/2 flex-col items-center",
-        style: { left: timeToX(time2, scale), top: rulerNumbersHeight },
+        style: { left: timeToX(time2, scale), top: rulerNumbersHeight + (rulerScrubHeight - handleSize) / 2 },
         children: [
-          /* @__PURE__ */ jsx("div", { ...bind(), className: "pointer-events-auto h-2.5 w-2.5 shrink-0 cursor-grab touch-none rounded-full bg-black" }),
+          /* @__PURE__ */ jsx("div", { ...bind(), className: "pointer-events-auto shrink-0 cursor-grab touch-none rounded-full bg-black", style: { width: handleSize, height: handleSize } }),
           /* @__PURE__ */ jsx("div", { className: "w-[3px] flex-1 bg-black" })
         ]
       }
@@ -146859,7 +146860,7 @@ const Timeline = () => {
         groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupLabel, { group }, group.id)),
         /* @__PURE__ */ jsx("button", { className: "h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200", onClick: addNewGroup, children: "+ New group" })
       ] }),
-      /* @__PURE__ */ jsxs("div", { className: "relative w-full min-w-0", children: [
+      /* @__PURE__ */ jsxs("div", { className: "relative w-full min-w-0 self-start", children: [
         /* @__PURE__ */ jsxs("div", { ref: scrollerRef, onScroll: updateLabelRange, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto", style: { paddingTop: lanesTop }, children: [
           groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupBody, { group }, group.id)),
           /* @__PURE__ */ jsx(TimelineMarker, { labelRange })
