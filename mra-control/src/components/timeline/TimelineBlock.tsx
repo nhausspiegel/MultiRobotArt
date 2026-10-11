@@ -3,8 +3,20 @@ import {blockColor, type TimelineItem, useRobartState} from '@MRAControl/state/u
 import {useDrag} from '@use-gesture/react';
 import clsx from 'clsx';
 import React, {useState} from 'react';
+import {create} from 'zustand';
 
 import {blockOverlaps, convertPixelsToSeconds, laneOccupiedItems, minItemWidth, pixelsPerSecond, timeToX} from './TimelineGroupBody';
+
+// The timeline item being dragged, where it would land: read by what follows it before the drop (the show's end line,
+// and All drones' busy stripes on the other lanes)
+export const useItemDrag = create<{drag?: {itemId: string; laneId: string; startTime: number}}>(() => ({}));
+
+// The show's end, following a dragged item
+export const useShowEnd = () => {
+	const drag = useItemDrag((state) => state.drag);
+	return useRobartState((state) => Math.max(0, ...Object.values(state.timelineState.groups).flatMap((group) =>
+		Object.values(group.items).map((item) => (item.id === drag?.itemId ? drag.startTime : item.startTime) + item.duration))));
+};
 
 export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}) => {
 	const blockName = useRobartState((state) => state.blocks[item.blockId]?.name);
@@ -31,10 +43,12 @@ export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}
 
 		if (active) {
 			setDrag({x: mx, y: my, valid});
+			useItemDrag.setState({drag: {itemId: item.id, laneId, startTime}});
 			return;
 		}
 
 		setDrag(undefined);
+		useItemDrag.setState({drag: undefined});
 		if (!valid) return; // Snaps back
 		if (laneId === item.groupId) updateItem(item.groupId, item.id, startTime);
 		else moveItem(item.groupId, item.id, laneId, startTime);

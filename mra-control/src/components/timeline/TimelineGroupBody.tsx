@@ -9,7 +9,7 @@ import {allDronesGroupId} from '../../state/groupMigration';
 import {type MRAState, type TimelineGroupState, type TimelineItem, useRobartState} from '../../state/useRobartState';
 import {lastItemEnd} from '../../layout/timeline/SimulationOptions';
 import {HoverTimelineBlock} from './HoverTimelineBlock';
-import {TimelineBlock} from './TimelineBlock';
+import {TimelineBlock, useItemDrag, useShowEnd} from './TimelineBlock';
 import React from 'react';
 
 type TimelineGroupProps = {
@@ -100,11 +100,15 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 	// The same for every lane, so they line up
 	const length = useRobartState(timelineLength);
 	// Where the show ends: the room after it is faded (all of it on an empty timeline)
-	const end = useRobartState(lastItemEnd);
+	const end = useShowEnd();
+	const drag = useItemDrag((state) => state.drag);
 	const groups = useRobartState((state) => state.timelineState.groups);
 	const occupiedItems = laneOccupiedItems(groups, group.id);
-	// Shown greyed out on group lanes: time these drones are already busy
-	const allDronesItems = group.id === allDronesGroupId ? [] : Object.values(groups[allDronesGroupId]?.items ?? {});
+	// Shown greyed out on group lanes: time these drones are already busy. Follows an All drones item while it's dragged
+	// (and one dragged onto All drones, or away from it).
+	const allDronesItems = group.id === allDronesGroupId ? [] : Object.values(groups).flatMap((lane) => Object.values(lane.items))
+		.filter((item) => (item.id === drag?.itemId ? drag.laneId === allDronesGroupId : item.groupId === allDronesGroupId))
+		.map((item) => (item.id === drag?.itemId ? {...item, startTime: drag.startTime} : item));
 
 	// Pointer x while a block from the block list is dragged over this lane
 	const [hoverX, setHoverX] = useState<number | undefined>();

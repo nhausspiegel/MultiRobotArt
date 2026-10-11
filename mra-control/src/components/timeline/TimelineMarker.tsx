@@ -1,9 +1,10 @@
-import {lastItemEnd, useShowLength} from '@MRAControl/layout/timeline/SimulationOptions';
+import {useShowLength} from '@MRAControl/layout/timeline/SimulationOptions';
 import {useRobartState} from '@MRAControl/state/useRobartState';
 import {useSimulator} from '@MRAControl/state/useSimulator';
 import {useDrag} from '@use-gesture/react';
 import React, {useRef} from 'react';
 
+import {useShowEnd} from './TimelineBlock';
 import {convertPixelsToSeconds, convertSecondsToPixels, everyAtLeast, tickArea, tickLayer, tickSpacing, timelineLength, timelineStartPadding, timeToX} from './TimelineGroupBody';
 
 // Heights (px) of the ruler's rows; the scroll area's top padding (Timeline) is both plus the gap between lanes
@@ -25,7 +26,7 @@ export const TimelineMarker = ({labelRange}: {labelRange: [number, number]}) => 
 	const scale = useRobartState((state) => state.timelineState.scale);
 	const showLength = useShowLength();
 	const length = useRobartState(timelineLength);
-	const end = useRobartState(lastItemEnd);
+	const end = useShowEnd();
 	const markerRef = useRef<HTMLDivElement>(null);
 
 	// On press too, so a click jumps
