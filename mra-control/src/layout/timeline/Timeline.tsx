@@ -1,4 +1,4 @@
-import {TimelineMarker} from '@MRAControl/components/timeline/TimelineMarker';
+import {lanesTop, TimelineMarker} from '@MRAControl/components/timeline/TimelineMarker';
 
 import {usePinch} from '@use-gesture/react';
 
@@ -8,7 +8,7 @@ import {TimelineGroupLabel} from '../../components/timeline/TimelineGroupLabel';
 import {useRobartState} from '../../state/useRobartState';
 import {nextGroupName} from '../../state/groupMigration';
 import {useSimulator} from '../../state/useSimulator';
-import {SimulationOptions} from './SimulationOptions';
+import {lastItemEnd, SimulationOptions} from './SimulationOptions';
 import {TimelineSimulationButtons} from './TimelineSimulationButtons';
 import React, {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
 
@@ -23,6 +23,7 @@ const maxScale = 10;
 export const Timeline = () => {
 	const timelineState = useRobartState((state) => state.timelineState);
 	const groups = Object.values(timelineState.groups);
+	const isEmpty = useRobartState((state) => lastItemEnd(state) === 0);
 	const setTimelineScale = useRobartState((state) => state.setTimelineScale);
 
 	// Pinch to zoom, keeping the time under the fingers in place
@@ -111,9 +112,8 @@ export const Timeline = () => {
 
 			<div className="overflow-y-auto">
 				<div className="flex flex-shrink-0 gap-2">
-					{/* pt-5 on both columns: room above the lanes for the ruler (h-3) plus the gap between lanes (gap-2), so rows stay
-					    aligned */}
-					<div className="ml-2 flex h-full flex-col gap-2 pt-5">
+					{/* The same top padding on both columns (room for the ruler), so rows stay aligned */}
+					<div className="ml-2 flex h-full flex-col gap-2" style={{paddingTop: lanesTop}}>
 						{groups.map((group) => (
 							<TimelineGroupLabel group={group} key={group.id} />
 						))}
@@ -121,12 +121,22 @@ export const Timeline = () => {
 							+ New group
 						</button>
 					</div>
-					<div ref={scrollerRef} onScroll={updateLabelRange} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto pt-5">
-						{groups.map((group) => (
-							<TimelineGroupBody group={group} labelRange={labelRange} key={group.id} />
-						))}
+					<div className="relative w-full min-w-0">
+						<div ref={scrollerRef} onScroll={updateLabelRange} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto" style={{paddingTop: lanesTop}}>
+							{groups.map((group) => (
+								<TimelineGroupBody group={group} key={group.id} />
+							))}
 
-						<TimelineMarker />
+							<TimelineMarker labelRange={labelRange} />
+						</div>
+						{/* Over the lanes, outside the scroll area so it stays centered in view */}
+						{isEmpty && (
+							<div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center" style={{top: lanesTop}}>
+								<span className="rounded-md border border-dashed border-gray-400 bg-white/85 px-3 py-1.5 text-sm font-medium text-gray-600">
+									Drag a block here to get started
+								</span>
+							</div>
+						)}
 					</div>
 				</div>
 				<DroneEditor />

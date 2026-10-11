@@ -14,39 +14,33 @@ import React from 'react';
 
 type TimelineGroupProps = {
 	group: TimelineGroupState;
-	// Times (s) to draw second labels between: only near what's visible (see Timeline)
-	labelRange: [number, number];
 };
 
 export const pixelsPerSecond = 100;
 // Lanes reach this far past the last block (s), and are at least minTimelineLength long, so there's always room to add more
 const roomAfterLastBlock = 30;
 const minTimelineLength = 120;
-// Seconds between labels and between major ticks, when that many seconds are far enough apart (px)
+// Seconds between ruler numbers and between major ticks, when that many seconds are far enough apart (px)
 const roundSeconds = [1, 2, 5, 10, 15, 30, 60];
-const everyAtLeast = (secondWidth: number, minWidth: number) => roundSeconds.find((seconds) => seconds * secondWidth >= minWidth) ?? 60;
+export const everyAtLeast = (secondWidth: number, minWidth: number) => roundSeconds.find((seconds) => seconds * secondWidth >= minWidth) ?? 60;
 
 /**
- * Tick marks as a repeating background, not elements: thousands of tick elements made zooming slow. A major tick every
- * second, or every few seconds when zoomed out (every second merged into a black band); 2, 4 or 8 subdivision ticks
- * per second when they stay far enough apart. Heights are how far down each kind reaches. Each layer is one repeating
- * gradient placed from time 0 onward (a tiled image would also repeat backwards into the start padding).
+ * Tick spacing (px): a major tick every second, or every few seconds when zoomed out (every second merged into a black
+ * band); 2, 4 or 8 minor ticks per second when they stay far enough apart (none otherwise).
  */
-const tickBackground = (scale: number, majorHeight: string, minorHeight: string) => {
+export const tickSpacing = (scale: number) => {
 	const secondWidth = convertSecondsToPixels(1, scale);
-	const majorWidth = everyAtLeast(secondWidth, 10) * secondWidth;
-	const subdivisions = majorWidth === secondWidth ? [8, 4, 2].find((perSecond) => secondWidth / perSecond >= 12) : undefined;
-	const ticks = (spacing: number) => `repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px ${spacing}px)`;
-	const area = `calc(100% - ${timelineStartPadding}px)`;
-	const layers = [{image: ticks(majorWidth), height: majorHeight}];
-	if (subdivisions) layers.push({image: ticks(secondWidth / subdivisions), height: minorHeight});
-	return {
-		backgroundImage: layers.map((layer) => layer.image).join(', '),
-		backgroundSize: layers.map((layer) => `${area} ${layer.height}`).join(', '),
-		backgroundPosition: `${timelineStartPadding}px 0`,
-		backgroundRepeat: 'no-repeat',
-	};
+	const major = everyAtLeast(secondWidth, 10) * secondWidth;
+	const perSecond = major === secondWidth ? [8, 4, 2].find((count) => secondWidth / count >= 12) : undefined;
+	return {major, minor: perSecond ? secondWidth / perSecond : undefined};
 };
+
+/**
+ * Ticks as repeating backgrounds, not elements: thousands of tick elements made zooming slow. Each is one repeating
+ * gradient from time 0 onward (a tiled image would also repeat backwards into the start padding).
+ */
+export const tickLayer = (spacing: number, color: string, width: number) =>
+	`repeating-linear-gradient(to right, ${color} 0 ${width}px, transparent ${width}px ${spacing}px)`;
 
 // Length of every lane (s)
 export const timelineLength = (state: Pick<MRAState, 'timelineState'>) => Math.max(minTimelineLength, lastItemEnd(state) + roomAfterLastBlock);
@@ -63,6 +57,8 @@ export const convertSecondsToPixels = (duration: number, scale: number) => {
 
 // Time 0 starts this far into each lane, so the "0" label can be centered on its tick without being cut off
 export const timelineStartPadding = 12;
+// Ticks are drawn across the lane after the start padding
+export const tickArea = `calc(100% - ${timelineStartPadding}px)`;
 
 // x of a time within a lane, and within the timeline's scroll area (lanes start at its left edge)
 export const timeToX = (seconds: number, scale: number) => timelineStartPadding + convertSecondsToPixels(seconds, scale);
@@ -96,13 +92,15 @@ export const laneOccupiedItems = (groups: Record<string, TimelineGroupState>, la
 	? Object.values(groups).flatMap((group) => Object.values(group.items))
 	: [...Object.values(groups[laneId]?.items ?? {}), ...Object.values(groups[allDronesGroupId]?.items ?? {})]);
 
-export const TimelineGroupBody = ({group, labelRange}: TimelineGroupProps) => {
+export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 	const addBlockToTimeline = useRobartState((state) => state.addBlockToTimeline);
 	const selectedBlockId = useRobartState((state) => state.editingBlockId);
 	const blocks = useRobartState((state) => state.blocks);
 	const scale = useRobartState((state) => state.timelineState.scale);
 	// The same for every lane, so they line up
 	const length = useRobartState(timelineLength);
+	// Where the show ends: the room after it is faded (all of it on an empty timeline)
+	const end = useRobartState(lastItemEnd);
 	const groups = useRobartState((state) => state.timelineState.groups);
 	const occupiedItems = laneOccupiedItems(groups, group.id);
 	// Shown greyed out on group lanes: time these drones are already busy
@@ -164,10 +162,8 @@ export const TimelineGroupBody = ({group, labelRange}: TimelineGroupProps) => {
 		}
 	};
 
-	// Labels only when far enough apart to read, and only near what's visible
-	const labelEvery = everyAtLeast(convertSecondsToPixels(1, scale), 32);
-	const firstLabel = Math.max(0, Math.floor(labelRange[0] / labelEvery));
-	const labelCount = Math.max(0, Math.min(Math.ceil(length / labelEvery), Math.ceil(labelRange[1] / labelEvery)) - firstLabel);
+	// Faint full-height lines at the finest tick spacing; the numbers and major ticks are on the ruler
+	const {major, minor} = tickSpacing(scale);
 
 	return (
 		<div
@@ -180,16 +176,14 @@ export const TimelineGroupBody = ({group, labelRange}: TimelineGroupProps) => {
 			onDrop={handleDrop}
 			style={{
 				width: `${timeToX(length, scale)}px`,
-				...tickBackground(scale, '25%', '16.67%'),
+				backgroundImage: tickLayer(minor ?? major, 'rgb(30 58 138 / 0.14)', 1),
+				backgroundSize: `${tickArea} 100%`,
+				backgroundPosition: `${timelineStartPadding}px 0`,
+				backgroundRepeat: 'no-repeat',
 			}}
 		>
-			{/* No second labels on a collapsed lane: no room */}
-			{!group.collapsed && [...new Array(labelCount)].map((_, i) => (firstLabel + i) * labelEvery).map((seconds) => (
-				// Centered on their ticks
-				<span key={seconds} className="absolute top-1/4 -translate-x-1/2" style={{left: timeToX(seconds, scale)}}>
-					{seconds}
-				</span>
-			))}
+			{/* After the end of the show, faded; still takes drops */}
+			<div className={clsx('pointer-events-none absolute inset-y-0 right-0 bg-white/45', end > 0 ? 'rounded-r' : 'rounded')} style={{left: end > 0 ? timeToX(end, scale) : 0}} />
 			{allDronesItems.map((item) => (
 				<div
 					key={`all-drones-${item.id}`}
