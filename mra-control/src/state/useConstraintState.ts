@@ -4,7 +4,12 @@ import * as THREE from 'three';
 import {create} from 'zustand';
 import {subscribeWithSelector} from 'zustand/middleware';
 import {immer} from 'zustand/middleware/immer';
-import {defaultLimits, useRobartState} from './useRobartState';
+import {defaultLimits, type Limits, useRobartState} from './useRobartState';
+
+// The work area from Settings, with 1 cm leeway so a robot resting on the floor (z = 0) counts as inside; undefined when
+// the check is off. Shared by the warning and the red hitbox.
+export const workAreaBox = ({workAreaOn, workAreaMin, workAreaMax}: Limits = useRobartState.getState().limits ?? defaultLimits) =>
+	(workAreaOn ? new THREE.Box3(new THREE.Vector3(...workAreaMin), new THREE.Vector3(...workAreaMax)).expandByScalar(0.01) : undefined);
 
 type ConstraintViolation = 'velocity' | 'acceleration' | 'workspace';
 
@@ -102,10 +107,8 @@ export const useCrazyflieConstraintState = create<ConstraintState>()(
 			checkKinematicConstraints(robotIDs: string[]) {
 				const history = get().positionHistory as PositionHistory;
 				if (history.length > 0) {
-					// Work area from Settings, with 1 cm leeway so a robot resting on the floor (z = 0) counts as inside
-					const {workAreaOn, workAreaMin, workAreaMax} = useRobartState.getState().limits ?? defaultLimits;
-					if (!workAreaOn) return [];
-					const workArea = new THREE.Box3(new THREE.Vector3(...workAreaMin), new THREE.Vector3(...workAreaMax)).expandByScalar(0.01);
+					const workArea = workAreaBox();
+					if (!workArea) return [];
 					let warnings: ConstraintWarning[] = [];
 
 					// Check workspace bounds
