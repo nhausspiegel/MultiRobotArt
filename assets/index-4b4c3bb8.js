@@ -146197,69 +146197,6 @@ const HoverTimelineBlock = ({ scale, startTime, cannotDrop }) => {
     }
   );
 };
-const TimelineBlock = ({ item, scale }) => {
-  const blockName = useRobartState((state2) => {
-    var _a3;
-    return (_a3 = state2.blocks[item.blockId]) == null ? void 0 : _a3.name;
-  });
-  const color = useRobartState((state2) => state2.blocks[item.blockId] ? blockColor(state2.blocks[item.blockId]) : void 0);
-  const removeItem = useRobartState((state2) => state2.removeTimelineItem);
-  const updateItem = useRobartState((state2) => state2.updateBlockInTimeline);
-  const moveItem = useRobartState((state2) => state2.moveTimelineItem);
-  const [drag, setDrag] = reactExports.useState();
-  const bind = useDrag(({ active, tap, movement: [mx, my], xy: [x2, y2] }) => {
-    var _a3;
-    if (tap)
-      return;
-    const { groups } = useRobartState.getState().timelineState;
-    const laneId = document.elementsFromPoint(x2, y2).map((element) => {
-      var _a4;
-      return (_a4 = element.dataset) == null ? void 0 : _a4.laneId;
-    }).find(Boolean) ?? item.groupId;
-    const startTime = Math.max(0, item.startTime + convertPixelsToSeconds(mx, scale));
-    const laneHasDrones = Object.keys(((_a3 = groups[laneId]) == null ? void 0 : _a3.robots) ?? {}).length > 0;
-    const valid = (laneId === item.groupId || laneHasDrones) && !blockOverlaps(laneOccupiedItems(groups, laneId), startTime, item.duration, item.id);
-    if (active) {
-      setDrag({ x: mx, y: my, valid });
-      return;
-    }
-    setDrag(void 0);
-    if (!valid)
-      return;
-    if (laneId === item.groupId)
-      updateItem(item.groupId, item.id, startTime);
-    else
-      moveItem(item.groupId, item.id, laneId, startTime);
-  }, { pointer: { keys: false }, filterTaps: true });
-  return /* @__PURE__ */ jsx(
-    "div",
-    {
-      tabIndex: 0,
-      className: clsx(
-        "absolute top-1/2 flex h-5/6 -translate-y-1/2 cursor-move items-center justify-center rounded-xl border border-black/15 touch-none select-none focus:outline-none focus:ring-2 focus:ring-indigo-600",
-        drag && !drag.valid && "bg-red-400"
-      ),
-      style: {
-        backgroundColor: drag && !drag.valid ? void 0 : color,
-        width: pixelsPerSecond * scale * item.duration,
-        minWidth: minItemWidth,
-        left: timeToX(item.startTime, scale),
-        // Replaces the class's -50% y translate while dragging, so keep it
-        transform: drag ? `translate(${drag.x}px, calc(-50% + ${drag.y}px))` : void 0,
-        zIndex: drag ? 20 : void 0
-      },
-      onKeyDown: (e2) => {
-        if (e2.key !== "Delete" && e2.key !== "Backspace")
-          return;
-        e2.preventDefault();
-        e2.stopPropagation();
-        removeItem(item.groupId, item.id);
-      },
-      ...bind(),
-      children: /* @__PURE__ */ jsx("span", { className: "block overflow-hidden text-ellipsis whitespace-nowrap", children: blockName })
-    }
-  );
-};
 const pixelsPerSecond = 100;
 const roomAfterLastBlock = 30;
 const minTimelineLength = 120;
@@ -146300,16 +146237,17 @@ const laneOccupiedItems = (groups, laneId) => {
   return laneId === allDronesGroupId ? Object.values(groups).flatMap((group) => Object.values(group.items)) : [...Object.values(((_a3 = groups[laneId]) == null ? void 0 : _a3.items) ?? {}), ...Object.values(((_b2 = groups[allDronesGroupId]) == null ? void 0 : _b2.items) ?? {})];
 };
 const TimelineGroupBody = ({ group }) => {
-  var _a3, _b2;
+  var _a3;
   const addBlockToTimeline = useRobartState((state2) => state2.addBlockToTimeline);
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
   const blocks = useRobartState((state2) => state2.blocks);
   const scale = useRobartState((state2) => state2.timelineState.scale);
   const length = useRobartState(timelineLength);
-  const end2 = useRobartState(lastItemEnd);
+  const end2 = useShowEnd();
+  const drag = useItemDrag((state2) => state2.drag);
   const groups = useRobartState((state2) => state2.timelineState.groups);
   const occupiedItems = laneOccupiedItems(groups, group.id);
-  const allDronesItems = group.id === allDronesGroupId ? [] : Object.values(((_a3 = groups[allDronesGroupId]) == null ? void 0 : _a3.items) ?? {});
+  const allDronesItems = group.id === allDronesGroupId ? [] : Object.values(groups).flatMap((lane) => Object.values(lane.items)).filter((item) => item.id === (drag == null ? void 0 : drag.itemId) ? drag.laneId === allDronesGroupId : item.groupId === allDronesGroupId).map((item) => item.id === (drag == null ? void 0 : drag.itemId) ? { ...item, startTime: drag.startTime } : item);
   const [hoverX, setHoverX] = reactExports.useState();
   const laneBodyRef = reactExports.useRef(null);
   const hasDrones = Object.keys(group.robots).length > 0;
@@ -146398,10 +146336,80 @@ const TimelineGroupBody = ({ group }) => {
           {
             scale,
             startTime: computeTimelineBlockOffset(hoverX, selectedBlockId),
-            cannotDrop: !hasDrones || isEmptyBlock(selectedBlockId) || blockOverlaps(occupiedItems, computeTimelineBlockOffset(hoverX, selectedBlockId), ((_b2 = blocks[selectedBlockId ?? ""]) == null ? void 0 : _b2.duration) ?? 0)
+            cannotDrop: !hasDrones || isEmptyBlock(selectedBlockId) || blockOverlaps(occupiedItems, computeTimelineBlockOffset(hoverX, selectedBlockId), ((_a3 = blocks[selectedBlockId ?? ""]) == null ? void 0 : _a3.duration) ?? 0)
           }
         )
       ]
+    }
+  );
+};
+const useItemDrag = create$2(() => ({}));
+const useShowEnd = () => {
+  const drag = useItemDrag((state2) => state2.drag);
+  return useRobartState((state2) => Math.max(0, ...Object.values(state2.timelineState.groups).flatMap((group) => Object.values(group.items).map((item) => (item.id === (drag == null ? void 0 : drag.itemId) ? drag.startTime : item.startTime) + item.duration))));
+};
+const TimelineBlock = ({ item, scale }) => {
+  const blockName = useRobartState((state2) => {
+    var _a3;
+    return (_a3 = state2.blocks[item.blockId]) == null ? void 0 : _a3.name;
+  });
+  const color = useRobartState((state2) => state2.blocks[item.blockId] ? blockColor(state2.blocks[item.blockId]) : void 0);
+  const removeItem = useRobartState((state2) => state2.removeTimelineItem);
+  const updateItem = useRobartState((state2) => state2.updateBlockInTimeline);
+  const moveItem = useRobartState((state2) => state2.moveTimelineItem);
+  const [drag, setDrag] = reactExports.useState();
+  const bind = useDrag(({ active, tap, movement: [mx, my], xy: [x2, y2] }) => {
+    var _a3;
+    if (tap)
+      return;
+    const { groups } = useRobartState.getState().timelineState;
+    const laneId = document.elementsFromPoint(x2, y2).map((element) => {
+      var _a4;
+      return (_a4 = element.dataset) == null ? void 0 : _a4.laneId;
+    }).find(Boolean) ?? item.groupId;
+    const startTime = Math.max(0, item.startTime + convertPixelsToSeconds(mx, scale));
+    const laneHasDrones = Object.keys(((_a3 = groups[laneId]) == null ? void 0 : _a3.robots) ?? {}).length > 0;
+    const valid = (laneId === item.groupId || laneHasDrones) && !blockOverlaps(laneOccupiedItems(groups, laneId), startTime, item.duration, item.id);
+    if (active) {
+      setDrag({ x: mx, y: my, valid });
+      useItemDrag.setState({ drag: { itemId: item.id, laneId, startTime } });
+      return;
+    }
+    setDrag(void 0);
+    useItemDrag.setState({ drag: void 0 });
+    if (!valid)
+      return;
+    if (laneId === item.groupId)
+      updateItem(item.groupId, item.id, startTime);
+    else
+      moveItem(item.groupId, item.id, laneId, startTime);
+  }, { pointer: { keys: false }, filterTaps: true });
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      tabIndex: 0,
+      className: clsx(
+        "absolute top-1/2 flex h-5/6 -translate-y-1/2 cursor-move items-center justify-center rounded-xl border border-black/15 touch-none select-none focus:outline-none focus:ring-2 focus:ring-indigo-600",
+        drag && !drag.valid && "bg-red-400"
+      ),
+      style: {
+        backgroundColor: drag && !drag.valid ? void 0 : color,
+        width: pixelsPerSecond * scale * item.duration,
+        minWidth: minItemWidth,
+        left: timeToX(item.startTime, scale),
+        // Replaces the class's -50% y translate while dragging, so keep it
+        transform: drag ? `translate(${drag.x}px, calc(-50% + ${drag.y}px))` : void 0,
+        zIndex: drag ? 20 : void 0
+      },
+      onKeyDown: (e2) => {
+        if (e2.key !== "Delete" && e2.key !== "Backspace")
+          return;
+        e2.preventDefault();
+        e2.stopPropagation();
+        removeItem(item.groupId, item.id);
+      },
+      ...bind(),
+      children: /* @__PURE__ */ jsx("span", { className: "block overflow-hidden text-ellipsis whitespace-nowrap", children: blockName })
     }
   );
 };
@@ -146417,7 +146425,7 @@ const TimelineMarker = ({ labelRange }) => {
   const scale = useRobartState((state2) => state2.timelineState.scale);
   const showLength = useShowLength();
   const length = useRobartState(timelineLength);
-  const end2 = useRobartState(lastItemEnd);
+  const end2 = useShowEnd();
   const markerRef = reactExports.useRef(null);
   const bind = useDrag(({ xy: [x2] }) => {
     var _a3;
