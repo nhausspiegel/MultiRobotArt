@@ -146439,9 +146439,9 @@ const TimelineMarker = ({ labelRange }) => {
   const { major, minor } = tickSpacing(scale);
   const numberEvery = everyAtLeast(convertSecondsToPixels(1, scale), 48);
   const firstNumber = Math.max(0, Math.floor(labelRange[0] / numberEvery));
-  const numberCount = end2 === 0 ? 0 : Math.max(0, Math.min(Math.ceil(length / numberEvery), Math.ceil(labelRange[1] / numberEvery)) - firstNumber);
+  const numberCount = Math.max(0, Math.min(Math.ceil(length / numberEvery), Math.ceil(labelRange[1] / numberEvery)) - firstNumber);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    end2 > 0 && /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsx(
       "div",
       {
         className: "pointer-events-none absolute left-0 top-0",
