@@ -40,35 +40,33 @@ export const TimelineMarker = ({labelRange}: {labelRange: [number, number]}) => 
 
 	const width = timeToX(length, scale);
 	const {major, minor} = tickSpacing(scale);
-	// Numbers far enough apart to read, and only near what's visible (see Timeline); none on an empty timeline
+	// Numbers far enough apart to read, and only near what's visible (see Timeline)
 	const numberEvery = everyAtLeast(convertSecondsToPixels(1, scale), 48);
 	const firstNumber = Math.max(0, Math.floor(labelRange[0] / numberEvery));
-	const numberCount = end === 0 ? 0 : Math.max(0, Math.min(Math.ceil(length / numberEvery), Math.ceil(labelRange[1] / numberEvery)) - firstNumber);
+	const numberCount = Math.max(0, Math.min(Math.ceil(length / numberEvery), Math.ceil(labelRange[1] / numberEvery)) - firstNumber);
 
 	return (<>
-		{end > 0 && (
-			<div
-				className="pointer-events-none absolute left-0 top-0"
-				style={{
-					width,
-					height: rulerNumbersHeight,
-					backgroundImage: tickLayer(convertSecondsToPixels(numberEvery, scale), tickColor, 1.5),
-					backgroundSize: `${tickArea} 100%`,
-					backgroundPosition: `${timelineStartPadding}px 0`,
-					backgroundRepeat: 'no-repeat',
-				}}
-			>
-				{[...new Array(numberCount)].map((_, i) => (firstNumber + i) * numberEvery).map((seconds) => (
-					<span
-						key={seconds}
-						className="absolute top-0 text-[11px] tabular-nums text-slate-700"
-						style={{left: timeToX(seconds, scale) + 4, lineHeight: `${rulerNumbersHeight}px`}}
-					>
-						{seconds}
-					</span>
-				))}
-			</div>
-		)}
+		<div
+			className="pointer-events-none absolute left-0 top-0"
+			style={{
+				width,
+				height: rulerNumbersHeight,
+				backgroundImage: tickLayer(convertSecondsToPixels(numberEvery, scale), tickColor, 1.5),
+				backgroundSize: `${tickArea} 100%`,
+				backgroundPosition: `${timelineStartPadding}px 0`,
+				backgroundRepeat: 'no-repeat',
+			}}
+		>
+			{[...new Array(numberCount)].map((_, i) => (firstNumber + i) * numberEvery).map((seconds) => (
+				<span
+					key={seconds}
+					className="absolute top-0 text-[11px] tabular-nums text-slate-700"
+					style={{left: timeToX(seconds, scale) + 4, lineHeight: `${rulerNumbersHeight}px`}}
+				>
+					{seconds}
+				</span>
+			))}
+		</div>
 		<div
 			{...bind()}
 			className="absolute left-0 cursor-pointer touch-none rounded-sm bg-blue-200/90"
