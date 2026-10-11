@@ -119,7 +119,9 @@ export const Timeline = () => {
 							+ New group
 						</button>
 					</div>
-					<div className="relative w-full min-w-0">
+					{/* self-start: stretched to the label column's height (it also holds + New group), lines drawn to the bottom
+					    of the lanes ran past the last one */}
+					<div className="relative w-full min-w-0 self-start">
 						<div ref={scrollerRef} onScroll={updateLabelRange} className="relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto" style={{paddingTop: lanesTop}}>
 							{groups.map((group) => (
 								<TimelineGroupBody group={group} key={group.id} />

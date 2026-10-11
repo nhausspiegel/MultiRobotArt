@@ -7,8 +7,10 @@ import React, {useRef} from 'react';
 import {convertPixelsToSeconds, convertSecondsToPixels, everyAtLeast, tickArea, tickLayer, tickSpacing, timelineLength, timelineStartPadding, timeToX} from './TimelineGroupBody';
 
 // Heights (px) of the ruler's rows; the scroll area's top padding (Timeline) is both plus the gap between lanes
-export const rulerNumbersHeight = 15;
-export const rulerScrubHeight = 10;
+export const rulerNumbersHeight = 16;
+export const rulerScrubHeight = 20;
+// The playhead's round handle, centered in the scrub row
+const handleSize = 12;
 export const rulerHeight = rulerNumbersHeight + rulerScrubHeight;
 // Where the lanes start: below the ruler and the same gap as between lanes (gap-2)
 export const lanesTop = rulerHeight + 8;
@@ -82,16 +84,16 @@ export const TimelineMarker = ({labelRange}: {labelRange: [number, number]}) => 
 		/>
 		{end > 0 && (
 			<div
-				className="pointer-events-none absolute bottom-0 z-[5] w-0.5 -translate-x-1/2 bg-blue-900"
+				className="pointer-events-none absolute bottom-0 z-[5] w-0.5 -translate-x-1/2 bg-blue-500"
 				style={{left: timeToX(end, scale), top: lanesTop}}
 			/>
 		)}
 		<div
 			ref={markerRef}
 			className="pointer-events-none absolute bottom-0 z-10 flex -translate-x-1/2 flex-col items-center"
-			style={{left: timeToX(time, scale), top: rulerNumbersHeight}}
+			style={{left: timeToX(time, scale), top: rulerNumbersHeight + ((rulerScrubHeight - handleSize) / 2)}}
 		>
-			<div {...bind()} className="pointer-events-auto h-2.5 w-2.5 shrink-0 cursor-grab touch-none rounded-full bg-black" />
+			<div {...bind()} className="pointer-events-auto shrink-0 cursor-grab touch-none rounded-full bg-black" style={{width: handleSize, height: handleSize}} />
 			<div className="w-[3px] flex-1 bg-black" />
 		</div>
 	</>);

@@ -183,7 +183,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 			}}
 		>
 			{/* After the end of the show, faded; still takes drops */}
-			<div className={clsx('pointer-events-none absolute inset-y-0 right-0 bg-white/45', end > 0 ? 'rounded-r' : 'rounded')} style={{left: end > 0 ? timeToX(end, scale) : 0}} />
+			<div className={clsx('pointer-events-none absolute inset-y-0 right-0 bg-white/60', end > 0 ? 'rounded-r' : 'rounded')} style={{left: end > 0 ? timeToX(end, scale) : 0}} />
 			{allDronesItems.map((item) => (
 				<div
 					key={`all-drones-${item.id}`}
