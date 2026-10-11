@@ -84,8 +84,9 @@ export const TimelineMarker = ({labelRange}: {labelRange: [number, number]}) => 
 		/>
 		{end > 0 && (
 			<div
-				className="pointer-events-none absolute bottom-0 z-[5] w-0.5 -translate-x-1/2 bg-blue-500"
-				style={{left: timeToX(end, scale), top: lanesTop}}
+				className="pointer-events-none absolute bottom-0 z-[5] w-0.5 bg-blue-500"
+				// 1 px clear of the last block's right edge
+				style={{left: timeToX(end, scale) + 1, top: lanesTop}}
 			/>
 		)}
 		<div
