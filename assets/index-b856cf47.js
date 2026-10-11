@@ -81566,6 +81566,7 @@ const SIM = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty(
   toRadians,
   translateTrajectory
 }, Symbol.toStringTag, { value: "Module" }));
+const workAreaBox = ({ workAreaOn, workAreaMin, workAreaMax } = useRobartState.getState().limits ?? defaultLimits) => workAreaOn ? new Box3(new Vector3(...workAreaMin), new Vector3(...workAreaMax)).expandByScalar(0.01) : void 0;
 const useCrazyflieConstraintState = create$2()(
   subscribeWithSelector(
     immer((set2, get2) => ({
@@ -81623,10 +81624,9 @@ const useCrazyflieConstraintState = create$2()(
       checkKinematicConstraints(robotIDs) {
         const history2 = get2().positionHistory;
         if (history2.length > 0) {
-          const { workAreaOn, workAreaMin, workAreaMax } = useRobartState.getState().limits ?? defaultLimits;
-          if (!workAreaOn)
+          const workArea = workAreaBox();
+          if (!workArea)
             return [];
-          const workArea = new Box3(new Vector3(...workAreaMin), new Vector3(...workAreaMax)).expandByScalar(0.01);
           let warnings = [];
           robotIDs.forEach((id2) => {
             var _a3, _b2;
@@ -121082,14 +121082,16 @@ const Sky = /* @__PURE__ */ reactExports.forwardRef(({
   }, props));
 });
 function Crazyflie({ robotId: robotId2, renderBoundingBox }) {
+  var _a3;
   const checkCollisions = useSimulator((state2) => state2.checkCollisions);
   const robot = useRobartState((state2) => state2.robots[robotId2]);
   const simRobot = useSimulator((state2) => state2.robots[robotId2]);
   const showCoordinates = useSimulator((state2) => state2.showCoordinates);
   const groupColor = useRobartState((state2) => {
-    var _a3;
-    return ((_a3 = Object.values(state2.timelineState.groups).find((group2) => group2.id !== allDronesGroupId && robotId2 in group2.robots)) == null ? void 0 : _a3.color) ?? "#9ca3af";
+    var _a4;
+    return ((_a4 = Object.values(state2.timelineState.groups).find((group2) => group2.id !== allDronesGroupId && robotId2 in group2.robots)) == null ? void 0 : _a4.color) ?? "#9ca3af";
   });
+  const limits = useRobartState((state2) => state2.limits ?? defaultLimits);
   const boundingBox = simRobot == null ? void 0 : simRobot.boundingBox;
   const boundingBoxDims = boundingBox == null ? void 0 : boundingBox.getSize(new Vector3());
   const [showText, setShowText] = reactExports.useState(false);
@@ -121257,7 +121259,7 @@ function Crazyflie({ robotId: robotId2, renderBoundingBox }) {
           setShowText(false);
         },
         args: [boundingBoxDims.x, boundingBoxDims.y, boundingBoxDims.z],
-        material: new MeshBasicMaterial({ color: checkCollisions(robotId2) ? 16711680 : 65280, wireframe: true }),
+        material: new MeshBasicMaterial({ color: checkCollisions(robotId2) || simRobot && ((_a3 = workAreaBox(limits)) == null ? void 0 : _a3.containsPoint(simRobot.pos)) === false ? 16711680 : 65280, wireframe: true }),
         position: new Vector3(0, 0, 0)
       },
       robotId2
