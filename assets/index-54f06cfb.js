@@ -146758,6 +146758,11 @@ const TimelineSimulationButtons = () => {
   const halt = useSimulator((state2) => state2.halt);
   const pause = useSimulator((state2) => state2.pause);
   const resume = useSimulator((state2) => state2.resume);
+  const executeSimulation = useSimulator((state2) => state2.executeSimulation);
+  const stop = () => {
+    executeSimulation(0);
+    halt();
+  };
   const hasDrones = useRobartState((state2) => Object.keys(state2.robots).length > 0);
   reactExports.useEffect(() => {
     const onKeyDown = (event) => {
@@ -146784,7 +146789,7 @@ const TimelineSimulationButtons = () => {
     simulationStatus === "RUNNING" && /* @__PURE__ */ jsx(SimButton, { icon: faPause, onClick: pause, text: "Pause", color: "white" }),
     simulationStatus === "PAUSED" && /* @__PURE__ */ jsx(SimButton, { icon: faPlay, onClick: resume, text: "Resume", color: "green" }),
     simulationStatus === "STOPPED" && /* @__PURE__ */ jsx(SimButton, { icon: faPlay, onClick: play, text: "Run", color: "green", disabled: !hasDrones }),
-    simulationStatus !== "STOPPED" && /* @__PURE__ */ jsx(SimButton, { icon: faSquare, onClick: halt, text: "Stop", color: "red" })
+    simulationStatus !== "STOPPED" && /* @__PURE__ */ jsx(SimButton, { icon: faSquare, onClick: stop, text: "Stop", color: "red" })
   ] });
 };
 const addNewGroup = () => {
