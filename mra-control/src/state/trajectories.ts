@@ -46,8 +46,8 @@ export class NullTrajectory extends Trajectory {
 
 export class Hover extends Trajectory {
 	position: THREE.Vector3;
-	constructor(position: THREE.Vector3) {
-		super(0.1);
+	constructor(position: THREE.Vector3, duration = 0.1) {
+		super(duration);
 		this.position = position;
 	}
 

@@ -159,6 +159,12 @@ def move_direction(groupState, direction, distance, duration):
     return duration
 
 
+def hover(groupState, duration):
+    """Hover in place: the crazyflies already hold their last position, so just wait"""
+    groupState.timeHelper.sleep(duration)
+
+
+# The old "stop and hover" block's code, still in projects saved before it became "hover for N seconds"
 def stop_and_hover(groupState, height=None):
     crazyflies = groupState.crazyflies
     for cf in crazyflies:

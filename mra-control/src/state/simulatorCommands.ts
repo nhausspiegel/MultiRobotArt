@@ -58,6 +58,16 @@ export const setColor = (groupState: SimulatorGroupState, r = 0, g = 0, b = 0): 
 	return [0.1, trajectories]; // There is actually a cost to switching LEDs
 };
 
+// The robots hold where they are for the duration
+export const hover = (groupState: SimulatorGroupState, duration: number): [number, Map<string, Trajectory>] => {
+	const trajectories = new Map<string, Trajectory>();
+	groupState.robotIDs.forEach((robotId) => {
+		const robot = useSimulator.getState().robots[robotId];
+		if (robot) trajectories.set(robotId, new Hover(robot.pos.clone(), duration));
+	});
+	return [duration, trajectories];
+};
+
 export const goToXyzDuration = (groupState: SimulatorGroupState, x: number, y: number, z: number, duration: number) =>{
 	let trajectories: Map<string, Trajectory> = new Map<string, Trajectory>;
 	groupState.robotIDs.forEach((robotId) => {

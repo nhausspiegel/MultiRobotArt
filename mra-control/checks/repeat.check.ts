@@ -32,6 +32,11 @@ const once = useSimulator.getState().measureBlockLength('simulator.takeoff(group
 const repeated = useSimulator.getState().measureBlockLength(js);
 assert.ok(Math.abs(repeated - 3 * once) < 0.1, `${repeated} vs 3 x ${once}`);
 
+// Hover for N seconds takes N seconds, after a takeoff
+const hovering = useSimulator.getState().measureBlockLength('simulator.takeoff(groupState, 1, 3)\nsimulator.hover(groupState, 2)\n');
+const takeoffOnly = useSimulator.getState().measureBlockLength('simulator.takeoff(groupState, 1, 3)\n');
+assert.ok(Math.abs(hovering - takeoffOnly - 2) < 0.1, `${hovering} vs ${takeoffOnly} + 2`);
+
 // Empty, or zero times: no code, like an empty block
 const emptyWorkspace = new Blockly.Workspace();
 emptyWorkspace.newBlock('repeat');
