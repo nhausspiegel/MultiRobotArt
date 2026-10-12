@@ -485,168 +485,70 @@ def simCommand(originalGroupState, command):
     return simGroupState
 
 
-def addTrajectories(groupState, command1, command2):
-    groupState1 = simCommand(groupState, command1)
-    groupState2 = simCommand(groupState, command2)
-
-    # Convert any goTo commands to LL Commands
-    convertToLL(groupState1)
-    convertToLL(groupState2)
-    groupState1.crazyflies[0].commands[0].startTime = 0
-    for i, command in enumerate(groupState1.crazyflies[0].commands):
-        if i > 0:
-            command.startTime = (
-                groupState1.crazyflies[0].commands[i - 1].startTime
-                + groupState1.crazyflies[0].commands[i - 1].duration
-            )
-
-    groupState2.crazyflies[0].commands[0].startTime = 0
-    for i, command in enumerate(groupState2.crazyflies[0].commands):
-        if i > 0:
-            command.startTime = (
-                groupState2.crazyflies[0].commands[i - 1].startTime
-                + groupState2.crazyflies[0].commands[i - 1].duration
-            )
-
-    # Get duration of latest non-notify setpoints stop command
-    if groupState1.crazyflies[0].commands[-1].command == "notifySetpointsStop":
-        finalCommand1 = -2
-    else:
-        finalCommand1 = -1
-    if groupState2.crazyflies[0].commands[-1].command == "notifySetpointsStop":
-        finalCommand2 = -2
-    else:
-        finalCommand2 = -1
-
-    # Get duration of each command
-    duration1 = (
-        groupState1.crazyflies[0].commands[finalCommand1].startTime
-        + groupState1.crazyflies[0].commands[finalCommand1].duration
-        - groupState1.crazyflies[0].commands[1].startTime
-    )
-    duration2 = (
-        groupState2.crazyflies[0].commands[finalCommand2].startTime
-        + groupState2.crazyflies[0].commands[finalCommand2].duration
-        - groupState2.crazyflies[0].commands[1].startTime
-    )
-
-    # if abs(duration1) > 1e9:
-    #     duration1 /= 1e9
-    duration1 = abs(duration1)
-    # if abs(duration2) > 1e9:
-    #     duration2 /= 1e9
-    duration2 = abs(duration2)
-    if duration1 > duration2:
-        # Command 1 is longer, scale 2 appropriately
-        command_duration = duration1
-        scaling_factor = duration1 / duration2
-        print("Scale", scaling_factor)
-        start_time = groupState2.crazyflies[0].commands[0].startTime
-        for cf in groupState2.crazyflies:
-            for command in cf.commands:
-                command.startTime *= scaling_factor
-                command.duration *= scaling_factor
-                command.startTime -= start_time
-                command.startTime = abs(command.startTime)
-                if abs(command.startTime) > 1e9:
-                    command.startTime /= 1e9
-
-    else:
-        # Command 2 is longer, scale 1 appropriately
-        command_duration = duration2
-        scaling_factor = duration2 / duration1
-        groupState1.crazyflies[0].commands[0].startTime = 0
-        for cf in groupState1.crazyflies:
-            for i, command in enumerate(cf.commands):
-                command.startTime *= scaling_factor
-                command.duration *= scaling_factor
-                if i > 0:
-                    command.startTime = (
-                        cf.commands[i - 1].startTime + cf.commands[i - 1].duration
-                    )
-                command.startTime = abs(command.startTime)
-                # if abs(command.startTime) > 1e9:
-                #     command.startTime /= 1e9
-
-        groupState2.crazyflies[0].commands[0].startTime = 0
-        for cf in groupState2.crazyflies:
-            for i, command in enumerate(cf.commands):
-                if i > 0:
-                    command.startTime = (
-                        cf.commands[i - 1].startTime + cf.commands[i - 1].duration
-                    )
-                command.startTime = abs(command.startTime)
-                # if abs(command.startTime) > 1e9:
-                #     command.startTime /= 1e9
-
-    # TODO: Convert to 20Hz
-
-    # New commands for group1
-    # for cf in groupState1.crazyflies:
-    #     new_commands = []
-    #     counter = 0
-    #     for t in np.arange(0, max(duration1, duration2), 0.05):
-    #         curr_command = cf.commands[counter]
-    #         if t == curr_command.startTime:
-
-    # take list of commands, gather positions, and interpolate/extrapolate
-    # Should be same duration and length, so just add...
-    for cf1, cf2, realCf in zip(
-        groupState1.crazyflies, groupState2.crazyflies, groupState.crazyflies
-    ):
-        initial_position = np.array(_safe_cf_position(realCf))
-        i1 = i2 = 0
-        new_commands = []
-        total_time = 0
-
-        cf1_start_time = cf1.commands[0].startTime
-        cf2_start_time = cf2.commands[0].startTime
-
-        while i1 < len(cf1.commands) or i2 < len(cf2.commands):
-            cmd1 = cf1.commands[i1] if i1 < len(cf1.commands) else None
-            cmd2 = cf2.commands[i2] if i2 < len(cf2.commands) else None
-
-            if cmd1 and (not cmd2 or cmd1.startTime <= cmd2.startTime):
-                if cmd1.startTime <= total_time:
-                    new_cmd = cmd1  # Use the original command object
-                    if new_cmd.command == "cmdPos":
-                        if not cmd2:
-                            cmd2 = Command(
-                                "",
-                                "",
-                                cf2.commands[min(i2, len(cf2.commands) - 1)].position,
-                            )
-                        new_cmd.position = np.array(new_cmd.position) + (
-                            np.array(cmd2.position) - initial_position
-                        )
-                    new_commands.append(new_cmd)
-                    total_time = max(total_time, cmd1.startTime + cmd1.duration)
-                    i1 += 1
-                else:
-                    total_time += 0.05  # Increment time if no command is ready
-            elif cmd2:
-                if cmd2.startTime <= total_time:
-                    new_cmd = cmd2  # Use the original command object
-                    if new_cmd.command == "cmdPos":
-                        cmd1 = Command(
-                            "",
-                            "",
-                            cf1.commands[min(i1, len(cf1.commands) - 1)].position,
-                        )
-                        new_cmd.position = np.array(new_cmd.position) + (
-                            np.array(cmd1.position) - initial_position
-                        )
-                    new_commands.append(new_cmd)
-                    total_time = max(total_time, cmd2.startTime + cmd2.duration)
-                    i2 += 1
-                else:
-                    total_time += 0.05  # Increment time if no command is ready
+def _recorded_path(simCF, start):
+    """A stand-in crazyflie's recorded commands (see simCommand) as one path, like a simulator Trajectory: its duration
+    and its position at any time. Go-tos, takeoffs and landings follow the same degree 7 polynomial as the firmware and
+    the simulator (robotGoTo); each streamed position is held for its step."""
+    segments = []
+    position = np.array(start, dtype=float)
+    elapsed = 0.0
+    for command in simCF.commands:
+        if command.command == "goTo":
+            goal = np.array(command.position, dtype=float) + (position if command.relative else 0)
+        elif command.command in ("takeoff", "land"):
+            goal = np.array([position[0], position[1], command.height], dtype=float)
+        elif command.command == "cmdPos":
+            goal = np.array(command.position, dtype=float)
+        else:
+            continue  # LED changes and mode switches don't move the drone
+        if command.duration > 0:
+            if command.command == "cmdPos":
+                segments.append((elapsed, command.duration, lambda t, goal=goal: goal))
             else:
-                break  # Both command lists are exhausted
-            print(new_commands[-1].position)
-    print(new_commands)
-    cf1.commands = new_commands  # Replace cf1's commands with the new commands
-    execute_commands(groupState1, groupState)
+                polynomials = [goToPolynomial(command.duration, p, 0, 0, g, 0, 0) for p, g in zip(position, goal)]
+                segments.append((elapsed, command.duration, lambda t, fs=polynomials: np.array([f(t) for f in fs])))
+            elapsed += command.duration
+        position = goal
+
+    def position_at(t):
+        for segment_start, duration, segment in segments:
+            if t < segment_start + duration:
+                return segment(t - segment_start)
+        return position
+
+    return elapsed, position_at
+
+
+def addTrajectories(groupState, command1, command2, add=True):
+    """Flies command1 and command2 at the same time, adding up their movements, or subtracting command2's when add is
+    False. Mirrors the simulator's AddTrajectories (trajectories.ts): start + movement of 1 +/- movement of 2, with the
+    shorter one stretched to last as long as the longer one. Streams positions like parametric(), then hands control
+    back to the high-level commander and holds the end."""
+    crazyflies = groupState.crazyflies
+    timeHelper = groupState.timeHelper
+    starts = [np.array(_safe_cf_position(cf), dtype=float) for cf in crazyflies]
+    paths1 = [_recorded_path(simCF, start) for simCF, start in zip(simCommand(groupState, command1).crazyflies, starts)]
+    paths2 = [_recorded_path(simCF, start) for simCF, start in zip(simCommand(groupState, command2).crazyflies, starts)]
+    duration = max([path_duration for path_duration, _ in paths1 + paths2], default=0.0)
+    if duration <= 0:
+        return
+    sign = 1 if add else -1
+
+    def position_at(start, path1, path2, fraction):
+        (duration1, at1), (duration2, at2) = path1, path2
+        return start + (at1(fraction * duration1) - start) + sign * (at2(fraction * duration2) - start)
+
+    drones = list(zip(crazyflies, starts, paths1, paths2))
+    # Counted in whole steps: np.arange can add a step through rounding (12.6 / 0.05 = 252.00000000000003)
+    for step in range(int(np.ceil(duration * Hz - 1e-9))):
+        for cf, start, path1, path2 in drones:
+            cf.cmdPosition(position_at(start, path1, path2, step / Hz / duration))
+        timeHelper.sleepForRate(Hz)
+    for cf, start, path1, path2 in drones:
+        end = position_at(start, path1, path2, 1.0)
+        cf.cmdPosition(end)
+        cf.notifySetpointsStop()
+        cf.goTo(end, 0, 2.0)
 
 
 def goToPolynomial(T, p, v, a, p2, v2, a2):
@@ -676,56 +578,9 @@ def goToPolynomial(T, p, v, a, p2, v2, a2):
     return lambda t: sum([poly[i] * t**i for i in range(len(poly))])
 
 
-def convertToLL(groupState):
-    # Convert high level command to series of low level commands
-    # Typically, this is converting a goTo command to cmdPos using a 7-Degree polynomial
-    for cf in groupState.crazyflies:
-        # TODO: Change to correct initialPosition!
-        simCF = CrazyflieSimLogger(cf.initialPosition)
-        currPosition = simCF.position()
-        new_commands = []
-        for command in cf.commands:
-            if (
-                command.command == "goTo"
-                or command.command == "land"
-                or command.command == "takeoff"
-            ):
-                startTime = command.startTime
-                # Convert to Polynomial
-                if command.relative == True:
-                    goal = np.array(command.position) + np.array(currPosition)
-                else:
-                    goal = command.position
-                fx = goToPolynomial(
-                    command.duration, currPosition[0], 0, 0, goal[0], 0, 0
-                )
-                fy = goToPolynomial(
-                    command.duration, currPosition[1], 0, 0, goal[1], 0, 0
-                )
-                fz = goToPolynomial(
-                    command.duration, currPosition[2], 0, 0, goal[2], 0, 0
-                )
-
-                timesteps = np.arange(0, command.duration, 1 / Hz)
-                commands = [
-                    Command(
-                        "cmdPos",
-                        t + startTime,
-                        (fx(t), fy(t), fz(t)),
-                        0,
-                        1 / Hz,
-                        relative=False,
-                    )
-                    for t in timesteps
-                ]
-                new_commands.extend(commands)
-            else:
-                new_commands.append(command)
-        cf.commands = new_commands
-
-
-def subtractTrajectories(groupState, command1, command2):
-    pass
+def subtractTrajectories(groupState, command1, command2, add=False):
+    """Like addTrajectories, subtracting command2's movement. The block passes add=False; it's ignored."""
+    addTrajectories(groupState, command1, command2, add=False)
 
 
 def execute_commands(simGroupState, originalGroupState):
