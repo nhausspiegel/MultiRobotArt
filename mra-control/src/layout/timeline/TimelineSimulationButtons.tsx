@@ -28,6 +28,12 @@ export const TimelineSimulationButtons = () => {
 	const halt = useSimulator((state) => state.halt);
 	const pause = useSimulator((state) => state.pause);
 	const resume = useSimulator((state) => state.resume);
+	const executeSimulation = useSimulator((state) => state.executeSimulation);
+	// Back to the start (drones too); a show that plays to its end stays there
+	const stop = () => {
+		executeSimulation(0);
+		halt();
+	};
 	// Nothing to simulate without drones
 	const hasDrones = useRobartState((state) => Object.keys(state.robots).length > 0);
 
@@ -53,7 +59,7 @@ export const TimelineSimulationButtons = () => {
 			{simulationStatus === 'RUNNING' && <SimButton icon={faPause} onClick={pause} text="Pause" color="white" />}
 			{simulationStatus === 'PAUSED' && <SimButton icon={faPlay} onClick={resume} text="Resume" color="green" />}
 			{simulationStatus === 'STOPPED' && <SimButton icon={faPlay} onClick={play} text="Run" color="green" disabled={!hasDrones} />}
-			{simulationStatus !== 'STOPPED' && <SimButton icon={faSquare} onClick={halt} text="Stop" color="red" />}
+			{simulationStatus !== 'STOPPED' && <SimButton icon={faSquare} onClick={stop} text="Stop" color="red" />}
 		</>
 	);
 };
