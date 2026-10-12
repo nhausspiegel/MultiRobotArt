@@ -2,6 +2,7 @@ import {blocklyToolboxConfiguration} from '@MRAControl/config/BlockToolboxConfig
 import '@MRAControl/config/customBlocks';
 import {useRobartState} from '@MRAControl/state/useRobartState';
 import * as Blockly from 'blockly';
+import {ContinuousCategory, ContinuousFlyout, ContinuousToolbox, registerContinuousToolbox} from '@blockly/continuous-toolbox';
 import defaultTheme from 'tailwindcss/defaultTheme';
 import {inMultipleSelectionModeWeakMap, Multiselect} from '@mit-app-inventor/blockly-plugin-workspace-multiselect';
 import {javascriptGenerator} from 'blockly/javascript';
@@ -28,15 +29,33 @@ const blocklyTheme = Blockly.registry.getObject(Blockly.registry.Type.THEME, 'ro
 // Thinner than the default 15 px; read when the workspace is created. Colors are in index.css.
 Blockly.Scrollbar.scrollbarThickness = 8;
 
-// The toolbox's block palette. By default it follows the workspace's zoom; keep it at the starting size instead.
-class FixedScaleFlyout extends Blockly.VerticalFlyout {
+// The block palette: every category in one scrolling list (continuous-toolbox plugin). Clicking a category opens it
+// over the workspace, scrolled to that category; it closes once a block is dragged out, like Blockly's own palette.
+registerContinuousToolbox();
+class PopoverFlyout extends ContinuousFlyout {
+	autoClose = true; // The plugin keeps it open beside the workspace, which leaves the workspace too narrow
+
+	// By default it follows the workspace's zoom; keep it at the starting size instead
 	getFlyoutScale() {
 		return blockScale;
 	}
 }
+class PopoverToolbox extends ContinuousToolbox {
+	init() {
+		super.init();
+		this.getFlyout().hide(); // The plugin opens it at the start
+	}
+
+	updateFlyout_(oldItem: Blockly.ISelectableToolboxItem | null, newItem: Blockly.ISelectableToolboxItem | null) {
+		const opening = newItem && !this.getFlyout().isVisible();
+		super.updateFlyout_(oldItem, newItem);
+		// The plugin scrolls to the category before opening the palette, while its sizes are stale; scroll again now it's open
+		if (opening) this.getFlyout().scrollToCategory(newItem);
+	}
+}
 
 // Toolbox categories as a column of colored circles with the name under each, like Scratch (styles in index.css)
-class CircleCategory extends Blockly.ToolboxCategory {
+class CircleCategory extends ContinuousCategory {
 	createIconDom_() {
 		const circle = document.createElement('div');
 		circle.className = 'categoryCircle';
@@ -101,7 +120,7 @@ export const BlockEditorPanel = () => {
 			// or every scroll would zoom.
 			zoom: {wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed, startScale: blockScale},
 			move: {wheel: true, drag: true, scrollbars: true},
-			plugins: {flyoutsVerticalToolbox: FixedScaleFlyout},
+			plugins: {toolbox: PopoverToolbox, flyoutsVerticalToolbox: PopoverFlyout},
 			theme: blocklyTheme,
 			renderer: 'zelos', // Scratch's block look
 			sounds: false, // Blockly 12+ plays a click when a block is dropped
