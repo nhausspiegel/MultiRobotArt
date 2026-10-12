@@ -32,3 +32,60 @@ body .blocklyDropDownDiv .blocklyMenu,
 body .blocklyTooltipDiv {
   font-family: theme('fontFamily.sans');
 }
+
+/* Toolbox categories as a column of colored circles with the name under each, like Scratch (CircleCategory in
+   BlockEditorPanel) */
+.injectionDiv .blocklyToolbox {
+  border-right: 1px solid #e5e7eb;
+  padding: 4px;
+}
+
+.injectionDiv .blocklyToolboxCategoryContainer {
+  margin: 0;
+}
+
+.injectionDiv .blocklyToolboxCategory {
+  height: auto;
+  line-height: normal;
+  margin: 0 0 2px;
+  padding: 6px 2px;
+  border-radius: 6px;
+}
+
+.injectionDiv .blocklyToolboxCategory:not(.blocklyToolboxSelected):hover {
+  background-color: #f1f5f9;
+}
+
+.injectionDiv .blocklyToolboxSelected {
+  background-color: #e9f1fc;
+}
+
+.injectionDiv .blocklyTreeRowContentContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.injectionDiv .categoryCircle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.injectionDiv .blocklyToolboxCategoryLabel,
+.injectionDiv .blocklyToolboxSelected .blocklyToolboxCategoryLabel {
+  width: 64px;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: normal;
+  text-align: center;
+  color: #575e75;
+}
+
+/* The block palette, white over the light grey workspace */
+.injectionDiv .blocklyFlyoutBackground {
+  stroke: #e5e7eb;
+}

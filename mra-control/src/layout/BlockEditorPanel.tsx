@@ -12,6 +12,8 @@ import {useBlocklyWorkspace} from 'react-blockly';
 import {BlockEditorHeader} from './BlockEditorHeader';
 
 const zoomScaleSpeed = 1.2;
+// Scratch-style blocks (zelos) are big at full size; this makes them about the size the classic ones were
+const blockScale = 0.8;
 
 // Block text in the page's font (Tailwind's sans stack) instead of Blockly's plain sans-serif (Helvetica/Arial).
 // Set through the theme so Blockly also measures text with it. Reused if already registered (module reloads).
@@ -20,17 +22,38 @@ const blocklyTheme = Blockly.registry.getObject(Blockly.registry.Type.THEME, 'ro
 		name: 'robart',
 		base: Blockly.Themes.Classic,
 		fontStyle: {family: defaultTheme.fontFamily.sans.join(', ')},
+		componentStyles: {workspaceBackgroundColour: '#f9f9f9', toolboxBackgroundColour: '#fff', flyoutBackgroundColour: '#fff', flyoutOpacity: 1},
 	});
 
 // Thinner than the default 15 px; read when the workspace is created. Colors are in index.css.
 Blockly.Scrollbar.scrollbarThickness = 8;
 
-// The toolbox's block palette. By default it follows the workspace's zoom; keep it at normal size instead.
+// The toolbox's block palette. By default it follows the workspace's zoom; keep it at the starting size instead.
 class FixedScaleFlyout extends Blockly.VerticalFlyout {
 	getFlyoutScale() {
-		return 1;
+		return blockScale;
 	}
 }
+
+// Toolbox categories as a column of colored circles with the name under each, like Scratch (styles in index.css)
+class CircleCategory extends Blockly.ToolboxCategory {
+	createIconDom_() {
+		const circle = document.createElement('div');
+		circle.className = 'categoryCircle';
+		circle.style.backgroundColor = this.colour_;
+		return circle;
+	}
+
+	// The circle shows the color instead of a strip beside the name
+	addColourBorder_() {}
+
+	// Selected: a light background from the CSS, not the category's color
+	setSelected(isSelected: boolean) {
+		super.setSelected(isSelected);
+		if (this.rowDiv_) this.rowDiv_.style.backgroundColor = '';
+	}
+}
+Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, Blockly.ToolboxCategory.registrationName, CircleCategory, true);
 
 // In multi-select mode, a drag that starts on empty space draws the selection box. Blockly 13 drags whatever is selected
 // when a drag starts, and the multi-select plugin keeps the selected blocks selected there, so they followed the pointer.
@@ -71,16 +94,16 @@ export const BlockEditorPanel = () => {
 			grid: {
 				spacing: 20,
 				length: 3,
-				colour: '#ccc',
+				colour: '#ddd',
 				snap: true,
 			},
 			// Pinch (ctrl+wheel in Chrome/Firefox) and cmd+scroll zoom; plain scrolling pans. move.wheel is needed,
 			// or every scroll would zoom.
-			zoom: {wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed},
+			zoom: {wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed, startScale: blockScale},
 			move: {wheel: true, drag: true, scrollbars: true},
 			plugins: {flyoutsVerticalToolbox: FixedScaleFlyout},
 			theme: blocklyTheme,
-			renderer: 'geras', // Blockly 9's block look; Blockly 12+ defaults to the flatter 'thrasos'
+			renderer: 'zelos', // Scratch's block look
 			sounds: false, // Blockly 12+ plays a click when a block is dropped
 		},
 		onWorkspaceChange: (workspaceChanged) => {

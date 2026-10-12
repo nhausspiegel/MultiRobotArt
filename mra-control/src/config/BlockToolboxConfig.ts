@@ -1,3 +1,4 @@
+import * as Blockly from 'blockly';
 import {type ToolboxDefinition} from 'react-blockly';
 import {type RobartBlockDefinition} from './customBlocks/BlockDefinition';
 import {CUSTOM_BLOCKS} from './customBlocks';
@@ -13,6 +14,7 @@ export const blocklyToolboxConfiguration: ToolboxDefinition = {
 		{
 			kind: 'category',
 			name: 'Straight Motion',
+			colour: '#4C97FF', // Scratch's palette
 			contents: [
 				// blockToToolbox(CUSTOM_BLOCKS.blockGoTo_xyz),
 				blockToToolbox(CUSTOM_BLOCKS.blockTakeoff),
@@ -29,6 +31,7 @@ export const blocklyToolboxConfiguration: ToolboxDefinition = {
 		{
 			kind: 'category',
 			name: 'Curves',
+			colour: '#0FBD8C', // Scratch's palette
 			contents: [
 				blockToToolbox(CUSTOM_BLOCKS.blockCircle),
 				blockToToolbox(CUSTOM_BLOCKS.blockCircleRadians),
@@ -47,6 +50,7 @@ export const blocklyToolboxConfiguration: ToolboxDefinition = {
 		{
 			kind: 'category',
 			name: 'Colors',
+			colour: '#9966FF', // Scratch's palette
 			contents: [
 				blockToToolbox(CUSTOM_BLOCKS.blockColor),
 				blockToToolbox(CUSTOM_BLOCKS.blockRandomColor),
@@ -56,6 +60,7 @@ export const blocklyToolboxConfiguration: ToolboxDefinition = {
 		{
 			kind: 'category',
 			name: 'Loops',
+			colour: '#FFAB19', // Scratch's palette
 			contents: [
 				blockToToolbox(CUSTOM_BLOCKS.blockRepeat),
 			],
@@ -63,6 +68,7 @@ export const blocklyToolboxConfiguration: ToolboxDefinition = {
 		{
 			kind: 'category',
 			name: 'Trajectory Modifiers',
+			colour: '#59C059', // Scratch's palette
 			contents: [
 				blockToToolbox(CUSTOM_BLOCKS.blockNegate),
 				// blockToToolbox(CUSTOM_BLOCKS.multiTraj),
@@ -106,3 +112,17 @@ export const blocklyToolboxConfiguration: ToolboxDefinition = {
 		// },
 	],
 };
+
+// Each block takes its category's color, over the one its own definition sets
+for (const {colour, contents} of blocklyToolboxConfiguration.contents as Array<{colour?: string; contents?: Array<{type?: string}>}>) {
+	if (!colour) continue;
+	for (const {type} of contents ?? []) {
+		const definition = Blockly.Blocks[type ?? ''];
+		if (!definition) continue;
+		const {init} = definition;
+		definition.init = function (this: Blockly.Block) {
+			init?.call(this);
+			this.setColour(colour);
+		};
+	}
+}
