@@ -8620,7 +8620,7 @@ function $971f2c37f9d2b98e$export$8829ecf6b6b15484({ children = null, className:
   });
 }
 $971f2c37f9d2b98e$export$8829ecf6b6b15484.displayName = "PanelResizeHandle";
-var python_compressed = { exports: {} };
+var blockly$1 = { exports: {} };
 var blockly_compressed = { exports: {} };
 var hasRequiredBlockly_compressed;
 function requireBlockly_compressed() {
@@ -32442,1761 +32442,6 @@ ${b2} to its parent, because: ${a2}`);
   })(blockly_compressed);
   return blockly_compressed.exports;
 }
-(function(module, exports) {
-  (function(root, factory) {
-    {
-      module.exports = factory(requireBlockly_compressed());
-    }
-  })(commonjsGlobal, function(__parent__) {
-    var $2 = __parent__.__namespace__;
-    var cs = function(a2, b2) {
-      var c2 = 0, d2 = "";
-      b2.STATEMENT_PREFIX && (d2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
-      do {
-        var e2 = b2.valueToCode(a2, "IF" + c2, U2.NONE) || "False";
-        var f2 = b2.statementToCode(a2, "DO" + c2) || b2.PASS;
-        b2.STATEMENT_SUFFIX && (f2 = b2.prefixLines(b2.injectId(b2.STATEMENT_SUFFIX, a2), b2.INDENT) + f2);
-        d2 += (c2 === 0 ? "if " : "elif ") + e2 + ":\n" + f2;
-        c2++;
-      } while (a2.getInput("IF" + c2));
-      if (a2.getInput("ELSE") || b2.STATEMENT_SUFFIX)
-        f2 = a2.getInput("ELSE") ? b2.statementToCode(a2, "ELSE") || b2.PASS : b2.PASS, b2.STATEMENT_SUFFIX && (f2 = b2.prefixLines(b2.injectId(
-          b2.STATEMENT_SUFFIX,
-          a2
-        ), b2.INDENT) + f2), d2 += "else:\n" + f2;
-      return d2;
-    }, ds = function(a2, b2) {
-      var c2 = a2.getField("TIMES") ? String(parseInt(a2.getFieldValue("TIMES"), 10)) : b2.valueToCode(a2, "TIMES", U2.NONE) || "0";
-      c2 = $2.zf(c2) ? parseInt(c2, 10) : "int(" + c2 + ")";
-      var d2 = b2.statementToCode(a2, "DO");
-      d2 = b2.addLoopTrap(d2, a2) || b2.PASS;
-      return "for " + b2.nameDB_.getDistinctName("count", $2.P.VARIABLE) + " in range(" + c2 + "):\n" + d2;
-    }, es = function(a2, b2) {
-      var c2 = a2.getFieldValue("OP");
-      if (c2 === "NEG") {
-        var d2 = b2.valueToCode(a2, "NUM", U2.UNARY_SIGN) || "0";
-        return ["-" + d2, U2.UNARY_SIGN];
-      }
-      b2.definitions_.import_math = "import math";
-      a2 = c2 === "SIN" || c2 === "COS" || c2 === "TAN" ? b2.valueToCode(a2, "NUM", U2.MULTIPLICATIVE) || "0" : b2.valueToCode(a2, "NUM", U2.NONE) || "0";
-      switch (c2) {
-        case "ABS":
-          d2 = "math.fabs(" + a2 + ")";
-          break;
-        case "ROOT":
-          d2 = "math.sqrt(" + a2 + ")";
-          break;
-        case "LN":
-          d2 = "math.log(" + a2 + ")";
-          break;
-        case "LOG10":
-          d2 = "math.log10(" + a2 + ")";
-          break;
-        case "EXP":
-          d2 = "math.exp(" + a2 + ")";
-          break;
-        case "POW10":
-          d2 = "math.pow(10," + a2 + ")";
-          break;
-        case "ROUND":
-          d2 = "round(" + a2 + ")";
-          break;
-        case "ROUNDUP":
-          d2 = "math.ceil(" + a2 + ")";
-          break;
-        case "ROUNDDOWN":
-          d2 = "math.floor(" + a2 + ")";
-          break;
-        case "SIN":
-          d2 = "math.sin(" + a2 + " / 180.0 * math.pi)";
-          break;
-        case "COS":
-          d2 = "math.cos(" + a2 + " / 180.0 * math.pi)";
-          break;
-        case "TAN":
-          d2 = "math.tan(" + a2 + " / 180.0 * math.pi)";
-      }
-      if (d2)
-        return [d2, U2.FUNCTION_CALL];
-      switch (c2) {
-        case "ASIN":
-          d2 = "math.asin(" + a2 + ") / math.pi * 180";
-          break;
-        case "ACOS":
-          d2 = "math.acos(" + a2 + ") / math.pi * 180";
-          break;
-        case "ATAN":
-          d2 = "math.atan(" + a2 + ") / math.pi * 180";
-          break;
-        default:
-          throw Error("Unknown math operator: " + c2);
-      }
-      return [d2, U2.MULTIPLICATIVE];
-    }, fs = function(a2, b2) {
-      var c2 = [], d2 = a2.workspace, e2 = $2.Bd(d2) || [];
-      for (var f2 of e2)
-        e2 = f2.getName(), a2.getVarModels().includes(f2) || c2.push(b2.getVariableName(e2));
-      d2 = $2.Cd(d2);
-      for (f2 = 0; f2 < d2.length; f2++)
-        c2.push(b2.nameDB_.getName(d2[f2], $2.P.DEVELOPER_VARIABLE));
-      d2 = c2.length ? b2.INDENT + "global " + c2.join(", ") + "\n" : "";
-      c2 = b2.getProcedureName(a2.getFieldValue("NAME"));
-      f2 = "";
-      b2.STATEMENT_PREFIX && (f2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
-      b2.STATEMENT_SUFFIX && (f2 += b2.injectId(b2.STATEMENT_SUFFIX, a2));
-      f2 && (f2 = b2.prefixLines(f2, b2.INDENT));
-      e2 = "";
-      b2.INFINITE_LOOP_TRAP && (e2 = b2.prefixLines(b2.injectId(b2.INFINITE_LOOP_TRAP, a2), b2.INDENT));
-      var g2 = "";
-      a2.getInput("STACK") && (g2 = b2.statementToCode(a2, "STACK"));
-      var h2 = "";
-      a2.getInput("RETURN") && (h2 = b2.valueToCode(a2, "RETURN", U2.NONE) || "");
-      var m2 = "";
-      g2 && h2 && (m2 = f2);
-      h2 ? h2 = b2.INDENT + "return " + h2 + "\n" : g2 || (g2 = b2.PASS);
-      var z2 = [], F2 = a2.getVarModels();
-      for (let J2 = 0; J2 < F2.length; J2++)
-        z2[J2] = b2.getVariableName(F2[J2].getId());
-      d2 = "def " + c2 + "(" + z2.join(", ") + "):\n" + d2 + f2 + e2 + g2 + m2 + h2;
-      d2 = b2.scrub_(a2, d2);
-      b2.definitions_["%" + c2] = d2;
-      return null;
-    }, hs = function(a2) {
-      return gs.test(a2) ? [a2, U2.ATOMIC] : ["str(" + a2 + ")", U2.FUNCTION_CALL];
-    }, is2 = function(a2, b2) {
-      var c2 = b2.provideFunction_(
-        "text_prompt",
-        `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(msg):
-  try:
-    return raw_input(msg)
-  except NameError:
-    return input(msg)
-`
-      );
-      b2 = a2.getField("TEXT") ? b2.quote_(a2.getFieldValue("TEXT")) : b2.valueToCode(a2, "TEXT", U2.NONE) || "''";
-      c2 = c2 + "(" + b2 + ")";
-      a2.getFieldValue("TYPE") === "NUMBER" && (c2 = "float(" + c2 + ")");
-      return [c2, U2.FUNCTION_CALL];
-    }, js = function(a2, b2) {
-      return [b2.getVariableName(a2.getFieldValue("VAR")), U2.ATOMIC];
-    }, ks = function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "VALUE", U2.NONE) || "0";
-      return b2.getVariableName(a2.getFieldValue("VAR")) + " = " + c2 + "\n";
-    }, U2, ls = U2 || (U2 = {});
-    ls[ls.ATOMIC = 0] = "ATOMIC";
-    ls[ls.COLLECTION = 1] = "COLLECTION";
-    ls[ls.STRING_CONVERSION = 1] = "STRING_CONVERSION";
-    ls[ls.MEMBER = 2.1] = "MEMBER";
-    ls[ls.FUNCTION_CALL = 2.2] = "FUNCTION_CALL";
-    ls[ls.EXPONENTIATION = 3] = "EXPONENTIATION";
-    ls[ls.UNARY_SIGN = 4] = "UNARY_SIGN";
-    ls[ls.BITWISE_NOT = 4] = "BITWISE_NOT";
-    ls[ls.MULTIPLICATIVE = 5] = "MULTIPLICATIVE";
-    ls[ls.ADDITIVE = 6] = "ADDITIVE";
-    ls[ls.BITWISE_SHIFT = 7] = "BITWISE_SHIFT";
-    ls[ls.BITWISE_AND = 8] = "BITWISE_AND";
-    ls[ls.BITWISE_XOR = 9] = "BITWISE_XOR";
-    ls[ls.BITWISE_OR = 10] = "BITWISE_OR";
-    ls[ls.RELATIONAL = 11] = "RELATIONAL";
-    ls[ls.LOGICAL_NOT = 12] = "LOGICAL_NOT";
-    ls[ls.LOGICAL_AND = 13] = "LOGICAL_AND";
-    ls[ls.LOGICAL_OR = 14] = "LOGICAL_OR";
-    ls[ls.CONDITIONAL = 15] = "CONDITIONAL";
-    ls[ls.LAMBDA = 16] = "LAMBDA";
-    ls[ls.NONE = 99] = "NONE";
-    var ms = class extends $2.zq {
-      constructor(a2 = "Python") {
-        super(a2);
-        this.ORDER_OVERRIDES = [[U2.FUNCTION_CALL, U2.MEMBER], [U2.FUNCTION_CALL, U2.FUNCTION_CALL], [U2.MEMBER, U2.MEMBER], [U2.MEMBER, U2.FUNCTION_CALL], [U2.LOGICAL_NOT, U2.LOGICAL_NOT], [U2.LOGICAL_AND, U2.LOGICAL_AND], [U2.LOGICAL_OR, U2.LOGICAL_OR]];
-        this.PASS = "";
-        this.isInitialized = false;
-        for (let b2 in U2)
-          a2 = U2[b2], typeof a2 !== "string" && (this["ORDER_" + b2] = a2);
-        this.addReservedWords("False,None,True,and,as,assert,break,class,continue,def,del,elif,else,except,exec,finally,for,from,global,if,import,in,is,lambda,nonlocal,not,or,pass,print,raise,return,try,while,with,yield,NotImplemented,Ellipsis,__debug__,quit,exit,copyright,license,credits,ArithmeticError,AssertionError,AttributeError,BaseException,BlockingIOError,BrokenPipeError,BufferError,BytesWarning,ChildProcessError,ConnectionAbortedError,ConnectionError,ConnectionRefusedError,ConnectionResetError,DeprecationWarning,EOFError,Ellipsis,EnvironmentError,Exception,FileExistsError,FileNotFoundError,FloatingPointError,FutureWarning,GeneratorExit,IOError,ImportError,ImportWarning,IndentationError,IndexError,InterruptedError,IsADirectoryError,KeyError,KeyboardInterrupt,LookupError,MemoryError,ModuleNotFoundError,NameError,NotADirectoryError,NotImplemented,NotImplementedError,OSError,OverflowError,PendingDeprecationWarning,PermissionError,ProcessLookupError,RecursionError,ReferenceError,ResourceWarning,RuntimeError,RuntimeWarning,StandardError,StopAsyncIteration,StopIteration,SyntaxError,SyntaxWarning,SystemError,SystemExit,TabError,TimeoutError,TypeError,UnboundLocalError,UnicodeDecodeError,UnicodeEncodeError,UnicodeError,UnicodeTranslateError,UnicodeWarning,UserWarning,ValueError,Warning,ZeroDivisionError,_,__build_class__,__debug__,__doc__,__import__,__loader__,__name__,__package__,__spec__,abs,all,any,apply,ascii,basestring,bin,bool,buffer,bytearray,bytes,callable,chr,classmethod,cmp,coerce,compile,complex,copyright,credits,delattr,dict,dir,divmod,enumerate,eval,exec,execfile,exit,file,filter,float,format,frozenset,getattr,globals,hasattr,hash,help,hex,id,input,int,intern,isinstance,issubclass,iter,len,license,list,locals,long,map,max,memoryview,min,next,object,oct,open,ord,pow,print,property,quit,range,raw_input,reduce,reload,repr,reversed,round,set,setattr,slice,sorted,staticmethod,str,sum,super,tuple,type,unichr,unicode,vars,xrange,zip");
-      }
-      init(a2) {
-        super.init(a2);
-        this.PASS = this.INDENT + "pass\n";
-        this.nameDB_ ? this.nameDB_.reset() : this.nameDB_ = new $2.Cj(this.RESERVED_WORDS_);
-        this.nameDB_.setVariableMap(a2.getVariableMap());
-        this.nameDB_.populateVariables(a2);
-        this.nameDB_.populateProcedures(a2);
-        var b2 = [], c2 = $2.Cd(a2);
-        for (let d2 = 0; d2 < c2.length; d2++)
-          b2.push(this.nameDB_.getName(c2[d2], $2.Cj.DEVELOPER_VARIABLE_TYPE) + " = None");
-        a2 = $2.Bd(a2);
-        for (c2 = 0; c2 < a2.length; c2++)
-          b2.push(this.getVariableName(a2[c2].getId()) + " = None");
-        this.definitions_.variables = b2.join("\n");
-        this.isInitialized = true;
-      }
-      finish(a2) {
-        var b2 = [], c2 = [];
-        for (let d2 in this.definitions_) {
-          let e2 = this.definitions_[d2];
-          e2.match(/^(from\s+\S+\s+)?import\s+\S+/) ? b2.push(e2) : c2.push(e2);
-        }
-        a2 = super.finish(a2);
-        this.isInitialized = false;
-        this.nameDB_.reset();
-        return (b2.join("\n") + "\n\n" + c2.join("\n\n")).replace(/\n\n+/g, "\n\n").replace(/\n*$/, "\n\n\n") + a2;
-      }
-      scrubNakedValue(a2) {
-        return a2 + "\n";
-      }
-      quote_(a2) {
-        a2 = a2.replace(/\\/g, "\\\\").replace(/\n/g, "\\\n");
-        var b2 = "'";
-        a2.includes("'") && (a2.includes('"') ? a2 = a2.replace(/'/g, "\\'") : b2 = '"');
-        return b2 + a2 + b2;
-      }
-      multiline_quote_(a2) {
-        return a2.split(/\n/g).map(this.quote_).join(" + '\\n' + \n");
-      }
-      scrub_(a2, b2, c2 = false) {
-        var d2 = "";
-        if (!a2.outputConnection || !a2.outputConnection.targetConnection) {
-          var e2 = a2.getCommentText();
-          e2 && (e2 = $2.yf(e2, this.COMMENT_WRAP - 3), d2 += this.prefixLines(e2 + "\n", "# "));
-          for (let f2 = 0; f2 < a2.inputList.length; f2++)
-            a2.inputList[f2].type === $2.je.VALUE && (e2 = a2.inputList[f2].connection.targetBlock()) && (e2 = this.allNestedComments(e2)) && (d2 += this.prefixLines(e2, "# "));
-        }
-        a2 = a2.nextConnection && a2.nextConnection.targetBlock();
-        c2 = c2 ? "" : this.blockToCode(a2);
-        return d2 + b2 + c2;
-      }
-      getAdjustedInt(a2, b2, c2 = 0, d2 = false) {
-        a2.workspace.options.oneBasedIndex && c2--;
-        var e2 = a2.workspace.options.oneBasedIndex ? "1" : "0";
-        a2 = this.valueToCode(a2, b2, c2 ? U2.ADDITIVE : U2.NONE) || e2;
-        $2.zf(a2) ? (a2 = parseInt(a2, 10) + c2, d2 && (a2 = -a2)) : (a2 = c2 > 0 ? "int(" + a2 + " + " + c2 + ")" : c2 < 0 ? "int(" + a2 + " - " + -c2 + ")" : "int(" + a2 + ")", d2 && (a2 = "-" + a2));
-        return a2;
-      }
-    };
-    var ns = {};
-    ns.controls_if = cs;
-    ns.controls_ifelse = cs;
-    ns.logic_boolean = function(a2) {
-      return [a2.getFieldValue("BOOL") === "TRUE" ? "True" : "False", U2.ATOMIC];
-    };
-    ns.logic_compare = function(a2, b2) {
-      var c2 = { EQ: "==", NEQ: "!=", LT: "<", LTE: "<=", GT: ">", GTE: ">=" }[a2.getFieldValue("OP")], d2 = U2.RELATIONAL, e2 = b2.valueToCode(a2, "A", d2) || "0";
-      a2 = b2.valueToCode(a2, "B", d2) || "0";
-      return [e2 + " " + c2 + " " + a2, d2];
-    };
-    ns.logic_negate = function(a2, b2) {
-      return ["not " + (b2.valueToCode(a2, "BOOL", U2.LOGICAL_NOT) || "True"), U2.LOGICAL_NOT];
-    };
-    ns.logic_null = function() {
-      return ["None", U2.ATOMIC];
-    };
-    ns.logic_operation = function(a2, b2) {
-      var c2 = a2.getFieldValue("OP") === "AND" ? "and" : "or", d2 = c2 === "and" ? U2.LOGICAL_AND : U2.LOGICAL_OR, e2 = b2.valueToCode(a2, "A", d2);
-      a2 = b2.valueToCode(a2, "B", d2);
-      e2 || a2 ? (b2 = c2 === "and" ? "True" : "False", e2 || (e2 = b2), a2 || (a2 = b2)) : a2 = e2 = "False";
-      return [e2 + " " + c2 + " " + a2, d2];
-    };
-    ns.logic_ternary = function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "IF", U2.CONDITIONAL) || "False", d2 = b2.valueToCode(a2, "THEN", U2.CONDITIONAL) || "None";
-      a2 = b2.valueToCode(a2, "ELSE", U2.CONDITIONAL) || "None";
-      return [d2 + " if " + c2 + " else " + a2, U2.CONDITIONAL];
-    };
-    var os = { controls_flow_statements: function(a2, b2) {
-      var c2 = "";
-      b2.STATEMENT_PREFIX && (c2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
-      b2.STATEMENT_SUFFIX && (c2 += b2.injectId(b2.STATEMENT_SUFFIX, a2));
-      if (b2.STATEMENT_PREFIX) {
-        let d2 = a2.getSurroundLoop();
-        d2 && !d2.suppressPrefixSuffix && (c2 += b2.injectId(b2.STATEMENT_PREFIX, d2));
-      }
-      switch (a2.getFieldValue("FLOW")) {
-        case "BREAK":
-          return c2 + "break\n";
-        case "CONTINUE":
-          return c2 + "continue\n";
-      }
-      throw Error("Unknown flow statement.");
-    }, controls_for: function(a2, b2) {
-      function c2() {
-        return b2.provideFunction_(
-          "downRange",
-          `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(start, stop, step):
-  while start >= stop:
-    yield start
-    start -= abs(step)
-`
-        );
-      }
-      function d2() {
-        return b2.provideFunction_("upRange", `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(start, stop, step):
-  while start <= stop:
-    yield start
-    start += abs(step)
-`);
-      }
-      var e2 = b2.getVariableName(a2.getFieldValue("VAR")), f2 = b2.valueToCode(a2, "FROM", U2.NONE) || "0", g2 = b2.valueToCode(a2, "TO", U2.NONE) || "0", h2 = b2.valueToCode(a2, "BY", U2.NONE) || "1", m2 = b2.statementToCode(a2, "DO");
-      m2 = b2.addLoopTrap(m2, a2) || b2.PASS;
-      var z2 = "";
-      $2.zf(f2) && $2.zf(g2) && $2.zf(h2) ? (f2 = Number(f2), g2 = Number(g2), h2 = Math.abs(Number(h2)), f2 % 1 === 0 && g2 % 1 === 0 && h2 % 1 === 0 ? (f2 <= g2 ? (g2++, a2 = f2 === 0 && h2 === 1 ? g2 : f2 + ", " + g2, h2 !== 1 && (a2 += ", " + h2)) : (g2--, a2 = f2 + ", " + g2 + ", -" + h2), a2 = "range(" + a2 + ")") : (a2 = f2 < g2 ? d2() : c2(), a2 += "(" + f2 + ", " + g2 + ", " + h2 + ")")) : (a2 = function(F2, J2) {
-        $2.zf(F2) ? F2 = String(Number(F2)) : F2.match(/^\w+$/) || (J2 = b2.nameDB_.getDistinctName(e2 + J2, $2.P.VARIABLE), z2 += J2 + " = " + F2 + "\n", F2 = J2);
-        return F2;
-      }, f2 = a2(f2, "_start"), g2 = a2(g2, "_end"), h2 = a2(h2, "_inc"), typeof f2 === "number" && typeof g2 === "number" ? (a2 = f2 < g2 ? d2() : c2(), a2 += "(" + f2 + ", " + g2 + ", " + h2 + ")") : a2 = "(" + f2 + " <= " + g2 + ") and " + d2() + "(" + f2 + ", " + g2 + ", " + h2 + ") or " + c2() + "(" + f2 + ", " + g2 + ", " + h2 + ")");
-      return z2 += "for " + e2 + " in " + a2 + ":\n" + m2;
-    }, controls_forEach: function(a2, b2) {
-      var c2 = b2.getVariableName(a2.getFieldValue("VAR")), d2 = b2.valueToCode(a2, "LIST", U2.RELATIONAL) || "[]", e2 = b2.statementToCode(a2, "DO");
-      e2 = b2.addLoopTrap(e2, a2) || b2.PASS;
-      return "for " + c2 + " in " + d2 + ":\n" + e2;
-    } };
-    os.controls_repeat = ds;
-    os.controls_repeat_ext = ds;
-    os.controls_whileUntil = function(a2, b2) {
-      var c2 = a2.getFieldValue("MODE") === "UNTIL", d2 = b2.valueToCode(a2, "BOOL", c2 ? U2.LOGICAL_NOT : U2.NONE) || "False", e2 = b2.statementToCode(a2, "DO");
-      e2 = b2.addLoopTrap(e2, a2) || b2.PASS;
-      c2 && (d2 = "not " + d2);
-      return "while " + d2 + ":\n" + e2;
-    };
-    var ps = {
-      math_arithmetic: function(a2, b2) {
-        var c2 = { ADD: [" + ", U2.ADDITIVE], MINUS: [" - ", U2.ADDITIVE], MULTIPLY: [" * ", U2.MULTIPLICATIVE], DIVIDE: [" / ", U2.MULTIPLICATIVE], POWER: [" ** ", U2.EXPONENTIATION] }[a2.getFieldValue("OP")], d2 = c2[0];
-        c2 = c2[1];
-        var e2 = b2.valueToCode(a2, "A", c2) || "0";
-        a2 = b2.valueToCode(a2, "B", c2) || "0";
-        return [e2 + d2 + a2, c2];
-      },
-      math_atan2: function(a2, b2) {
-        b2.definitions_.import_math = "import math";
-        var c2 = b2.valueToCode(a2, "X", U2.NONE) || "0";
-        return ["math.atan2(" + (b2.valueToCode(a2, "Y", U2.NONE) || "0") + ", " + c2 + ") / math.pi * 180", U2.MULTIPLICATIVE];
-      },
-      math_change: function(a2, b2) {
-        b2.definitions_.from_numbers_import_Number = "from numbers import Number";
-        var c2 = b2.valueToCode(a2, "DELTA", U2.ADDITIVE) || "0";
-        a2 = b2.getVariableName(a2.getFieldValue("VAR"));
-        return a2 + " = (" + a2 + " if isinstance(" + a2 + ", Number) else 0) + " + c2 + "\n";
-      },
-      math_constant: function(a2, b2) {
-        var c2 = { PI: ["math.pi", U2.MEMBER], E: ["math.e", U2.MEMBER], GOLDEN_RATIO: ["(1 + math.sqrt(5)) / 2", U2.MULTIPLICATIVE], SQRT2: ["math.sqrt(2)", U2.MEMBER], SQRT1_2: ["math.sqrt(1.0 / 2)", U2.MEMBER], INFINITY: ["float('inf')", U2.ATOMIC] };
-        a2 = a2.getFieldValue("CONSTANT");
-        a2 !== "INFINITY" && (b2.definitions_.import_math = "import math");
-        return c2[a2];
-      },
-      math_constrain: function(a2, b2) {
-        var c2 = b2.valueToCode(a2, "VALUE", U2.NONE) || "0", d2 = b2.valueToCode(a2, "LOW", U2.NONE) || "0";
-        a2 = b2.valueToCode(a2, "HIGH", U2.NONE) || "float('inf')";
-        return ["min(max(" + c2 + ", " + d2 + "), " + a2 + ")", U2.FUNCTION_CALL];
-      },
-      math_modulo: function(a2, b2) {
-        var c2 = b2.valueToCode(a2, "DIVIDEND", U2.MULTIPLICATIVE) || "0";
-        a2 = b2.valueToCode(a2, "DIVISOR", U2.MULTIPLICATIVE) || "0";
-        return [c2 + " % " + a2, U2.MULTIPLICATIVE];
-      },
-      math_number: function(a2) {
-        a2 = Number(a2.getFieldValue("NUM"));
-        return a2 === Infinity ? ['float("inf")', U2.FUNCTION_CALL] : a2 === -Infinity ? ['-float("inf")', U2.UNARY_SIGN] : [String(a2), a2 < 0 ? U2.UNARY_SIGN : U2.ATOMIC];
-      },
-      math_number_property: function(a2, b2) {
-        var c2 = { EVEN: [" % 2 == 0", U2.MULTIPLICATIVE, U2.RELATIONAL], ODD: [" % 2 == 1", U2.MULTIPLICATIVE, U2.RELATIONAL], WHOLE: [" % 1 == 0", U2.MULTIPLICATIVE, U2.RELATIONAL], POSITIVE: [" > 0", U2.RELATIONAL, U2.RELATIONAL], NEGATIVE: [" < 0", U2.RELATIONAL, U2.RELATIONAL], DIVISIBLE_BY: [null, U2.MULTIPLICATIVE, U2.RELATIONAL], PRIME: [
-          null,
-          U2.NONE,
-          U2.FUNCTION_CALL
-        ] }, d2 = a2.getFieldValue("PROPERTY"), [e2, f2, g2] = c2[d2];
-        c2 = b2.valueToCode(a2, "NUMBER_TO_CHECK", f2) || "0";
-        if (d2 === "PRIME")
-          b2.definitions_.import_math = "import math", b2.definitions_.from_numbers_import_Number = "from numbers import Number", a2 = b2.provideFunction_("math_isPrime", `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(n):
-  # https://en.wikipedia.org/wiki/Primality_test#Naive_methods
-  # If n is not a number but a string, try parsing it.
-  if not isinstance(n, Number):
-    try:
-      n = float(n)
-    except:
-      return False
-  if n == 2 or n == 3:
-    return True
-  # False if n is negative, is 1, or not whole, or if n is divisible by 2 or 3.
-  if n <= 1 or n % 1 != 0 or n % 2 == 0 or n % 3 == 0:
-    return False
-  # Check all the numbers of form 6k +/- 1, up to sqrt(n).
-  for x in range(6, int(math.sqrt(n)) + 2, 6):
-    if n % (x - 1) == 0 or n % (x + 1) == 0:
-      return False
-  return True
-`) + "(" + c2 + ")";
-        else if (d2 === "DIVISIBLE_BY") {
-          a2 = b2.valueToCode(a2, "DIVISOR", U2.MULTIPLICATIVE) || "0";
-          if (a2 === "0")
-            return ["False", U2.ATOMIC];
-          a2 = c2 + " % " + a2 + " == 0";
-        } else
-          a2 = c2 + e2;
-        return [a2, g2];
-      },
-      math_on_list: function(a2, b2) {
-        var c2 = a2.getFieldValue("OP");
-        a2 = b2.valueToCode(a2, "LIST", U2.NONE) || "[]";
-        switch (c2) {
-          case "SUM":
-            b2 = "sum(" + a2 + ")";
-            break;
-          case "MIN":
-            b2 = "min(" + a2 + ")";
-            break;
-          case "MAX":
-            b2 = "max(" + a2 + ")";
-            break;
-          case "AVERAGE":
-            b2.definitions_.from_numbers_import_Number = "from numbers import Number";
-            b2 = b2.provideFunction_("math_mean", `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(myList):
-  localList = [e for e in myList if isinstance(e, Number)]
-  if not localList: return
-  return float(sum(localList)) / len(localList)
-`) + "(" + a2 + ")";
-            break;
-          case "MEDIAN":
-            b2.definitions_.from_numbers_import_Number = "from numbers import Number";
-            b2 = b2.provideFunction_("math_median", `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(myList):
-  localList = sorted([e for e in myList if isinstance(e, Number)])
-  if not localList: return
-  if len(localList) % 2 == 0:
-    return (localList[len(localList) // 2 - 1] + localList[len(localList) // 2]) / 2.0
-  else:
-    return localList[(len(localList) - 1) // 2]
-`) + "(" + a2 + ")";
-            break;
-          case "MODE":
-            b2 = b2.provideFunction_("math_modes", `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(some_list):
-  modes = []
-  # Using a lists of [item, count] to keep count rather than dict
-  # to avoid "unhashable" errors when the counted item is itself a list or dict.
-  counts = []
-  maxCount = 1
-  for item in some_list:
-    found = False
-    for count in counts:
-      if count[0] == item:
-        count[1] += 1
-        maxCount = max(maxCount, count[1])
-        found = True
-    if not found:
-      counts.append([item, 1])
-  for counted_item, item_count in counts:
-    if item_count == maxCount:
-      modes.append(counted_item)
-  return modes
-`) + "(" + a2 + ")";
-            break;
-          case "STD_DEV":
-            b2.definitions_.import_math = "import math";
-            b2 = b2.provideFunction_("math_standard_deviation", `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(numbers):
-  n = len(numbers)
-  if n == 0: return
-  mean = float(sum(numbers)) / n
-  variance = sum((x - mean) ** 2 for x in numbers) / n
-  return math.sqrt(variance)
-`) + "(" + a2 + ")";
-            break;
-          case "RANDOM":
-            b2.definitions_.import_random = "import random";
-            b2 = "random.choice(" + a2 + ")";
-            break;
-          default:
-            throw Error("Unknown operator: " + c2);
-        }
-        return [b2, U2.FUNCTION_CALL];
-      },
-      math_random_float: function(a2, b2) {
-        b2.definitions_.import_random = "import random";
-        return ["random.random()", U2.FUNCTION_CALL];
-      },
-      math_random_int: function(a2, b2) {
-        b2.definitions_.import_random = "import random";
-        var c2 = b2.valueToCode(a2, "FROM", U2.NONE) || "0";
-        a2 = b2.valueToCode(a2, "TO", U2.NONE) || "0";
-        return ["random.randint(" + c2 + ", " + a2 + ")", U2.FUNCTION_CALL];
-      }
-    };
-    ps.math_round = es;
-    ps.math_single = es;
-    ps.math_trig = es;
-    var qs = { procedures_callnoreturn: function(a2, b2) {
-      return b2.forBlock.procedures_callreturn(a2, b2)[0] + "\n";
-    }, procedures_callreturn: function(a2, b2) {
-      var c2 = b2.getProcedureName(a2.getFieldValue("NAME")), d2 = [], e2 = a2.getVarModels();
-      for (let f2 = 0; f2 < e2.length; f2++)
-        d2[f2] = b2.valueToCode(a2, "ARG" + f2, U2.NONE) || "None";
-      return [c2 + "(" + d2.join(", ") + ")", U2.FUNCTION_CALL];
-    } };
-    qs.procedures_defnoreturn = fs;
-    qs.procedures_defreturn = fs;
-    qs.procedures_ifreturn = function(a2, b2) {
-      var c2 = "if " + (b2.valueToCode(a2, "CONDITION", U2.NONE) || "False") + ":\n";
-      b2.STATEMENT_SUFFIX && (c2 += b2.prefixLines(b2.injectId(b2.STATEMENT_SUFFIX, a2), b2.INDENT));
-      a2.hasReturnValue_ ? (a2 = b2.valueToCode(a2, "VALUE", U2.NONE) || "None", c2 += b2.INDENT + "return " + a2 + "\n") : c2 += b2.INDENT + "return\n";
-      return c2;
-    };
-    var gs = /^\s*'([^']|\\')*'\s*$/, rs = { text: function(a2, b2) {
-      return [b2.quote_(a2.getFieldValue("TEXT")), U2.ATOMIC];
-    }, text_append: function(a2, b2) {
-      var c2 = b2.getVariableName(a2.getFieldValue("VAR"));
-      a2 = b2.valueToCode(a2, "TEXT", U2.NONE) || "''";
-      return c2 + " = str(" + c2 + ") + " + hs(a2)[0] + "\n";
-    }, text_changeCase: function(a2, b2) {
-      var c2 = { UPPERCASE: ".upper()", LOWERCASE: ".lower()", TITLECASE: ".title()" }[a2.getFieldValue("CASE")];
-      return [(b2.valueToCode(a2, "TEXT", U2.MEMBER) || "''") + c2, U2.FUNCTION_CALL];
-    }, text_charAt: function(a2, b2) {
-      var c2 = a2.getFieldValue("WHERE") || "FROM_START", d2 = b2.valueToCode(a2, "VALUE", c2 === "RANDOM" ? U2.NONE : U2.MEMBER) || "''";
-      switch (c2) {
-        case "FIRST":
-          return [d2 + "[0]", U2.MEMBER];
-        case "LAST":
-          return [d2 + "[-1]", U2.MEMBER];
-        case "FROM_START":
-          return a2 = b2.getAdjustedInt(a2, "AT"), [d2 + "[" + a2 + "]", U2.MEMBER];
-        case "FROM_END":
-          return a2 = b2.getAdjustedInt(a2, "AT", 1, true), [d2 + "[" + a2 + "]", U2.MEMBER];
-        case "RANDOM":
-          return b2.definitions_.import_random = "import random", [b2.provideFunction_("text_random_letter", `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(text):
-  x = int(random.random() * len(text))
-  return text[x]
-`) + "(" + d2 + ")", U2.FUNCTION_CALL];
-      }
-      throw Error("Unhandled option (text_charAt).");
-    }, text_count: function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "TEXT", U2.MEMBER) || "''";
-      a2 = b2.valueToCode(a2, "SUB", U2.NONE) || "''";
-      return [c2 + ".count(" + a2 + ")", U2.FUNCTION_CALL];
-    }, text_getSubstring: function(a2, b2) {
-      var c2 = a2.getFieldValue("WHERE1"), d2 = a2.getFieldValue("WHERE2"), e2 = b2.valueToCode(a2, "STRING", U2.MEMBER) || "''";
-      switch (c2) {
-        case "FROM_START":
-          c2 = b2.getAdjustedInt(a2, "AT1");
-          c2 === 0 && (c2 = "");
-          break;
-        case "FROM_END":
-          c2 = b2.getAdjustedInt(a2, "AT1", 1, true);
-          break;
-        case "FIRST":
-          c2 = "";
-          break;
-        default:
-          throw Error("Unhandled option (text_getSubstring)");
-      }
-      switch (d2) {
-        case "FROM_START":
-          a2 = b2.getAdjustedInt(a2, "AT2", 1);
-          break;
-        case "FROM_END":
-          a2 = b2.getAdjustedInt(a2, "AT2", 0, true);
-          $2.zf(String(a2)) ? a2 === 0 && (a2 = "") : (b2.definitions_.import_sys = "import sys", a2 += " or sys.maxsize");
-          break;
-        case "LAST":
-          a2 = "";
-          break;
-        default:
-          throw Error("Unhandled option (text_getSubstring)");
-      }
-      return [e2 + "[" + c2 + " : " + a2 + "]", U2.MEMBER];
-    }, text_indexOf: function(a2, b2) {
-      var c2 = a2.getFieldValue("END") === "FIRST" ? "find" : "rfind", d2 = b2.valueToCode(
-        a2,
-        "FIND",
-        U2.NONE
-      ) || "''";
-      b2 = (b2.valueToCode(a2, "VALUE", U2.MEMBER) || "''") + "." + c2 + "(" + d2 + ")";
-      return a2.workspace.options.oneBasedIndex ? [b2 + " + 1", U2.ADDITIVE] : [b2, U2.FUNCTION_CALL];
-    }, text_isEmpty: function(a2, b2) {
-      return ["not len(" + (b2.valueToCode(a2, "VALUE", U2.NONE) || "''") + ")", U2.LOGICAL_NOT];
-    }, text_join: function(a2, b2) {
-      switch (a2.itemCount_) {
-        case 0:
-          return ["''", U2.ATOMIC];
-        case 1:
-          return a2 = b2.valueToCode(a2, "ADD0", U2.NONE) || "''", hs(a2);
-        case 2:
-          var c2 = b2.valueToCode(a2, "ADD0", U2.NONE) || "''";
-          a2 = b2.valueToCode(a2, "ADD1", U2.NONE) || "''";
-          return [hs(c2)[0] + " + " + hs(a2)[0], U2.ADDITIVE];
-        default:
-          c2 = [];
-          for (let d2 = 0; d2 < a2.itemCount_; d2++)
-            c2[d2] = b2.valueToCode(a2, "ADD" + d2, U2.NONE) || "''";
-          a2 = b2.nameDB_.getDistinctName("x", $2.P.VARIABLE);
-          return ["''.join([str(" + a2 + ") for " + a2 + " in [" + c2.join(", ") + "]])", U2.FUNCTION_CALL];
-      }
-    }, text_length: function(a2, b2) {
-      return ["len(" + (b2.valueToCode(a2, "VALUE", U2.NONE) || "''") + ")", U2.FUNCTION_CALL];
-    }, text_print: function(a2, b2) {
-      return "print(" + (b2.valueToCode(a2, "TEXT", U2.NONE) || "''") + ")\n";
-    } };
-    rs.text_prompt = is2;
-    rs.text_prompt_ext = is2;
-    rs.text_replace = function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "TEXT", U2.MEMBER) || "''", d2 = b2.valueToCode(a2, "FROM", U2.NONE) || "''";
-      a2 = b2.valueToCode(a2, "TO", U2.NONE) || "''";
-      return [c2 + ".replace(" + d2 + ", " + a2 + ")", U2.MEMBER];
-    };
-    rs.text_reverse = function(a2, b2) {
-      return [(b2.valueToCode(a2, "TEXT", U2.MEMBER) || "''") + "[::-1]", U2.MEMBER];
-    };
-    rs.text_trim = function(a2, b2) {
-      var c2 = { LEFT: ".lstrip()", RIGHT: ".rstrip()", BOTH: ".strip()" }[a2.getFieldValue("MODE")];
-      return [(b2.valueToCode(a2, "TEXT", U2.MEMBER) || "''") + c2, U2.FUNCTION_CALL];
-    };
-    var ss = {};
-    ss.variables_get = js;
-    ss.variables_set = ks;
-    var ts = {};
-    ts.variables_get_dynamic = js;
-    ts.variables_set_dynamic = ks;
-    var us = new ms();
-    us.addReservedWords("math,random,Number");
-    var vs = Object.assign({}, { lists_create_empty: function() {
-      return ["[]", U2.ATOMIC];
-    }, lists_create_with: function(a2, b2) {
-      var c2 = Array(a2.itemCount_);
-      for (let d2 = 0; d2 < a2.itemCount_; d2++)
-        c2[d2] = b2.valueToCode(a2, "ADD" + d2, U2.NONE) || "None";
-      return ["[" + c2.join(", ") + "]", U2.ATOMIC];
-    }, lists_getIndex: function(a2, b2) {
-      var c2 = a2.getFieldValue("MODE") || "GET", d2 = a2.getFieldValue("WHERE") || "FROM_START", e2 = b2.valueToCode(a2, "VALUE", d2 === "RANDOM" ? U2.NONE : U2.MEMBER) || "[]";
-      switch (d2) {
-        case "FIRST":
-          if (c2 === "GET")
-            return [e2 + "[0]", U2.MEMBER];
-          if (c2 === "GET_REMOVE")
-            return [e2 + ".pop(0)", U2.FUNCTION_CALL];
-          if (c2 === "REMOVE")
-            return e2 + ".pop(0)\n";
-          break;
-        case "LAST":
-          if (c2 === "GET")
-            return [e2 + "[-1]", U2.MEMBER];
-          if (c2 === "GET_REMOVE")
-            return [e2 + ".pop()", U2.FUNCTION_CALL];
-          if (c2 === "REMOVE")
-            return e2 + ".pop()\n";
-          break;
-        case "FROM_START":
-          a2 = b2.getAdjustedInt(a2, "AT");
-          if (c2 === "GET")
-            return [e2 + "[" + a2 + "]", U2.MEMBER];
-          if (c2 === "GET_REMOVE")
-            return [e2 + ".pop(" + a2 + ")", U2.FUNCTION_CALL];
-          if (c2 === "REMOVE")
-            return e2 + ".pop(" + a2 + ")\n";
-          break;
-        case "FROM_END":
-          a2 = b2.getAdjustedInt(a2, "AT", 1, true);
-          if (c2 === "GET")
-            return [e2 + "[" + a2 + "]", U2.MEMBER];
-          if (c2 === "GET_REMOVE")
-            return [e2 + ".pop(" + a2 + ")", U2.FUNCTION_CALL];
-          if (c2 === "REMOVE")
-            return e2 + ".pop(" + a2 + ")\n";
-          break;
-        case "RANDOM":
-          b2.definitions_.import_random = "import random";
-          if (c2 === "GET")
-            return ["random.choice(" + e2 + ")", U2.FUNCTION_CALL];
-          e2 = b2.provideFunction_("lists_remove_random_item", `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(myList):
-  x = int(random.random() * len(myList))
-  return myList.pop(x)
-`) + "(" + e2 + ")";
-          if (c2 === "GET_REMOVE")
-            return [e2, U2.FUNCTION_CALL];
-          if (c2 === "REMOVE")
-            return e2 + "\n";
-      }
-      throw Error("Unhandled combination (lists_getIndex).");
-    }, lists_getSublist: function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "LIST", U2.MEMBER) || "[]", d2 = a2.getFieldValue("WHERE1"), e2 = a2.getFieldValue("WHERE2");
-      switch (d2) {
-        case "FROM_START":
-          d2 = b2.getAdjustedInt(a2, "AT1");
-          d2 === 0 && (d2 = "");
-          break;
-        case "FROM_END":
-          d2 = b2.getAdjustedInt(a2, "AT1", 1, true);
-          break;
-        case "FIRST":
-          d2 = "";
-          break;
-        default:
-          throw Error("Unhandled option (lists_getSublist)");
-      }
-      switch (e2) {
-        case "FROM_START":
-          a2 = b2.getAdjustedInt(a2, "AT2", 1);
-          break;
-        case "FROM_END":
-          a2 = b2.getAdjustedInt(a2, "AT2", 0, true);
-          $2.zf(String(a2)) ? a2 === 0 && (a2 = "") : (b2.definitions_.import_sys = "import sys", a2 += " or sys.maxsize");
-          break;
-        case "LAST":
-          a2 = "";
-          break;
-        default:
-          throw Error("Unhandled option (lists_getSublist)");
-      }
-      return [c2 + "[" + d2 + " : " + a2 + "]", U2.MEMBER];
-    }, lists_indexOf: function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "FIND", U2.NONE) || "[]", d2 = b2.valueToCode(a2, "VALUE", U2.NONE) || "''", e2 = " -1", f2 = "", g2 = " - 1";
-      a2.workspace.options.oneBasedIndex && (e2 = " 0", f2 = " + 1", g2 = "");
-      return [(a2.getFieldValue("END") === "FIRST" ? b2.provideFunction_("first_index", `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(my_list, elem):
-  try: index = my_list.index(elem)${f2}
-  except: index =${e2}
-  return index
-`) : b2.provideFunction_("last_index", `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(my_list, elem):
-  try: index = len(my_list) - my_list[::-1].index(elem)${g2}
-  except: index =${e2}
-  return index
-`)) + "(" + d2 + ", " + c2 + ")", U2.FUNCTION_CALL];
-    }, lists_isEmpty: function(a2, b2) {
-      return ["not len(" + (b2.valueToCode(a2, "VALUE", U2.NONE) || "[]") + ")", U2.LOGICAL_NOT];
-    }, lists_length: function(a2, b2) {
-      return ["len(" + (b2.valueToCode(a2, "VALUE", U2.NONE) || "[]") + ")", U2.FUNCTION_CALL];
-    }, lists_repeat: function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "ITEM", U2.NONE) || "None";
-      a2 = b2.valueToCode(a2, "NUM", U2.MULTIPLICATIVE) || "0";
-      return ["[" + c2 + "] * " + a2, U2.MULTIPLICATIVE];
-    }, lists_reverse: function(a2, b2) {
-      return [
-        "list(reversed(" + (b2.valueToCode(a2, "LIST", U2.NONE) || "[]") + "))",
-        U2.FUNCTION_CALL
-      ];
-    }, lists_setIndex: function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "LIST", U2.MEMBER) || "[]", d2 = a2.getFieldValue("MODE") || "GET", e2 = a2.getFieldValue("WHERE") || "FROM_START", f2 = b2.valueToCode(a2, "TO", U2.NONE) || "None";
-      switch (e2) {
-        case "FIRST":
-          if (d2 === "SET")
-            return c2 + "[0] = " + f2 + "\n";
-          if (d2 === "INSERT")
-            return c2 + ".insert(0, " + f2 + ")\n";
-          break;
-        case "LAST":
-          if (d2 === "SET")
-            return c2 + "[-1] = " + f2 + "\n";
-          if (d2 === "INSERT")
-            return c2 + ".append(" + f2 + ")\n";
-          break;
-        case "FROM_START":
-          b2 = b2.getAdjustedInt(a2, "AT");
-          if (d2 === "SET")
-            return c2 + "[" + b2 + "] = " + f2 + "\n";
-          if (d2 === "INSERT")
-            return c2 + ".insert(" + b2 + ", " + f2 + ")\n";
-          break;
-        case "FROM_END":
-          b2 = b2.getAdjustedInt(a2, "AT", 1, true);
-          if (d2 === "SET")
-            return c2 + "[" + b2 + "] = " + f2 + "\n";
-          if (d2 === "INSERT")
-            return c2 + ".insert(" + b2 + ", " + f2 + ")\n";
-          break;
-        case "RANDOM":
-          b2.definitions_.import_random = "import random";
-          c2.match(/^\w+$/) ? a2 = "" : (a2 = b2.nameDB_.getDistinctName("tmp_list", $2.P.VARIABLE), e2 = a2 + " = " + c2 + "\n", c2 = a2, a2 = e2);
-          b2 = b2.nameDB_.getDistinctName("tmp_x", $2.P.VARIABLE);
-          a2 += b2 + " = int(random.random() * len(" + c2 + "))\n";
-          if (d2 === "SET")
-            return a2 + (c2 + "[" + b2 + "] = " + f2 + "\n");
-          if (d2 === "INSERT")
-            return a2 + (c2 + ".insert(" + b2 + ", " + f2 + ")\n");
-      }
-      throw Error("Unhandled combination (lists_setIndex).");
-    }, lists_sort: function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "LIST", U2.NONE) || "[]", d2 = a2.getFieldValue("TYPE");
-      a2 = a2.getFieldValue("DIRECTION") === "1" ? "False" : "True";
-      return [b2.provideFunction_("lists_sort", `
-def ${b2.FUNCTION_NAME_PLACEHOLDER_}(my_list, type, reverse):
-  def try_float(s):
-    try:
-      return float(s)
-    except:
-      return 0
-  key_funcs = {
-    "NUMERIC": try_float,
-    "TEXT": str,
-    "IGNORE_CASE": lambda s: str(s).lower()
-  }
-  key_func = key_funcs[type]
-  list_cpy = list(my_list)
-  return sorted(list_cpy, key=key_func, reverse=reverse)
-`) + "(" + c2 + ', "' + d2 + '", ' + a2 + ")", U2.FUNCTION_CALL];
-    }, lists_split: function(a2, b2) {
-      var c2 = a2.getFieldValue("MODE");
-      if (c2 === "SPLIT")
-        c2 = b2.valueToCode(a2, "INPUT", U2.MEMBER) || "''", a2 = b2.valueToCode(a2, "DELIM", U2.NONE), a2 = c2 + ".split(" + a2 + ")";
-      else if (c2 === "JOIN")
-        c2 = b2.valueToCode(a2, "INPUT", U2.NONE) || "[]", a2 = (b2.valueToCode(a2, "DELIM", U2.MEMBER) || "''") + ".join(" + c2 + ")";
-      else
-        throw Error("Unknown mode: " + c2);
-      return [a2, U2.FUNCTION_CALL];
-    } }, ns, os, ps, qs, rs, ss, ts);
-    for (let a2 in vs)
-      us.forBlock[a2] = vs[a2];
-    var ws = {};
-    ws.Order = U2;
-    ws.PythonGenerator = ms;
-    ws.pythonGenerator = us;
-    $2.__chunk_python = ws;
-    $2.__chunk_python.__namespace__ = $2;
-    return $2.__chunk_python;
-  });
-})(python_compressed);
-var python_compressedExports = python_compressed.exports;
-const python$2 = /* @__PURE__ */ getDefaultExportFromCjs(python_compressedExports);
-const {
-  Order: Order$1,
-  PythonGenerator,
-  pythonGenerator
-} = python$2;
-const python$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  Order: Order$1,
-  PythonGenerator,
-  pythonGenerator
-}, Symbol.toStringTag, { value: "Module" }));
-var javascript_compressed = { exports: {} };
-(function(module, exports) {
-  (function(root, factory) {
-    {
-      module.exports = factory(requireBlockly_compressed());
-    }
-  })(commonjsGlobal, function(__parent__) {
-    var $2 = __parent__.__namespace__;
-    var Hr = function(a2, b2, c2) {
-      return b2 === "FIRST" ? "0" : b2 === "FROM_END" ? a2 + ".length - 1 - " + c2 : b2 === "LAST" ? a2 + ".length - 1" : c2;
-    }, Ir = function(a2, b2) {
-      var c2 = 0, d2 = "";
-      b2.STATEMENT_PREFIX && (d2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
-      do {
-        let e2 = b2.valueToCode(a2, "IF" + c2, S2.NONE) || "false", f2 = b2.statementToCode(a2, "DO" + c2);
-        b2.STATEMENT_SUFFIX && (f2 = b2.prefixLines(b2.injectId(b2.STATEMENT_SUFFIX, a2), b2.INDENT) + f2);
-        d2 += (c2 > 0 ? " else " : "") + "if (" + e2 + ") {\n" + f2 + "}";
-        c2++;
-      } while (a2.getInput("IF" + c2));
-      if (a2.getInput("ELSE") || b2.STATEMENT_SUFFIX)
-        c2 = a2.getInput("ELSE") ? b2.statementToCode(
-          a2,
-          "ELSE"
-        ) : "", b2.STATEMENT_SUFFIX && (c2 = b2.prefixLines(b2.injectId(b2.STATEMENT_SUFFIX, a2), b2.INDENT) + c2), d2 += " else {\n" + c2 + "}";
-      return d2 + "\n";
-    }, Jr = function(a2, b2) {
-      var c2 = a2.getField("TIMES") ? String(Number(a2.getFieldValue("TIMES"))) : b2.valueToCode(a2, "TIMES", S2.ASSIGNMENT) || "0";
-      var d2 = b2.statementToCode(a2, "DO");
-      d2 = b2.addLoopTrap(d2, a2);
-      a2 = "";
-      var e2 = b2.nameDB_.getDistinctName("count", $2.P.VARIABLE), f2 = c2;
-      c2.match(/^\w+$/) || $2.zf(c2) || (f2 = b2.nameDB_.getDistinctName("repeat_end", $2.P.VARIABLE), a2 += "var " + f2 + " = " + c2 + ";\n");
-      return a2 + ("for (var " + e2 + " = 0; " + e2 + " < " + f2 + "; " + e2 + "++) {\n" + d2 + "}\n");
-    }, Kr = function(a2, b2) {
-      var c2 = a2.getFieldValue("OP");
-      if (c2 === "NEG")
-        return a2 = b2.valueToCode(a2, "NUM", S2.UNARY_NEGATION) || "0", a2[0] === "-" && (a2 = " " + a2), ["-" + a2, S2.UNARY_NEGATION];
-      a2 = c2 === "SIN" || c2 === "COS" || c2 === "TAN" ? b2.valueToCode(a2, "NUM", S2.DIVISION) || "0" : b2.valueToCode(a2, "NUM", S2.NONE) || "0";
-      switch (c2) {
-        case "ABS":
-          var d2 = "Math.abs(" + a2 + ")";
-          break;
-        case "ROOT":
-          d2 = "Math.sqrt(" + a2 + ")";
-          break;
-        case "LN":
-          d2 = "Math.log(" + a2 + ")";
-          break;
-        case "EXP":
-          d2 = "Math.exp(" + a2 + ")";
-          break;
-        case "POW10":
-          d2 = "Math.pow(10," + a2 + ")";
-          break;
-        case "ROUND":
-          d2 = "Math.round(" + a2 + ")";
-          break;
-        case "ROUNDUP":
-          d2 = "Math.ceil(" + a2 + ")";
-          break;
-        case "ROUNDDOWN":
-          d2 = "Math.floor(" + a2 + ")";
-          break;
-        case "SIN":
-          d2 = "Math.sin(" + a2 + " / 180 * Math.PI)";
-          break;
-        case "COS":
-          d2 = "Math.cos(" + a2 + " / 180 * Math.PI)";
-          break;
-        case "TAN":
-          d2 = "Math.tan(" + a2 + " / 180 * Math.PI)";
-      }
-      if (d2)
-        return [d2, S2.FUNCTION_CALL];
-      switch (c2) {
-        case "LOG10":
-          d2 = "Math.log(" + a2 + ") / Math.log(10)";
-          break;
-        case "ASIN":
-          d2 = "Math.asin(" + a2 + ") / Math.PI * 180";
-          break;
-        case "ACOS":
-          d2 = "Math.acos(" + a2 + ") / Math.PI * 180";
-          break;
-        case "ATAN":
-          d2 = "Math.atan(" + a2 + ") / Math.PI * 180";
-          break;
-        default:
-          throw Error("Unknown math operator: " + c2);
-      }
-      return [d2, S2.DIVISION];
-    }, Lr2 = function(a2, b2) {
-      var c2 = b2.getProcedureName(a2.getFieldValue("NAME")), d2 = "";
-      b2.STATEMENT_PREFIX && (d2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
-      b2.STATEMENT_SUFFIX && (d2 += b2.injectId(b2.STATEMENT_SUFFIX, a2));
-      d2 && (d2 = b2.prefixLines(d2, b2.INDENT));
-      var e2 = "";
-      b2.INFINITE_LOOP_TRAP && (e2 = b2.prefixLines(b2.injectId(b2.INFINITE_LOOP_TRAP, a2), b2.INDENT));
-      var f2 = "";
-      a2.getInput("STACK") && (f2 = b2.statementToCode(a2, "STACK"));
-      var g2 = "";
-      a2.getInput("RETURN") && (g2 = b2.valueToCode(a2, "RETURN", S2.NONE) || "");
-      var h2 = "";
-      f2 && g2 && (h2 = d2);
-      g2 && (g2 = b2.INDENT + "return " + g2 + ";\n");
-      var m2 = [], z2 = a2.getVarModels();
-      for (let F2 = 0; F2 < z2.length; F2++)
-        m2[F2] = b2.getVariableName(z2[F2].getId());
-      d2 = "function " + c2 + "(" + m2.join(", ") + ") {\n" + d2 + e2 + f2 + h2 + g2 + "}";
-      d2 = b2.scrub_(a2, d2);
-      b2.definitions_["%" + c2] = d2;
-      return null;
-    }, Nr = function(a2) {
-      return Mr2.test(a2) ? [a2, S2.ATOMIC] : ["String(" + a2 + ")", S2.FUNCTION_CALL];
-    }, Or = function(a2, b2, c2) {
-      return b2 === "FIRST" ? "0" : b2 === "FROM_END" ? a2 + ".length - 1 - " + c2 : b2 === "LAST" ? a2 + ".length - 1" : c2;
-    }, Pr = function(a2, b2) {
-      b2 = "window.prompt(" + (a2.getField("TEXT") ? b2.quote_(a2.getFieldValue("TEXT")) : b2.valueToCode(a2, "TEXT", S2.NONE) || "''") + ")";
-      a2.getFieldValue("TYPE") === "NUMBER" && (b2 = "Number(" + b2 + ")");
-      return [b2, S2.FUNCTION_CALL];
-    }, Qr = function(a2, b2) {
-      return [b2.getVariableName(a2.getFieldValue("VAR")), S2.ATOMIC];
-    }, Rr = function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "VALUE", S2.ASSIGNMENT) || "0";
-      return b2.getVariableName(a2.getFieldValue("VAR")) + " = " + c2 + ";\n";
-    }, S2, T2 = S2 || (S2 = {});
-    T2[T2.ATOMIC = 0] = "ATOMIC";
-    T2[T2.NEW = 1.1] = "NEW";
-    T2[T2.MEMBER = 1.2] = "MEMBER";
-    T2[T2.FUNCTION_CALL = 2] = "FUNCTION_CALL";
-    T2[T2.INCREMENT = 3] = "INCREMENT";
-    T2[T2.DECREMENT = 3] = "DECREMENT";
-    T2[T2.BITWISE_NOT = 4.1] = "BITWISE_NOT";
-    T2[T2.UNARY_PLUS = 4.2] = "UNARY_PLUS";
-    T2[T2.UNARY_NEGATION = 4.3] = "UNARY_NEGATION";
-    T2[T2.LOGICAL_NOT = 4.4] = "LOGICAL_NOT";
-    T2[T2.TYPEOF = 4.5] = "TYPEOF";
-    T2[T2.VOID = 4.6] = "VOID";
-    T2[T2.DELETE = 4.7] = "DELETE";
-    T2[T2.AWAIT = 4.8] = "AWAIT";
-    T2[T2.EXPONENTIATION = 5] = "EXPONENTIATION";
-    T2[T2.MULTIPLICATION = 5.1] = "MULTIPLICATION";
-    T2[T2.DIVISION = 5.2] = "DIVISION";
-    T2[T2.MODULUS = 5.3] = "MODULUS";
-    T2[T2.SUBTRACTION = 6.1] = "SUBTRACTION";
-    T2[T2.ADDITION = 6.2] = "ADDITION";
-    T2[T2.BITWISE_SHIFT = 7] = "BITWISE_SHIFT";
-    T2[T2.RELATIONAL = 8] = "RELATIONAL";
-    T2[T2.IN = 8] = "IN";
-    T2[T2.INSTANCEOF = 8] = "INSTANCEOF";
-    T2[T2.EQUALITY = 9] = "EQUALITY";
-    T2[T2.BITWISE_AND = 10] = "BITWISE_AND";
-    T2[T2.BITWISE_XOR = 11] = "BITWISE_XOR";
-    T2[T2.BITWISE_OR = 12] = "BITWISE_OR";
-    T2[T2.LOGICAL_AND = 13] = "LOGICAL_AND";
-    T2[T2.LOGICAL_OR = 14] = "LOGICAL_OR";
-    T2[T2.CONDITIONAL = 15] = "CONDITIONAL";
-    T2[T2.ASSIGNMENT = 16] = "ASSIGNMENT";
-    T2[T2.YIELD = 17] = "YIELD";
-    T2[T2.COMMA = 18] = "COMMA";
-    T2[T2.NONE = 99] = "NONE";
-    var Sr = class extends $2.zq {
-      constructor(a2 = "JavaScript") {
-        super(a2);
-        this.ORDER_OVERRIDES = [[S2.FUNCTION_CALL, S2.MEMBER], [S2.FUNCTION_CALL, S2.FUNCTION_CALL], [S2.MEMBER, S2.MEMBER], [S2.MEMBER, S2.FUNCTION_CALL], [S2.LOGICAL_NOT, S2.LOGICAL_NOT], [S2.MULTIPLICATION, S2.MULTIPLICATION], [S2.ADDITION, S2.ADDITION], [S2.LOGICAL_AND, S2.LOGICAL_AND], [S2.LOGICAL_OR, S2.LOGICAL_OR]];
-        this.isInitialized = false;
-        for (let b2 in S2)
-          a2 = S2[b2], typeof a2 !== "string" && (this["ORDER_" + b2] = a2);
-        this.addReservedWords("break,case,catch,class,const,continue,debugger,default,delete,do,else,export,extends,finally,for,function,if,import,in,instanceof,new,return,super,switch,this,throw,try,typeof,var,void,while,with,yield,enum,implements,interface,let,package,private,protected,public,static,await,null,true,false,arguments," + Object.getOwnPropertyNames(globalThis).join(","));
-      }
-      init(a2) {
-        super.init(a2);
-        this.nameDB_ ? this.nameDB_.reset() : this.nameDB_ = new $2.Cj(this.RESERVED_WORDS_);
-        this.nameDB_.setVariableMap(a2.getVariableMap());
-        this.nameDB_.populateVariables(a2);
-        this.nameDB_.populateProcedures(a2);
-        var b2 = [], c2 = $2.Cd(a2);
-        for (let d2 = 0; d2 < c2.length; d2++)
-          b2.push(this.nameDB_.getName(c2[d2], $2.P.DEVELOPER_VARIABLE));
-        a2 = $2.Bd(a2);
-        for (c2 = 0; c2 < a2.length; c2++)
-          b2.push(this.nameDB_.getName(a2[c2].getId(), $2.P.VARIABLE));
-        b2.length && (this.definitions_.variables = "var " + b2.join(", ") + ";");
-        this.isInitialized = true;
-      }
-      finish(a2) {
-        var b2 = Object.values(this.definitions_);
-        super.finish(a2);
-        this.isInitialized = false;
-        this.nameDB_.reset();
-        return b2.join("\n\n") + "\n\n\n" + a2;
-      }
-      scrubNakedValue(a2) {
-        return a2 + ";\n";
-      }
-      quote_(a2) {
-        a2 = a2.replace(/\\/g, "\\\\").replace(/\n/g, "\\\n").replace(/'/g, "\\'");
-        return "'" + a2 + "'";
-      }
-      multiline_quote_(a2) {
-        return a2.split(/\n/g).map(this.quote_).join(" + '\\n' +\n");
-      }
-      scrub_(a2, b2, c2 = false) {
-        var d2 = "";
-        if (!a2.outputConnection || !a2.outputConnection.targetConnection) {
-          var e2 = a2.getCommentText();
-          e2 && (e2 = $2.yf(e2, this.COMMENT_WRAP - 3), d2 += this.prefixLines(e2 + "\n", "// "));
-          for (let f2 = 0; f2 < a2.inputList.length; f2++)
-            a2.inputList[f2].type === $2.je.VALUE && (e2 = a2.inputList[f2].connection.targetBlock()) && (e2 = this.allNestedComments(e2)) && (d2 += this.prefixLines(e2, "// "));
-        }
-        a2 = a2.nextConnection && a2.nextConnection.targetBlock();
-        c2 = c2 ? "" : this.blockToCode(a2);
-        return d2 + b2 + c2;
-      }
-      getAdjusted(a2, b2, c2 = 0, d2 = false, e2 = S2.NONE) {
-        a2.workspace.options.oneBasedIndex && c2--;
-        var f2 = a2.workspace.options.oneBasedIndex ? "1" : "0", g2 = e2;
-        c2 > 0 ? g2 = S2.ADDITION : c2 < 0 ? g2 = S2.SUBTRACTION : d2 && (g2 = S2.UNARY_NEGATION);
-        a2 = this.valueToCode(a2, b2, g2) || f2;
-        if (c2 === 0 && !d2)
-          return a2;
-        if ($2.zf(a2))
-          return a2 = String(Number(a2) + c2), d2 && (a2 = String(-Number(a2))), a2;
-        c2 > 0 ? a2 = `${a2} + ${c2}` : c2 < 0 && (a2 = `${a2} - ${-c2}`);
-        d2 && (a2 = c2 ? `-(${a2})` : `-${a2}`);
-        Math.floor(e2) >= Math.floor(g2) && (a2 = `(${a2})`);
-        return a2;
-      }
-    };
-    var Tr = {};
-    Tr.controls_if = Ir;
-    Tr.controls_ifelse = Ir;
-    Tr.logic_boolean = function(a2) {
-      return [a2.getFieldValue("BOOL") === "TRUE" ? "true" : "false", S2.ATOMIC];
-    };
-    Tr.logic_compare = function(a2, b2) {
-      var c2 = { EQ: "==", NEQ: "!=", LT: "<", LTE: "<=", GT: ">", GTE: ">=" }[a2.getFieldValue("OP")], d2 = c2 === "==" || c2 === "!=" ? S2.EQUALITY : S2.RELATIONAL, e2 = b2.valueToCode(a2, "A", d2) || "0";
-      a2 = b2.valueToCode(a2, "B", d2) || "0";
-      return [e2 + " " + c2 + " " + a2, d2];
-    };
-    Tr.logic_negate = function(a2, b2) {
-      var c2 = S2.LOGICAL_NOT;
-      return ["!" + (b2.valueToCode(a2, "BOOL", c2) || "true"), c2];
-    };
-    Tr.logic_null = function() {
-      return ["null", S2.ATOMIC];
-    };
-    Tr.logic_operation = function(a2, b2) {
-      var c2 = a2.getFieldValue("OP") === "AND" ? "&&" : "||", d2 = c2 === "&&" ? S2.LOGICAL_AND : S2.LOGICAL_OR, e2 = b2.valueToCode(a2, "A", d2);
-      a2 = b2.valueToCode(a2, "B", d2);
-      e2 || a2 ? (b2 = c2 === "&&" ? "true" : "false", e2 || (e2 = b2), a2 || (a2 = b2)) : a2 = e2 = "false";
-      return [e2 + " " + c2 + " " + a2, d2];
-    };
-    Tr.logic_ternary = function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "IF", S2.CONDITIONAL) || "false", d2 = b2.valueToCode(a2, "THEN", S2.CONDITIONAL) || "null";
-      a2 = b2.valueToCode(a2, "ELSE", S2.CONDITIONAL) || "null";
-      return [c2 + " ? " + d2 + " : " + a2, S2.CONDITIONAL];
-    };
-    var Ur2 = { controls_flow_statements: function(a2, b2) {
-      var c2 = "";
-      b2.STATEMENT_PREFIX && (c2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
-      b2.STATEMENT_SUFFIX && (c2 += b2.injectId(b2.STATEMENT_SUFFIX, a2));
-      if (b2.STATEMENT_PREFIX) {
-        let d2 = a2.getSurroundLoop();
-        d2 && !d2.suppressPrefixSuffix && (c2 += b2.injectId(b2.STATEMENT_PREFIX, d2));
-      }
-      switch (a2.getFieldValue("FLOW")) {
-        case "BREAK":
-          return c2 + "break;\n";
-        case "CONTINUE":
-          return c2 + "continue;\n";
-      }
-      throw Error("Unknown flow statement.");
-    }, controls_for: function(a2, b2) {
-      var c2 = b2.getVariableName(a2.getFieldValue("VAR")), d2 = b2.valueToCode(a2, "FROM", S2.ASSIGNMENT) || "0", e2 = b2.valueToCode(a2, "TO", S2.ASSIGNMENT) || "0", f2 = b2.valueToCode(a2, "BY", S2.ASSIGNMENT) || "1", g2 = b2.statementToCode(a2, "DO");
-      g2 = b2.addLoopTrap(g2, a2);
-      if ($2.zf(d2) && $2.zf(e2) && $2.zf(f2))
-        b2 = Number(d2) <= Number(e2), a2 = "for (" + c2 + " = " + d2 + "; " + c2 + (b2 ? " <= " : " >= ") + e2 + "; " + c2, c2 = Math.abs(Number(f2)), a2 = c2 === 1 ? a2 + (b2 ? "++" : "--") : a2 + ((b2 ? " += " : " -= ") + c2), a2 += ") {\n" + g2 + "}\n";
-      else {
-        a2 = "";
-        let h2 = d2;
-        d2.match(/^\w+$/) || $2.zf(d2) || (h2 = b2.nameDB_.getDistinctName(c2 + "_start", $2.P.VARIABLE), a2 += "var " + h2 + " = " + d2 + ";\n");
-        d2 = e2;
-        e2.match(/^\w+$/) || $2.zf(e2) || (d2 = b2.nameDB_.getDistinctName(c2 + "_end", $2.P.VARIABLE), a2 += "var " + d2 + " = " + e2 + ";\n");
-        e2 = b2.nameDB_.getDistinctName(c2 + "_inc", $2.P.VARIABLE);
-        a2 += "var " + e2 + " = ";
-        a2 = $2.zf(f2) ? a2 + (Math.abs(Number(f2)) + ";\n") : a2 + ("Math.abs(" + f2 + ");\n");
-        a2 += "if (" + h2 + " > " + d2 + ") {\n";
-        a2 += b2.INDENT + e2 + " = -" + e2 + ";\n";
-        a2 = a2 + "}\nfor (" + (c2 + " = " + h2 + "; " + e2 + " >= 0 ? " + c2 + " <= " + d2 + " : " + c2 + " >= " + d2 + "; " + c2 + " += " + e2 + ") {\n" + g2 + "}\n");
-      }
-      return a2;
-    }, controls_forEach: function(a2, b2) {
-      var c2 = b2.getVariableName(a2.getFieldValue("VAR")), d2 = b2.valueToCode(
-        a2,
-        "LIST",
-        S2.ASSIGNMENT
-      ) || "[]", e2 = b2.statementToCode(a2, "DO");
-      e2 = b2.addLoopTrap(e2, a2);
-      a2 = "";
-      var f2 = d2;
-      d2.match(/^\w+$/) || (f2 = b2.nameDB_.getDistinctName(c2 + "_list", $2.P.VARIABLE), a2 += "var " + f2 + " = " + d2 + ";\n");
-      d2 = b2.nameDB_.getDistinctName(c2 + "_index", $2.P.VARIABLE);
-      e2 = b2.INDENT + c2 + " = " + f2 + "[" + d2 + "];\n" + e2;
-      return a2 + ("for (var " + d2 + " in " + f2 + ") {\n" + e2 + "}\n");
-    } };
-    Ur2.controls_repeat = Jr;
-    Ur2.controls_repeat_ext = Jr;
-    Ur2.controls_whileUntil = function(a2, b2) {
-      var c2 = a2.getFieldValue("MODE") === "UNTIL", d2 = b2.valueToCode(a2, "BOOL", c2 ? S2.LOGICAL_NOT : S2.NONE) || "false", e2 = b2.statementToCode(a2, "DO");
-      e2 = b2.addLoopTrap(e2, a2);
-      c2 && (d2 = "!" + d2);
-      return "while (" + d2 + ") {\n" + e2 + "}\n";
-    };
-    var Vr = {
-      math_arithmetic: function(a2, b2) {
-        var c2 = { ADD: [" + ", S2.ADDITION], MINUS: [" - ", S2.SUBTRACTION], MULTIPLY: [" * ", S2.MULTIPLICATION], DIVIDE: [" / ", S2.DIVISION], POWER: [null, S2.NONE] }[a2.getFieldValue("OP")], d2 = c2[0];
-        c2 = c2[1];
-        var e2 = b2.valueToCode(a2, "A", c2) || "0";
-        a2 = b2.valueToCode(a2, "B", c2) || "0";
-        return d2 ? [e2 + d2 + a2, c2] : ["Math.pow(" + e2 + ", " + a2 + ")", S2.FUNCTION_CALL];
-      },
-      math_atan2: function(a2, b2) {
-        var c2 = b2.valueToCode(a2, "X", S2.NONE) || "0";
-        return ["Math.atan2(" + (b2.valueToCode(a2, "Y", S2.NONE) || "0") + ", " + c2 + ") / Math.PI * 180", S2.DIVISION];
-      },
-      math_change: function(a2, b2) {
-        var c2 = b2.valueToCode(a2, "DELTA", S2.ADDITION) || "0";
-        a2 = b2.getVariableName(a2.getFieldValue("VAR"));
-        return a2 + " = (typeof " + a2 + " === 'number' ? " + a2 + " : 0) + " + c2 + ";\n";
-      },
-      math_constant: function(a2) {
-        return { PI: ["Math.PI", S2.MEMBER], E: ["Math.E", S2.MEMBER], GOLDEN_RATIO: ["(1 + Math.sqrt(5)) / 2", S2.DIVISION], SQRT2: ["Math.SQRT2", S2.MEMBER], SQRT1_2: ["Math.SQRT1_2", S2.MEMBER], INFINITY: ["Infinity", S2.ATOMIC] }[a2.getFieldValue("CONSTANT")];
-      },
-      math_constrain: function(a2, b2) {
-        var c2 = b2.valueToCode(a2, "VALUE", S2.NONE) || "0", d2 = b2.valueToCode(a2, "LOW", S2.NONE) || "0";
-        a2 = b2.valueToCode(a2, "HIGH", S2.NONE) || "Infinity";
-        return ["Math.min(Math.max(" + c2 + ", " + d2 + "), " + a2 + ")", S2.FUNCTION_CALL];
-      },
-      math_modulo: function(a2, b2) {
-        var c2 = b2.valueToCode(a2, "DIVIDEND", S2.MODULUS) || "0";
-        a2 = b2.valueToCode(a2, "DIVISOR", S2.MODULUS) || "0";
-        return [c2 + " % " + a2, S2.MODULUS];
-      },
-      math_number: function(a2) {
-        a2 = Number(a2.getFieldValue("NUM"));
-        return [String(a2), a2 >= 0 ? S2.ATOMIC : S2.UNARY_NEGATION];
-      },
-      math_number_property: function(a2, b2) {
-        var c2 = { EVEN: [" % 2 === 0", S2.MODULUS, S2.EQUALITY], ODD: [
-          " % 2 === 1",
-          S2.MODULUS,
-          S2.EQUALITY
-        ], WHOLE: [" % 1 === 0", S2.MODULUS, S2.EQUALITY], POSITIVE: [" > 0", S2.RELATIONAL, S2.RELATIONAL], NEGATIVE: [" < 0", S2.RELATIONAL, S2.RELATIONAL], DIVISIBLE_BY: [null, S2.MODULUS, S2.EQUALITY], PRIME: [null, S2.NONE, S2.FUNCTION_CALL] }, d2 = a2.getFieldValue("PROPERTY"), [e2, f2, g2] = c2[d2];
-        c2 = b2.valueToCode(a2, "NUMBER_TO_CHECK", f2) || "0";
-        d2 === "PRIME" ? a2 = b2.provideFunction_("mathIsPrime", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(n) {
-  // https://en.wikipedia.org/wiki/Primality_test#Naive_methods
-  if (n == 2 || n == 3) {
-    return true;
-  }
-  // False if n is NaN, negative, is 1, or not whole.
-  // And false if n is divisible by 2 or 3.
-  if (isNaN(n) || n <= 1 || n % 1 !== 0 || n % 2 === 0 || n % 3 === 0) {
-    return false;
-  }
-  // Check all the numbers of form 6k +/- 1, up to sqrt(n).
-  for (var x = 6; x <= Math.sqrt(n) + 1; x += 6) {
-    if (n % (x - 1) === 0 || n % (x + 1) === 0) {
-      return false;
-    }
-  }
-  return true;
-}
-`) + "(" + c2 + ")" : d2 === "DIVISIBLE_BY" ? (a2 = b2.valueToCode(a2, "DIVISOR", S2.MODULUS) || "0", a2 = c2 + " % " + a2 + " === 0") : a2 = c2 + e2;
-        return [a2, g2];
-      },
-      math_on_list: function(a2, b2) {
-        var c2 = a2.getFieldValue("OP");
-        switch (c2) {
-          case "SUM":
-            a2 = b2.valueToCode(a2, "LIST", S2.MEMBER) || "[]";
-            a2 += ".reduce(function(x, y) {return x + y;}, 0)";
-            break;
-          case "MIN":
-            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
-            a2 = "Math.min.apply(null, " + a2 + ")";
-            break;
-          case "MAX":
-            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
-            a2 = "Math.max.apply(null, " + a2 + ")";
-            break;
-          case "AVERAGE":
-            c2 = b2.provideFunction_(
-              "mathMean",
-              `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(myList) {
-  return myList.reduce(function(x, y) {return x + y;}, 0) / myList.length;
-}
-`
-            );
-            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
-            a2 = c2 + "(" + a2 + ")";
-            break;
-          case "MEDIAN":
-            c2 = b2.provideFunction_("mathMedian", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(myList) {
-  var localList = myList.filter(function (x) {return typeof x === 'number';});
-  if (!localList.length) return null;
-  localList.sort(function(a, b) {return b - a;});
-  if (localList.length % 2 === 0) {
-    return (localList[localList.length / 2 - 1] + localList[localList.length / 2]) / 2;
-  } else {
-    return localList[(localList.length - 1) / 2];
-  }
-}
-`);
-            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
-            a2 = c2 + "(" + a2 + ")";
-            break;
-          case "MODE":
-            c2 = b2.provideFunction_("mathModes", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(values) {
-  var modes = [];
-  var counts = [];
-  var maxCount = 0;
-  for (var i = 0; i < values.length; i++) {
-    var value = values[i];
-    var found = false;
-    var thisCount;
-    for (var j = 0; j < counts.length; j++) {
-      if (counts[j][0] === value) {
-        thisCount = ++counts[j][1];
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      counts.push([value, 1]);
-      thisCount = 1;
-    }
-    maxCount = Math.max(thisCount, maxCount);
-  }
-  for (var j = 0; j < counts.length; j++) {
-    if (counts[j][1] === maxCount) {
-      modes.push(counts[j][0]);
-    }
-  }
-  return modes;
-}
-`);
-            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
-            a2 = c2 + "(" + a2 + ")";
-            break;
-          case "STD_DEV":
-            c2 = b2.provideFunction_("mathStandardDeviation", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(numbers) {
-  var n = numbers.length;
-  if (!n) return null;
-  var mean = numbers.reduce(function(x, y) {return x + y;}) / n;
-  var variance = 0;
-  for (var j = 0; j < n; j++) {
-    variance += Math.pow(numbers[j] - mean, 2);
-  }
-  variance /= n;
-  return Math.sqrt(variance);
-}
-`);
-            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
-            a2 = c2 + "(" + a2 + ")";
-            break;
-          case "RANDOM":
-            c2 = b2.provideFunction_("mathRandomList", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(list) {
-  var x = Math.floor(Math.random() * list.length);
-  return list[x];
-}
-`);
-            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
-            a2 = c2 + "(" + a2 + ")";
-            break;
-          default:
-            throw Error("Unknown operator: " + c2);
-        }
-        return [a2, S2.FUNCTION_CALL];
-      },
-      math_random_float: function() {
-        return ["Math.random()", S2.FUNCTION_CALL];
-      },
-      math_random_int: function(a2, b2) {
-        var c2 = b2.valueToCode(a2, "FROM", S2.NONE) || "0";
-        a2 = b2.valueToCode(a2, "TO", S2.NONE) || "0";
-        return [b2.provideFunction_("mathRandomInt", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(a, b) {
-  if (a > b) {
-    // Swap a and b to ensure a is smaller.
-    var c = a;
-    a = b;
-    b = c;
-  }
-  return Math.floor(Math.random() * (b - a + 1) + a);
-}
-`) + "(" + c2 + ", " + a2 + ")", S2.FUNCTION_CALL];
-      }
-    };
-    Vr.math_round = Kr;
-    Vr.math_single = Kr;
-    Vr.math_trig = Kr;
-    var Wr = { procedures_callnoreturn: function(a2, b2) {
-      return b2.forBlock.procedures_callreturn(a2, b2)[0] + ";\n";
-    }, procedures_callreturn: function(a2, b2) {
-      var c2 = b2.getProcedureName(a2.getFieldValue("NAME")), d2 = [], e2 = a2.getVarModels();
-      for (let f2 = 0; f2 < e2.length; f2++)
-        d2[f2] = b2.valueToCode(a2, "ARG" + f2, S2.NONE) || "null";
-      return [c2 + "(" + d2.join(", ") + ")", S2.FUNCTION_CALL];
-    } };
-    Wr.procedures_defnoreturn = Lr2;
-    Wr.procedures_defreturn = Lr2;
-    Wr.procedures_ifreturn = function(a2, b2) {
-      var c2 = "if (" + (b2.valueToCode(a2, "CONDITION", S2.NONE) || "false") + ") {\n";
-      b2.STATEMENT_SUFFIX && (c2 += b2.prefixLines(b2.injectId(b2.STATEMENT_SUFFIX, a2), b2.INDENT));
-      a2.hasReturnValue_ ? (a2 = b2.valueToCode(a2, "VALUE", S2.NONE) || "null", c2 += b2.INDENT + "return " + a2 + ";\n") : c2 += b2.INDENT + "return;\n";
-      return c2 + "}\n";
-    };
-    var Mr2 = /^\s*'([^']|\\')*'\s*$/, Xr = {
-      text: function(a2, b2) {
-        return [b2.quote_(a2.getFieldValue("TEXT")), S2.ATOMIC];
-      },
-      text_append: function(a2, b2) {
-        var c2 = b2.getVariableName(a2.getFieldValue("VAR"));
-        a2 = b2.valueToCode(a2, "TEXT", S2.NONE) || "''";
-        return c2 + " += " + Nr(a2)[0] + ";\n";
-      },
-      text_changeCase: function(a2, b2) {
-        var c2 = { UPPERCASE: ".toUpperCase()", LOWERCASE: ".toLowerCase()", TITLECASE: null }[a2.getFieldValue("CASE")];
-        a2 = b2.valueToCode(a2, "TEXT", c2 ? S2.MEMBER : S2.NONE) || "''";
-        return [c2 ? a2 + c2 : b2.provideFunction_("textToTitleCase", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(str) {
-  return str.replace(/\\S+/g,
-      function(txt) {return txt[0].toUpperCase() + txt.substring(1).toLowerCase();});
-}
-`) + "(" + a2 + ")", S2.FUNCTION_CALL];
-      },
-      text_charAt: function(a2, b2) {
-        var c2 = a2.getFieldValue("WHERE") || "FROM_START", d2 = b2.valueToCode(a2, "VALUE", c2 === "RANDOM" ? S2.NONE : S2.MEMBER) || "''";
-        switch (c2) {
-          case "FIRST":
-            return [d2 + ".charAt(0)", S2.FUNCTION_CALL];
-          case "LAST":
-            return [d2 + ".slice(-1)", S2.FUNCTION_CALL];
-          case "FROM_START":
-            return a2 = b2.getAdjusted(a2, "AT"), [d2 + ".charAt(" + a2 + ")", S2.FUNCTION_CALL];
-          case "FROM_END":
-            return a2 = b2.getAdjusted(a2, "AT", 1, true), [d2 + ".slice(" + a2 + ").charAt(0)", S2.FUNCTION_CALL];
-          case "RANDOM":
-            return [b2.provideFunction_(
-              "textRandomLetter",
-              `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(text) {
-  var x = Math.floor(Math.random() * text.length);
-  return text[x];
-}
-`
-            ) + "(" + d2 + ")", S2.FUNCTION_CALL];
-        }
-        throw Error("Unhandled option (text_charAt).");
-      },
-      text_count: function(a2, b2) {
-        var c2 = b2.valueToCode(a2, "TEXT", S2.NONE) || "''";
-        a2 = b2.valueToCode(a2, "SUB", S2.NONE) || "''";
-        return [b2.provideFunction_("textCount", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(haystack, needle) {
-  if (needle.length === 0) {
-    return haystack.length + 1;
-  } else {
-    return haystack.split(needle).length - 1;
-  }
-}
-`) + "(" + c2 + ", " + a2 + ")", S2.FUNCTION_CALL];
-      },
-      text_getSubstring: function(a2, b2) {
-        var c2 = { FIRST: "First", LAST: "Last", FROM_START: "FromStart", FROM_END: "FromEnd" }, d2 = a2.getFieldValue("WHERE1"), e2 = a2.getFieldValue("WHERE2"), f2 = d2 !== "FROM_END" && d2 !== "LAST" && e2 !== "FROM_END" && e2 !== "LAST", g2 = b2.valueToCode(a2, "STRING", f2 ? S2.MEMBER : S2.NONE) || "''";
-        if (d2 === "FIRST" && e2 === "LAST")
-          return [g2, S2.NONE];
-        if (g2.match(/^'?\w+'?$/) || f2) {
-          switch (d2) {
-            case "FROM_START":
-              c2 = b2.getAdjusted(a2, "AT1");
-              break;
-            case "FROM_END":
-              c2 = b2.getAdjusted(a2, "AT1", 1, false, S2.SUBTRACTION);
-              c2 = g2 + ".length - " + c2;
-              break;
-            case "FIRST":
-              c2 = "0";
-              break;
-            default:
-              throw Error("Unhandled option (text_getSubstring).");
-          }
-          switch (e2) {
-            case "FROM_START":
-              b2 = b2.getAdjusted(a2, "AT2", 1);
-              break;
-            case "FROM_END":
-              b2 = b2.getAdjusted(a2, "AT2", 0, false, S2.SUBTRACTION);
-              b2 = g2 + ".length - " + b2;
-              break;
-            case "LAST":
-              b2 = g2 + ".length";
-              break;
-            default:
-              throw Error("Unhandled option (text_getSubstring).");
-          }
-          g2 = g2 + ".slice(" + c2 + ", " + b2 + ")";
-        } else
-          f2 = b2.getAdjusted(a2, "AT1"), a2 = b2.getAdjusted(a2, "AT2"), g2 = b2.provideFunction_("subsequence" + c2[d2] + c2[e2], `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(sequence${d2 === "FROM_END" || d2 === "FROM_START" ? ", at1" : ""}${e2 === "FROM_END" || e2 === "FROM_START" ? ", at2" : ""}) {
-  var start = ${Or("sequence", d2, "at1")};
-  var end = ${Or("sequence", e2, "at2")} + 1;
-  return sequence.slice(start, end);
-}
-`) + "(" + g2 + (d2 === "FROM_END" || d2 === "FROM_START" ? ", " + f2 : "") + (e2 === "FROM_END" || e2 === "FROM_START" ? ", " + a2 : "") + ")";
-        return [g2, S2.FUNCTION_CALL];
-      },
-      text_indexOf: function(a2, b2) {
-        var c2 = a2.getFieldValue("END") === "FIRST" ? "indexOf" : "lastIndexOf", d2 = b2.valueToCode(a2, "FIND", S2.NONE) || "''";
-        b2 = (b2.valueToCode(a2, "VALUE", S2.MEMBER) || "''") + "." + c2 + "(" + d2 + ")";
-        return a2.workspace.options.oneBasedIndex ? [b2 + " + 1", S2.ADDITION] : [b2, S2.FUNCTION_CALL];
-      },
-      text_isEmpty: function(a2, b2) {
-        return ["!" + (b2.valueToCode(a2, "VALUE", S2.MEMBER) || "''") + ".length", S2.LOGICAL_NOT];
-      },
-      text_join: function(a2, b2) {
-        switch (a2.itemCount_) {
-          case 0:
-            return ["''", S2.ATOMIC];
-          case 1:
-            return a2 = b2.valueToCode(a2, "ADD0", S2.NONE) || "''", Nr(a2);
-          case 2:
-            var c2 = b2.valueToCode(a2, "ADD0", S2.NONE) || "''";
-            a2 = b2.valueToCode(a2, "ADD1", S2.NONE) || "''";
-            return [Nr(c2)[0] + " + " + Nr(a2)[0], S2.ADDITION];
-          default:
-            c2 = Array(a2.itemCount_);
-            for (let d2 = 0; d2 < a2.itemCount_; d2++)
-              c2[d2] = b2.valueToCode(a2, "ADD" + d2, S2.NONE) || "''";
-            return ["[" + c2.join(",") + "].join('')", S2.FUNCTION_CALL];
-        }
-      },
-      text_length: function(a2, b2) {
-        return [
-          (b2.valueToCode(a2, "VALUE", S2.MEMBER) || "''") + ".length",
-          S2.MEMBER
-        ];
-      },
-      text_print: function(a2, b2) {
-        return "window.alert(" + (b2.valueToCode(a2, "TEXT", S2.NONE) || "''") + ");\n";
-      }
-    };
-    Xr.text_prompt = Pr;
-    Xr.text_prompt_ext = Pr;
-    Xr.text_replace = function(a2, b2) {
-      var c2 = b2.valueToCode(a2, "TEXT", S2.NONE) || "''", d2 = b2.valueToCode(a2, "FROM", S2.NONE) || "''";
-      a2 = b2.valueToCode(a2, "TO", S2.NONE) || "''";
-      return [b2.provideFunction_("textReplace", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(haystack, needle, replacement) {
-  needle = needle.replace(/([-()\\[\\]{}+?*.$\\^|,:#<!\\\\])/g, '\\\\$1')
-                 .replace(/\\x08/g, '\\\\x08');
-  return haystack.replace(new RegExp(needle, 'g'), replacement);
-}
-`) + "(" + c2 + ", " + d2 + ", " + a2 + ")", S2.FUNCTION_CALL];
-    };
-    Xr.text_reverse = function(a2, b2) {
-      return [(b2.valueToCode(a2, "TEXT", S2.MEMBER) || "''") + ".split('').reverse().join('')", S2.FUNCTION_CALL];
-    };
-    Xr.text_trim = function(a2, b2) {
-      var c2 = { LEFT: ".replace(/^[\\s\\xa0]+/, '')", RIGHT: ".replace(/[\\s\\xa0]+$/, '')", BOTH: ".trim()" }[a2.getFieldValue("MODE")];
-      return [(b2.valueToCode(a2, "TEXT", S2.MEMBER) || "''") + c2, S2.FUNCTION_CALL];
-    };
-    var Yr = {};
-    Yr.variables_get = Qr;
-    Yr.variables_set = Rr;
-    var Zr = {};
-    Zr.variables_get_dynamic = Qr;
-    Zr.variables_set_dynamic = Rr;
-    var $r2 = new Sr(), as = Object.assign({}, {
-      lists_create_empty: function() {
-        return ["[]", S2.ATOMIC];
-      },
-      lists_create_with: function(a2, b2) {
-        var c2 = Array(a2.itemCount_);
-        for (let d2 = 0; d2 < a2.itemCount_; d2++)
-          c2[d2] = b2.valueToCode(a2, "ADD" + d2, S2.NONE) || "null";
-        return ["[" + c2.join(", ") + "]", S2.ATOMIC];
-      },
-      lists_getIndex: function(a2, b2) {
-        var c2 = a2.getFieldValue("MODE") || "GET", d2 = a2.getFieldValue("WHERE") || "FROM_START", e2 = b2.valueToCode(a2, "VALUE", d2 === "RANDOM" ? S2.NONE : S2.MEMBER) || "[]";
-        switch (d2) {
-          case "FIRST":
-            if (c2 === "GET")
-              return [e2 + "[0]", S2.MEMBER];
-            if (c2 === "GET_REMOVE")
-              return [e2 + ".shift()", S2.MEMBER];
-            if (c2 === "REMOVE")
-              return e2 + ".shift();\n";
-            break;
-          case "LAST":
-            if (c2 === "GET")
-              return [e2 + ".slice(-1)[0]", S2.MEMBER];
-            if (c2 === "GET_REMOVE")
-              return [e2 + ".pop()", S2.MEMBER];
-            if (c2 === "REMOVE")
-              return e2 + ".pop();\n";
-            break;
-          case "FROM_START":
-            a2 = b2.getAdjusted(a2, "AT");
-            if (c2 === "GET")
-              return [e2 + "[" + a2 + "]", S2.MEMBER];
-            if (c2 === "GET_REMOVE")
-              return [e2 + ".splice(" + a2 + ", 1)[0]", S2.FUNCTION_CALL];
-            if (c2 === "REMOVE")
-              return e2 + ".splice(" + a2 + ", 1);\n";
-            break;
-          case "FROM_END":
-            a2 = b2.getAdjusted(a2, "AT", 1, true);
-            if (c2 === "GET")
-              return [e2 + ".slice(" + a2 + ")[0]", S2.FUNCTION_CALL];
-            if (c2 === "GET_REMOVE")
-              return [e2 + ".splice(" + a2 + ", 1)[0]", S2.FUNCTION_CALL];
-            if (c2 === "REMOVE")
-              return e2 + ".splice(" + a2 + ", 1);";
-            break;
-          case "RANDOM":
-            e2 = b2.provideFunction_("listsGetRandomItem", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(list, remove) {
-  var x = Math.floor(Math.random() * list.length);
-  if (remove) {
-    return list.splice(x, 1)[0];
-  } else {
-    return list[x];
-  }
-}
-`) + "(" + e2 + ", " + (c2 !== "GET") + ")";
-            if (c2 === "GET" || c2 === "GET_REMOVE")
-              return [e2, S2.FUNCTION_CALL];
-            if (c2 === "REMOVE")
-              return e2 + ";\n";
-        }
-        throw Error("Unhandled combination (lists_getIndex).");
-      },
-      lists_getSublist: function(a2, b2) {
-        var c2 = { FIRST: "First", LAST: "Last", FROM_START: "FromStart", FROM_END: "FromEnd" }, d2 = b2.valueToCode(a2, "LIST", S2.MEMBER) || "[]", e2 = a2.getFieldValue("WHERE1"), f2 = a2.getFieldValue("WHERE2");
-        if (e2 === "FIRST" && f2 === "LAST")
-          d2 += ".slice(0)";
-        else if (d2.match(/^\w+$/) || e2 !== "FROM_END" && f2 === "FROM_START") {
-          switch (e2) {
-            case "FROM_START":
-              c2 = b2.getAdjusted(a2, "AT1");
-              break;
-            case "FROM_END":
-              c2 = b2.getAdjusted(a2, "AT1", 1, false, S2.SUBTRACTION);
-              c2 = d2 + ".length - " + c2;
-              break;
-            case "FIRST":
-              c2 = "0";
-              break;
-            default:
-              throw Error("Unhandled option (lists_getSublist).");
-          }
-          switch (f2) {
-            case "FROM_START":
-              b2 = b2.getAdjusted(a2, "AT2", 1);
-              break;
-            case "FROM_END":
-              b2 = b2.getAdjusted(a2, "AT2", 0, false, S2.SUBTRACTION);
-              b2 = d2 + ".length - " + b2;
-              break;
-            case "LAST":
-              b2 = d2 + ".length";
-              break;
-            default:
-              throw Error("Unhandled option (lists_getSublist).");
-          }
-          d2 = d2 + ".slice(" + c2 + ", " + b2 + ")";
-        } else {
-          let g2 = b2.getAdjusted(a2, "AT1");
-          a2 = b2.getAdjusted(a2, "AT2");
-          d2 = b2.provideFunction_("subsequence" + c2[e2] + c2[f2], `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(sequence${e2 === "FROM_END" || e2 === "FROM_START" ? ", at1" : ""}${f2 === "FROM_END" || f2 === "FROM_START" ? ", at2" : ""}) {
-  var start = ${Hr("sequence", e2, "at1")};
-  var end = ${Hr("sequence", f2, "at2")} + 1;
-  return sequence.slice(start, end);
-}
-`) + "(" + d2 + (e2 === "FROM_END" || e2 === "FROM_START" ? ", " + g2 : "") + (f2 === "FROM_END" || f2 === "FROM_START" ? ", " + a2 : "") + ")";
-        }
-        return [d2, S2.FUNCTION_CALL];
-      },
-      lists_indexOf: function(a2, b2) {
-        var c2 = a2.getFieldValue("END") === "FIRST" ? "indexOf" : "lastIndexOf", d2 = b2.valueToCode(a2, "FIND", S2.NONE) || "''";
-        b2 = (b2.valueToCode(a2, "VALUE", S2.MEMBER) || "[]") + "." + c2 + "(" + d2 + ")";
-        return a2.workspace.options.oneBasedIndex ? [b2 + " + 1", S2.ADDITION] : [b2, S2.FUNCTION_CALL];
-      },
-      lists_isEmpty: function(a2, b2) {
-        return ["!" + (b2.valueToCode(a2, "VALUE", S2.MEMBER) || "[]") + ".length", S2.LOGICAL_NOT];
-      },
-      lists_length: function(a2, b2) {
-        return [(b2.valueToCode(a2, "VALUE", S2.MEMBER) || "[]") + ".length", S2.MEMBER];
-      },
-      lists_repeat: function(a2, b2) {
-        var c2 = b2.provideFunction_("listsRepeat", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(value, n) {
-  var array = [];
-  for (var i = 0; i < n; i++) {
-    array[i] = value;
-  }
-  return array;
-}
-`), d2 = b2.valueToCode(a2, "ITEM", S2.NONE) || "null";
-        a2 = b2.valueToCode(a2, "NUM", S2.NONE) || "0";
-        return [c2 + "(" + d2 + ", " + a2 + ")", S2.FUNCTION_CALL];
-      },
-      lists_reverse: function(a2, b2) {
-        return [(b2.valueToCode(a2, "LIST", S2.FUNCTION_CALL) || "[]") + ".slice().reverse()", S2.FUNCTION_CALL];
-      },
-      lists_setIndex: function(a2, b2) {
-        function c2() {
-          if (d2.match(/^\w+$/))
-            return "";
-          var h2 = b2.nameDB_.getDistinctName("tmpList", $2.P.VARIABLE), m2 = "var " + h2 + " = " + d2 + ";\n";
-          d2 = h2;
-          return m2;
-        }
-        var d2 = b2.valueToCode(a2, "LIST", S2.MEMBER) || "[]", e2 = a2.getFieldValue("MODE") || "GET", f2 = a2.getFieldValue("WHERE") || "FROM_START", g2 = b2.valueToCode(a2, "TO", S2.ASSIGNMENT) || "null";
-        switch (f2) {
-          case "FIRST":
-            if (e2 === "SET")
-              return d2 + "[0] = " + g2 + ";\n";
-            if (e2 === "INSERT")
-              return d2 + ".unshift(" + g2 + ");\n";
-            break;
-          case "LAST":
-            if (e2 === "SET")
-              return c2() + (d2 + "[" + d2 + ".length - 1] = " + g2 + ";\n");
-            if (e2 === "INSERT")
-              return d2 + ".push(" + g2 + ");\n";
-            break;
-          case "FROM_START":
-            a2 = b2.getAdjusted(a2, "AT");
-            if (e2 === "SET")
-              return d2 + "[" + a2 + "] = " + g2 + ";\n";
-            if (e2 === "INSERT")
-              return d2 + ".splice(" + a2 + ", 0, " + g2 + ");\n";
-            break;
-          case "FROM_END":
-            a2 = b2.getAdjusted(a2, "AT", 1, false, S2.SUBTRACTION);
-            f2 = c2();
-            if (e2 === "SET")
-              return f2 + (d2 + "[" + d2 + ".length - " + a2 + "] = " + g2 + ";\n");
-            if (e2 === "INSERT")
-              return f2 + (d2 + ".splice(" + d2 + ".length - " + a2 + ", 0, " + g2 + ");\n");
-            break;
-          case "RANDOM":
-            a2 = c2();
-            f2 = b2.nameDB_.getDistinctName("tmpX", $2.P.VARIABLE);
-            a2 += "var " + f2 + " = Math.floor(Math.random() * " + d2 + ".length);\n";
-            if (e2 === "SET")
-              return a2 + (d2 + "[" + f2 + "] = " + g2 + ";\n");
-            if (e2 === "INSERT")
-              return a2 + (d2 + ".splice(" + f2 + ", 0, " + g2 + ");\n");
-        }
-        throw Error("Unhandled combination (lists_setIndex).");
-      },
-      lists_sort: function(a2, b2) {
-        var c2 = b2.valueToCode(a2, "LIST", S2.FUNCTION_CALL) || "[]", d2 = a2.getFieldValue("DIRECTION") === "1" ? 1 : -1;
-        a2 = a2.getFieldValue("TYPE");
-        b2 = b2.provideFunction_("listsGetSortCompare", `
-function ${b2.FUNCTION_NAME_PLACEHOLDER_}(type, direction) {
-  var compareFuncs = {
-    'NUMERIC': function(a, b) {
-        return Number(a) - Number(b); },
-    'TEXT': function(a, b) {
-        return String(a) > String(b) ? 1 : -1; },
-    'IGNORE_CASE': function(a, b) {
-        return String(a).toLowerCase() > String(b).toLowerCase() ? 1 : -1; },
-  };
-  var compare = compareFuncs[type];
-  return function(a, b) { return compare(a, b) * direction; };
-}
-      `);
-        return [c2 + ".slice().sort(" + b2 + '("' + a2 + '", ' + d2 + "))", S2.FUNCTION_CALL];
-      },
-      lists_split: function(a2, b2) {
-        var c2 = b2.valueToCode(a2, "INPUT", S2.MEMBER);
-        b2 = b2.valueToCode(a2, "DELIM", S2.NONE) || "''";
-        a2 = a2.getFieldValue("MODE");
-        if (a2 === "SPLIT")
-          c2 || (c2 = "''"), a2 = "split";
-        else if (a2 === "JOIN")
-          c2 || (c2 = "[]"), a2 = "join";
-        else
-          throw Error("Unknown mode: " + a2);
-        return [c2 + "." + a2 + "(" + b2 + ")", S2.FUNCTION_CALL];
-      }
-    }, Tr, Ur2, Vr, Wr, Xr, Yr, Zr);
-    for (let a2 in as)
-      $r2.forBlock[a2] = as[a2];
-    var bs = {};
-    bs.JavascriptGenerator = Sr;
-    bs.Order = S2;
-    bs.javascriptGenerator = $r2;
-    $2.__chunk_javascript = bs;
-    $2.__chunk_javascript.__namespace__ = $2;
-    return $2.__chunk_javascript;
-  });
-})(javascript_compressed);
-var javascript_compressedExports = javascript_compressed.exports;
-const javascript$2 = /* @__PURE__ */ getDefaultExportFromCjs(javascript_compressedExports);
-const {
-  JavascriptGenerator,
-  Order,
-  javascriptGenerator
-} = javascript$2;
-const javascript$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  JavascriptGenerator,
-  Order,
-  javascriptGenerator
-}, Symbol.toStringTag, { value: "Module" }));
-var blockly$1 = { exports: {} };
 var blockly_compressedExports = requireBlockly_compressed();
 const Blockly$1 = /* @__PURE__ */ getDefaultExportFromCjs(blockly_compressedExports);
 const {
@@ -37111,6 +35356,1761 @@ const {
   utils,
   zelos
 } = Blockly;
+var python_compressed = { exports: {} };
+(function(module, exports) {
+  (function(root, factory) {
+    {
+      module.exports = factory(requireBlockly_compressed());
+    }
+  })(commonjsGlobal, function(__parent__) {
+    var $2 = __parent__.__namespace__;
+    var cs = function(a2, b2) {
+      var c2 = 0, d2 = "";
+      b2.STATEMENT_PREFIX && (d2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
+      do {
+        var e2 = b2.valueToCode(a2, "IF" + c2, U2.NONE) || "False";
+        var f2 = b2.statementToCode(a2, "DO" + c2) || b2.PASS;
+        b2.STATEMENT_SUFFIX && (f2 = b2.prefixLines(b2.injectId(b2.STATEMENT_SUFFIX, a2), b2.INDENT) + f2);
+        d2 += (c2 === 0 ? "if " : "elif ") + e2 + ":\n" + f2;
+        c2++;
+      } while (a2.getInput("IF" + c2));
+      if (a2.getInput("ELSE") || b2.STATEMENT_SUFFIX)
+        f2 = a2.getInput("ELSE") ? b2.statementToCode(a2, "ELSE") || b2.PASS : b2.PASS, b2.STATEMENT_SUFFIX && (f2 = b2.prefixLines(b2.injectId(
+          b2.STATEMENT_SUFFIX,
+          a2
+        ), b2.INDENT) + f2), d2 += "else:\n" + f2;
+      return d2;
+    }, ds = function(a2, b2) {
+      var c2 = a2.getField("TIMES") ? String(parseInt(a2.getFieldValue("TIMES"), 10)) : b2.valueToCode(a2, "TIMES", U2.NONE) || "0";
+      c2 = $2.zf(c2) ? parseInt(c2, 10) : "int(" + c2 + ")";
+      var d2 = b2.statementToCode(a2, "DO");
+      d2 = b2.addLoopTrap(d2, a2) || b2.PASS;
+      return "for " + b2.nameDB_.getDistinctName("count", $2.P.VARIABLE) + " in range(" + c2 + "):\n" + d2;
+    }, es = function(a2, b2) {
+      var c2 = a2.getFieldValue("OP");
+      if (c2 === "NEG") {
+        var d2 = b2.valueToCode(a2, "NUM", U2.UNARY_SIGN) || "0";
+        return ["-" + d2, U2.UNARY_SIGN];
+      }
+      b2.definitions_.import_math = "import math";
+      a2 = c2 === "SIN" || c2 === "COS" || c2 === "TAN" ? b2.valueToCode(a2, "NUM", U2.MULTIPLICATIVE) || "0" : b2.valueToCode(a2, "NUM", U2.NONE) || "0";
+      switch (c2) {
+        case "ABS":
+          d2 = "math.fabs(" + a2 + ")";
+          break;
+        case "ROOT":
+          d2 = "math.sqrt(" + a2 + ")";
+          break;
+        case "LN":
+          d2 = "math.log(" + a2 + ")";
+          break;
+        case "LOG10":
+          d2 = "math.log10(" + a2 + ")";
+          break;
+        case "EXP":
+          d2 = "math.exp(" + a2 + ")";
+          break;
+        case "POW10":
+          d2 = "math.pow(10," + a2 + ")";
+          break;
+        case "ROUND":
+          d2 = "round(" + a2 + ")";
+          break;
+        case "ROUNDUP":
+          d2 = "math.ceil(" + a2 + ")";
+          break;
+        case "ROUNDDOWN":
+          d2 = "math.floor(" + a2 + ")";
+          break;
+        case "SIN":
+          d2 = "math.sin(" + a2 + " / 180.0 * math.pi)";
+          break;
+        case "COS":
+          d2 = "math.cos(" + a2 + " / 180.0 * math.pi)";
+          break;
+        case "TAN":
+          d2 = "math.tan(" + a2 + " / 180.0 * math.pi)";
+      }
+      if (d2)
+        return [d2, U2.FUNCTION_CALL];
+      switch (c2) {
+        case "ASIN":
+          d2 = "math.asin(" + a2 + ") / math.pi * 180";
+          break;
+        case "ACOS":
+          d2 = "math.acos(" + a2 + ") / math.pi * 180";
+          break;
+        case "ATAN":
+          d2 = "math.atan(" + a2 + ") / math.pi * 180";
+          break;
+        default:
+          throw Error("Unknown math operator: " + c2);
+      }
+      return [d2, U2.MULTIPLICATIVE];
+    }, fs = function(a2, b2) {
+      var c2 = [], d2 = a2.workspace, e2 = $2.Bd(d2) || [];
+      for (var f2 of e2)
+        e2 = f2.getName(), a2.getVarModels().includes(f2) || c2.push(b2.getVariableName(e2));
+      d2 = $2.Cd(d2);
+      for (f2 = 0; f2 < d2.length; f2++)
+        c2.push(b2.nameDB_.getName(d2[f2], $2.P.DEVELOPER_VARIABLE));
+      d2 = c2.length ? b2.INDENT + "global " + c2.join(", ") + "\n" : "";
+      c2 = b2.getProcedureName(a2.getFieldValue("NAME"));
+      f2 = "";
+      b2.STATEMENT_PREFIX && (f2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
+      b2.STATEMENT_SUFFIX && (f2 += b2.injectId(b2.STATEMENT_SUFFIX, a2));
+      f2 && (f2 = b2.prefixLines(f2, b2.INDENT));
+      e2 = "";
+      b2.INFINITE_LOOP_TRAP && (e2 = b2.prefixLines(b2.injectId(b2.INFINITE_LOOP_TRAP, a2), b2.INDENT));
+      var g2 = "";
+      a2.getInput("STACK") && (g2 = b2.statementToCode(a2, "STACK"));
+      var h2 = "";
+      a2.getInput("RETURN") && (h2 = b2.valueToCode(a2, "RETURN", U2.NONE) || "");
+      var m2 = "";
+      g2 && h2 && (m2 = f2);
+      h2 ? h2 = b2.INDENT + "return " + h2 + "\n" : g2 || (g2 = b2.PASS);
+      var z2 = [], F2 = a2.getVarModels();
+      for (let J2 = 0; J2 < F2.length; J2++)
+        z2[J2] = b2.getVariableName(F2[J2].getId());
+      d2 = "def " + c2 + "(" + z2.join(", ") + "):\n" + d2 + f2 + e2 + g2 + m2 + h2;
+      d2 = b2.scrub_(a2, d2);
+      b2.definitions_["%" + c2] = d2;
+      return null;
+    }, hs = function(a2) {
+      return gs.test(a2) ? [a2, U2.ATOMIC] : ["str(" + a2 + ")", U2.FUNCTION_CALL];
+    }, is2 = function(a2, b2) {
+      var c2 = b2.provideFunction_(
+        "text_prompt",
+        `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(msg):
+  try:
+    return raw_input(msg)
+  except NameError:
+    return input(msg)
+`
+      );
+      b2 = a2.getField("TEXT") ? b2.quote_(a2.getFieldValue("TEXT")) : b2.valueToCode(a2, "TEXT", U2.NONE) || "''";
+      c2 = c2 + "(" + b2 + ")";
+      a2.getFieldValue("TYPE") === "NUMBER" && (c2 = "float(" + c2 + ")");
+      return [c2, U2.FUNCTION_CALL];
+    }, js = function(a2, b2) {
+      return [b2.getVariableName(a2.getFieldValue("VAR")), U2.ATOMIC];
+    }, ks = function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "VALUE", U2.NONE) || "0";
+      return b2.getVariableName(a2.getFieldValue("VAR")) + " = " + c2 + "\n";
+    }, U2, ls = U2 || (U2 = {});
+    ls[ls.ATOMIC = 0] = "ATOMIC";
+    ls[ls.COLLECTION = 1] = "COLLECTION";
+    ls[ls.STRING_CONVERSION = 1] = "STRING_CONVERSION";
+    ls[ls.MEMBER = 2.1] = "MEMBER";
+    ls[ls.FUNCTION_CALL = 2.2] = "FUNCTION_CALL";
+    ls[ls.EXPONENTIATION = 3] = "EXPONENTIATION";
+    ls[ls.UNARY_SIGN = 4] = "UNARY_SIGN";
+    ls[ls.BITWISE_NOT = 4] = "BITWISE_NOT";
+    ls[ls.MULTIPLICATIVE = 5] = "MULTIPLICATIVE";
+    ls[ls.ADDITIVE = 6] = "ADDITIVE";
+    ls[ls.BITWISE_SHIFT = 7] = "BITWISE_SHIFT";
+    ls[ls.BITWISE_AND = 8] = "BITWISE_AND";
+    ls[ls.BITWISE_XOR = 9] = "BITWISE_XOR";
+    ls[ls.BITWISE_OR = 10] = "BITWISE_OR";
+    ls[ls.RELATIONAL = 11] = "RELATIONAL";
+    ls[ls.LOGICAL_NOT = 12] = "LOGICAL_NOT";
+    ls[ls.LOGICAL_AND = 13] = "LOGICAL_AND";
+    ls[ls.LOGICAL_OR = 14] = "LOGICAL_OR";
+    ls[ls.CONDITIONAL = 15] = "CONDITIONAL";
+    ls[ls.LAMBDA = 16] = "LAMBDA";
+    ls[ls.NONE = 99] = "NONE";
+    var ms = class extends $2.zq {
+      constructor(a2 = "Python") {
+        super(a2);
+        this.ORDER_OVERRIDES = [[U2.FUNCTION_CALL, U2.MEMBER], [U2.FUNCTION_CALL, U2.FUNCTION_CALL], [U2.MEMBER, U2.MEMBER], [U2.MEMBER, U2.FUNCTION_CALL], [U2.LOGICAL_NOT, U2.LOGICAL_NOT], [U2.LOGICAL_AND, U2.LOGICAL_AND], [U2.LOGICAL_OR, U2.LOGICAL_OR]];
+        this.PASS = "";
+        this.isInitialized = false;
+        for (let b2 in U2)
+          a2 = U2[b2], typeof a2 !== "string" && (this["ORDER_" + b2] = a2);
+        this.addReservedWords("False,None,True,and,as,assert,break,class,continue,def,del,elif,else,except,exec,finally,for,from,global,if,import,in,is,lambda,nonlocal,not,or,pass,print,raise,return,try,while,with,yield,NotImplemented,Ellipsis,__debug__,quit,exit,copyright,license,credits,ArithmeticError,AssertionError,AttributeError,BaseException,BlockingIOError,BrokenPipeError,BufferError,BytesWarning,ChildProcessError,ConnectionAbortedError,ConnectionError,ConnectionRefusedError,ConnectionResetError,DeprecationWarning,EOFError,Ellipsis,EnvironmentError,Exception,FileExistsError,FileNotFoundError,FloatingPointError,FutureWarning,GeneratorExit,IOError,ImportError,ImportWarning,IndentationError,IndexError,InterruptedError,IsADirectoryError,KeyError,KeyboardInterrupt,LookupError,MemoryError,ModuleNotFoundError,NameError,NotADirectoryError,NotImplemented,NotImplementedError,OSError,OverflowError,PendingDeprecationWarning,PermissionError,ProcessLookupError,RecursionError,ReferenceError,ResourceWarning,RuntimeError,RuntimeWarning,StandardError,StopAsyncIteration,StopIteration,SyntaxError,SyntaxWarning,SystemError,SystemExit,TabError,TimeoutError,TypeError,UnboundLocalError,UnicodeDecodeError,UnicodeEncodeError,UnicodeError,UnicodeTranslateError,UnicodeWarning,UserWarning,ValueError,Warning,ZeroDivisionError,_,__build_class__,__debug__,__doc__,__import__,__loader__,__name__,__package__,__spec__,abs,all,any,apply,ascii,basestring,bin,bool,buffer,bytearray,bytes,callable,chr,classmethod,cmp,coerce,compile,complex,copyright,credits,delattr,dict,dir,divmod,enumerate,eval,exec,execfile,exit,file,filter,float,format,frozenset,getattr,globals,hasattr,hash,help,hex,id,input,int,intern,isinstance,issubclass,iter,len,license,list,locals,long,map,max,memoryview,min,next,object,oct,open,ord,pow,print,property,quit,range,raw_input,reduce,reload,repr,reversed,round,set,setattr,slice,sorted,staticmethod,str,sum,super,tuple,type,unichr,unicode,vars,xrange,zip");
+      }
+      init(a2) {
+        super.init(a2);
+        this.PASS = this.INDENT + "pass\n";
+        this.nameDB_ ? this.nameDB_.reset() : this.nameDB_ = new $2.Cj(this.RESERVED_WORDS_);
+        this.nameDB_.setVariableMap(a2.getVariableMap());
+        this.nameDB_.populateVariables(a2);
+        this.nameDB_.populateProcedures(a2);
+        var b2 = [], c2 = $2.Cd(a2);
+        for (let d2 = 0; d2 < c2.length; d2++)
+          b2.push(this.nameDB_.getName(c2[d2], $2.Cj.DEVELOPER_VARIABLE_TYPE) + " = None");
+        a2 = $2.Bd(a2);
+        for (c2 = 0; c2 < a2.length; c2++)
+          b2.push(this.getVariableName(a2[c2].getId()) + " = None");
+        this.definitions_.variables = b2.join("\n");
+        this.isInitialized = true;
+      }
+      finish(a2) {
+        var b2 = [], c2 = [];
+        for (let d2 in this.definitions_) {
+          let e2 = this.definitions_[d2];
+          e2.match(/^(from\s+\S+\s+)?import\s+\S+/) ? b2.push(e2) : c2.push(e2);
+        }
+        a2 = super.finish(a2);
+        this.isInitialized = false;
+        this.nameDB_.reset();
+        return (b2.join("\n") + "\n\n" + c2.join("\n\n")).replace(/\n\n+/g, "\n\n").replace(/\n*$/, "\n\n\n") + a2;
+      }
+      scrubNakedValue(a2) {
+        return a2 + "\n";
+      }
+      quote_(a2) {
+        a2 = a2.replace(/\\/g, "\\\\").replace(/\n/g, "\\\n");
+        var b2 = "'";
+        a2.includes("'") && (a2.includes('"') ? a2 = a2.replace(/'/g, "\\'") : b2 = '"');
+        return b2 + a2 + b2;
+      }
+      multiline_quote_(a2) {
+        return a2.split(/\n/g).map(this.quote_).join(" + '\\n' + \n");
+      }
+      scrub_(a2, b2, c2 = false) {
+        var d2 = "";
+        if (!a2.outputConnection || !a2.outputConnection.targetConnection) {
+          var e2 = a2.getCommentText();
+          e2 && (e2 = $2.yf(e2, this.COMMENT_WRAP - 3), d2 += this.prefixLines(e2 + "\n", "# "));
+          for (let f2 = 0; f2 < a2.inputList.length; f2++)
+            a2.inputList[f2].type === $2.je.VALUE && (e2 = a2.inputList[f2].connection.targetBlock()) && (e2 = this.allNestedComments(e2)) && (d2 += this.prefixLines(e2, "# "));
+        }
+        a2 = a2.nextConnection && a2.nextConnection.targetBlock();
+        c2 = c2 ? "" : this.blockToCode(a2);
+        return d2 + b2 + c2;
+      }
+      getAdjustedInt(a2, b2, c2 = 0, d2 = false) {
+        a2.workspace.options.oneBasedIndex && c2--;
+        var e2 = a2.workspace.options.oneBasedIndex ? "1" : "0";
+        a2 = this.valueToCode(a2, b2, c2 ? U2.ADDITIVE : U2.NONE) || e2;
+        $2.zf(a2) ? (a2 = parseInt(a2, 10) + c2, d2 && (a2 = -a2)) : (a2 = c2 > 0 ? "int(" + a2 + " + " + c2 + ")" : c2 < 0 ? "int(" + a2 + " - " + -c2 + ")" : "int(" + a2 + ")", d2 && (a2 = "-" + a2));
+        return a2;
+      }
+    };
+    var ns = {};
+    ns.controls_if = cs;
+    ns.controls_ifelse = cs;
+    ns.logic_boolean = function(a2) {
+      return [a2.getFieldValue("BOOL") === "TRUE" ? "True" : "False", U2.ATOMIC];
+    };
+    ns.logic_compare = function(a2, b2) {
+      var c2 = { EQ: "==", NEQ: "!=", LT: "<", LTE: "<=", GT: ">", GTE: ">=" }[a2.getFieldValue("OP")], d2 = U2.RELATIONAL, e2 = b2.valueToCode(a2, "A", d2) || "0";
+      a2 = b2.valueToCode(a2, "B", d2) || "0";
+      return [e2 + " " + c2 + " " + a2, d2];
+    };
+    ns.logic_negate = function(a2, b2) {
+      return ["not " + (b2.valueToCode(a2, "BOOL", U2.LOGICAL_NOT) || "True"), U2.LOGICAL_NOT];
+    };
+    ns.logic_null = function() {
+      return ["None", U2.ATOMIC];
+    };
+    ns.logic_operation = function(a2, b2) {
+      var c2 = a2.getFieldValue("OP") === "AND" ? "and" : "or", d2 = c2 === "and" ? U2.LOGICAL_AND : U2.LOGICAL_OR, e2 = b2.valueToCode(a2, "A", d2);
+      a2 = b2.valueToCode(a2, "B", d2);
+      e2 || a2 ? (b2 = c2 === "and" ? "True" : "False", e2 || (e2 = b2), a2 || (a2 = b2)) : a2 = e2 = "False";
+      return [e2 + " " + c2 + " " + a2, d2];
+    };
+    ns.logic_ternary = function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "IF", U2.CONDITIONAL) || "False", d2 = b2.valueToCode(a2, "THEN", U2.CONDITIONAL) || "None";
+      a2 = b2.valueToCode(a2, "ELSE", U2.CONDITIONAL) || "None";
+      return [d2 + " if " + c2 + " else " + a2, U2.CONDITIONAL];
+    };
+    var os = { controls_flow_statements: function(a2, b2) {
+      var c2 = "";
+      b2.STATEMENT_PREFIX && (c2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
+      b2.STATEMENT_SUFFIX && (c2 += b2.injectId(b2.STATEMENT_SUFFIX, a2));
+      if (b2.STATEMENT_PREFIX) {
+        let d2 = a2.getSurroundLoop();
+        d2 && !d2.suppressPrefixSuffix && (c2 += b2.injectId(b2.STATEMENT_PREFIX, d2));
+      }
+      switch (a2.getFieldValue("FLOW")) {
+        case "BREAK":
+          return c2 + "break\n";
+        case "CONTINUE":
+          return c2 + "continue\n";
+      }
+      throw Error("Unknown flow statement.");
+    }, controls_for: function(a2, b2) {
+      function c2() {
+        return b2.provideFunction_(
+          "downRange",
+          `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(start, stop, step):
+  while start >= stop:
+    yield start
+    start -= abs(step)
+`
+        );
+      }
+      function d2() {
+        return b2.provideFunction_("upRange", `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(start, stop, step):
+  while start <= stop:
+    yield start
+    start += abs(step)
+`);
+      }
+      var e2 = b2.getVariableName(a2.getFieldValue("VAR")), f2 = b2.valueToCode(a2, "FROM", U2.NONE) || "0", g2 = b2.valueToCode(a2, "TO", U2.NONE) || "0", h2 = b2.valueToCode(a2, "BY", U2.NONE) || "1", m2 = b2.statementToCode(a2, "DO");
+      m2 = b2.addLoopTrap(m2, a2) || b2.PASS;
+      var z2 = "";
+      $2.zf(f2) && $2.zf(g2) && $2.zf(h2) ? (f2 = Number(f2), g2 = Number(g2), h2 = Math.abs(Number(h2)), f2 % 1 === 0 && g2 % 1 === 0 && h2 % 1 === 0 ? (f2 <= g2 ? (g2++, a2 = f2 === 0 && h2 === 1 ? g2 : f2 + ", " + g2, h2 !== 1 && (a2 += ", " + h2)) : (g2--, a2 = f2 + ", " + g2 + ", -" + h2), a2 = "range(" + a2 + ")") : (a2 = f2 < g2 ? d2() : c2(), a2 += "(" + f2 + ", " + g2 + ", " + h2 + ")")) : (a2 = function(F2, J2) {
+        $2.zf(F2) ? F2 = String(Number(F2)) : F2.match(/^\w+$/) || (J2 = b2.nameDB_.getDistinctName(e2 + J2, $2.P.VARIABLE), z2 += J2 + " = " + F2 + "\n", F2 = J2);
+        return F2;
+      }, f2 = a2(f2, "_start"), g2 = a2(g2, "_end"), h2 = a2(h2, "_inc"), typeof f2 === "number" && typeof g2 === "number" ? (a2 = f2 < g2 ? d2() : c2(), a2 += "(" + f2 + ", " + g2 + ", " + h2 + ")") : a2 = "(" + f2 + " <= " + g2 + ") and " + d2() + "(" + f2 + ", " + g2 + ", " + h2 + ") or " + c2() + "(" + f2 + ", " + g2 + ", " + h2 + ")");
+      return z2 += "for " + e2 + " in " + a2 + ":\n" + m2;
+    }, controls_forEach: function(a2, b2) {
+      var c2 = b2.getVariableName(a2.getFieldValue("VAR")), d2 = b2.valueToCode(a2, "LIST", U2.RELATIONAL) || "[]", e2 = b2.statementToCode(a2, "DO");
+      e2 = b2.addLoopTrap(e2, a2) || b2.PASS;
+      return "for " + c2 + " in " + d2 + ":\n" + e2;
+    } };
+    os.controls_repeat = ds;
+    os.controls_repeat_ext = ds;
+    os.controls_whileUntil = function(a2, b2) {
+      var c2 = a2.getFieldValue("MODE") === "UNTIL", d2 = b2.valueToCode(a2, "BOOL", c2 ? U2.LOGICAL_NOT : U2.NONE) || "False", e2 = b2.statementToCode(a2, "DO");
+      e2 = b2.addLoopTrap(e2, a2) || b2.PASS;
+      c2 && (d2 = "not " + d2);
+      return "while " + d2 + ":\n" + e2;
+    };
+    var ps = {
+      math_arithmetic: function(a2, b2) {
+        var c2 = { ADD: [" + ", U2.ADDITIVE], MINUS: [" - ", U2.ADDITIVE], MULTIPLY: [" * ", U2.MULTIPLICATIVE], DIVIDE: [" / ", U2.MULTIPLICATIVE], POWER: [" ** ", U2.EXPONENTIATION] }[a2.getFieldValue("OP")], d2 = c2[0];
+        c2 = c2[1];
+        var e2 = b2.valueToCode(a2, "A", c2) || "0";
+        a2 = b2.valueToCode(a2, "B", c2) || "0";
+        return [e2 + d2 + a2, c2];
+      },
+      math_atan2: function(a2, b2) {
+        b2.definitions_.import_math = "import math";
+        var c2 = b2.valueToCode(a2, "X", U2.NONE) || "0";
+        return ["math.atan2(" + (b2.valueToCode(a2, "Y", U2.NONE) || "0") + ", " + c2 + ") / math.pi * 180", U2.MULTIPLICATIVE];
+      },
+      math_change: function(a2, b2) {
+        b2.definitions_.from_numbers_import_Number = "from numbers import Number";
+        var c2 = b2.valueToCode(a2, "DELTA", U2.ADDITIVE) || "0";
+        a2 = b2.getVariableName(a2.getFieldValue("VAR"));
+        return a2 + " = (" + a2 + " if isinstance(" + a2 + ", Number) else 0) + " + c2 + "\n";
+      },
+      math_constant: function(a2, b2) {
+        var c2 = { PI: ["math.pi", U2.MEMBER], E: ["math.e", U2.MEMBER], GOLDEN_RATIO: ["(1 + math.sqrt(5)) / 2", U2.MULTIPLICATIVE], SQRT2: ["math.sqrt(2)", U2.MEMBER], SQRT1_2: ["math.sqrt(1.0 / 2)", U2.MEMBER], INFINITY: ["float('inf')", U2.ATOMIC] };
+        a2 = a2.getFieldValue("CONSTANT");
+        a2 !== "INFINITY" && (b2.definitions_.import_math = "import math");
+        return c2[a2];
+      },
+      math_constrain: function(a2, b2) {
+        var c2 = b2.valueToCode(a2, "VALUE", U2.NONE) || "0", d2 = b2.valueToCode(a2, "LOW", U2.NONE) || "0";
+        a2 = b2.valueToCode(a2, "HIGH", U2.NONE) || "float('inf')";
+        return ["min(max(" + c2 + ", " + d2 + "), " + a2 + ")", U2.FUNCTION_CALL];
+      },
+      math_modulo: function(a2, b2) {
+        var c2 = b2.valueToCode(a2, "DIVIDEND", U2.MULTIPLICATIVE) || "0";
+        a2 = b2.valueToCode(a2, "DIVISOR", U2.MULTIPLICATIVE) || "0";
+        return [c2 + " % " + a2, U2.MULTIPLICATIVE];
+      },
+      math_number: function(a2) {
+        a2 = Number(a2.getFieldValue("NUM"));
+        return a2 === Infinity ? ['float("inf")', U2.FUNCTION_CALL] : a2 === -Infinity ? ['-float("inf")', U2.UNARY_SIGN] : [String(a2), a2 < 0 ? U2.UNARY_SIGN : U2.ATOMIC];
+      },
+      math_number_property: function(a2, b2) {
+        var c2 = { EVEN: [" % 2 == 0", U2.MULTIPLICATIVE, U2.RELATIONAL], ODD: [" % 2 == 1", U2.MULTIPLICATIVE, U2.RELATIONAL], WHOLE: [" % 1 == 0", U2.MULTIPLICATIVE, U2.RELATIONAL], POSITIVE: [" > 0", U2.RELATIONAL, U2.RELATIONAL], NEGATIVE: [" < 0", U2.RELATIONAL, U2.RELATIONAL], DIVISIBLE_BY: [null, U2.MULTIPLICATIVE, U2.RELATIONAL], PRIME: [
+          null,
+          U2.NONE,
+          U2.FUNCTION_CALL
+        ] }, d2 = a2.getFieldValue("PROPERTY"), [e2, f2, g2] = c2[d2];
+        c2 = b2.valueToCode(a2, "NUMBER_TO_CHECK", f2) || "0";
+        if (d2 === "PRIME")
+          b2.definitions_.import_math = "import math", b2.definitions_.from_numbers_import_Number = "from numbers import Number", a2 = b2.provideFunction_("math_isPrime", `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(n):
+  # https://en.wikipedia.org/wiki/Primality_test#Naive_methods
+  # If n is not a number but a string, try parsing it.
+  if not isinstance(n, Number):
+    try:
+      n = float(n)
+    except:
+      return False
+  if n == 2 or n == 3:
+    return True
+  # False if n is negative, is 1, or not whole, or if n is divisible by 2 or 3.
+  if n <= 1 or n % 1 != 0 or n % 2 == 0 or n % 3 == 0:
+    return False
+  # Check all the numbers of form 6k +/- 1, up to sqrt(n).
+  for x in range(6, int(math.sqrt(n)) + 2, 6):
+    if n % (x - 1) == 0 or n % (x + 1) == 0:
+      return False
+  return True
+`) + "(" + c2 + ")";
+        else if (d2 === "DIVISIBLE_BY") {
+          a2 = b2.valueToCode(a2, "DIVISOR", U2.MULTIPLICATIVE) || "0";
+          if (a2 === "0")
+            return ["False", U2.ATOMIC];
+          a2 = c2 + " % " + a2 + " == 0";
+        } else
+          a2 = c2 + e2;
+        return [a2, g2];
+      },
+      math_on_list: function(a2, b2) {
+        var c2 = a2.getFieldValue("OP");
+        a2 = b2.valueToCode(a2, "LIST", U2.NONE) || "[]";
+        switch (c2) {
+          case "SUM":
+            b2 = "sum(" + a2 + ")";
+            break;
+          case "MIN":
+            b2 = "min(" + a2 + ")";
+            break;
+          case "MAX":
+            b2 = "max(" + a2 + ")";
+            break;
+          case "AVERAGE":
+            b2.definitions_.from_numbers_import_Number = "from numbers import Number";
+            b2 = b2.provideFunction_("math_mean", `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(myList):
+  localList = [e for e in myList if isinstance(e, Number)]
+  if not localList: return
+  return float(sum(localList)) / len(localList)
+`) + "(" + a2 + ")";
+            break;
+          case "MEDIAN":
+            b2.definitions_.from_numbers_import_Number = "from numbers import Number";
+            b2 = b2.provideFunction_("math_median", `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(myList):
+  localList = sorted([e for e in myList if isinstance(e, Number)])
+  if not localList: return
+  if len(localList) % 2 == 0:
+    return (localList[len(localList) // 2 - 1] + localList[len(localList) // 2]) / 2.0
+  else:
+    return localList[(len(localList) - 1) // 2]
+`) + "(" + a2 + ")";
+            break;
+          case "MODE":
+            b2 = b2.provideFunction_("math_modes", `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(some_list):
+  modes = []
+  # Using a lists of [item, count] to keep count rather than dict
+  # to avoid "unhashable" errors when the counted item is itself a list or dict.
+  counts = []
+  maxCount = 1
+  for item in some_list:
+    found = False
+    for count in counts:
+      if count[0] == item:
+        count[1] += 1
+        maxCount = max(maxCount, count[1])
+        found = True
+    if not found:
+      counts.append([item, 1])
+  for counted_item, item_count in counts:
+    if item_count == maxCount:
+      modes.append(counted_item)
+  return modes
+`) + "(" + a2 + ")";
+            break;
+          case "STD_DEV":
+            b2.definitions_.import_math = "import math";
+            b2 = b2.provideFunction_("math_standard_deviation", `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(numbers):
+  n = len(numbers)
+  if n == 0: return
+  mean = float(sum(numbers)) / n
+  variance = sum((x - mean) ** 2 for x in numbers) / n
+  return math.sqrt(variance)
+`) + "(" + a2 + ")";
+            break;
+          case "RANDOM":
+            b2.definitions_.import_random = "import random";
+            b2 = "random.choice(" + a2 + ")";
+            break;
+          default:
+            throw Error("Unknown operator: " + c2);
+        }
+        return [b2, U2.FUNCTION_CALL];
+      },
+      math_random_float: function(a2, b2) {
+        b2.definitions_.import_random = "import random";
+        return ["random.random()", U2.FUNCTION_CALL];
+      },
+      math_random_int: function(a2, b2) {
+        b2.definitions_.import_random = "import random";
+        var c2 = b2.valueToCode(a2, "FROM", U2.NONE) || "0";
+        a2 = b2.valueToCode(a2, "TO", U2.NONE) || "0";
+        return ["random.randint(" + c2 + ", " + a2 + ")", U2.FUNCTION_CALL];
+      }
+    };
+    ps.math_round = es;
+    ps.math_single = es;
+    ps.math_trig = es;
+    var qs = { procedures_callnoreturn: function(a2, b2) {
+      return b2.forBlock.procedures_callreturn(a2, b2)[0] + "\n";
+    }, procedures_callreturn: function(a2, b2) {
+      var c2 = b2.getProcedureName(a2.getFieldValue("NAME")), d2 = [], e2 = a2.getVarModels();
+      for (let f2 = 0; f2 < e2.length; f2++)
+        d2[f2] = b2.valueToCode(a2, "ARG" + f2, U2.NONE) || "None";
+      return [c2 + "(" + d2.join(", ") + ")", U2.FUNCTION_CALL];
+    } };
+    qs.procedures_defnoreturn = fs;
+    qs.procedures_defreturn = fs;
+    qs.procedures_ifreturn = function(a2, b2) {
+      var c2 = "if " + (b2.valueToCode(a2, "CONDITION", U2.NONE) || "False") + ":\n";
+      b2.STATEMENT_SUFFIX && (c2 += b2.prefixLines(b2.injectId(b2.STATEMENT_SUFFIX, a2), b2.INDENT));
+      a2.hasReturnValue_ ? (a2 = b2.valueToCode(a2, "VALUE", U2.NONE) || "None", c2 += b2.INDENT + "return " + a2 + "\n") : c2 += b2.INDENT + "return\n";
+      return c2;
+    };
+    var gs = /^\s*'([^']|\\')*'\s*$/, rs = { text: function(a2, b2) {
+      return [b2.quote_(a2.getFieldValue("TEXT")), U2.ATOMIC];
+    }, text_append: function(a2, b2) {
+      var c2 = b2.getVariableName(a2.getFieldValue("VAR"));
+      a2 = b2.valueToCode(a2, "TEXT", U2.NONE) || "''";
+      return c2 + " = str(" + c2 + ") + " + hs(a2)[0] + "\n";
+    }, text_changeCase: function(a2, b2) {
+      var c2 = { UPPERCASE: ".upper()", LOWERCASE: ".lower()", TITLECASE: ".title()" }[a2.getFieldValue("CASE")];
+      return [(b2.valueToCode(a2, "TEXT", U2.MEMBER) || "''") + c2, U2.FUNCTION_CALL];
+    }, text_charAt: function(a2, b2) {
+      var c2 = a2.getFieldValue("WHERE") || "FROM_START", d2 = b2.valueToCode(a2, "VALUE", c2 === "RANDOM" ? U2.NONE : U2.MEMBER) || "''";
+      switch (c2) {
+        case "FIRST":
+          return [d2 + "[0]", U2.MEMBER];
+        case "LAST":
+          return [d2 + "[-1]", U2.MEMBER];
+        case "FROM_START":
+          return a2 = b2.getAdjustedInt(a2, "AT"), [d2 + "[" + a2 + "]", U2.MEMBER];
+        case "FROM_END":
+          return a2 = b2.getAdjustedInt(a2, "AT", 1, true), [d2 + "[" + a2 + "]", U2.MEMBER];
+        case "RANDOM":
+          return b2.definitions_.import_random = "import random", [b2.provideFunction_("text_random_letter", `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(text):
+  x = int(random.random() * len(text))
+  return text[x]
+`) + "(" + d2 + ")", U2.FUNCTION_CALL];
+      }
+      throw Error("Unhandled option (text_charAt).");
+    }, text_count: function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "TEXT", U2.MEMBER) || "''";
+      a2 = b2.valueToCode(a2, "SUB", U2.NONE) || "''";
+      return [c2 + ".count(" + a2 + ")", U2.FUNCTION_CALL];
+    }, text_getSubstring: function(a2, b2) {
+      var c2 = a2.getFieldValue("WHERE1"), d2 = a2.getFieldValue("WHERE2"), e2 = b2.valueToCode(a2, "STRING", U2.MEMBER) || "''";
+      switch (c2) {
+        case "FROM_START":
+          c2 = b2.getAdjustedInt(a2, "AT1");
+          c2 === 0 && (c2 = "");
+          break;
+        case "FROM_END":
+          c2 = b2.getAdjustedInt(a2, "AT1", 1, true);
+          break;
+        case "FIRST":
+          c2 = "";
+          break;
+        default:
+          throw Error("Unhandled option (text_getSubstring)");
+      }
+      switch (d2) {
+        case "FROM_START":
+          a2 = b2.getAdjustedInt(a2, "AT2", 1);
+          break;
+        case "FROM_END":
+          a2 = b2.getAdjustedInt(a2, "AT2", 0, true);
+          $2.zf(String(a2)) ? a2 === 0 && (a2 = "") : (b2.definitions_.import_sys = "import sys", a2 += " or sys.maxsize");
+          break;
+        case "LAST":
+          a2 = "";
+          break;
+        default:
+          throw Error("Unhandled option (text_getSubstring)");
+      }
+      return [e2 + "[" + c2 + " : " + a2 + "]", U2.MEMBER];
+    }, text_indexOf: function(a2, b2) {
+      var c2 = a2.getFieldValue("END") === "FIRST" ? "find" : "rfind", d2 = b2.valueToCode(
+        a2,
+        "FIND",
+        U2.NONE
+      ) || "''";
+      b2 = (b2.valueToCode(a2, "VALUE", U2.MEMBER) || "''") + "." + c2 + "(" + d2 + ")";
+      return a2.workspace.options.oneBasedIndex ? [b2 + " + 1", U2.ADDITIVE] : [b2, U2.FUNCTION_CALL];
+    }, text_isEmpty: function(a2, b2) {
+      return ["not len(" + (b2.valueToCode(a2, "VALUE", U2.NONE) || "''") + ")", U2.LOGICAL_NOT];
+    }, text_join: function(a2, b2) {
+      switch (a2.itemCount_) {
+        case 0:
+          return ["''", U2.ATOMIC];
+        case 1:
+          return a2 = b2.valueToCode(a2, "ADD0", U2.NONE) || "''", hs(a2);
+        case 2:
+          var c2 = b2.valueToCode(a2, "ADD0", U2.NONE) || "''";
+          a2 = b2.valueToCode(a2, "ADD1", U2.NONE) || "''";
+          return [hs(c2)[0] + " + " + hs(a2)[0], U2.ADDITIVE];
+        default:
+          c2 = [];
+          for (let d2 = 0; d2 < a2.itemCount_; d2++)
+            c2[d2] = b2.valueToCode(a2, "ADD" + d2, U2.NONE) || "''";
+          a2 = b2.nameDB_.getDistinctName("x", $2.P.VARIABLE);
+          return ["''.join([str(" + a2 + ") for " + a2 + " in [" + c2.join(", ") + "]])", U2.FUNCTION_CALL];
+      }
+    }, text_length: function(a2, b2) {
+      return ["len(" + (b2.valueToCode(a2, "VALUE", U2.NONE) || "''") + ")", U2.FUNCTION_CALL];
+    }, text_print: function(a2, b2) {
+      return "print(" + (b2.valueToCode(a2, "TEXT", U2.NONE) || "''") + ")\n";
+    } };
+    rs.text_prompt = is2;
+    rs.text_prompt_ext = is2;
+    rs.text_replace = function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "TEXT", U2.MEMBER) || "''", d2 = b2.valueToCode(a2, "FROM", U2.NONE) || "''";
+      a2 = b2.valueToCode(a2, "TO", U2.NONE) || "''";
+      return [c2 + ".replace(" + d2 + ", " + a2 + ")", U2.MEMBER];
+    };
+    rs.text_reverse = function(a2, b2) {
+      return [(b2.valueToCode(a2, "TEXT", U2.MEMBER) || "''") + "[::-1]", U2.MEMBER];
+    };
+    rs.text_trim = function(a2, b2) {
+      var c2 = { LEFT: ".lstrip()", RIGHT: ".rstrip()", BOTH: ".strip()" }[a2.getFieldValue("MODE")];
+      return [(b2.valueToCode(a2, "TEXT", U2.MEMBER) || "''") + c2, U2.FUNCTION_CALL];
+    };
+    var ss = {};
+    ss.variables_get = js;
+    ss.variables_set = ks;
+    var ts = {};
+    ts.variables_get_dynamic = js;
+    ts.variables_set_dynamic = ks;
+    var us = new ms();
+    us.addReservedWords("math,random,Number");
+    var vs = Object.assign({}, { lists_create_empty: function() {
+      return ["[]", U2.ATOMIC];
+    }, lists_create_with: function(a2, b2) {
+      var c2 = Array(a2.itemCount_);
+      for (let d2 = 0; d2 < a2.itemCount_; d2++)
+        c2[d2] = b2.valueToCode(a2, "ADD" + d2, U2.NONE) || "None";
+      return ["[" + c2.join(", ") + "]", U2.ATOMIC];
+    }, lists_getIndex: function(a2, b2) {
+      var c2 = a2.getFieldValue("MODE") || "GET", d2 = a2.getFieldValue("WHERE") || "FROM_START", e2 = b2.valueToCode(a2, "VALUE", d2 === "RANDOM" ? U2.NONE : U2.MEMBER) || "[]";
+      switch (d2) {
+        case "FIRST":
+          if (c2 === "GET")
+            return [e2 + "[0]", U2.MEMBER];
+          if (c2 === "GET_REMOVE")
+            return [e2 + ".pop(0)", U2.FUNCTION_CALL];
+          if (c2 === "REMOVE")
+            return e2 + ".pop(0)\n";
+          break;
+        case "LAST":
+          if (c2 === "GET")
+            return [e2 + "[-1]", U2.MEMBER];
+          if (c2 === "GET_REMOVE")
+            return [e2 + ".pop()", U2.FUNCTION_CALL];
+          if (c2 === "REMOVE")
+            return e2 + ".pop()\n";
+          break;
+        case "FROM_START":
+          a2 = b2.getAdjustedInt(a2, "AT");
+          if (c2 === "GET")
+            return [e2 + "[" + a2 + "]", U2.MEMBER];
+          if (c2 === "GET_REMOVE")
+            return [e2 + ".pop(" + a2 + ")", U2.FUNCTION_CALL];
+          if (c2 === "REMOVE")
+            return e2 + ".pop(" + a2 + ")\n";
+          break;
+        case "FROM_END":
+          a2 = b2.getAdjustedInt(a2, "AT", 1, true);
+          if (c2 === "GET")
+            return [e2 + "[" + a2 + "]", U2.MEMBER];
+          if (c2 === "GET_REMOVE")
+            return [e2 + ".pop(" + a2 + ")", U2.FUNCTION_CALL];
+          if (c2 === "REMOVE")
+            return e2 + ".pop(" + a2 + ")\n";
+          break;
+        case "RANDOM":
+          b2.definitions_.import_random = "import random";
+          if (c2 === "GET")
+            return ["random.choice(" + e2 + ")", U2.FUNCTION_CALL];
+          e2 = b2.provideFunction_("lists_remove_random_item", `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(myList):
+  x = int(random.random() * len(myList))
+  return myList.pop(x)
+`) + "(" + e2 + ")";
+          if (c2 === "GET_REMOVE")
+            return [e2, U2.FUNCTION_CALL];
+          if (c2 === "REMOVE")
+            return e2 + "\n";
+      }
+      throw Error("Unhandled combination (lists_getIndex).");
+    }, lists_getSublist: function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "LIST", U2.MEMBER) || "[]", d2 = a2.getFieldValue("WHERE1"), e2 = a2.getFieldValue("WHERE2");
+      switch (d2) {
+        case "FROM_START":
+          d2 = b2.getAdjustedInt(a2, "AT1");
+          d2 === 0 && (d2 = "");
+          break;
+        case "FROM_END":
+          d2 = b2.getAdjustedInt(a2, "AT1", 1, true);
+          break;
+        case "FIRST":
+          d2 = "";
+          break;
+        default:
+          throw Error("Unhandled option (lists_getSublist)");
+      }
+      switch (e2) {
+        case "FROM_START":
+          a2 = b2.getAdjustedInt(a2, "AT2", 1);
+          break;
+        case "FROM_END":
+          a2 = b2.getAdjustedInt(a2, "AT2", 0, true);
+          $2.zf(String(a2)) ? a2 === 0 && (a2 = "") : (b2.definitions_.import_sys = "import sys", a2 += " or sys.maxsize");
+          break;
+        case "LAST":
+          a2 = "";
+          break;
+        default:
+          throw Error("Unhandled option (lists_getSublist)");
+      }
+      return [c2 + "[" + d2 + " : " + a2 + "]", U2.MEMBER];
+    }, lists_indexOf: function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "FIND", U2.NONE) || "[]", d2 = b2.valueToCode(a2, "VALUE", U2.NONE) || "''", e2 = " -1", f2 = "", g2 = " - 1";
+      a2.workspace.options.oneBasedIndex && (e2 = " 0", f2 = " + 1", g2 = "");
+      return [(a2.getFieldValue("END") === "FIRST" ? b2.provideFunction_("first_index", `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(my_list, elem):
+  try: index = my_list.index(elem)${f2}
+  except: index =${e2}
+  return index
+`) : b2.provideFunction_("last_index", `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(my_list, elem):
+  try: index = len(my_list) - my_list[::-1].index(elem)${g2}
+  except: index =${e2}
+  return index
+`)) + "(" + d2 + ", " + c2 + ")", U2.FUNCTION_CALL];
+    }, lists_isEmpty: function(a2, b2) {
+      return ["not len(" + (b2.valueToCode(a2, "VALUE", U2.NONE) || "[]") + ")", U2.LOGICAL_NOT];
+    }, lists_length: function(a2, b2) {
+      return ["len(" + (b2.valueToCode(a2, "VALUE", U2.NONE) || "[]") + ")", U2.FUNCTION_CALL];
+    }, lists_repeat: function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "ITEM", U2.NONE) || "None";
+      a2 = b2.valueToCode(a2, "NUM", U2.MULTIPLICATIVE) || "0";
+      return ["[" + c2 + "] * " + a2, U2.MULTIPLICATIVE];
+    }, lists_reverse: function(a2, b2) {
+      return [
+        "list(reversed(" + (b2.valueToCode(a2, "LIST", U2.NONE) || "[]") + "))",
+        U2.FUNCTION_CALL
+      ];
+    }, lists_setIndex: function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "LIST", U2.MEMBER) || "[]", d2 = a2.getFieldValue("MODE") || "GET", e2 = a2.getFieldValue("WHERE") || "FROM_START", f2 = b2.valueToCode(a2, "TO", U2.NONE) || "None";
+      switch (e2) {
+        case "FIRST":
+          if (d2 === "SET")
+            return c2 + "[0] = " + f2 + "\n";
+          if (d2 === "INSERT")
+            return c2 + ".insert(0, " + f2 + ")\n";
+          break;
+        case "LAST":
+          if (d2 === "SET")
+            return c2 + "[-1] = " + f2 + "\n";
+          if (d2 === "INSERT")
+            return c2 + ".append(" + f2 + ")\n";
+          break;
+        case "FROM_START":
+          b2 = b2.getAdjustedInt(a2, "AT");
+          if (d2 === "SET")
+            return c2 + "[" + b2 + "] = " + f2 + "\n";
+          if (d2 === "INSERT")
+            return c2 + ".insert(" + b2 + ", " + f2 + ")\n";
+          break;
+        case "FROM_END":
+          b2 = b2.getAdjustedInt(a2, "AT", 1, true);
+          if (d2 === "SET")
+            return c2 + "[" + b2 + "] = " + f2 + "\n";
+          if (d2 === "INSERT")
+            return c2 + ".insert(" + b2 + ", " + f2 + ")\n";
+          break;
+        case "RANDOM":
+          b2.definitions_.import_random = "import random";
+          c2.match(/^\w+$/) ? a2 = "" : (a2 = b2.nameDB_.getDistinctName("tmp_list", $2.P.VARIABLE), e2 = a2 + " = " + c2 + "\n", c2 = a2, a2 = e2);
+          b2 = b2.nameDB_.getDistinctName("tmp_x", $2.P.VARIABLE);
+          a2 += b2 + " = int(random.random() * len(" + c2 + "))\n";
+          if (d2 === "SET")
+            return a2 + (c2 + "[" + b2 + "] = " + f2 + "\n");
+          if (d2 === "INSERT")
+            return a2 + (c2 + ".insert(" + b2 + ", " + f2 + ")\n");
+      }
+      throw Error("Unhandled combination (lists_setIndex).");
+    }, lists_sort: function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "LIST", U2.NONE) || "[]", d2 = a2.getFieldValue("TYPE");
+      a2 = a2.getFieldValue("DIRECTION") === "1" ? "False" : "True";
+      return [b2.provideFunction_("lists_sort", `
+def ${b2.FUNCTION_NAME_PLACEHOLDER_}(my_list, type, reverse):
+  def try_float(s):
+    try:
+      return float(s)
+    except:
+      return 0
+  key_funcs = {
+    "NUMERIC": try_float,
+    "TEXT": str,
+    "IGNORE_CASE": lambda s: str(s).lower()
+  }
+  key_func = key_funcs[type]
+  list_cpy = list(my_list)
+  return sorted(list_cpy, key=key_func, reverse=reverse)
+`) + "(" + c2 + ', "' + d2 + '", ' + a2 + ")", U2.FUNCTION_CALL];
+    }, lists_split: function(a2, b2) {
+      var c2 = a2.getFieldValue("MODE");
+      if (c2 === "SPLIT")
+        c2 = b2.valueToCode(a2, "INPUT", U2.MEMBER) || "''", a2 = b2.valueToCode(a2, "DELIM", U2.NONE), a2 = c2 + ".split(" + a2 + ")";
+      else if (c2 === "JOIN")
+        c2 = b2.valueToCode(a2, "INPUT", U2.NONE) || "[]", a2 = (b2.valueToCode(a2, "DELIM", U2.MEMBER) || "''") + ".join(" + c2 + ")";
+      else
+        throw Error("Unknown mode: " + c2);
+      return [a2, U2.FUNCTION_CALL];
+    } }, ns, os, ps, qs, rs, ss, ts);
+    for (let a2 in vs)
+      us.forBlock[a2] = vs[a2];
+    var ws = {};
+    ws.Order = U2;
+    ws.PythonGenerator = ms;
+    ws.pythonGenerator = us;
+    $2.__chunk_python = ws;
+    $2.__chunk_python.__namespace__ = $2;
+    return $2.__chunk_python;
+  });
+})(python_compressed);
+var python_compressedExports = python_compressed.exports;
+const python$2 = /* @__PURE__ */ getDefaultExportFromCjs(python_compressedExports);
+const {
+  Order: Order$1,
+  PythonGenerator,
+  pythonGenerator
+} = python$2;
+const python$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  Order: Order$1,
+  PythonGenerator,
+  pythonGenerator
+}, Symbol.toStringTag, { value: "Module" }));
+var javascript_compressed = { exports: {} };
+(function(module, exports) {
+  (function(root, factory) {
+    {
+      module.exports = factory(requireBlockly_compressed());
+    }
+  })(commonjsGlobal, function(__parent__) {
+    var $2 = __parent__.__namespace__;
+    var Hr = function(a2, b2, c2) {
+      return b2 === "FIRST" ? "0" : b2 === "FROM_END" ? a2 + ".length - 1 - " + c2 : b2 === "LAST" ? a2 + ".length - 1" : c2;
+    }, Ir = function(a2, b2) {
+      var c2 = 0, d2 = "";
+      b2.STATEMENT_PREFIX && (d2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
+      do {
+        let e2 = b2.valueToCode(a2, "IF" + c2, S2.NONE) || "false", f2 = b2.statementToCode(a2, "DO" + c2);
+        b2.STATEMENT_SUFFIX && (f2 = b2.prefixLines(b2.injectId(b2.STATEMENT_SUFFIX, a2), b2.INDENT) + f2);
+        d2 += (c2 > 0 ? " else " : "") + "if (" + e2 + ") {\n" + f2 + "}";
+        c2++;
+      } while (a2.getInput("IF" + c2));
+      if (a2.getInput("ELSE") || b2.STATEMENT_SUFFIX)
+        c2 = a2.getInput("ELSE") ? b2.statementToCode(
+          a2,
+          "ELSE"
+        ) : "", b2.STATEMENT_SUFFIX && (c2 = b2.prefixLines(b2.injectId(b2.STATEMENT_SUFFIX, a2), b2.INDENT) + c2), d2 += " else {\n" + c2 + "}";
+      return d2 + "\n";
+    }, Jr = function(a2, b2) {
+      var c2 = a2.getField("TIMES") ? String(Number(a2.getFieldValue("TIMES"))) : b2.valueToCode(a2, "TIMES", S2.ASSIGNMENT) || "0";
+      var d2 = b2.statementToCode(a2, "DO");
+      d2 = b2.addLoopTrap(d2, a2);
+      a2 = "";
+      var e2 = b2.nameDB_.getDistinctName("count", $2.P.VARIABLE), f2 = c2;
+      c2.match(/^\w+$/) || $2.zf(c2) || (f2 = b2.nameDB_.getDistinctName("repeat_end", $2.P.VARIABLE), a2 += "var " + f2 + " = " + c2 + ";\n");
+      return a2 + ("for (var " + e2 + " = 0; " + e2 + " < " + f2 + "; " + e2 + "++) {\n" + d2 + "}\n");
+    }, Kr = function(a2, b2) {
+      var c2 = a2.getFieldValue("OP");
+      if (c2 === "NEG")
+        return a2 = b2.valueToCode(a2, "NUM", S2.UNARY_NEGATION) || "0", a2[0] === "-" && (a2 = " " + a2), ["-" + a2, S2.UNARY_NEGATION];
+      a2 = c2 === "SIN" || c2 === "COS" || c2 === "TAN" ? b2.valueToCode(a2, "NUM", S2.DIVISION) || "0" : b2.valueToCode(a2, "NUM", S2.NONE) || "0";
+      switch (c2) {
+        case "ABS":
+          var d2 = "Math.abs(" + a2 + ")";
+          break;
+        case "ROOT":
+          d2 = "Math.sqrt(" + a2 + ")";
+          break;
+        case "LN":
+          d2 = "Math.log(" + a2 + ")";
+          break;
+        case "EXP":
+          d2 = "Math.exp(" + a2 + ")";
+          break;
+        case "POW10":
+          d2 = "Math.pow(10," + a2 + ")";
+          break;
+        case "ROUND":
+          d2 = "Math.round(" + a2 + ")";
+          break;
+        case "ROUNDUP":
+          d2 = "Math.ceil(" + a2 + ")";
+          break;
+        case "ROUNDDOWN":
+          d2 = "Math.floor(" + a2 + ")";
+          break;
+        case "SIN":
+          d2 = "Math.sin(" + a2 + " / 180 * Math.PI)";
+          break;
+        case "COS":
+          d2 = "Math.cos(" + a2 + " / 180 * Math.PI)";
+          break;
+        case "TAN":
+          d2 = "Math.tan(" + a2 + " / 180 * Math.PI)";
+      }
+      if (d2)
+        return [d2, S2.FUNCTION_CALL];
+      switch (c2) {
+        case "LOG10":
+          d2 = "Math.log(" + a2 + ") / Math.log(10)";
+          break;
+        case "ASIN":
+          d2 = "Math.asin(" + a2 + ") / Math.PI * 180";
+          break;
+        case "ACOS":
+          d2 = "Math.acos(" + a2 + ") / Math.PI * 180";
+          break;
+        case "ATAN":
+          d2 = "Math.atan(" + a2 + ") / Math.PI * 180";
+          break;
+        default:
+          throw Error("Unknown math operator: " + c2);
+      }
+      return [d2, S2.DIVISION];
+    }, Lr2 = function(a2, b2) {
+      var c2 = b2.getProcedureName(a2.getFieldValue("NAME")), d2 = "";
+      b2.STATEMENT_PREFIX && (d2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
+      b2.STATEMENT_SUFFIX && (d2 += b2.injectId(b2.STATEMENT_SUFFIX, a2));
+      d2 && (d2 = b2.prefixLines(d2, b2.INDENT));
+      var e2 = "";
+      b2.INFINITE_LOOP_TRAP && (e2 = b2.prefixLines(b2.injectId(b2.INFINITE_LOOP_TRAP, a2), b2.INDENT));
+      var f2 = "";
+      a2.getInput("STACK") && (f2 = b2.statementToCode(a2, "STACK"));
+      var g2 = "";
+      a2.getInput("RETURN") && (g2 = b2.valueToCode(a2, "RETURN", S2.NONE) || "");
+      var h2 = "";
+      f2 && g2 && (h2 = d2);
+      g2 && (g2 = b2.INDENT + "return " + g2 + ";\n");
+      var m2 = [], z2 = a2.getVarModels();
+      for (let F2 = 0; F2 < z2.length; F2++)
+        m2[F2] = b2.getVariableName(z2[F2].getId());
+      d2 = "function " + c2 + "(" + m2.join(", ") + ") {\n" + d2 + e2 + f2 + h2 + g2 + "}";
+      d2 = b2.scrub_(a2, d2);
+      b2.definitions_["%" + c2] = d2;
+      return null;
+    }, Nr = function(a2) {
+      return Mr2.test(a2) ? [a2, S2.ATOMIC] : ["String(" + a2 + ")", S2.FUNCTION_CALL];
+    }, Or = function(a2, b2, c2) {
+      return b2 === "FIRST" ? "0" : b2 === "FROM_END" ? a2 + ".length - 1 - " + c2 : b2 === "LAST" ? a2 + ".length - 1" : c2;
+    }, Pr = function(a2, b2) {
+      b2 = "window.prompt(" + (a2.getField("TEXT") ? b2.quote_(a2.getFieldValue("TEXT")) : b2.valueToCode(a2, "TEXT", S2.NONE) || "''") + ")";
+      a2.getFieldValue("TYPE") === "NUMBER" && (b2 = "Number(" + b2 + ")");
+      return [b2, S2.FUNCTION_CALL];
+    }, Qr = function(a2, b2) {
+      return [b2.getVariableName(a2.getFieldValue("VAR")), S2.ATOMIC];
+    }, Rr = function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "VALUE", S2.ASSIGNMENT) || "0";
+      return b2.getVariableName(a2.getFieldValue("VAR")) + " = " + c2 + ";\n";
+    }, S2, T2 = S2 || (S2 = {});
+    T2[T2.ATOMIC = 0] = "ATOMIC";
+    T2[T2.NEW = 1.1] = "NEW";
+    T2[T2.MEMBER = 1.2] = "MEMBER";
+    T2[T2.FUNCTION_CALL = 2] = "FUNCTION_CALL";
+    T2[T2.INCREMENT = 3] = "INCREMENT";
+    T2[T2.DECREMENT = 3] = "DECREMENT";
+    T2[T2.BITWISE_NOT = 4.1] = "BITWISE_NOT";
+    T2[T2.UNARY_PLUS = 4.2] = "UNARY_PLUS";
+    T2[T2.UNARY_NEGATION = 4.3] = "UNARY_NEGATION";
+    T2[T2.LOGICAL_NOT = 4.4] = "LOGICAL_NOT";
+    T2[T2.TYPEOF = 4.5] = "TYPEOF";
+    T2[T2.VOID = 4.6] = "VOID";
+    T2[T2.DELETE = 4.7] = "DELETE";
+    T2[T2.AWAIT = 4.8] = "AWAIT";
+    T2[T2.EXPONENTIATION = 5] = "EXPONENTIATION";
+    T2[T2.MULTIPLICATION = 5.1] = "MULTIPLICATION";
+    T2[T2.DIVISION = 5.2] = "DIVISION";
+    T2[T2.MODULUS = 5.3] = "MODULUS";
+    T2[T2.SUBTRACTION = 6.1] = "SUBTRACTION";
+    T2[T2.ADDITION = 6.2] = "ADDITION";
+    T2[T2.BITWISE_SHIFT = 7] = "BITWISE_SHIFT";
+    T2[T2.RELATIONAL = 8] = "RELATIONAL";
+    T2[T2.IN = 8] = "IN";
+    T2[T2.INSTANCEOF = 8] = "INSTANCEOF";
+    T2[T2.EQUALITY = 9] = "EQUALITY";
+    T2[T2.BITWISE_AND = 10] = "BITWISE_AND";
+    T2[T2.BITWISE_XOR = 11] = "BITWISE_XOR";
+    T2[T2.BITWISE_OR = 12] = "BITWISE_OR";
+    T2[T2.LOGICAL_AND = 13] = "LOGICAL_AND";
+    T2[T2.LOGICAL_OR = 14] = "LOGICAL_OR";
+    T2[T2.CONDITIONAL = 15] = "CONDITIONAL";
+    T2[T2.ASSIGNMENT = 16] = "ASSIGNMENT";
+    T2[T2.YIELD = 17] = "YIELD";
+    T2[T2.COMMA = 18] = "COMMA";
+    T2[T2.NONE = 99] = "NONE";
+    var Sr = class extends $2.zq {
+      constructor(a2 = "JavaScript") {
+        super(a2);
+        this.ORDER_OVERRIDES = [[S2.FUNCTION_CALL, S2.MEMBER], [S2.FUNCTION_CALL, S2.FUNCTION_CALL], [S2.MEMBER, S2.MEMBER], [S2.MEMBER, S2.FUNCTION_CALL], [S2.LOGICAL_NOT, S2.LOGICAL_NOT], [S2.MULTIPLICATION, S2.MULTIPLICATION], [S2.ADDITION, S2.ADDITION], [S2.LOGICAL_AND, S2.LOGICAL_AND], [S2.LOGICAL_OR, S2.LOGICAL_OR]];
+        this.isInitialized = false;
+        for (let b2 in S2)
+          a2 = S2[b2], typeof a2 !== "string" && (this["ORDER_" + b2] = a2);
+        this.addReservedWords("break,case,catch,class,const,continue,debugger,default,delete,do,else,export,extends,finally,for,function,if,import,in,instanceof,new,return,super,switch,this,throw,try,typeof,var,void,while,with,yield,enum,implements,interface,let,package,private,protected,public,static,await,null,true,false,arguments," + Object.getOwnPropertyNames(globalThis).join(","));
+      }
+      init(a2) {
+        super.init(a2);
+        this.nameDB_ ? this.nameDB_.reset() : this.nameDB_ = new $2.Cj(this.RESERVED_WORDS_);
+        this.nameDB_.setVariableMap(a2.getVariableMap());
+        this.nameDB_.populateVariables(a2);
+        this.nameDB_.populateProcedures(a2);
+        var b2 = [], c2 = $2.Cd(a2);
+        for (let d2 = 0; d2 < c2.length; d2++)
+          b2.push(this.nameDB_.getName(c2[d2], $2.P.DEVELOPER_VARIABLE));
+        a2 = $2.Bd(a2);
+        for (c2 = 0; c2 < a2.length; c2++)
+          b2.push(this.nameDB_.getName(a2[c2].getId(), $2.P.VARIABLE));
+        b2.length && (this.definitions_.variables = "var " + b2.join(", ") + ";");
+        this.isInitialized = true;
+      }
+      finish(a2) {
+        var b2 = Object.values(this.definitions_);
+        super.finish(a2);
+        this.isInitialized = false;
+        this.nameDB_.reset();
+        return b2.join("\n\n") + "\n\n\n" + a2;
+      }
+      scrubNakedValue(a2) {
+        return a2 + ";\n";
+      }
+      quote_(a2) {
+        a2 = a2.replace(/\\/g, "\\\\").replace(/\n/g, "\\\n").replace(/'/g, "\\'");
+        return "'" + a2 + "'";
+      }
+      multiline_quote_(a2) {
+        return a2.split(/\n/g).map(this.quote_).join(" + '\\n' +\n");
+      }
+      scrub_(a2, b2, c2 = false) {
+        var d2 = "";
+        if (!a2.outputConnection || !a2.outputConnection.targetConnection) {
+          var e2 = a2.getCommentText();
+          e2 && (e2 = $2.yf(e2, this.COMMENT_WRAP - 3), d2 += this.prefixLines(e2 + "\n", "// "));
+          for (let f2 = 0; f2 < a2.inputList.length; f2++)
+            a2.inputList[f2].type === $2.je.VALUE && (e2 = a2.inputList[f2].connection.targetBlock()) && (e2 = this.allNestedComments(e2)) && (d2 += this.prefixLines(e2, "// "));
+        }
+        a2 = a2.nextConnection && a2.nextConnection.targetBlock();
+        c2 = c2 ? "" : this.blockToCode(a2);
+        return d2 + b2 + c2;
+      }
+      getAdjusted(a2, b2, c2 = 0, d2 = false, e2 = S2.NONE) {
+        a2.workspace.options.oneBasedIndex && c2--;
+        var f2 = a2.workspace.options.oneBasedIndex ? "1" : "0", g2 = e2;
+        c2 > 0 ? g2 = S2.ADDITION : c2 < 0 ? g2 = S2.SUBTRACTION : d2 && (g2 = S2.UNARY_NEGATION);
+        a2 = this.valueToCode(a2, b2, g2) || f2;
+        if (c2 === 0 && !d2)
+          return a2;
+        if ($2.zf(a2))
+          return a2 = String(Number(a2) + c2), d2 && (a2 = String(-Number(a2))), a2;
+        c2 > 0 ? a2 = `${a2} + ${c2}` : c2 < 0 && (a2 = `${a2} - ${-c2}`);
+        d2 && (a2 = c2 ? `-(${a2})` : `-${a2}`);
+        Math.floor(e2) >= Math.floor(g2) && (a2 = `(${a2})`);
+        return a2;
+      }
+    };
+    var Tr = {};
+    Tr.controls_if = Ir;
+    Tr.controls_ifelse = Ir;
+    Tr.logic_boolean = function(a2) {
+      return [a2.getFieldValue("BOOL") === "TRUE" ? "true" : "false", S2.ATOMIC];
+    };
+    Tr.logic_compare = function(a2, b2) {
+      var c2 = { EQ: "==", NEQ: "!=", LT: "<", LTE: "<=", GT: ">", GTE: ">=" }[a2.getFieldValue("OP")], d2 = c2 === "==" || c2 === "!=" ? S2.EQUALITY : S2.RELATIONAL, e2 = b2.valueToCode(a2, "A", d2) || "0";
+      a2 = b2.valueToCode(a2, "B", d2) || "0";
+      return [e2 + " " + c2 + " " + a2, d2];
+    };
+    Tr.logic_negate = function(a2, b2) {
+      var c2 = S2.LOGICAL_NOT;
+      return ["!" + (b2.valueToCode(a2, "BOOL", c2) || "true"), c2];
+    };
+    Tr.logic_null = function() {
+      return ["null", S2.ATOMIC];
+    };
+    Tr.logic_operation = function(a2, b2) {
+      var c2 = a2.getFieldValue("OP") === "AND" ? "&&" : "||", d2 = c2 === "&&" ? S2.LOGICAL_AND : S2.LOGICAL_OR, e2 = b2.valueToCode(a2, "A", d2);
+      a2 = b2.valueToCode(a2, "B", d2);
+      e2 || a2 ? (b2 = c2 === "&&" ? "true" : "false", e2 || (e2 = b2), a2 || (a2 = b2)) : a2 = e2 = "false";
+      return [e2 + " " + c2 + " " + a2, d2];
+    };
+    Tr.logic_ternary = function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "IF", S2.CONDITIONAL) || "false", d2 = b2.valueToCode(a2, "THEN", S2.CONDITIONAL) || "null";
+      a2 = b2.valueToCode(a2, "ELSE", S2.CONDITIONAL) || "null";
+      return [c2 + " ? " + d2 + " : " + a2, S2.CONDITIONAL];
+    };
+    var Ur2 = { controls_flow_statements: function(a2, b2) {
+      var c2 = "";
+      b2.STATEMENT_PREFIX && (c2 += b2.injectId(b2.STATEMENT_PREFIX, a2));
+      b2.STATEMENT_SUFFIX && (c2 += b2.injectId(b2.STATEMENT_SUFFIX, a2));
+      if (b2.STATEMENT_PREFIX) {
+        let d2 = a2.getSurroundLoop();
+        d2 && !d2.suppressPrefixSuffix && (c2 += b2.injectId(b2.STATEMENT_PREFIX, d2));
+      }
+      switch (a2.getFieldValue("FLOW")) {
+        case "BREAK":
+          return c2 + "break;\n";
+        case "CONTINUE":
+          return c2 + "continue;\n";
+      }
+      throw Error("Unknown flow statement.");
+    }, controls_for: function(a2, b2) {
+      var c2 = b2.getVariableName(a2.getFieldValue("VAR")), d2 = b2.valueToCode(a2, "FROM", S2.ASSIGNMENT) || "0", e2 = b2.valueToCode(a2, "TO", S2.ASSIGNMENT) || "0", f2 = b2.valueToCode(a2, "BY", S2.ASSIGNMENT) || "1", g2 = b2.statementToCode(a2, "DO");
+      g2 = b2.addLoopTrap(g2, a2);
+      if ($2.zf(d2) && $2.zf(e2) && $2.zf(f2))
+        b2 = Number(d2) <= Number(e2), a2 = "for (" + c2 + " = " + d2 + "; " + c2 + (b2 ? " <= " : " >= ") + e2 + "; " + c2, c2 = Math.abs(Number(f2)), a2 = c2 === 1 ? a2 + (b2 ? "++" : "--") : a2 + ((b2 ? " += " : " -= ") + c2), a2 += ") {\n" + g2 + "}\n";
+      else {
+        a2 = "";
+        let h2 = d2;
+        d2.match(/^\w+$/) || $2.zf(d2) || (h2 = b2.nameDB_.getDistinctName(c2 + "_start", $2.P.VARIABLE), a2 += "var " + h2 + " = " + d2 + ";\n");
+        d2 = e2;
+        e2.match(/^\w+$/) || $2.zf(e2) || (d2 = b2.nameDB_.getDistinctName(c2 + "_end", $2.P.VARIABLE), a2 += "var " + d2 + " = " + e2 + ";\n");
+        e2 = b2.nameDB_.getDistinctName(c2 + "_inc", $2.P.VARIABLE);
+        a2 += "var " + e2 + " = ";
+        a2 = $2.zf(f2) ? a2 + (Math.abs(Number(f2)) + ";\n") : a2 + ("Math.abs(" + f2 + ");\n");
+        a2 += "if (" + h2 + " > " + d2 + ") {\n";
+        a2 += b2.INDENT + e2 + " = -" + e2 + ";\n";
+        a2 = a2 + "}\nfor (" + (c2 + " = " + h2 + "; " + e2 + " >= 0 ? " + c2 + " <= " + d2 + " : " + c2 + " >= " + d2 + "; " + c2 + " += " + e2 + ") {\n" + g2 + "}\n");
+      }
+      return a2;
+    }, controls_forEach: function(a2, b2) {
+      var c2 = b2.getVariableName(a2.getFieldValue("VAR")), d2 = b2.valueToCode(
+        a2,
+        "LIST",
+        S2.ASSIGNMENT
+      ) || "[]", e2 = b2.statementToCode(a2, "DO");
+      e2 = b2.addLoopTrap(e2, a2);
+      a2 = "";
+      var f2 = d2;
+      d2.match(/^\w+$/) || (f2 = b2.nameDB_.getDistinctName(c2 + "_list", $2.P.VARIABLE), a2 += "var " + f2 + " = " + d2 + ";\n");
+      d2 = b2.nameDB_.getDistinctName(c2 + "_index", $2.P.VARIABLE);
+      e2 = b2.INDENT + c2 + " = " + f2 + "[" + d2 + "];\n" + e2;
+      return a2 + ("for (var " + d2 + " in " + f2 + ") {\n" + e2 + "}\n");
+    } };
+    Ur2.controls_repeat = Jr;
+    Ur2.controls_repeat_ext = Jr;
+    Ur2.controls_whileUntil = function(a2, b2) {
+      var c2 = a2.getFieldValue("MODE") === "UNTIL", d2 = b2.valueToCode(a2, "BOOL", c2 ? S2.LOGICAL_NOT : S2.NONE) || "false", e2 = b2.statementToCode(a2, "DO");
+      e2 = b2.addLoopTrap(e2, a2);
+      c2 && (d2 = "!" + d2);
+      return "while (" + d2 + ") {\n" + e2 + "}\n";
+    };
+    var Vr = {
+      math_arithmetic: function(a2, b2) {
+        var c2 = { ADD: [" + ", S2.ADDITION], MINUS: [" - ", S2.SUBTRACTION], MULTIPLY: [" * ", S2.MULTIPLICATION], DIVIDE: [" / ", S2.DIVISION], POWER: [null, S2.NONE] }[a2.getFieldValue("OP")], d2 = c2[0];
+        c2 = c2[1];
+        var e2 = b2.valueToCode(a2, "A", c2) || "0";
+        a2 = b2.valueToCode(a2, "B", c2) || "0";
+        return d2 ? [e2 + d2 + a2, c2] : ["Math.pow(" + e2 + ", " + a2 + ")", S2.FUNCTION_CALL];
+      },
+      math_atan2: function(a2, b2) {
+        var c2 = b2.valueToCode(a2, "X", S2.NONE) || "0";
+        return ["Math.atan2(" + (b2.valueToCode(a2, "Y", S2.NONE) || "0") + ", " + c2 + ") / Math.PI * 180", S2.DIVISION];
+      },
+      math_change: function(a2, b2) {
+        var c2 = b2.valueToCode(a2, "DELTA", S2.ADDITION) || "0";
+        a2 = b2.getVariableName(a2.getFieldValue("VAR"));
+        return a2 + " = (typeof " + a2 + " === 'number' ? " + a2 + " : 0) + " + c2 + ";\n";
+      },
+      math_constant: function(a2) {
+        return { PI: ["Math.PI", S2.MEMBER], E: ["Math.E", S2.MEMBER], GOLDEN_RATIO: ["(1 + Math.sqrt(5)) / 2", S2.DIVISION], SQRT2: ["Math.SQRT2", S2.MEMBER], SQRT1_2: ["Math.SQRT1_2", S2.MEMBER], INFINITY: ["Infinity", S2.ATOMIC] }[a2.getFieldValue("CONSTANT")];
+      },
+      math_constrain: function(a2, b2) {
+        var c2 = b2.valueToCode(a2, "VALUE", S2.NONE) || "0", d2 = b2.valueToCode(a2, "LOW", S2.NONE) || "0";
+        a2 = b2.valueToCode(a2, "HIGH", S2.NONE) || "Infinity";
+        return ["Math.min(Math.max(" + c2 + ", " + d2 + "), " + a2 + ")", S2.FUNCTION_CALL];
+      },
+      math_modulo: function(a2, b2) {
+        var c2 = b2.valueToCode(a2, "DIVIDEND", S2.MODULUS) || "0";
+        a2 = b2.valueToCode(a2, "DIVISOR", S2.MODULUS) || "0";
+        return [c2 + " % " + a2, S2.MODULUS];
+      },
+      math_number: function(a2) {
+        a2 = Number(a2.getFieldValue("NUM"));
+        return [String(a2), a2 >= 0 ? S2.ATOMIC : S2.UNARY_NEGATION];
+      },
+      math_number_property: function(a2, b2) {
+        var c2 = { EVEN: [" % 2 === 0", S2.MODULUS, S2.EQUALITY], ODD: [
+          " % 2 === 1",
+          S2.MODULUS,
+          S2.EQUALITY
+        ], WHOLE: [" % 1 === 0", S2.MODULUS, S2.EQUALITY], POSITIVE: [" > 0", S2.RELATIONAL, S2.RELATIONAL], NEGATIVE: [" < 0", S2.RELATIONAL, S2.RELATIONAL], DIVISIBLE_BY: [null, S2.MODULUS, S2.EQUALITY], PRIME: [null, S2.NONE, S2.FUNCTION_CALL] }, d2 = a2.getFieldValue("PROPERTY"), [e2, f2, g2] = c2[d2];
+        c2 = b2.valueToCode(a2, "NUMBER_TO_CHECK", f2) || "0";
+        d2 === "PRIME" ? a2 = b2.provideFunction_("mathIsPrime", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(n) {
+  // https://en.wikipedia.org/wiki/Primality_test#Naive_methods
+  if (n == 2 || n == 3) {
+    return true;
+  }
+  // False if n is NaN, negative, is 1, or not whole.
+  // And false if n is divisible by 2 or 3.
+  if (isNaN(n) || n <= 1 || n % 1 !== 0 || n % 2 === 0 || n % 3 === 0) {
+    return false;
+  }
+  // Check all the numbers of form 6k +/- 1, up to sqrt(n).
+  for (var x = 6; x <= Math.sqrt(n) + 1; x += 6) {
+    if (n % (x - 1) === 0 || n % (x + 1) === 0) {
+      return false;
+    }
+  }
+  return true;
+}
+`) + "(" + c2 + ")" : d2 === "DIVISIBLE_BY" ? (a2 = b2.valueToCode(a2, "DIVISOR", S2.MODULUS) || "0", a2 = c2 + " % " + a2 + " === 0") : a2 = c2 + e2;
+        return [a2, g2];
+      },
+      math_on_list: function(a2, b2) {
+        var c2 = a2.getFieldValue("OP");
+        switch (c2) {
+          case "SUM":
+            a2 = b2.valueToCode(a2, "LIST", S2.MEMBER) || "[]";
+            a2 += ".reduce(function(x, y) {return x + y;}, 0)";
+            break;
+          case "MIN":
+            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
+            a2 = "Math.min.apply(null, " + a2 + ")";
+            break;
+          case "MAX":
+            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
+            a2 = "Math.max.apply(null, " + a2 + ")";
+            break;
+          case "AVERAGE":
+            c2 = b2.provideFunction_(
+              "mathMean",
+              `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(myList) {
+  return myList.reduce(function(x, y) {return x + y;}, 0) / myList.length;
+}
+`
+            );
+            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
+            a2 = c2 + "(" + a2 + ")";
+            break;
+          case "MEDIAN":
+            c2 = b2.provideFunction_("mathMedian", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(myList) {
+  var localList = myList.filter(function (x) {return typeof x === 'number';});
+  if (!localList.length) return null;
+  localList.sort(function(a, b) {return b - a;});
+  if (localList.length % 2 === 0) {
+    return (localList[localList.length / 2 - 1] + localList[localList.length / 2]) / 2;
+  } else {
+    return localList[(localList.length - 1) / 2];
+  }
+}
+`);
+            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
+            a2 = c2 + "(" + a2 + ")";
+            break;
+          case "MODE":
+            c2 = b2.provideFunction_("mathModes", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(values) {
+  var modes = [];
+  var counts = [];
+  var maxCount = 0;
+  for (var i = 0; i < values.length; i++) {
+    var value = values[i];
+    var found = false;
+    var thisCount;
+    for (var j = 0; j < counts.length; j++) {
+      if (counts[j][0] === value) {
+        thisCount = ++counts[j][1];
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      counts.push([value, 1]);
+      thisCount = 1;
+    }
+    maxCount = Math.max(thisCount, maxCount);
+  }
+  for (var j = 0; j < counts.length; j++) {
+    if (counts[j][1] === maxCount) {
+      modes.push(counts[j][0]);
+    }
+  }
+  return modes;
+}
+`);
+            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
+            a2 = c2 + "(" + a2 + ")";
+            break;
+          case "STD_DEV":
+            c2 = b2.provideFunction_("mathStandardDeviation", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(numbers) {
+  var n = numbers.length;
+  if (!n) return null;
+  var mean = numbers.reduce(function(x, y) {return x + y;}) / n;
+  var variance = 0;
+  for (var j = 0; j < n; j++) {
+    variance += Math.pow(numbers[j] - mean, 2);
+  }
+  variance /= n;
+  return Math.sqrt(variance);
+}
+`);
+            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
+            a2 = c2 + "(" + a2 + ")";
+            break;
+          case "RANDOM":
+            c2 = b2.provideFunction_("mathRandomList", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(list) {
+  var x = Math.floor(Math.random() * list.length);
+  return list[x];
+}
+`);
+            a2 = b2.valueToCode(a2, "LIST", S2.NONE) || "[]";
+            a2 = c2 + "(" + a2 + ")";
+            break;
+          default:
+            throw Error("Unknown operator: " + c2);
+        }
+        return [a2, S2.FUNCTION_CALL];
+      },
+      math_random_float: function() {
+        return ["Math.random()", S2.FUNCTION_CALL];
+      },
+      math_random_int: function(a2, b2) {
+        var c2 = b2.valueToCode(a2, "FROM", S2.NONE) || "0";
+        a2 = b2.valueToCode(a2, "TO", S2.NONE) || "0";
+        return [b2.provideFunction_("mathRandomInt", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(a, b) {
+  if (a > b) {
+    // Swap a and b to ensure a is smaller.
+    var c = a;
+    a = b;
+    b = c;
+  }
+  return Math.floor(Math.random() * (b - a + 1) + a);
+}
+`) + "(" + c2 + ", " + a2 + ")", S2.FUNCTION_CALL];
+      }
+    };
+    Vr.math_round = Kr;
+    Vr.math_single = Kr;
+    Vr.math_trig = Kr;
+    var Wr = { procedures_callnoreturn: function(a2, b2) {
+      return b2.forBlock.procedures_callreturn(a2, b2)[0] + ";\n";
+    }, procedures_callreturn: function(a2, b2) {
+      var c2 = b2.getProcedureName(a2.getFieldValue("NAME")), d2 = [], e2 = a2.getVarModels();
+      for (let f2 = 0; f2 < e2.length; f2++)
+        d2[f2] = b2.valueToCode(a2, "ARG" + f2, S2.NONE) || "null";
+      return [c2 + "(" + d2.join(", ") + ")", S2.FUNCTION_CALL];
+    } };
+    Wr.procedures_defnoreturn = Lr2;
+    Wr.procedures_defreturn = Lr2;
+    Wr.procedures_ifreturn = function(a2, b2) {
+      var c2 = "if (" + (b2.valueToCode(a2, "CONDITION", S2.NONE) || "false") + ") {\n";
+      b2.STATEMENT_SUFFIX && (c2 += b2.prefixLines(b2.injectId(b2.STATEMENT_SUFFIX, a2), b2.INDENT));
+      a2.hasReturnValue_ ? (a2 = b2.valueToCode(a2, "VALUE", S2.NONE) || "null", c2 += b2.INDENT + "return " + a2 + ";\n") : c2 += b2.INDENT + "return;\n";
+      return c2 + "}\n";
+    };
+    var Mr2 = /^\s*'([^']|\\')*'\s*$/, Xr = {
+      text: function(a2, b2) {
+        return [b2.quote_(a2.getFieldValue("TEXT")), S2.ATOMIC];
+      },
+      text_append: function(a2, b2) {
+        var c2 = b2.getVariableName(a2.getFieldValue("VAR"));
+        a2 = b2.valueToCode(a2, "TEXT", S2.NONE) || "''";
+        return c2 + " += " + Nr(a2)[0] + ";\n";
+      },
+      text_changeCase: function(a2, b2) {
+        var c2 = { UPPERCASE: ".toUpperCase()", LOWERCASE: ".toLowerCase()", TITLECASE: null }[a2.getFieldValue("CASE")];
+        a2 = b2.valueToCode(a2, "TEXT", c2 ? S2.MEMBER : S2.NONE) || "''";
+        return [c2 ? a2 + c2 : b2.provideFunction_("textToTitleCase", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(str) {
+  return str.replace(/\\S+/g,
+      function(txt) {return txt[0].toUpperCase() + txt.substring(1).toLowerCase();});
+}
+`) + "(" + a2 + ")", S2.FUNCTION_CALL];
+      },
+      text_charAt: function(a2, b2) {
+        var c2 = a2.getFieldValue("WHERE") || "FROM_START", d2 = b2.valueToCode(a2, "VALUE", c2 === "RANDOM" ? S2.NONE : S2.MEMBER) || "''";
+        switch (c2) {
+          case "FIRST":
+            return [d2 + ".charAt(0)", S2.FUNCTION_CALL];
+          case "LAST":
+            return [d2 + ".slice(-1)", S2.FUNCTION_CALL];
+          case "FROM_START":
+            return a2 = b2.getAdjusted(a2, "AT"), [d2 + ".charAt(" + a2 + ")", S2.FUNCTION_CALL];
+          case "FROM_END":
+            return a2 = b2.getAdjusted(a2, "AT", 1, true), [d2 + ".slice(" + a2 + ").charAt(0)", S2.FUNCTION_CALL];
+          case "RANDOM":
+            return [b2.provideFunction_(
+              "textRandomLetter",
+              `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(text) {
+  var x = Math.floor(Math.random() * text.length);
+  return text[x];
+}
+`
+            ) + "(" + d2 + ")", S2.FUNCTION_CALL];
+        }
+        throw Error("Unhandled option (text_charAt).");
+      },
+      text_count: function(a2, b2) {
+        var c2 = b2.valueToCode(a2, "TEXT", S2.NONE) || "''";
+        a2 = b2.valueToCode(a2, "SUB", S2.NONE) || "''";
+        return [b2.provideFunction_("textCount", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(haystack, needle) {
+  if (needle.length === 0) {
+    return haystack.length + 1;
+  } else {
+    return haystack.split(needle).length - 1;
+  }
+}
+`) + "(" + c2 + ", " + a2 + ")", S2.FUNCTION_CALL];
+      },
+      text_getSubstring: function(a2, b2) {
+        var c2 = { FIRST: "First", LAST: "Last", FROM_START: "FromStart", FROM_END: "FromEnd" }, d2 = a2.getFieldValue("WHERE1"), e2 = a2.getFieldValue("WHERE2"), f2 = d2 !== "FROM_END" && d2 !== "LAST" && e2 !== "FROM_END" && e2 !== "LAST", g2 = b2.valueToCode(a2, "STRING", f2 ? S2.MEMBER : S2.NONE) || "''";
+        if (d2 === "FIRST" && e2 === "LAST")
+          return [g2, S2.NONE];
+        if (g2.match(/^'?\w+'?$/) || f2) {
+          switch (d2) {
+            case "FROM_START":
+              c2 = b2.getAdjusted(a2, "AT1");
+              break;
+            case "FROM_END":
+              c2 = b2.getAdjusted(a2, "AT1", 1, false, S2.SUBTRACTION);
+              c2 = g2 + ".length - " + c2;
+              break;
+            case "FIRST":
+              c2 = "0";
+              break;
+            default:
+              throw Error("Unhandled option (text_getSubstring).");
+          }
+          switch (e2) {
+            case "FROM_START":
+              b2 = b2.getAdjusted(a2, "AT2", 1);
+              break;
+            case "FROM_END":
+              b2 = b2.getAdjusted(a2, "AT2", 0, false, S2.SUBTRACTION);
+              b2 = g2 + ".length - " + b2;
+              break;
+            case "LAST":
+              b2 = g2 + ".length";
+              break;
+            default:
+              throw Error("Unhandled option (text_getSubstring).");
+          }
+          g2 = g2 + ".slice(" + c2 + ", " + b2 + ")";
+        } else
+          f2 = b2.getAdjusted(a2, "AT1"), a2 = b2.getAdjusted(a2, "AT2"), g2 = b2.provideFunction_("subsequence" + c2[d2] + c2[e2], `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(sequence${d2 === "FROM_END" || d2 === "FROM_START" ? ", at1" : ""}${e2 === "FROM_END" || e2 === "FROM_START" ? ", at2" : ""}) {
+  var start = ${Or("sequence", d2, "at1")};
+  var end = ${Or("sequence", e2, "at2")} + 1;
+  return sequence.slice(start, end);
+}
+`) + "(" + g2 + (d2 === "FROM_END" || d2 === "FROM_START" ? ", " + f2 : "") + (e2 === "FROM_END" || e2 === "FROM_START" ? ", " + a2 : "") + ")";
+        return [g2, S2.FUNCTION_CALL];
+      },
+      text_indexOf: function(a2, b2) {
+        var c2 = a2.getFieldValue("END") === "FIRST" ? "indexOf" : "lastIndexOf", d2 = b2.valueToCode(a2, "FIND", S2.NONE) || "''";
+        b2 = (b2.valueToCode(a2, "VALUE", S2.MEMBER) || "''") + "." + c2 + "(" + d2 + ")";
+        return a2.workspace.options.oneBasedIndex ? [b2 + " + 1", S2.ADDITION] : [b2, S2.FUNCTION_CALL];
+      },
+      text_isEmpty: function(a2, b2) {
+        return ["!" + (b2.valueToCode(a2, "VALUE", S2.MEMBER) || "''") + ".length", S2.LOGICAL_NOT];
+      },
+      text_join: function(a2, b2) {
+        switch (a2.itemCount_) {
+          case 0:
+            return ["''", S2.ATOMIC];
+          case 1:
+            return a2 = b2.valueToCode(a2, "ADD0", S2.NONE) || "''", Nr(a2);
+          case 2:
+            var c2 = b2.valueToCode(a2, "ADD0", S2.NONE) || "''";
+            a2 = b2.valueToCode(a2, "ADD1", S2.NONE) || "''";
+            return [Nr(c2)[0] + " + " + Nr(a2)[0], S2.ADDITION];
+          default:
+            c2 = Array(a2.itemCount_);
+            for (let d2 = 0; d2 < a2.itemCount_; d2++)
+              c2[d2] = b2.valueToCode(a2, "ADD" + d2, S2.NONE) || "''";
+            return ["[" + c2.join(",") + "].join('')", S2.FUNCTION_CALL];
+        }
+      },
+      text_length: function(a2, b2) {
+        return [
+          (b2.valueToCode(a2, "VALUE", S2.MEMBER) || "''") + ".length",
+          S2.MEMBER
+        ];
+      },
+      text_print: function(a2, b2) {
+        return "window.alert(" + (b2.valueToCode(a2, "TEXT", S2.NONE) || "''") + ");\n";
+      }
+    };
+    Xr.text_prompt = Pr;
+    Xr.text_prompt_ext = Pr;
+    Xr.text_replace = function(a2, b2) {
+      var c2 = b2.valueToCode(a2, "TEXT", S2.NONE) || "''", d2 = b2.valueToCode(a2, "FROM", S2.NONE) || "''";
+      a2 = b2.valueToCode(a2, "TO", S2.NONE) || "''";
+      return [b2.provideFunction_("textReplace", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(haystack, needle, replacement) {
+  needle = needle.replace(/([-()\\[\\]{}+?*.$\\^|,:#<!\\\\])/g, '\\\\$1')
+                 .replace(/\\x08/g, '\\\\x08');
+  return haystack.replace(new RegExp(needle, 'g'), replacement);
+}
+`) + "(" + c2 + ", " + d2 + ", " + a2 + ")", S2.FUNCTION_CALL];
+    };
+    Xr.text_reverse = function(a2, b2) {
+      return [(b2.valueToCode(a2, "TEXT", S2.MEMBER) || "''") + ".split('').reverse().join('')", S2.FUNCTION_CALL];
+    };
+    Xr.text_trim = function(a2, b2) {
+      var c2 = { LEFT: ".replace(/^[\\s\\xa0]+/, '')", RIGHT: ".replace(/[\\s\\xa0]+$/, '')", BOTH: ".trim()" }[a2.getFieldValue("MODE")];
+      return [(b2.valueToCode(a2, "TEXT", S2.MEMBER) || "''") + c2, S2.FUNCTION_CALL];
+    };
+    var Yr = {};
+    Yr.variables_get = Qr;
+    Yr.variables_set = Rr;
+    var Zr = {};
+    Zr.variables_get_dynamic = Qr;
+    Zr.variables_set_dynamic = Rr;
+    var $r2 = new Sr(), as = Object.assign({}, {
+      lists_create_empty: function() {
+        return ["[]", S2.ATOMIC];
+      },
+      lists_create_with: function(a2, b2) {
+        var c2 = Array(a2.itemCount_);
+        for (let d2 = 0; d2 < a2.itemCount_; d2++)
+          c2[d2] = b2.valueToCode(a2, "ADD" + d2, S2.NONE) || "null";
+        return ["[" + c2.join(", ") + "]", S2.ATOMIC];
+      },
+      lists_getIndex: function(a2, b2) {
+        var c2 = a2.getFieldValue("MODE") || "GET", d2 = a2.getFieldValue("WHERE") || "FROM_START", e2 = b2.valueToCode(a2, "VALUE", d2 === "RANDOM" ? S2.NONE : S2.MEMBER) || "[]";
+        switch (d2) {
+          case "FIRST":
+            if (c2 === "GET")
+              return [e2 + "[0]", S2.MEMBER];
+            if (c2 === "GET_REMOVE")
+              return [e2 + ".shift()", S2.MEMBER];
+            if (c2 === "REMOVE")
+              return e2 + ".shift();\n";
+            break;
+          case "LAST":
+            if (c2 === "GET")
+              return [e2 + ".slice(-1)[0]", S2.MEMBER];
+            if (c2 === "GET_REMOVE")
+              return [e2 + ".pop()", S2.MEMBER];
+            if (c2 === "REMOVE")
+              return e2 + ".pop();\n";
+            break;
+          case "FROM_START":
+            a2 = b2.getAdjusted(a2, "AT");
+            if (c2 === "GET")
+              return [e2 + "[" + a2 + "]", S2.MEMBER];
+            if (c2 === "GET_REMOVE")
+              return [e2 + ".splice(" + a2 + ", 1)[0]", S2.FUNCTION_CALL];
+            if (c2 === "REMOVE")
+              return e2 + ".splice(" + a2 + ", 1);\n";
+            break;
+          case "FROM_END":
+            a2 = b2.getAdjusted(a2, "AT", 1, true);
+            if (c2 === "GET")
+              return [e2 + ".slice(" + a2 + ")[0]", S2.FUNCTION_CALL];
+            if (c2 === "GET_REMOVE")
+              return [e2 + ".splice(" + a2 + ", 1)[0]", S2.FUNCTION_CALL];
+            if (c2 === "REMOVE")
+              return e2 + ".splice(" + a2 + ", 1);";
+            break;
+          case "RANDOM":
+            e2 = b2.provideFunction_("listsGetRandomItem", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(list, remove) {
+  var x = Math.floor(Math.random() * list.length);
+  if (remove) {
+    return list.splice(x, 1)[0];
+  } else {
+    return list[x];
+  }
+}
+`) + "(" + e2 + ", " + (c2 !== "GET") + ")";
+            if (c2 === "GET" || c2 === "GET_REMOVE")
+              return [e2, S2.FUNCTION_CALL];
+            if (c2 === "REMOVE")
+              return e2 + ";\n";
+        }
+        throw Error("Unhandled combination (lists_getIndex).");
+      },
+      lists_getSublist: function(a2, b2) {
+        var c2 = { FIRST: "First", LAST: "Last", FROM_START: "FromStart", FROM_END: "FromEnd" }, d2 = b2.valueToCode(a2, "LIST", S2.MEMBER) || "[]", e2 = a2.getFieldValue("WHERE1"), f2 = a2.getFieldValue("WHERE2");
+        if (e2 === "FIRST" && f2 === "LAST")
+          d2 += ".slice(0)";
+        else if (d2.match(/^\w+$/) || e2 !== "FROM_END" && f2 === "FROM_START") {
+          switch (e2) {
+            case "FROM_START":
+              c2 = b2.getAdjusted(a2, "AT1");
+              break;
+            case "FROM_END":
+              c2 = b2.getAdjusted(a2, "AT1", 1, false, S2.SUBTRACTION);
+              c2 = d2 + ".length - " + c2;
+              break;
+            case "FIRST":
+              c2 = "0";
+              break;
+            default:
+              throw Error("Unhandled option (lists_getSublist).");
+          }
+          switch (f2) {
+            case "FROM_START":
+              b2 = b2.getAdjusted(a2, "AT2", 1);
+              break;
+            case "FROM_END":
+              b2 = b2.getAdjusted(a2, "AT2", 0, false, S2.SUBTRACTION);
+              b2 = d2 + ".length - " + b2;
+              break;
+            case "LAST":
+              b2 = d2 + ".length";
+              break;
+            default:
+              throw Error("Unhandled option (lists_getSublist).");
+          }
+          d2 = d2 + ".slice(" + c2 + ", " + b2 + ")";
+        } else {
+          let g2 = b2.getAdjusted(a2, "AT1");
+          a2 = b2.getAdjusted(a2, "AT2");
+          d2 = b2.provideFunction_("subsequence" + c2[e2] + c2[f2], `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(sequence${e2 === "FROM_END" || e2 === "FROM_START" ? ", at1" : ""}${f2 === "FROM_END" || f2 === "FROM_START" ? ", at2" : ""}) {
+  var start = ${Hr("sequence", e2, "at1")};
+  var end = ${Hr("sequence", f2, "at2")} + 1;
+  return sequence.slice(start, end);
+}
+`) + "(" + d2 + (e2 === "FROM_END" || e2 === "FROM_START" ? ", " + g2 : "") + (f2 === "FROM_END" || f2 === "FROM_START" ? ", " + a2 : "") + ")";
+        }
+        return [d2, S2.FUNCTION_CALL];
+      },
+      lists_indexOf: function(a2, b2) {
+        var c2 = a2.getFieldValue("END") === "FIRST" ? "indexOf" : "lastIndexOf", d2 = b2.valueToCode(a2, "FIND", S2.NONE) || "''";
+        b2 = (b2.valueToCode(a2, "VALUE", S2.MEMBER) || "[]") + "." + c2 + "(" + d2 + ")";
+        return a2.workspace.options.oneBasedIndex ? [b2 + " + 1", S2.ADDITION] : [b2, S2.FUNCTION_CALL];
+      },
+      lists_isEmpty: function(a2, b2) {
+        return ["!" + (b2.valueToCode(a2, "VALUE", S2.MEMBER) || "[]") + ".length", S2.LOGICAL_NOT];
+      },
+      lists_length: function(a2, b2) {
+        return [(b2.valueToCode(a2, "VALUE", S2.MEMBER) || "[]") + ".length", S2.MEMBER];
+      },
+      lists_repeat: function(a2, b2) {
+        var c2 = b2.provideFunction_("listsRepeat", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(value, n) {
+  var array = [];
+  for (var i = 0; i < n; i++) {
+    array[i] = value;
+  }
+  return array;
+}
+`), d2 = b2.valueToCode(a2, "ITEM", S2.NONE) || "null";
+        a2 = b2.valueToCode(a2, "NUM", S2.NONE) || "0";
+        return [c2 + "(" + d2 + ", " + a2 + ")", S2.FUNCTION_CALL];
+      },
+      lists_reverse: function(a2, b2) {
+        return [(b2.valueToCode(a2, "LIST", S2.FUNCTION_CALL) || "[]") + ".slice().reverse()", S2.FUNCTION_CALL];
+      },
+      lists_setIndex: function(a2, b2) {
+        function c2() {
+          if (d2.match(/^\w+$/))
+            return "";
+          var h2 = b2.nameDB_.getDistinctName("tmpList", $2.P.VARIABLE), m2 = "var " + h2 + " = " + d2 + ";\n";
+          d2 = h2;
+          return m2;
+        }
+        var d2 = b2.valueToCode(a2, "LIST", S2.MEMBER) || "[]", e2 = a2.getFieldValue("MODE") || "GET", f2 = a2.getFieldValue("WHERE") || "FROM_START", g2 = b2.valueToCode(a2, "TO", S2.ASSIGNMENT) || "null";
+        switch (f2) {
+          case "FIRST":
+            if (e2 === "SET")
+              return d2 + "[0] = " + g2 + ";\n";
+            if (e2 === "INSERT")
+              return d2 + ".unshift(" + g2 + ");\n";
+            break;
+          case "LAST":
+            if (e2 === "SET")
+              return c2() + (d2 + "[" + d2 + ".length - 1] = " + g2 + ";\n");
+            if (e2 === "INSERT")
+              return d2 + ".push(" + g2 + ");\n";
+            break;
+          case "FROM_START":
+            a2 = b2.getAdjusted(a2, "AT");
+            if (e2 === "SET")
+              return d2 + "[" + a2 + "] = " + g2 + ";\n";
+            if (e2 === "INSERT")
+              return d2 + ".splice(" + a2 + ", 0, " + g2 + ");\n";
+            break;
+          case "FROM_END":
+            a2 = b2.getAdjusted(a2, "AT", 1, false, S2.SUBTRACTION);
+            f2 = c2();
+            if (e2 === "SET")
+              return f2 + (d2 + "[" + d2 + ".length - " + a2 + "] = " + g2 + ";\n");
+            if (e2 === "INSERT")
+              return f2 + (d2 + ".splice(" + d2 + ".length - " + a2 + ", 0, " + g2 + ");\n");
+            break;
+          case "RANDOM":
+            a2 = c2();
+            f2 = b2.nameDB_.getDistinctName("tmpX", $2.P.VARIABLE);
+            a2 += "var " + f2 + " = Math.floor(Math.random() * " + d2 + ".length);\n";
+            if (e2 === "SET")
+              return a2 + (d2 + "[" + f2 + "] = " + g2 + ";\n");
+            if (e2 === "INSERT")
+              return a2 + (d2 + ".splice(" + f2 + ", 0, " + g2 + ");\n");
+        }
+        throw Error("Unhandled combination (lists_setIndex).");
+      },
+      lists_sort: function(a2, b2) {
+        var c2 = b2.valueToCode(a2, "LIST", S2.FUNCTION_CALL) || "[]", d2 = a2.getFieldValue("DIRECTION") === "1" ? 1 : -1;
+        a2 = a2.getFieldValue("TYPE");
+        b2 = b2.provideFunction_("listsGetSortCompare", `
+function ${b2.FUNCTION_NAME_PLACEHOLDER_}(type, direction) {
+  var compareFuncs = {
+    'NUMERIC': function(a, b) {
+        return Number(a) - Number(b); },
+    'TEXT': function(a, b) {
+        return String(a) > String(b) ? 1 : -1; },
+    'IGNORE_CASE': function(a, b) {
+        return String(a).toLowerCase() > String(b).toLowerCase() ? 1 : -1; },
+  };
+  var compare = compareFuncs[type];
+  return function(a, b) { return compare(a, b) * direction; };
+}
+      `);
+        return [c2 + ".slice().sort(" + b2 + '("' + a2 + '", ' + d2 + "))", S2.FUNCTION_CALL];
+      },
+      lists_split: function(a2, b2) {
+        var c2 = b2.valueToCode(a2, "INPUT", S2.MEMBER);
+        b2 = b2.valueToCode(a2, "DELIM", S2.NONE) || "''";
+        a2 = a2.getFieldValue("MODE");
+        if (a2 === "SPLIT")
+          c2 || (c2 = "''"), a2 = "split";
+        else if (a2 === "JOIN")
+          c2 || (c2 = "[]"), a2 = "join";
+        else
+          throw Error("Unknown mode: " + a2);
+        return [c2 + "." + a2 + "(" + b2 + ")", S2.FUNCTION_CALL];
+      }
+    }, Tr, Ur2, Vr, Wr, Xr, Yr, Zr);
+    for (let a2 in as)
+      $r2.forBlock[a2] = as[a2];
+    var bs = {};
+    bs.JavascriptGenerator = Sr;
+    bs.Order = S2;
+    bs.javascriptGenerator = $r2;
+    $2.__chunk_javascript = bs;
+    $2.__chunk_javascript.__namespace__ = $2;
+    return $2.__chunk_javascript;
+  });
+})(javascript_compressed);
+var javascript_compressedExports = javascript_compressed.exports;
+const javascript$2 = /* @__PURE__ */ getDefaultExportFromCjs(javascript_compressedExports);
+const {
+  JavascriptGenerator,
+  Order,
+  javascriptGenerator
+} = javascript$2;
+const javascript$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  JavascriptGenerator,
+  Order,
+  javascriptGenerator
+}, Symbol.toStringTag, { value: "Module" }));
 const blockCircle = {
   name: "circle",
   block: {
@@ -75995,6 +75995,8 @@ const blocklyToolboxConfiguration = {
     {
       kind: "category",
       name: "Straight Motion",
+      colour: "#4C97FF",
+      // Scratch's palette
       contents: [
         // blockToToolbox(CUSTOM_BLOCKS.blockGoTo_xyz),
         blockToToolbox(CUSTOM_BLOCKS.blockTakeoff),
@@ -76011,6 +76013,8 @@ const blocklyToolboxConfiguration = {
     {
       kind: "category",
       name: "Curves",
+      colour: "#0FBD8C",
+      // Scratch's palette
       contents: [
         blockToToolbox(CUSTOM_BLOCKS.blockCircle),
         blockToToolbox(CUSTOM_BLOCKS.blockCircleRadians),
@@ -76029,6 +76033,8 @@ const blocklyToolboxConfiguration = {
     {
       kind: "category",
       name: "Colors",
+      colour: "#9966FF",
+      // Scratch's palette
       contents: [
         blockToToolbox(CUSTOM_BLOCKS.blockColor),
         blockToToolbox(CUSTOM_BLOCKS.blockRandomColor),
@@ -76038,6 +76044,8 @@ const blocklyToolboxConfiguration = {
     {
       kind: "category",
       name: "Loops",
+      colour: "#FFAB19",
+      // Scratch's palette
       contents: [
         blockToToolbox(CUSTOM_BLOCKS.blockRepeat)
       ]
@@ -76045,6 +76053,8 @@ const blocklyToolboxConfiguration = {
     {
       kind: "category",
       name: "Trajectory Modifiers",
+      colour: "#59C059",
+      // Scratch's palette
       contents: [
         blockToToolbox(CUSTOM_BLOCKS.blockNegate),
         // blockToToolbox(CUSTOM_BLOCKS.multiTraj),
@@ -76088,6 +76098,20 @@ const blocklyToolboxConfiguration = {
     // },
   ]
 };
+for (const { colour, contents } of blocklyToolboxConfiguration.contents) {
+  if (!colour)
+    continue;
+  for (const { type } of contents ?? []) {
+    const definition = Blocks[type ?? ""];
+    if (!definition)
+      continue;
+    const { init: init2 } = definition;
+    definition.init = function() {
+      init2 == null ? void 0 : init2.call(this);
+      this.setColour(colour);
+    };
+  }
+}
 function uuid$1() {
   const hashTable = [
     "a",
@@ -82519,6 +82543,810 @@ useRobartState.subscribe(
       useSimulator.getState().setRobots(robots2);
   }
 );
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+class ContinuousCategory extends ToolboxCategory$1 {
+  /**
+   * Creates a DOM element to display the category's label.
+   *
+   * @param name The name of this category.
+   * @returns The newly created category label DOM element.
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  createLabelDom_(name2) {
+    const label = document.createElement("div");
+    label.setAttribute("id", this.getId() + ".label");
+    label.textContent = name2;
+    label.classList.add(this.cssConfig_["label"] ?? "");
+    return label;
+  }
+  /**
+   * Creates a DOM element to display the category's icon. This category uses
+   * color swatches instead of graphical icons.
+   *
+   * @returns The newly created category icon DOM element.
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  createIconDom_() {
+    const icon2 = document.createElement("div");
+    icon2.classList.add("categoryBubble");
+    icon2.style.backgroundColor = this.colour_;
+    return icon2;
+  }
+  /**
+   * Adds a color indicator to the toolbox category. Intentionally a no-op.
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  addColourBorder_() {
+  }
+  /**
+   * Sets whether or not this category is selected in the toolbox.
+   *
+   * @param isSelected True if this category is selected, otherwise false.
+   */
+  setSelected(isSelected) {
+    if (!this.rowDiv_ || !this.htmlDiv_)
+      return;
+    if (isSelected) {
+      this.rowDiv_.style.backgroundColor = "gray";
+      utils$1.dom.addClass(
+        this.rowDiv_,
+        this.cssConfig_["selected"] ?? ""
+      );
+    } else {
+      this.rowDiv_.style.backgroundColor = "";
+      utils$1.dom.removeClass(
+        this.rowDiv_,
+        this.cssConfig_["selected"] ?? ""
+      );
+    }
+    utils$1.aria.setState(
+      this.htmlDiv_,
+      utils$1.aria.State.SELECTED,
+      isSelected
+    );
+  }
+}
+/**
+ * @license
+ * Copyright 2026 Raspberry Pi Foundation
+ * SPDX-License-Identifier: Apache-2.0
+ */
+class ContinuousToolboxNavigator extends ToolboxNavigator$1 {
+  constructor(toolbox) {
+    super(toolbox);
+    this.toolbox = toolbox;
+  }
+  /**
+   * Returns the next node when navigating "in", in this case the first flyout
+   * item in the toolbox's currently selected category.
+   *
+   * @param node The node to navigate relative to.
+   * @returns The node "in" relative to the given node.
+   */
+  getInNode(node = getFocusManager$1().getFocusedNode()) {
+    if (!(node instanceof ContinuousCategory))
+      return null;
+    return this.toolbox.getFlyout().headerForCategory(node) ?? null;
+  }
+}
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+class ContinuousToolbox extends Toolbox$1 {
+  constructor() {
+    super(...arguments);
+    /**
+     * Timeout ID used to prevent refreshing the flyout during extensive block
+     * changes.
+     */
+    __publicField2(this, "refreshDebouncer");
+    /**
+     * Navigator object responsible for handling keyboard navigation within this
+     * toolbox.
+     */
+    __publicField2(this, "continuousToolboxNavigator", new ContinuousToolboxNavigator(this));
+  }
+  /**
+   * Initializes the continuous toolbox.
+   */
+  init() {
+    super.init();
+    const flyout = this.getFlyout();
+    flyout.show(this.getInitialFlyoutContents());
+    this.getWorkspace().addChangeListener((e2) => {
+      if (e2.type === Events$1.BLOCK_CREATE || e2.type === Events$1.BLOCK_DELETE || e2.type === Events$1.BLOCK_CHANGE) {
+        this.refreshSelection();
+      }
+    });
+  }
+  /**
+   * Returns the continuous toolbox's flyout.
+   *
+   * @returns The toolbox's flyout.
+   */
+  getFlyout() {
+    return super.getFlyout();
+  }
+  /**
+   * Gets the contents that should be shown in the flyout immediately.
+   * This includes all blocks and labels for each category of block.
+   *
+   * @returns Flyout contents.
+   */
+  getInitialFlyoutContents() {
+    return this.getToolboxItems().flatMap(this.convertToolboxItemToFlyoutItems);
+  }
+  /**
+   * Converts a given toolbox item to an array of flyout items, generally a
+   * label followed by the category's blocks.
+   *
+   * @param toolboxItem The toolbox item/category to convert.
+   * @returns An array of flyout items contained in the given toolbox item.
+   */
+  convertToolboxItemToFlyoutItems(toolboxItem) {
+    let contents = [];
+    if (toolboxItem instanceof ToolboxCategory$1) {
+      contents.push({ kind: "LABEL", text: toolboxItem.getName() });
+      let itemContents = toolboxItem.getContents();
+      if (typeof itemContents === "string") {
+        itemContents = [{ custom: itemContents, kind: "CATEGORY" }];
+      }
+      contents = contents.concat(itemContents);
+    }
+    return contents;
+  }
+  /**
+   * Updates the flyout's contents if it is visible.
+   */
+  refreshSelection() {
+    if (this.getFlyout().isVisible()) {
+      if (this.refreshDebouncer) {
+        clearTimeout(this.refreshDebouncer);
+      }
+      this.refreshDebouncer = setTimeout(() => {
+        this.getFlyout().show(this.getInitialFlyoutContents());
+      }, 100);
+    }
+  }
+  /**
+   * Scrolls the flyout to display the newly selected category's contents.
+   *
+   * @param oldItem The previously selected toolbox category.
+   * @param newItem The newly selected toolbox category.
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  updateFlyout_(oldItem, newItem) {
+    if (newItem) {
+      this.getFlyout().scrollToCategory(newItem);
+      if (!this.getFlyout().isVisible()) {
+        this.getFlyout().show(this.getInitialFlyoutContents());
+      }
+    } else if (this.getFlyout().autoClose) {
+      this.getFlyout().hide();
+    }
+  }
+  /**
+   * Returns whether or not the toolbox should deselect the old category.
+   *
+   * @param oldItem The previously selected toolbox category.
+   * @param newItem The newly selected toolbox category.
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  shouldDeselectItem_(oldItem, newItem) {
+    return !!(oldItem && oldItem !== newItem);
+  }
+  /**
+   * Gets a category by name.
+   *
+   * @param name Name of category to get.
+   * @returns Category, or null if not found.
+   * @internal
+   */
+  getCategoryByName(name2) {
+    const category = this.getToolboxItems().find(
+      (item) => item instanceof ToolboxCategory$1 && item.isSelectable() && name2 === item.getName()
+    );
+    if (!category)
+      return null;
+    return category;
+  }
+  /**
+   * Selects the category with the given name.
+   * Similar to setSelectedItem, but importantly, does not call updateFlyout
+   * because this is called while the flyout is being scrolled.
+   *
+   * @param name Name of category to select.
+   * @internal
+   */
+  selectCategoryByName(name2) {
+    const newItem = this.getCategoryByName(name2);
+    if (!newItem)
+      return;
+    const oldItem = this.selectedItem_;
+    if (oldItem && this.shouldDeselectItem_(oldItem, newItem)) {
+      this.deselectItem_(oldItem);
+    }
+    if (this.shouldSelectItem_(oldItem, newItem)) {
+      this.selectItem_(oldItem, newItem);
+    }
+  }
+  /**
+   * Returns the bounding rectangle of the drag target/deletion area in pixels
+   * relative to the viewport.
+   *
+   * @returns The toolbox's bounding box. Null if drag target area should be
+   *     ignored.
+   */
+  getClientRect() {
+    const flyout = this.getFlyout();
+    if (flyout && !flyout.autoClose) {
+      return flyout.getClientRect();
+    }
+    return super.getClientRect();
+  }
+  /**
+   * Returns the Navigator object responsible for handling keyboard navigation
+   * inside this toolbox.
+   */
+  getNavigator() {
+    return this.continuousToolboxNavigator;
+  }
+}
+/**
+ * @license
+ * Copyright 2021 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+class ContinuousFlyoutMetrics extends FlyoutMetricsManager$1 {
+  /**
+   * Returns the metrics for the scroll area of the continuous flyout's
+   * workspace. Adds additional padding to the bottom of the flyout if needed in
+   * order to make it possible  to scroll to the top of the last category.
+   *
+   * @param getWorkspaceCoordinates True to get the scroll metrics in
+   *     workspace coordinates, false to get them in pixel coordinates.
+   * @param cachedViewMetrics The view metrics if they have been previously
+   *     computed.
+   * @param cachedContentMetrics The content metrics if they have been
+   *     previously computed.
+   * @returns The metrics for the scroll container.
+   */
+  getScrollMetrics(getWorkspaceCoordinates, cachedViewMetrics, cachedContentMetrics) {
+    const scrollMetrics = super.getScrollMetrics(
+      getWorkspaceCoordinates,
+      cachedViewMetrics,
+      cachedContentMetrics
+    );
+    const contentMetrics = cachedContentMetrics || this.getContentMetrics(getWorkspaceCoordinates);
+    const viewMetrics = cachedViewMetrics || this.getViewMetrics(getWorkspaceCoordinates);
+    if (scrollMetrics) {
+      scrollMetrics.height += this.flyout_.calculateBottomPadding(contentMetrics, viewMetrics);
+    }
+    return scrollMetrics;
+  }
+}
+/**
+ * @license
+ * Copyright 2024 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+class RecyclableBlockFlyoutInflater extends BlockFlyoutInflater$1 {
+  constructor() {
+    super(...arguments);
+    /**
+     * Whether or not block recycling is enabled.
+     */
+    __publicField2(this, "recyclingEnabled", false);
+    /**
+     * Map from block type to block instance.
+     */
+    __publicField2(this, "recycledBlocks", /* @__PURE__ */ new Map());
+    /**
+     * Custom function to use for checking whether or not blocks can be recycled.
+     */
+    __publicField2(this, "recycleEligibilityChecker");
+  }
+  /**
+   * Creates a new block from the given block definition.
+   *
+   * @param blockDefinition The definition to create a block from.
+   * @param workspace The workspace to create the block on.
+   * @returns The newly created block.
+   */
+  createBlock(blockDefinition, workspace) {
+    const blockType = this.getTypeFromDefinition(blockDefinition);
+    return this.getRecycledBlock(blockType) ?? super.createBlock(blockDefinition, workspace);
+  }
+  /**
+   * Returns the type of a block from an XML or JSON block definition.
+   *
+   * @param blockDefinition The block definition to parse.
+   * @returns The block type.
+   */
+  getTypeFromDefinition(blockDefinition) {
+    let type;
+    if (blockDefinition["blockxml"]) {
+      const xml = typeof blockDefinition["blockxml"] === "string" ? utils$1.xml.textToDom(blockDefinition["blockxml"]) : blockDefinition["blockxml"];
+      type = xml.getAttribute("type");
+    } else {
+      type = blockDefinition["type"];
+    }
+    if (!type) {
+      throw new Error(
+        `Block type is not specified in block definition: ${JSON.stringify(
+          blockDefinition
+        )}`
+      );
+    }
+    return type;
+  }
+  /**
+   * Puts a previously created block into the recycle bin and moves it to the
+   * top of the workspace. Used during large workspace swaps to limit the number
+   * of new DOM elements we need to create.
+   *
+   * @param block The block to recycle.
+   */
+  recycleBlock(block) {
+    const xy = block.getRelativeToSurfaceXY();
+    block.moveBy(-xy.x, -xy.y);
+    this.recycledBlocks.set(block.type, block);
+  }
+  /**
+   * Returns a block from the cache of recycled blocks with the given type, or
+   * undefined if one cannot be found.
+   *
+   * @param blockType The type of the block to try to recycle.
+   * @returns The recycled block, or undefined if one could not be recycled.
+   */
+  getRecycledBlock(blockType) {
+    const block = this.recycledBlocks.get(blockType);
+    this.recycledBlocks.delete(blockType);
+    return block;
+  }
+  /**
+   * Returns whether the given block can be recycled or not.
+   *
+   * @param block The block to check for recyclability.
+   * @returns True if the block can be recycled. False otherwise.
+   */
+  blockIsRecyclable(block) {
+    if (!this.recyclingEnabled)
+      return false;
+    if (this.recycleEligibilityChecker) {
+      return this.recycleEligibilityChecker(block);
+    }
+    if (block.mutationToDom || block.domToMutation || block.saveExtraState || block.loadExtraState) {
+      return false;
+    }
+    if (!block.isEnabled())
+      return false;
+    for (const input of block.inputList) {
+      for (const field of input.fieldRow) {
+        if (field.referencesVariables())
+          return false;
+        if (field instanceof FieldDropdown$1) {
+          if (field.isOptionListDynamic())
+            return false;
+        }
+      }
+      if (input.connection) {
+        const targetBlock = input.connection.targetBlock();
+        if (targetBlock && !this.blockIsRecyclable(targetBlock)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  /**
+   * Disposes of the provided block.
+   *
+   * @param item The block to dispose of.
+   */
+  disposeItem(item) {
+    const element = item.getElement();
+    if (element instanceof BlockSvg$1 && this.blockIsRecyclable(element)) {
+      this.removeListeners(element.id);
+      this.recycleBlock(element);
+    } else {
+      super.disposeItem(item);
+    }
+  }
+  /**
+   * Clears the cache of recycled blocks.
+   */
+  emptyRecycledBlocks() {
+    this.recycledBlocks.forEach((block) => block.dispose(false, false));
+    this.recycledBlocks.clear();
+  }
+}
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+class ContinuousFlyout extends VerticalFlyout$1 {
+  /**
+   * Creates a new ContinuousFlyout.
+   *
+   * @param workspaceOptions The injection options for the flyout's workspace.
+   */
+  constructor(workspaceOptions) {
+    super(workspaceOptions);
+    /**
+     * Target scroll position, used to smoothly scroll to a given category
+     * location when selected.
+     */
+    __publicField2(this, "scrollTarget");
+    /**
+     * Map from category name to its position in the flyout.
+     */
+    __publicField2(this, "scrollPositions", /* @__PURE__ */ new Map());
+    /**
+     * The percentage of the distance to the scrollTarget that should be
+     * scrolled at a time. Lower values will produce a smoother, slower scroll.
+     */
+    __publicField2(this, "scrollAnimationFraction", 0.3);
+    /**
+     * Prevents the flyout from closing automatically when a block is dragged out.
+     */
+    __publicField2(this, "autoClose", false);
+    this.getWorkspace().setMetricsManager(
+      new ContinuousFlyoutMetrics(this.getWorkspace(), this)
+    );
+    this.getWorkspace().addChangeListener((e2) => {
+      if (e2.type === Events$1.VIEWPORT_CHANGE) {
+        this.selectCategoryByScrollPosition(-this.getWorkspace().scrollY);
+      }
+    });
+    this.setRecyclingEnabled(true);
+  }
+  /**
+   * Gets parent toolbox.
+   * Since we registered the ContinuousToolbox, we know that's its type.
+   *
+   * @returns Toolbox that owns this flyout.
+   */
+  getParentToolbox() {
+    const toolbox = this.targetWorkspace.getToolbox();
+    if (!toolbox || toolbox instanceof ContinuousToolbox)
+      return toolbox;
+    console.warn(
+      "Expected a `ContinuousToolbox` instance but did not find one. Make sure `registerContinuousToolbox()` has been called and the continuous toolbox has been injected."
+    );
+    return null;
+  }
+  /**
+   * Records scroll position for each category in the toolbox.
+   * The scroll position is determined by the coordinates of each category's
+   * label after the entire flyout has been rendered.
+   */
+  recordScrollPositions() {
+    this.scrollPositions.clear();
+    this.getContents().filter(this.toolboxItemIsLabel.bind(this)).map((item) => item.getElement()).forEach((label) => {
+      this.scrollPositions.set(
+        label.getButtonText(),
+        Math.max(0, label.getPosition().y - this.GAP_Y / 2)
+      );
+    });
+  }
+  /**
+   * Validates and typechecks that the given toolbox item represents a label.
+   *
+   * @param item The toolbox item to check.
+   * @returns True if the item represents a label in the flyout, and is a
+   *     Blockly.FlyoutButton.
+   */
+  toolboxItemIsLabel(item) {
+    var _a3;
+    const element = item.getElement();
+    return !!(item.getType() === "label" && // Note that `FlyoutButton` represents both buttons and labels.
+    element instanceof FlyoutButton$1 && element.isLabel() && ((_a3 = this.getParentToolbox()) == null ? void 0 : _a3.getCategoryByName(element.getButtonText())));
+  }
+  /**
+   * Returns the scroll position for the given category name.
+   *
+   * @param name Category name.
+   * @returns Scroll position for given category in workspace units, or null if
+   *     not found.
+   */
+  getCategoryScrollPosition(name2) {
+    const position = this.scrollPositions.get(name2);
+    if (position === void 0) {
+      console.warn(`Scroll position not recorded for category ${name2}`);
+    }
+    return position ?? null;
+  }
+  /**
+   * Selects an item in the toolbox based on the scroll position of the flyout.
+   *
+   * @param position Current scroll position of the workspace.
+   */
+  selectCategoryByScrollPosition(position) {
+    var _a3;
+    if (this.scrollTarget)
+      return;
+    const scaledPosition = Math.round(position / this.getWorkspace().scale);
+    for (const [name2, position2] of [
+      ...this.scrollPositions.entries()
+    ].reverse()) {
+      if (scaledPosition >= position2) {
+        (_a3 = this.getParentToolbox()) == null ? void 0 : _a3.selectCategoryByName(name2);
+        return;
+      }
+    }
+  }
+  /**
+   * Scrolls the flyout to given position.
+   *
+   * @param position The Y coordinate to scroll to.
+   */
+  scrollTo(position) {
+    const metrics = this.getWorkspace().getMetrics();
+    this.scrollTarget = Math.min(
+      position * this.getWorkspace().scale,
+      metrics.scrollHeight - metrics.viewHeight
+    );
+    this.stepScrollAnimation();
+  }
+  /**
+   * Scrolls the flyout to display the given category at the top.
+   *
+   * @param category The toolbox category to scroll to in the flyout.
+   */
+  scrollToCategory(category) {
+    const position = this.scrollPositions.get(category.getName());
+    if (position === void 0) {
+      console.warn(`Scroll position not recorded for category ${name}`);
+      return;
+    }
+    this.scrollTo(position);
+  }
+  /**
+   * Returns the header item in the flyout corresponding to the given
+   * toolbox category, if any.
+   *
+   * @param category The toolbox category to retrieve header item for.
+   * @returns The given category's header item, or undefined if not found.
+   */
+  headerForCategory(category) {
+    var _a3;
+    return (_a3 = this.getContents().find((item) => {
+      return this.toolboxItemIsLabel(item) && item.getElement().getButtonText() === category.getName();
+    })) == null ? void 0 : _a3.getElement();
+  }
+  /**
+   * Step the scrolling animation by scrolling a fraction of the way to
+   * a scroll target, and request the next frame if necessary.
+   */
+  stepScrollAnimation() {
+    var _a3, _b2;
+    if (this.scrollTarget === void 0)
+      return;
+    const currentScrollPos = -this.getWorkspace().scrollY;
+    const diff = this.scrollTarget - currentScrollPos;
+    if (Math.abs(diff) < 1) {
+      (_a3 = this.getWorkspace().scrollbar) == null ? void 0 : _a3.setY(this.scrollTarget);
+      this.scrollTarget = void 0;
+      return;
+    }
+    (_b2 = this.getWorkspace().scrollbar) == null ? void 0 : _b2.setY(
+      currentScrollPos + diff * this.scrollAnimationFraction
+    );
+    requestAnimationFrame(this.stepScrollAnimation.bind(this));
+  }
+  /**
+   * Handles mouse wheel events.
+   *
+   * @param e The mouse wheel event to handle.
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  wheel_(e2) {
+    if (this.scrollTarget)
+      return;
+    super.wheel_(e2);
+  }
+  /**
+   * Calculates the additional padding needed at the bottom of the flyout in
+   * order to make it possible to scroll to the top of the last category.
+   *
+   * @param contentMetrics Content metrics for the flyout.
+   * @param viewMetrics View metrics for the flyout.
+   * @returns The additional bottom padding needed.
+   */
+  calculateBottomPadding(contentMetrics, viewMetrics) {
+    if (this.scrollPositions.size === 0)
+      return 0;
+    const lastPosition = ([...this.scrollPositions.values()].pop() ?? 0) * this.getWorkspace().scale;
+    const lastCategoryHeight = contentMetrics.height - lastPosition;
+    if (lastCategoryHeight < viewMetrics.height) {
+      return viewMetrics.height - lastCategoryHeight;
+    }
+    return 0;
+  }
+  /**
+   * Returns the X coordinate for the flyout's position.
+   */
+  getX() {
+    if (this.isVisible() && // Make sure that this flyout is associated with a toolbox and not e.g.
+    // a simple flyout or the trashcan flyout.
+    this.targetWorkspace.toolboxPosition === this.toolboxPosition_ && this.targetWorkspace.getToolbox() && this.toolboxPosition_ !== utils$1.toolbox.Position.LEFT) {
+      return this.targetWorkspace.getMetricsManager().getViewMetrics().width;
+    }
+    return super.getX();
+  }
+  /**
+   * Displays the given contents in the flyout.
+   *
+   * @param flyoutDef A string or JSON object specifying the contents of the
+   *     flyout.
+   */
+  show(flyoutDef) {
+    var _a3;
+    super.show(flyoutDef);
+    this.recordScrollPositions();
+    this.getWorkspace().resizeContents();
+    if (!((_a3 = this.getParentToolbox()) == null ? void 0 : _a3.getSelectedItem())) {
+      this.selectCategoryByScrollPosition(0);
+    }
+    this.getRecyclableInflater().emptyRecycledBlocks();
+  }
+  /**
+   * Sets the function used to determine whether a block is recyclable.
+   *
+   * @param func The function used to determine if a block is recyclable.
+   */
+  setBlockIsRecyclable(func) {
+    this.getRecyclableInflater().recycleEligibilityChecker = func;
+  }
+  /**
+   * Set whether the flyout can recycle blocks.
+   *
+   * @param isEnabled True to allow blocks to be recycled, false otherwise.
+   */
+  setRecyclingEnabled(isEnabled) {
+    this.getRecyclableInflater().recyclingEnabled = isEnabled;
+  }
+  /**
+   * Returns the recyclable block flyout inflater.
+   *
+   * @returns The recyclable inflater.
+   */
+  getRecyclableInflater() {
+    const inflater = this.getInflaterForType("block");
+    if (!(inflater instanceof RecyclableBlockFlyoutInflater)) {
+      throw new Error("The RecyclableBlockFlyoutInflater is not registered.");
+    }
+    return inflater;
+  }
+}
+/**
+ * @license
+ * Copyright 2021 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+class ContinuousMetrics extends MetricsManager$1 {
+  /**
+   * Computes the viewport size to not include the toolbox and the flyout.
+   * The default viewport includes the flyout.
+   *
+   * @param getWorkspaceCoordinates True to get the view metrics in workspace
+   *     coordinates, false to get them in pixel coordinates.
+   * @returns The width, height, top and left of the viewport in either
+   *     workspace coordinates or pixel coordinates.
+   */
+  getViewMetrics(getWorkspaceCoordinates = false) {
+    const scale = getWorkspaceCoordinates ? this.workspace_.scale : 1;
+    const svgMetrics = this.getSvgMetrics();
+    const toolboxMetrics = this.getToolboxMetrics();
+    const flyoutMetrics = this.getFlyoutMetrics(false);
+    const toolboxPosition = toolboxMetrics.position;
+    if (this.workspace_.getToolbox()) {
+      if (toolboxPosition == TOOLBOX_AT_TOP$1 || toolboxPosition == TOOLBOX_AT_BOTTOM$1) {
+        svgMetrics.height -= toolboxMetrics.height + flyoutMetrics.height;
+      } else if (toolboxPosition == TOOLBOX_AT_LEFT$1 || toolboxPosition == TOOLBOX_AT_RIGHT$1) {
+        svgMetrics.width -= toolboxMetrics.width + flyoutMetrics.width;
+      }
+    }
+    return {
+      height: svgMetrics.height / scale,
+      width: svgMetrics.width / scale,
+      top: -this.workspace_.scrollY / scale,
+      left: -this.workspace_.scrollX / scale
+    };
+  }
+  /**
+   * Gets the absolute left and absolute top in pixel coordinates.
+   * This is where the visible workspace starts in relation to the SVG
+   * container, adjusted to not include the area behind the flyout.
+   *
+   * @returns The absolute metrics for the workspace.
+   */
+  getAbsoluteMetrics() {
+    const toolboxMetrics = this.getToolboxMetrics();
+    const flyoutMetrics = this.getFlyoutMetrics(false);
+    const toolboxPosition = toolboxMetrics.position;
+    let absoluteLeft = 0;
+    if (this.workspace_.getToolbox() && toolboxPosition == TOOLBOX_AT_LEFT$1) {
+      absoluteLeft = toolboxMetrics.width + flyoutMetrics.width;
+    }
+    let absoluteTop = 0;
+    if (this.workspace_.getToolbox() && toolboxPosition == TOOLBOX_AT_TOP$1) {
+      absoluteTop = toolboxMetrics.height + flyoutMetrics.height;
+    }
+    return {
+      top: absoluteTop,
+      left: absoluteLeft
+    };
+  }
+}
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+function registerContinuousToolbox() {
+  registry$1.register(
+    registry$1.Type.TOOLBOX_ITEM,
+    ToolboxCategory$1.registrationName,
+    ContinuousCategory,
+    true
+  );
+  registry$1.register(
+    registry$1.Type.METRICS_MANAGER,
+    "ContinuousMetrics",
+    ContinuousMetrics,
+    true
+  );
+  registry$1.register(
+    registry$1.Type.FLYOUTS_VERTICAL_TOOLBOX,
+    "ContinuousFlyout",
+    ContinuousFlyout,
+    true
+  );
+  registry$1.register(
+    registry$1.Type.TOOLBOX,
+    "ContinuousToolbox",
+    ContinuousToolbox,
+    true
+  );
+  registry$1.register(
+    registry$1.Type.FLYOUT_INFLATER,
+    "block",
+    RecyclableBlockFlyoutInflater,
+    true
+  );
+  Css$1.register(`
+  .categoryBubble {
+    margin: 0 auto 0.125rem;
+    border-radius: 100%;
+    border: 1px solid;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .blocklyToolboxCategory {
+    height: initial;
+    padding: 3px 0;
+  }
+  .blocklyTreeRowContentContainer {
+    display: flex;
+    flex-direction: column;
+  }
+  .blocklyToolboxCategoryLabel {
+    margin: auto;
+  }
+  .blocklyToolboxCategoryLabel {
+    text-align: center;
+  }
+  `);
+}
 var defaultTheme$3 = {};
 var cloneDeep$1 = {};
 (function(exports) {
@@ -90170,17 +90998,56 @@ const BlockEditorHeader = () => {
   ) });
 };
 const zoomScaleSpeed = 1.2;
+const blockScale = 0.8;
 const blocklyTheme = registry.getObject(registry.Type.THEME, "robart", false) ?? Theme.defineTheme("robart", {
   name: "robart",
   base: Themes.Classic,
-  fontStyle: { family: defaultTheme$2.fontFamily.sans.join(", ") }
+  fontStyle: { family: defaultTheme$2.fontFamily.sans.join(", ") },
+  componentStyles: { workspaceBackgroundColour: "#f9f9f9", toolboxBackgroundColour: "#fff", flyoutBackgroundColour: "#fff", flyoutOpacity: 1 }
 });
 Scrollbar.scrollbarThickness = 8;
-class FixedScaleFlyout extends VerticalFlyout {
+registerContinuousToolbox();
+class PopoverFlyout extends ContinuousFlyout {
+  constructor() {
+    super(...arguments);
+    __publicField2(this, "autoClose", true);
+  }
+  // The plugin keeps it open beside the workspace, which leaves the workspace too narrow
+  // By default it follows the workspace's zoom; keep it at the starting size instead
   getFlyoutScale() {
-    return 1;
+    return blockScale;
   }
 }
+class PopoverToolbox extends ContinuousToolbox {
+  init() {
+    super.init();
+    this.getFlyout().hide();
+  }
+  updateFlyout_(oldItem, newItem) {
+    const opening = newItem && !this.getFlyout().isVisible();
+    super.updateFlyout_(oldItem, newItem);
+    if (opening)
+      this.getFlyout().scrollToCategory(newItem);
+  }
+}
+class CircleCategory extends ContinuousCategory {
+  createIconDom_() {
+    const circle = document.createElement("div");
+    circle.className = "categoryCircle";
+    circle.style.backgroundColor = this.colour_;
+    return circle;
+  }
+  // The circle shows the color instead of a strip beside the name
+  addColourBorder_() {
+  }
+  // Selected: a light background from the CSS, not the category's color
+  setSelected(isSelected) {
+    super.setSelected(isSelected);
+    if (this.rowDiv_)
+      this.rowDiv_.style.backgroundColor = "";
+  }
+}
+registry.register(registry.Type.TOOLBOX_ITEM, ToolboxCategory.registrationName, CircleCategory, true);
 const gesturePrototype = Gesture.prototype;
 const updateIsDragging = gesturePrototype.updateIsDragging;
 gesturePrototype.updateIsDragging = function(e2) {
@@ -90209,17 +91076,17 @@ const BlockEditorPanel = () => {
       grid: {
         spacing: 20,
         length: 3,
-        colour: "#ccc",
+        colour: "#ddd",
         snap: true
       },
       // Pinch (ctrl+wheel in Chrome/Firefox) and cmd+scroll zoom; plain scrolling pans. move.wheel is needed,
       // or every scroll would zoom.
-      zoom: { wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed },
+      zoom: { wheel: true, pinch: true, minScale: 0.3, maxScale: 3, scaleSpeed: zoomScaleSpeed, startScale: blockScale },
       move: { wheel: true, drag: true, scrollbars: true },
-      plugins: { flyoutsVerticalToolbox: FixedScaleFlyout },
+      plugins: { toolbox: PopoverToolbox, flyoutsVerticalToolbox: PopoverFlyout },
       theme: blocklyTheme,
-      renderer: "geras",
-      // Blockly 9's block look; Blockly 12+ defaults to the flatter 'thrasos'
+      renderer: "zelos",
+      // Scratch's block look
       sounds: false
       // Blockly 12+ plays a click when a block is dropped
     },
@@ -126288,7 +127155,7 @@ function getStyleTags(node) {
   return rule || null;
 }
 const t = Tag.define;
-const comment = t(), name = t(), typeName = t(name), propertyName = t(name), literal = t(), string = t(literal), number = t(literal), content = t(), heading = t(content), keyword = t(), operator = t(), punctuation = t(), bracket = t(punctuation), meta = t();
+const comment = t(), name$1 = t(), typeName = t(name$1), propertyName = t(name$1), literal = t(), string = t(literal), number = t(literal), content = t(), heading = t(content), keyword = t(), operator = t(), punctuation = t(), bracket = t(punctuation), meta = t();
 const tags = {
   /// A comment.
   comment,
@@ -126299,9 +127166,9 @@ const tags = {
   /// A documentation [comment](#highlight.tags.comment).
   docComment: t(comment),
   /// Any kind of identifier.
-  name,
+  name: name$1,
   /// The [name](#highlight.tags.name) of a variable.
-  variableName: t(name),
+  variableName: t(name$1),
   /// A type [name](#highlight.tags.name).
   typeName,
   /// A tag name (subtag of [`typeName`](#highlight.tags.typeName)).
@@ -126311,13 +127178,13 @@ const tags = {
   /// An attribute name (subtag of [`propertyName`](#highlight.tags.propertyName)).
   attributeName: t(propertyName),
   /// The [name](#highlight.tags.name) of a class.
-  className: t(name),
+  className: t(name$1),
   /// A label [name](#highlight.tags.name).
-  labelName: t(name),
+  labelName: t(name$1),
   /// A namespace [name](#highlight.tags.name).
-  namespace: t(name),
+  namespace: t(name$1),
   /// The [name](#highlight.tags.name) of a macro.
-  macroName: t(name),
+  macroName: t(name$1),
   /// A literal value.
   literal,
   /// A string [literal](#highlight.tags.literal).
