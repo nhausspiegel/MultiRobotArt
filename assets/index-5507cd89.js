@@ -37177,19 +37177,21 @@ const blockStop = {
   name: "stop",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("stop and hover");
+      this.appendDummyInput().appendField("hover for").appendField(new FieldNumber(1, 0), "duration").appendField("seconds");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(0);
-      this.setTooltip("");
+      this.setTooltip("Hover in place for a given number of seconds.");
       this.setHelpUrl("");
     }
   },
-  pythonGenerator: (_block, _python) => {
-    return "stop_and_hover(groupState)\n";
+  pythonGenerator: (block, _python) => {
+    return `hover(groupState, ${block.getFieldValue("duration")})
+`;
   },
-  javascriptGenerator: (_block, _js) => {
-    return "simulator.stop_and_hover(groupState)\n";
+  javascriptGenerator: (block, _js) => {
+    return `simulator.hover(groupState, ${block.getFieldValue("duration")})
+`;
   }
 };
 const blockGoTo = {
@@ -75604,8 +75606,8 @@ class NullTrajectory extends Trajectory {
   }
 }
 class Hover extends Trajectory {
-  constructor(position) {
-    super(0.1);
+  constructor(position, duration2 = 0.1) {
+    super(duration2);
     __publicField2(this, "position");
     this.position = position;
   }
@@ -80107,6 +80109,12 @@ def move_direction(groupState, direction, distance, duration):
     return duration
 
 
+def hover(groupState, duration):
+    """Hover in place: the crazyflies already hold their last position, so just wait"""
+    groupState.timeHelper.sleep(duration)
+
+
+# The old "stop and hover" block's code, still in projects saved before it became "hover for N seconds"
 def stop_and_hover(groupState, height=None):
     crazyflies = groupState.crazyflies
     for cf in crazyflies:
@@ -81385,6 +81393,15 @@ const setColor = (groupState2, r2 = 0, g2 = 0, b2 = 0) => {
   });
   return [0.1, trajectories];
 };
+const hover = (groupState2, duration2) => {
+  const trajectories = /* @__PURE__ */ new Map();
+  groupState2.robotIDs.forEach((robotId2) => {
+    const robot = useSimulator.getState().robots[robotId2];
+    if (robot)
+      trajectories.set(robotId2, new Hover(robot.pos.clone(), duration2));
+  });
+  return [duration2, trajectories];
+};
 const goToXyzDuration = (groupState2, x2, y2, z2, duration2) => {
   let trajectories = /* @__PURE__ */ new Map();
   groupState2.robotIDs.forEach((robotId2) => {
@@ -81581,6 +81598,7 @@ const SIM = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty(
   dummy: dummy$1,
   goToXyzDuration,
   goToXyzSpeed,
+  hover,
   land,
   makeParametricTrajectory,
   moveCircleArcVel,
