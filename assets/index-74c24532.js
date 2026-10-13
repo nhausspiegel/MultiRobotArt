@@ -37111,6 +37111,7 @@ const javascript$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.define
   Order,
   javascriptGenerator
 }, Symbol.toStringTag, { value: "Module" }));
+const writesNoCode = (code2) => code2.split("\n").every((line) => /^\s*(\/\/.*|#.*)?$/.test(line));
 const blockCircle = {
   name: "circle",
   block: {
@@ -76035,7 +76036,7 @@ const CUSTOM_BLOCKS = {
   blockRandomColor,
   blockRepeat
 };
-const hasEmptySlot = (b2, generator) => b2.inputList.some((input) => input instanceof inputs.StatementInput && generator.statementToCode(b2, input.name).split("\n").every((line) => /^\s*(\/\/.*|#.*)?$/.test(line)));
+const hasEmptySlot = (b2, generator) => b2.inputList.some((input) => input instanceof inputs.StatementInput && writesNoCode(generator.statementToCode(b2, input.name)));
 Object.values(CUSTOM_BLOCKS).forEach((block) => {
   Blocks[block.name] = block.block;
   pythonGenerator.forBlock[block.name] = (b2) => hasEmptySlot(b2, pythonGenerator) ? "" : block.pythonGenerator(b2, pythonGenerator);
@@ -98167,7 +98168,7 @@ const BlockManagerPanel = () => {
                 setEditingBlock(void 0);
             },
             children: blocks.map((b2) => {
-              const empty2 = b2.javaScript.trim() === "";
+              const empty2 = writesNoCode(b2.javaScript);
               return /* @__PURE__ */ jsxs(
                 "div",
                 {
@@ -147095,7 +147096,8 @@ const TimelineGroupBody = ({ group }) => {
   const hasDrones = Object.keys(group.robots).length > 0;
   const isEmptyBlock = (blockId) => {
     var _a3;
-    return ((_a3 = blocks[blockId ?? ""]) == null ? void 0 : _a3.javaScript.trim()) === "";
+    const code2 = (_a3 = blocks[blockId ?? ""]) == null ? void 0 : _a3.javaScript;
+    return code2 !== void 0 && writesNoCode(code2);
   };
   const pointerStart = (clientX, blockId) => {
     if (clientX === void 0 || !laneBodyRef.current || blockId === void 0 || blocks[blockId] === void 0)
