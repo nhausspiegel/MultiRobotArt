@@ -148,12 +148,6 @@ export const BlockManagerPanel = () => {
 							)}
 							style={{backgroundColor: empty ? undefined : blockColor(b)}}
 							draggable={renamingId !== b.id}
-							onFocusCapture={(e) => {
-								if (e.target instanceof HTMLInputElement) setRenamingId(b.id);
-							}}
-							onBlurCapture={(e) => {
-								if (e.target instanceof HTMLInputElement) setRenamingId(undefined);
-							}}
 							onDragStart={(e) => {
 								e.dataTransfer.setData('text/plain', b.id);
 								e.dataTransfer.effectAllowed = 'copy';
@@ -168,7 +162,13 @@ export const BlockManagerPanel = () => {
 						>
 							{/* The selected block's name renames on click, like the name above the editor */}
 							{selectedBlockId === b.id
-								? <RenamableText bare className="min-w-0 truncate" text={b.name} updateText={(name) => renameBlock(name === '' ? newBlockName() : name)} />
+								? <RenamableText
+									bare
+									className="min-w-0 truncate"
+									text={b.name}
+									updateText={(name) => renameBlock(name === '' ? newBlockName() : name)}
+									onEditingChange={(editing) => setRenamingId(editing ? b.id : undefined)}
+								/>
 								: <span className="truncate px-1">{b.name}</span>}
 							{!empty && <span className="shrink-0 pr-1 text-xs tabular-nums text-black/55">{b.duration.toFixed(1)} s</span>}
 						</div>

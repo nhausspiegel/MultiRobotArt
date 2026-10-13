@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import {useLayoutEffect, useRef, useState} from 'react';
+import {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import React from 'react';
 type RenamableTextProps = {
 	text: string;
@@ -7,15 +7,27 @@ type RenamableTextProps = {
 	updateText: (updatedText: string) => void;
 	// Plain text, for a name inside something else (a block in the block list); otherwise a heading with a hover outline
 	bare?: boolean;
+	// Told when the name starts and stops being typed (however it stops: Enter, Escape, clicking away, or this going away)
+	onEditingChange?: (editing: boolean) => void;
 };
 
-export const RenamableText = ({text, updateText, className, bare}: RenamableTextProps) => {
+export const RenamableText = ({text, updateText, className, bare, onEditingChange}: RenamableTextProps) => {
 	const [showRenameInput, setShowRenameInput] = useState(false);
 	const [inputValue, setInputValue] = useState('');
 	const [width, setWidth] = useState(0);
 	const span = useRef<HTMLSpanElement>(null);
 	// Set once Enter or Escape has handled the edit, so the blur that follows doesn't apply it again
 	const finished = useRef(false);
+
+	// From this state, not focus events: Enter and Escape remove the box while it has focus, and browsers don't report
+	// focus leaving a removed element
+	const editingChange = useRef(onEditingChange);
+	editingChange.current = onEditingChange;
+	useEffect(() => {
+		if (!showRenameInput) return;
+		editingChange.current?.(true);
+		return () => editingChange.current?.(false);
+	}, [showRenameInput]);
 
 	// Before the box is drawn: measured after (useEffect), the first edit showed it 0 wide for a frame
 	useLayoutEffect(() => {
