@@ -146974,7 +146974,6 @@ const laneOccupiedItems = (groups, laneId) => {
   return laneId === allDronesGroupId ? Object.values(groups).flatMap((group) => Object.values(group.items)) : [...Object.values(((_a3 = groups[laneId]) == null ? void 0 : _a3.items) ?? {}), ...Object.values(((_b2 = groups[allDronesGroupId]) == null ? void 0 : _b2.items) ?? {})];
 };
 const TimelineGroupBody = ({ group }) => {
-  var _a3;
   const addBlockToTimeline = useRobartState((state2) => state2.addBlockToTimeline);
   const selectedBlockId = useRobartState((state2) => state2.editingBlockId);
   const blocks = useRobartState((state2) => state2.blocks);
@@ -146989,19 +146988,21 @@ const TimelineGroupBody = ({ group }) => {
   const laneBodyRef = reactExports.useRef(null);
   const hasDrones = Object.keys(group.robots).length > 0;
   const isEmptyBlock = (blockId) => {
-    var _a4;
-    return ((_a4 = blocks[blockId ?? ""]) == null ? void 0 : _a4.javaScript.trim()) === "";
+    var _a3;
+    return ((_a3 = blocks[blockId ?? ""]) == null ? void 0 : _a3.javaScript.trim()) === "";
   };
-  const computeTimelineBlockOffset = (clientX, blockId) => {
-    if (clientX === void 0)
+  const pointerStart = (clientX, blockId) => {
+    if (clientX === void 0 || !laneBodyRef.current || blockId === void 0 || blocks[blockId] === void 0)
       return;
-    if (laneBodyRef.current) {
-      if (blockId === void 0 || blocks[blockId] === void 0)
-        return;
-      const offsetX = clientX - laneBodyRef.current.getBoundingClientRect().left - timelineStartPadding;
-      const { duration: duration2 } = blocks[blockId];
-      return landingTime(occupiedItems, Math.max(0, convertPixelsToSeconds(offsetX, scale) - duration2 / 2), duration2, snapReach(duration2, scale));
-    }
+    const offsetX = clientX - laneBodyRef.current.getBoundingClientRect().left - timelineStartPadding;
+    return Math.max(0, convertPixelsToSeconds(offsetX, scale) - blocks[blockId].duration / 2);
+  };
+  const landing = (clientX, blockId) => {
+    const start = pointerStart(clientX, blockId);
+    if (start === void 0)
+      return;
+    const { duration: duration2 } = blocks[blockId];
+    return landingTime(occupiedItems, start, duration2, snapReach(duration2, scale));
   };
   const handleDragOver = (e2) => {
     if (!e2.dataTransfer.types.includes("text/plain"))
@@ -147011,8 +147012,8 @@ const TimelineGroupBody = ({ group }) => {
     setHoverX(e2.clientX);
   };
   const handleDragLeave = (e2) => {
-    var _a4;
-    if (!((_a4 = laneBodyRef.current) == null ? void 0 : _a4.contains(e2.relatedTarget)))
+    var _a3;
+    if (!((_a3 = laneBodyRef.current) == null ? void 0 : _a3.contains(e2.relatedTarget)))
       setHoverX(void 0);
   };
   const handleDrop = (e2) => {
@@ -147023,8 +147024,8 @@ const TimelineGroupBody = ({ group }) => {
       return;
     if (isEmptyBlock(blockId) || !hasDrones)
       return;
-    const startTime = computeTimelineBlockOffset(e2.clientX, blockId);
-    if (startTime !== void 0 && !blockOverlaps(occupiedItems, startTime, blocks[blockId].duration)) {
+    const startTime = landing(e2.clientX, blockId);
+    if (startTime !== void 0) {
       var isTraj = false;
       if (blocks[blockId].javaScript.includes("circle")) {
         isTraj = true;
@@ -147052,7 +147053,7 @@ const TimelineGroupBody = ({ group }) => {
       children: [
         /* @__PURE__ */ jsx("div", { className: clsx("pointer-events-none absolute inset-y-0 right-0 bg-white/60", end2 > 0 ? "rounded-r" : "rounded"), style: { left: end2 > 0 ? timeToX(end2, scale) : 0 } }),
         allDronesItems.map((item) => {
-          var _a4;
+          var _a3;
           return /* @__PURE__ */ jsx(
             "div",
             {
@@ -147063,20 +147064,23 @@ const TimelineGroupBody = ({ group }) => {
                 left: timeToX(item.startTime, scale),
                 background: "repeating-linear-gradient(45deg, #d1d5db, #d1d5db 6px, #e5e7eb 6px, #e5e7eb 12px)"
               },
-              children: /* @__PURE__ */ jsx("span", { className: "truncate px-1", children: (_a4 = blocks[item.blockId]) == null ? void 0 : _a4.name })
+              children: /* @__PURE__ */ jsx("span", { className: "truncate px-1", children: (_a3 = blocks[item.blockId]) == null ? void 0 : _a3.name })
             },
             `all-drones-${item.id}`
           );
         }),
         Object.values(group.items).map((item) => /* @__PURE__ */ jsx(TimelineBlock, { scale, item }, item.id)),
-        hoverX !== void 0 && /* @__PURE__ */ jsx(
-          HoverTimelineBlock,
-          {
-            scale,
-            startTime: computeTimelineBlockOffset(hoverX, selectedBlockId),
-            cannotDrop: !hasDrones || isEmptyBlock(selectedBlockId) || blockOverlaps(occupiedItems, computeTimelineBlockOffset(hoverX, selectedBlockId), ((_a3 = blocks[selectedBlockId ?? ""]) == null ? void 0 : _a3.duration) ?? 0)
-          }
-        )
+        hoverX !== void 0 && (() => {
+          const landsAt = landing(hoverX, selectedBlockId);
+          return /* @__PURE__ */ jsx(
+            HoverTimelineBlock,
+            {
+              scale,
+              startTime: landsAt ?? pointerStart(hoverX, selectedBlockId),
+              cannotDrop: !hasDrones || isEmptyBlock(selectedBlockId) || landsAt === void 0
+            }
+          );
+        })()
       ]
     }
   );
