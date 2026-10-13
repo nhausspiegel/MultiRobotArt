@@ -98064,49 +98064,61 @@ const BlockManagerPanel = () => {
             ] })
           }
         ),
-        /* @__PURE__ */ jsx("div", { ref: listRef, className: "flex min-h-0 flex-1 flex-wrap content-start gap-1.5 overflow-y-auto p-2", children: blocks.map((b2) => {
-          const empty2 = b2.javaScript.trim() === "";
-          return /* @__PURE__ */ jsxs(
-            "div",
-            {
-              role: "button",
-              tabIndex: 0,
-              "data-selected": selectedBlockId === b2.id,
-              className: clsx(
-                "flex max-w-full cursor-grab items-baseline gap-1 rounded-xl border px-1.5 py-1.5 text-sm focus:outline-none",
-                empty2 ? "border-dashed border-gray-400 bg-white text-gray-400" : "border-black/15",
-                selectedBlockId === b2.id && "ring-2 ring-indigo-600 ring-offset-2"
-              ),
-              style: { backgroundColor: empty2 ? void 0 : blockColor(b2) },
-              draggable: renamingId !== b2.id,
-              onFocusCapture: (e2) => {
-                if (e2.target instanceof HTMLInputElement)
-                  setRenamingId(b2.id);
-              },
-              onBlurCapture: (e2) => {
-                if (e2.target instanceof HTMLInputElement)
-                  setRenamingId(void 0);
-              },
-              onDragStart: (e2) => {
-                e2.dataTransfer.setData("text/plain", b2.id);
-                e2.dataTransfer.effectAllowed = "copy";
-                if (selectedBlockId !== b2.id)
-                  setEditingBlock(b2.id);
-              },
-              onClick: () => {
-                setEditingBlock(b2.id);
-              },
-              children: [
-                selectedBlockId === b2.id ? /* @__PURE__ */ jsx(RenamableText, { bare: true, className: "min-w-0 truncate", text: b2.name, updateText: (name2) => renameBlock(name2 === "" ? newBlockName() : name2) }) : /* @__PURE__ */ jsx("span", { className: "truncate px-1", children: b2.name }),
-                !empty2 && /* @__PURE__ */ jsxs("span", { className: "shrink-0 pr-1 text-xs tabular-nums text-black/55", children: [
-                  b2.duration.toFixed(1),
-                  " s"
-                ] })
-              ]
+        /* @__PURE__ */ jsx(
+          "div",
+          {
+            ref: listRef,
+            className: "flex min-h-0 flex-1 flex-wrap content-start gap-1.5 overflow-y-auto p-2",
+            onClick: (e2) => {
+              if (e2.target === e2.currentTarget)
+                setEditingBlock(void 0);
             },
-            b2.id
-          );
-        }) })
+            children: blocks.map((b2) => {
+              const empty2 = b2.javaScript.trim() === "";
+              return /* @__PURE__ */ jsxs(
+                "div",
+                {
+                  role: "button",
+                  tabIndex: 0,
+                  "data-selected": selectedBlockId === b2.id,
+                  className: clsx(
+                    "flex max-w-full cursor-grab items-baseline gap-1 rounded-xl border px-1.5 py-1.5 text-sm focus:outline-none",
+                    empty2 ? "border-dashed border-gray-400 bg-white text-gray-400" : "border-black/15",
+                    selectedBlockId === b2.id && "ring-2 ring-indigo-600 ring-offset-2"
+                  ),
+                  style: { backgroundColor: empty2 ? void 0 : blockColor(b2) },
+                  draggable: renamingId !== b2.id,
+                  onFocusCapture: (e2) => {
+                    if (e2.target instanceof HTMLInputElement)
+                      setRenamingId(b2.id);
+                  },
+                  onBlurCapture: (e2) => {
+                    if (e2.target instanceof HTMLInputElement)
+                      setRenamingId(void 0);
+                  },
+                  onDragStart: (e2) => {
+                    e2.dataTransfer.setData("text/plain", b2.id);
+                    e2.dataTransfer.effectAllowed = "copy";
+                    if (selectedBlockId !== b2.id)
+                      setEditingBlock(b2.id);
+                  },
+                  onClick: () => {
+                    if (selectedBlockId !== b2.id)
+                      setEditingBlock(b2.id);
+                  },
+                  children: [
+                    selectedBlockId === b2.id ? /* @__PURE__ */ jsx(RenamableText, { bare: true, className: "min-w-0 truncate", text: b2.name, updateText: (name2) => renameBlock(name2 === "" ? newBlockName() : name2) }) : /* @__PURE__ */ jsx("span", { className: "truncate px-1", children: b2.name }),
+                    !empty2 && /* @__PURE__ */ jsxs("span", { className: "shrink-0 pr-1 text-xs tabular-nums text-black/55", children: [
+                      b2.duration.toFixed(1),
+                      " s"
+                    ] })
+                  ]
+                },
+                b2.id
+              );
+            })
+          }
+        )
       ]
     }
   );
