@@ -37115,9 +37115,9 @@ const blockCircle = {
   name: "circle",
   block: {
     init: function() {
-      this.appendDummyInput().appendField(new FieldLabelSerializable("Go in circle of radius"), "Circular motion").appendField(new FieldNumber(1, 0.01), "radius_m").appendField("m");
+      this.appendDummyInput().appendField("go in circle of radius").appendField(new FieldNumber(1, 0.01), "radius_m").appendField("m");
       this.appendDummyInput().appendField("at speed").appendField(new FieldNumber(0.5, 0.01), "velocity").appendField("m/s");
-      this.appendDummyInput().appendField("for").appendField(new FieldNumber(360), "angle_degrees").appendField("degrees,");
+      this.appendDummyInput().appendField("for").appendField(new FieldNumber(360), "angle_degrees").appendField("degrees");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -37147,9 +37147,9 @@ const blockCircleRadians = {
   name: "circle_radians",
   block: {
     init: function() {
-      this.appendDummyInput().appendField(new FieldLabelSerializable("Go in circle of radius"), "Circular motion").appendField(new FieldNumber(1, 0.01), "radius_m").appendField("m");
+      this.appendDummyInput().appendField("go in circle of radius").appendField(new FieldNumber(1, 0.01), "radius_m").appendField("m");
       this.appendDummyInput().appendField("at speed").appendField(new FieldNumber(0.5, 0.01), "velocity").appendField("m/s");
-      this.appendDummyInput().appendField("for").appendField(new FieldNumber(6.28), "angle_radians").appendField("radians,");
+      this.appendDummyInput().appendField("for").appendField(new FieldNumber(6.28), "angle_radians").appendField("radians");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -37198,7 +37198,7 @@ const blockGoTo = {
   name: "go_to",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("go to X:").appendField(new FieldNumber(0), "x_pos").appendField("Y:").appendField(new FieldNumber(0), "y_pos").appendField("Z:").appendField(new FieldNumber(0), "z_pos").appendField("over").appendField(new FieldNumber(3, 0.1), "duration").appendField("seconds");
+      this.appendDummyInput().appendField("go to x:").appendField(new FieldNumber(0), "x_pos").appendField("y:").appendField(new FieldNumber(0), "y_pos").appendField("z:").appendField(new FieldNumber(0), "z_pos").appendField("over").appendField(new FieldNumber(3, 0.1), "duration").appendField("seconds");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -37227,7 +37227,7 @@ const blockGoToSpeed = {
   name: "go_to_speed",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("go to X:").appendField(new FieldNumber(0), "x_pos").appendField("Y:").appendField(new FieldNumber(0), "y_pos").appendField("Z:").appendField(new FieldNumber(0), "z_pos").appendField("at").appendField(new FieldNumber(0.5, 0.01), "speed").appendField("m/s");
+      this.appendDummyInput().appendField("go to x:").appendField(new FieldNumber(0), "x_pos").appendField("y:").appendField(new FieldNumber(0), "y_pos").appendField("z:").appendField(new FieldNumber(0), "z_pos").appendField("at").appendField(new FieldNumber(0.5, 0.01), "speed").appendField("m/s");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -37283,9 +37283,9 @@ const blockMoveXyz = {
   name: "move_xyz",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("move X").appendField(new FieldNumber(0), "x").appendField("meters");
-      this.appendDummyInput().appendField("move Y").appendField(new FieldNumber(0), "y").appendField("meters");
-      this.appendDummyInput().appendField("move Z").appendField(new FieldNumber(0), "z").appendField("meters");
+      this.appendDummyInput().appendField("move x").appendField(new FieldNumber(0), "x").appendField("meters");
+      this.appendDummyInput().appendField("move y").appendField(new FieldNumber(0), "y").appendField("meters");
+      this.appendDummyInput().appendField("move z").appendField(new FieldNumber(0), "z").appendField("meters");
       this.appendDummyInput().appendField("at max speed: ").appendField(new FieldNumber(0.5, 0.01), "speed").appendField("m/s");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -42576,8 +42576,8 @@ const blockNegate = {
   name: "negate",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("Negate Trajectory");
-      this.appendStatementInput("originalTraj").appendField("Trajectory:");
+      this.appendDummyInput().appendField("negate trajectory");
+      this.appendStatementInput("originalTraj").appendField("trajectory:");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42598,9 +42598,9 @@ const blockAddTrajectories = {
   name: "addTrajectories",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("Add Trajectories");
-      this.appendStatementInput("firstTrajectory").appendField("First Trajectory:");
-      this.appendStatementInput("secondTrajectory").appendField("Second Trajectory:");
+      this.appendDummyInput().appendField("add trajectories");
+      this.appendStatementInput("firstTrajectory").appendField("first trajectory:");
+      this.appendStatementInput("secondTrajectory").appendField("second trajectory:");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42621,9 +42621,9 @@ const blockSubtractTrajectories = {
   name: "subtractTrajectories",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("Subtract Trajectories");
-      this.appendStatementInput("firstTrajectory").appendField("First Trajectory:");
-      this.appendStatementInput("secondTrajectory").appendField("Second Trajectory:");
+      this.appendDummyInput().appendField("subtract trajectories");
+      this.appendStatementInput("firstTrajectory").appendField("first trajectory:");
+      this.appendStatementInput("secondTrajectory").appendField("second trajectory:");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42644,8 +42644,8 @@ const blockStretchTrajectories = {
   name: "stretch",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("Stretch Trajectory").appendField("x: ").appendField(new FieldNumber(1, 0), "x").appendField(" y: ").appendField(new FieldNumber(1, 0), "y").appendField(" z: ").appendField(new FieldNumber(1, 0), "z").appendField(" time: ").appendField(new FieldNumber(1, 0), "t");
-      this.appendStatementInput("originalTraj").appendField("Trajectory: ");
+      this.appendDummyInput().appendField("stretch trajectory by").appendField("x: ").appendField(new FieldNumber(1, 0), "x").appendField(" y: ").appendField(new FieldNumber(1, 0), "y").appendField(" z: ").appendField(new FieldNumber(1, 0), "z").appendField(" time: ").appendField(new FieldNumber(1, 0), "t");
+      this.appendStatementInput("originalTraj").appendField("trajectory:");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42674,8 +42674,8 @@ const blockRotateTrajectoryDegrees = {
   name: "rotateDegrees",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("Rotate Trajectory (degrees)").appendField("x: ").appendField(new FieldNumber(0), "x").appendField(" y: ").appendField(new FieldNumber(0), "y").appendField(" z: ").appendField(new FieldNumber(0), "z");
-      this.appendStatementInput("originalTraj").appendField("Trajectory: ");
+      this.appendDummyInput().appendField("rotate trajectory by").appendField("x: ").appendField(new FieldNumber(0), "x").appendField(" y: ").appendField(new FieldNumber(0), "y").appendField(" z: ").appendField(new FieldNumber(0), "z").appendField("degrees");
+      this.appendStatementInput("originalTraj").appendField("trajectory:");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42702,8 +42702,8 @@ const blockRotateTrajectoryRadians = {
   name: "rotateRadians",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("Rotate Trajectory (radians)").appendField("x: ").appendField(new FieldNumber(0), "x").appendField(" y: ").appendField(new FieldNumber(0), "y").appendField(" z: ").appendField(new FieldNumber(0), "z");
-      this.appendStatementInput("originalTraj").appendField("Trajectory: ");
+      this.appendDummyInput().appendField("rotate trajectory by").appendField("x: ").appendField(new FieldNumber(0), "x").appendField(" y: ").appendField(new FieldNumber(0), "y").appendField(" z: ").appendField(new FieldNumber(0), "z").appendField("radians");
+      this.appendStatementInput("originalTraj").appendField("trajectory:");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42730,8 +42730,8 @@ const blockTranslateTrajectory = {
   name: "translateTrajectory",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("Translate Trajectory").appendField("x: ").appendField(new FieldNumber(0), "x").appendField(" y: ").appendField(new FieldNumber(0), "y").appendField(" z: ").appendField(new FieldNumber(0), "z");
-      this.appendStatementInput("originalTraj").appendField("Trajectory: ");
+      this.appendDummyInput().appendField("translate trajectory by").appendField("x: ").appendField(new FieldNumber(0), "x").appendField(" y: ").appendField(new FieldNumber(0), "y").appendField(" z: ").appendField(new FieldNumber(0), "z");
+      this.appendStatementInput("originalTraj").appendField("trajectory:");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -75954,7 +75954,7 @@ const blockParametricPath = {
   name: "parametricPath",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("Parametric path");
+      this.appendDummyInput().appendField("parametric path");
       this.appendDummyInput().appendField("x(t) =").appendField(expressionField("sin(t)"), "x");
       this.appendDummyInput().appendField("y(t) =").appendField(expressionField("sin(2 * t) / 2"), "y");
       this.appendDummyInput().appendField("z(t) =").appendField(expressionField("0"), "z");
