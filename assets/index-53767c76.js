@@ -90924,6 +90924,15 @@ class CircleCategory extends ContinuousCategory {
 }
 registry.register(registry.Type.TOOLBOX_ITEM, ToolboxCategory.registrationName, CircleCategory, true);
 const gesturePrototype = Gesture.prototype;
+const focusFieldBlock = (gesture) => {
+  var _a3;
+  const block = gesture.targetBlock;
+  if (!gesture.fieldPressUnselected || !block)
+    return;
+  gesture.fieldPressUnselected = false;
+  if (!((_a3 = dragSelectionWeakMap.get(block.workspace)) == null ? void 0 : _a3.has(block.id)))
+    getFocusManager().focusNode(block);
+};
 const updateIsDragging = gesturePrototype.updateIsDragging;
 gesturePrototype.updateIsDragging = function(e2) {
   const onEmptySpace = !this.targetBlock && !this.startBubble && !this.startComment && !this.startIcon;
@@ -90931,10 +90940,8 @@ gesturePrototype.updateIsDragging = function(e2) {
     this.calledUpdateIsDragging = true;
     return;
   }
-  if (this.fieldPressUnselected && this.hasExceededDragRadius && this.targetBlock) {
-    this.fieldPressUnselected = false;
-    getFocusManager().focusNode(this.targetBlock);
-  }
+  if (this.hasExceededDragRadius)
+    focusFieldBlock(this);
   updateIsDragging.call(this, e2);
 };
 const setTargetBlock = gesturePrototype.setTargetBlock;
@@ -90947,6 +90954,11 @@ gesturePrototype.setTargetBlock = function(block) {
     return;
   }
   setTargetBlock.call(this, block);
+};
+const handleRightClick = gesturePrototype.handleRightClick;
+gesturePrototype.handleRightClick = function(e2) {
+  focusFieldBlock(this);
+  handleRightClick.call(this, e2);
 };
 for (const name2 of [ShortcutItems.names.PERFORM_ACTION, ShortcutItems.names.FINISH_MOVE]) {
   ShortcutRegistry.registry.removeKeyMapping(String(utils.KeyCodes.SPACE), name2, true);
