@@ -57,11 +57,13 @@ export const CUSTOM_BLOCKS = {
 
 // A command with an empty slot (a trajectory modifier or repeat with nothing inside) writes no code, so a block holding
 // only that counts as empty. Its code used to be a call with a missing argument, which the simulator skipped as an error,
-// yet the block looked filled, measured 0.1 s and could go on the timeline.
-const hasEmptySlot = (b: Blockly.Block) => b.inputList.some((input) => input instanceof Blockly.inputs.StatementInput && !input.connection?.targetBlock());
+// yet the block looked filled, measured 0.1 s and could go on the timeline. A slot is empty when nothing in it writes
+// code: no blocks, or only ones that write none themselves, like an empty repeat (block comments don't count).
+const hasEmptySlot = (b: Blockly.Block, generator: Blockly.CodeGenerator) => b.inputList.some((input) => input instanceof Blockly.inputs.StatementInput
+	&& generator.statementToCode(b, input.name).split('\n').every((line) => /^\s*(\/\/.*|#.*)?$/.test(line)));
 
 Object.values(CUSTOM_BLOCKS).forEach((block) => {
 	Blockly.Blocks[block.name] = block.block;
-	pythonGenerator.forBlock[block.name] = (b: Blockly.Block) => (hasEmptySlot(b) ? '' : block.pythonGenerator(b, pythonGenerator));
-	js.forBlock[block.name] = (b: Blockly.Block) => (hasEmptySlot(b) ? '' : block.javascriptGenerator(b, js));
+	pythonGenerator.forBlock[block.name] = (b: Blockly.Block) => (hasEmptySlot(b, pythonGenerator) ? '' : block.pythonGenerator(b, pythonGenerator));
+	js.forBlock[block.name] = (b: Blockly.Block) => (hasEmptySlot(b, js) ? '' : block.javascriptGenerator(b, js));
 });

@@ -245,11 +245,11 @@ const land = {type: 'land', fields: {height: 0, duration: 2}};
 
 	// An add inside another modifier: its loop runs on a stand-in clock, which once stopped advancing
 	sameBlockAsSimulator(negate(add([move(1, 0, 0)], [move(0, 1, 0)])), from, 1e-6);
-	// A slot whose blocks write no code (an empty repeat): the Python must still be valid
+	// An empty repeat in a slot writes nothing: with something else beside it the modifier runs that, and alone it leaves the
+	// modifier empty too (no code, so the block is empty and can't go on the timeline), also with a comment on it
 	sameBlockAsSimulator(negate({type: 'repeat', fields: {times: 2}, inputs: {}}, move(1, 0, 0)), from, 1e-6);
-	const emptyBody = codeOf(negate({type: 'repeat', fields: {times: 2}, inputs: {}}));
-	assert.equal(emptyBody.python.includes('pass'), true, emptyBody.python);
-	flyCode(emptyBody.python, from);
+	assert.deepEqual(codeOf(negate({type: 'repeat', fields: {times: 2}, inputs: {}})), {python: '', javaScript: ''});
+	assert.deepEqual(codeOf(negate({type: 'repeat', fields: {times: 2}, inputs: {}, icons: {comment: {text: 'a note', pinned: false, height: 80, width: 160}}})), {python: '', javaScript: ''});
 	// A comment on a block in a slot: the simulator still runs the slot
 	sameBlockAsSimulator(translate(1, 0, 0, {...move(1, 0, 0), icons: {comment: {text: 'a note', pinned: false, height: 80, width: 160}}} as BlockJson, move(0, 1, 0)), from, 1e-6);
 

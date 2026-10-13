@@ -13,6 +13,6 @@ export const slotSequence = (block: Blockly.Block, js: BlocklyGenerator, input: 
 
 // For the exported Python: the slot's commands as a function, defined just before the modifier that runs it. Blockly
 // indents the slot's code, which makes it the function's body. A modifier inside it defines its own, in its own scope.
-// Blocks that write no code (an empty repeat) leave it empty, which Python doesn't allow, so it gets a pass.
+// (A slot that writes no code makes the whole modifier write none: hasEmptySlot in ../index.ts.)
 export const slotFunction = (block: Blockly.Block, python: BlocklyGenerator, input: string, name: string) =>
-	`def ${name}(groupState):\n${python.statementToCode(block, input) || '  pass\n'}`;
+	`def ${name}(groupState):\n${python.statementToCode(block, input)}`;
