@@ -90983,7 +90983,10 @@ const BlockEditorPanel = () => {
       workspaceAutoFocus: false,
       // Its default focuses the editor whenever the pointer enters it, taking focus from text fields
       multiselectIcon: { hideIcon: true },
-      // Shift does the same; its default icons load from GitHub
+      // Its default icons load from GitHub
+      // Its own key for multi-select mode, held down, would fight the presses that decide it below (and a held Shift
+      // repeats on some systems, turning it back on mid-pan); a key name that no key has
+      multiSelectKeys: ["(set per press)"],
       bumpNeighbours: true,
       // Keep Blockly's nudging of overlapping blocks (the plugin turns it off by default)
       multiselectCopyPaste: { crossTab: true, menu: false }
@@ -91023,36 +91026,57 @@ const BlockEditorPanel = () => {
       controls.dragSelection.clear();
     };
     workspace.addChangeListener(onWorkspaceClick);
+    const svg2 = workspace.getParentSvg();
+    let presses = 0;
+    let turnedOn = false;
+    const turnOn = () => {
+      if (isOn())
+        return;
+      controls.enableMultiselect();
+      turnedOn = true;
+    };
+    const turnOff = () => {
+      turnedOn = false;
+      if (isOn())
+        controls.disableMultiselect();
+    };
+    const onPointerDown = (event) => {
+      presses += 1;
+      if (event.button !== 0 || !svg2.contains(event.target))
+        return;
+      const target2 = event.target;
+      const onBackground = target2.classList.contains("blocklyMainBackground");
+      const onBlock = !onBackground && target2.closest(".blocklyDraggable") !== null;
+      if (onBackground && !event.shiftKey) {
+        controls.multiDraggable.clearAll_();
+        controls.dragSelection.clear();
+        const focusTarget = workspace.getWorkspaceFocusTarget();
+        if (focusTarget)
+          getFocusManager().focusNode(focusTarget);
+        turnOn();
+      } else if (onBlock && event.shiftKey) {
+        turnOn();
+      } else if (onBackground || onBlock) {
+        turnOff();
+      }
+    };
+    const onPointerUp = () => {
+      if (!turnedOn)
+        return;
+      const press = presses;
+      requestAnimationFrame(() => setTimeout(() => {
+        if (press === presses && turnedOn)
+          turnOff();
+      }, 0));
+    };
     const editor = workspace.getInjectionDiv();
-    let pointerInside = false;
-    const onPointerEnter = (event) => {
-      var _a3;
-      pointerInside = true;
-      if (event.shiftKey && !isOn())
-        (_a3 = multiselect.controls_) == null ? void 0 : _a3.enableMultiselect();
-    };
-    const onPointerLeave = () => {
-      pointerInside = false;
-    };
-    const onKeyDown = (event) => {
-      var _a3;
-      if (event.key === "Shift" && pointerInside && !isOn())
-        (_a3 = multiselect.controls_) == null ? void 0 : _a3.enableMultiselect();
-    };
-    const onKeyUp = (event) => {
-      var _a3;
-      if (event.key === "Shift" && isOn())
-        (_a3 = multiselect.controls_) == null ? void 0 : _a3.disableMultiselect();
-    };
-    editor.addEventListener("pointerenter", onPointerEnter);
-    editor.addEventListener("pointerleave", onPointerLeave);
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
+    editor.addEventListener("pointerdown", onPointerDown, true);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
     return () => {
-      editor.removeEventListener("pointerenter", onPointerEnter);
-      editor.removeEventListener("pointerleave", onPointerLeave);
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
+      editor.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
       workspace.removeChangeListener(onWorkspaceClick);
       multiselect.dispose();
     };

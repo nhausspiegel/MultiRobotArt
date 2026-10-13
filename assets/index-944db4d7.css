@@ -2888,6 +2888,13 @@ body .blocklyTooltipDiv {
 .injectionDiv .blocklyFlyoutBackground {
   stroke: #e5e7eb;
 }
+
+/* The Scratch-style renderer (zelos) draws a selected block's outline again on top of it, filled with the block's color,
+   and only makes that copy transparent while the block is marked selected. The multi-select plugin unselects blocks by
+   removing the mark, which left the filled copy covering the block's text and fields. */
+.injectionDiv .blocklyPathSelected {
+  fill: none;
+}
 .after\:translate-x-full::after {
   content: var(--tw-content);
   --tw-translate-x: 100%;
