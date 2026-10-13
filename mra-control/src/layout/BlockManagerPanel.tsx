@@ -124,7 +124,14 @@ export const BlockManagerPanel = () => {
 				</>}
 			</ConfirmationModal>
 			{/* Scrolls when there are more blocks than fit; the buttons stay above it */}
-			<div ref={listRef} className="flex min-h-0 flex-1 flex-wrap content-start gap-1.5 overflow-y-auto p-2">
+			<div
+				ref={listRef}
+				className="flex min-h-0 flex-1 flex-wrap content-start gap-1.5 overflow-y-auto p-2"
+				// Clicking the empty space around the blocks deselects
+				onClick={(e) => {
+					if (e.target === e.currentTarget) setEditingBlock(undefined);
+				}}
+			>
 				{blocks.map((b) => {
 					// Empty blocks can't go on the timeline, so they look unfilled
 					const empty = b.javaScript.trim() === '';
@@ -153,8 +160,10 @@ export const BlockManagerPanel = () => {
 								// The timeline's drop preview reads the selected block (drag data is unreadable until drop)
 								if (selectedBlockId !== b.id) setEditingBlock(b.id);
 							}}
+							// Selects; clicking it again doesn't deselect (that's a click on the empty space around the blocks), so a
+							// second click on its name renames it
 							onClick={() => {
-								setEditingBlock(b.id);
+								if (selectedBlockId !== b.id) setEditingBlock(b.id);
 							}}
 						>
 							{/* The selected block's name renames on click, like the name above the editor */}
