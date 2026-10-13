@@ -91059,6 +91059,7 @@ const BlockEditorPanel = () => {
     let pressStart;
     let boxPress = false;
     let shiftBlockPress = false;
+    let shiftPressOnSelected;
     const turnOn = () => {
       if (!isOn())
         controls.enableMultiselect();
@@ -91076,10 +91077,12 @@ const BlockEditorPanel = () => {
         getFocusManager().focusNode(focusTarget);
     };
     const onPointerDown = (event) => {
+      var _a3;
       boxStarted = true;
       pressStart = void 0;
       boxPress = false;
       shiftBlockPress = false;
+      shiftPressOnSelected = void 0;
       if (event.button !== 0 || !svg2.contains(event.target))
         return;
       const target2 = event.target;
@@ -91096,6 +91099,9 @@ const BlockEditorPanel = () => {
       } else if (onBlock && event.shiftKey) {
         shiftBlockPress = true;
         turnOn();
+        const id2 = (_a3 = target2.closest("[data-id]")) == null ? void 0 : _a3.dataset.id;
+        if (id2 && controls.dragSelection.has(id2))
+          shiftPressOnSelected = { id: id2, x: event.clientX, y: event.clientY };
       } else if (onBackground || onBlock) {
         turnOff();
       }
@@ -91112,6 +91118,19 @@ const BlockEditorPanel = () => {
       pressStart = void 0;
       if (boxPress && boxStarted)
         turnOff();
+      if (!shiftBlockPress && !shiftPressOnSelected)
+        return;
+      const press = shiftPressOnSelected;
+      const takeOut = press && Math.hypot(event.clientX - press.x, event.clientY - press.y) <= config$2.dragRadius ? workspace.getBlockById(press.id) : null;
+      shiftBlockPress = false;
+      shiftPressOnSelected = void 0;
+      setTimeout(() => {
+        if (takeOut && controls.dragSelection.has(takeOut.id)) {
+          turnOn();
+          controls.updateDraggables_(takeOut);
+        }
+        turnOff();
+      }, 0);
     };
     const onWorkspaceEvent = (event) => {
       if (event.type === Events.SELECTED && shiftBlockPress) {
