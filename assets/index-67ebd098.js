@@ -90993,6 +90993,7 @@ const BlockEditorPanel = () => {
       // Keyboard copy/paste only, no extra menu items
     });
     const isOn = () => inMultipleSelectionModeWeakMap.get(workspace) === true;
+    let boxStarted = true;
     const controls = multiselect.controls_;
     const enableMultiselect = controls.enableMultiselect.bind(controls);
     controls.enableMultiselect = (...args) => {
@@ -91010,6 +91011,10 @@ const BlockEditorPanel = () => {
         const block = blockOf(event);
         if (!isOn() || !block || controls.dragSelection.has(block.id))
           return;
+        if (!boxStarted) {
+          dragSelect.removeSelection(event.item);
+          return;
+        }
         addedByBox.add(block.id);
         controls.updateDraggables_(block);
       }];
@@ -91027,8 +91032,10 @@ const BlockEditorPanel = () => {
     };
     workspace.addChangeListener(onWorkspaceClick);
     const svg2 = workspace.getParentSvg();
+    const editor = workspace.getInjectionDiv();
     let presses = 0;
     let turnedOn = false;
+    let pressStart;
     const turnOn = () => {
       if (isOn())
         return;
@@ -91042,12 +91049,18 @@ const BlockEditorPanel = () => {
     };
     const onPointerDown = (event) => {
       presses += 1;
+      boxStarted = true;
+      pressStart = void 0;
       if (event.button !== 0 || !svg2.contains(event.target))
         return;
       const target2 = event.target;
       const onBackground = target2.classList.contains("blocklyMainBackground");
       const onBlock = !onBackground && target2.closest(".blocklyDraggable") !== null;
+      if (onBackground && event.shiftKey)
+        editor.classList.add("shiftPanning");
       if (onBackground && !event.shiftKey) {
+        boxStarted = false;
+        pressStart = { x: event.clientX, y: event.clientY };
         controls.multiDraggable.clearAll_();
         controls.dragSelection.clear();
         const focusTarget = workspace.getWorkspaceFocusTarget();
@@ -91060,23 +91073,55 @@ const BlockEditorPanel = () => {
         turnOff();
       }
     };
+    const onPointerMove = (event) => {
+      if (pressStart && Math.hypot(event.clientX - pressStart.x, event.clientY - pressStart.y) > 4) {
+        boxStarted = true;
+        pressStart = void 0;
+      }
+    };
     const onPointerUp = () => {
+      editor.classList.remove("shiftPanning");
       if (!turnedOn)
         return;
       const press = presses;
+      const click = !boxStarted;
       requestAnimationFrame(() => setTimeout(() => {
-        if (press === presses && turnedOn)
-          turnOff();
+        if (press !== presses || !turnedOn)
+          return;
+        turnOff();
+        if (!click)
+          return;
+        controls.multiDraggable.clearAll_();
+        controls.dragSelection.clear();
+        const focusTarget = workspace.getWorkspaceFocusTarget();
+        if (focusTarget)
+          getFocusManager().focusNode(focusTarget);
       }, 0));
     };
-    const editor = workspace.getInjectionDiv();
+    const onShift = (event) => {
+      if (!(event instanceof KeyboardEvent) || event.key === "Shift")
+        editor.classList.toggle("shiftPan", event.shiftKey);
+    };
+    const onWindowBlur = () => {
+      editor.classList.remove("shiftPan", "shiftPanning");
+    };
     editor.addEventListener("pointerdown", onPointerDown, true);
+    editor.addEventListener("pointermove", onShift);
+    window.addEventListener("pointermove", onPointerMove, true);
     window.addEventListener("pointerup", onPointerUp);
     window.addEventListener("pointercancel", onPointerUp);
+    window.addEventListener("keydown", onShift);
+    window.addEventListener("keyup", onShift);
+    window.addEventListener("blur", onWindowBlur);
     return () => {
       editor.removeEventListener("pointerdown", onPointerDown, true);
+      editor.removeEventListener("pointermove", onShift);
+      window.removeEventListener("pointermove", onPointerMove, true);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerUp);
+      window.removeEventListener("keydown", onShift);
+      window.removeEventListener("keyup", onShift);
+      window.removeEventListener("blur", onWindowBlur);
       workspace.removeChangeListener(onWorkspaceClick);
       multiselect.dispose();
     };
