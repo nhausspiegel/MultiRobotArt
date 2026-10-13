@@ -42735,7 +42735,7 @@ const blockTranslateTrajectory = {
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
-      this.setTooltip("Shift the given trajectory by x, y, z meters. The drones first fly to the shifted start at 0.5 m/s.");
+      this.setTooltip("Shift the given trajectory by x, y, z meters. The drones first fly to the shifted start at 0.4 m/s.");
       this.setHelpUrl("");
     }
   },
@@ -75906,7 +75906,7 @@ class RotationTrajectory extends Trajectory {
     return this.originalTrajectory.lastColor(t2);
   }
 }
-const translationTravelSpeed = 0.5;
+const translationTravelSpeed = 0.4;
 class TranslationTrajectory extends Trajectory {
   constructor(initialPosition, originalTrajectory, offset2) {
     const travelDuration = offset2.length() / translationTravelSpeed;
@@ -80397,7 +80397,7 @@ def rotate(groupState, command, x_rot, y_rot, z_rot):
     _replay(groupState, simCommand(groupState, command), lambda start, point: start + matrix @ (point - start))
 
 
-def translate(groupState, command, x, y, z, speed=0.5):
+def translate(groupState, command, x, y, z, speed=0.4):
     """Runs command shifted by (x, y, z) meters, like TranslationTrajectory.
 
     The drones first fly to the shifted start in a straight line at \`speed\` m/s, so the shifted path doesn't begin
