@@ -10,7 +10,7 @@ import {type MRAState, type TimelineGroupState, type TimelineItem, useRobartStat
 import {lastItemEnd} from '../../layout/timeline/SimulationOptions';
 import {HoverTimelineBlock} from './HoverTimelineBlock';
 import {TimelineBlock, useItemDrag, useShowEnd} from './TimelineBlock';
-import {blockOverlaps, landingTime} from './placement';
+import {landingTime} from './placement';
 import React from 'react';
 
 type TimelineGroupProps = {
@@ -104,18 +104,21 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 	// A block with nothing in it does nothing, so it isn't allowed on the timeline
 	const isEmptyBlock = (blockId: string | undefined) => blocks[blockId ?? '']?.javaScript.trim() === '';
 
-	const computeTimelineBlockOffset = (clientX: number | undefined, blockId: string | undefined) => {
-		if (clientX === undefined) return;
+	// Where a block from the block list is under the pointer: centered on it, but never starting before 0 (long blocks
+	// near the left edge would otherwise be refused)
+	const pointerStart = (clientX: number | undefined, blockId: string | undefined) => {
+		if (clientX === undefined || !laneBodyRef.current || blockId === undefined || blocks[blockId] === undefined) return;
+		// The lane's on-screen rect already reflects scrolling
+		const offsetX = clientX - laneBodyRef.current.getBoundingClientRect().left - timelineStartPadding;
+		return Math.max(0, convertPixelsToSeconds(offsetX, scale) - (blocks[blockId].duration / 2));
+	};
 
-		if (laneBodyRef.current) {
-			if (blockId === undefined || blocks[blockId] === undefined) return;
-			// The lane's on-screen rect already reflects scrolling
-			const offsetX = clientX - laneBodyRef.current.getBoundingClientRect().left - timelineStartPadding;
-			// Centered on the pointer, but never starting before 0 (long blocks near the left edge would otherwise be refused),
-			// and against a neighbor it would overlap
-			const {duration} = blocks[blockId];
-			return landingTime(occupiedItems, Math.max(0, convertPixelsToSeconds(offsetX, scale) - duration / 2), duration, snapReach(duration, scale));
-		}
+	// Where it lands: there, or against a neighbor it would overlap. Undefined when it can't go there.
+	const landing = (clientX: number | undefined, blockId: string | undefined) => {
+		const start = pointerStart(clientX, blockId);
+		if (start === undefined) return;
+		const {duration} = blocks[blockId!];
+		return landingTime(occupiedItems, start, duration, snapReach(duration, scale));
 	};
 
 	const handleDragOver: DragEventHandler = (e) => {
@@ -138,9 +141,9 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 		if (blocks[blockId] === undefined) return; // Not a block from the block list
 		if (isEmptyBlock(blockId) || !hasDrones) return;
 
-		const startTime = computeTimelineBlockOffset(e.clientX, blockId);
+		const startTime = landing(e.clientX, blockId);
 
-		if (startTime !== undefined && !blockOverlaps(occupiedItems, startTime, blocks[blockId].duration)) {
+		if (startTime !== undefined) {
 			// TODO: Add isTraj appropriately (Currently hardcoded false), find better way to do it...
 			var isTraj = false;
 			if ( blocks[blockId].javaScript.includes('circle')) {
@@ -190,13 +193,17 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 			{Object.values(group.items).map((item) => (
 				<TimelineBlock key={item.id} scale={scale} item={item} />
 			))}
-			{hoverX !== undefined && (
-				<HoverTimelineBlock
-					scale={scale}
-					startTime={computeTimelineBlockOffset(hoverX, selectedBlockId)}
-					cannotDrop={!hasDrones || isEmptyBlock(selectedBlockId) || blockOverlaps(occupiedItems, computeTimelineBlockOffset(hoverX, selectedBlockId), blocks[selectedBlockId ?? '']?.duration ?? 0)}
-				/>
-			)}
+			{hoverX !== undefined && (() => {
+				// Where it would land, or else under the pointer, marked as not droppable
+				const landsAt = landing(hoverX, selectedBlockId);
+				return (
+					<HoverTimelineBlock
+						scale={scale}
+						startTime={landsAt ?? pointerStart(hoverX, selectedBlockId)}
+						cannotDrop={!hasDrones || isEmptyBlock(selectedBlockId) || landsAt === undefined}
+					/>
+				);
+			})()}
 		</div>
 	);
 };
