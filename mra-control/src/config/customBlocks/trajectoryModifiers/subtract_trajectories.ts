@@ -14,7 +14,9 @@ export const blockSubtractTrajectories: RobartBlockDefinition = {
 				.appendField('from trajectory');
 			this.appendStatementInput('firstTrajectory');
 			this.appendDummyInput()
-				.appendField('subtract trajectory');
+				.appendField('subtract trajectory')
+				// Blank label: keeps the row as thick as the top row (see add_trajectories.ts)
+				.appendField(new Blockly.FieldLabel(''));
 			this.appendStatementInput('secondTrajectory');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);

@@ -14,7 +14,10 @@ export const blockAddTrajectories: RobartBlockDefinition = {
 				.appendField('add trajectory');
 			this.appendStatementInput('firstTrajectory');
 			this.appendDummyInput()
-				.appendField('to trajectory');
+				.appendField('to trajectory')
+				// The Scratch look draws a row holding just one label between two slots thinner than the top row. A second, blank
+				// label keeps it as thick.
+				.appendField(new Blockly.FieldLabel(''));
 			this.appendStatementInput('secondTrajectory');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
