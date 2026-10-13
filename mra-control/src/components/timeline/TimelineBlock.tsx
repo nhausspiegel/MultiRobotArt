@@ -1,5 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import {blockColor, type TimelineItem, useRobartState} from '@MRAControl/state/useRobartState';
+import {faXmarkCircle} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {useDrag} from '@use-gesture/react';
 import clsx from 'clsx';
 import React, {useState} from 'react';
@@ -86,6 +88,8 @@ export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}
 			}}
 			{...bind()}
 		>
+			{/* Can't go here: the same mark as the drop preview from the block list */}
+			{drag && !drag.valid && <FontAwesomeIcon icon={faXmarkCircle} className="mx-1 shrink-0 text-red-700" />}
 			<span className="block overflow-hidden text-ellipsis whitespace-nowrap">{blockName}</span>
 		</div>
 	);

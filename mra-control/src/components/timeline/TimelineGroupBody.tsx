@@ -64,9 +64,11 @@ export const tickArea = `calc(100% - ${timelineStartPadding}px)`;
 // x of a time within a lane, and within the timeline's scroll area (lanes start at its left edge)
 export const timeToX = (seconds: number, scale: number) => timelineStartPadding + convertSecondsToPixels(seconds, scale);
 
-// How far a dropped or dragged block may snap to sit against a neighbor (landingTime): its own length, and for short
-// blocks at least two minimum widths
-export const snapReach = (duration: number, scale: number) => Math.max(duration, convertPixelsToSeconds(2 * minItemWidth, scale));
+// How far a dropped or dragged block may snap to sit against a neighbor (landingTime): half its length, and for short
+// blocks at least two minimum widths. A block is held by its middle, so lining its edge up with a neighbor's overlaps by
+// up to half; further in, it shows that it can't go there instead of jumping aside (e.g. an All drones block over a
+// block in another lane).
+export const snapReach = (duration: number, scale: number) => Math.max(duration / 2, convertPixelsToSeconds(2 * minItemWidth, scale));
 
 // What a block placed on this lane must not overlap: the lane's own items and, on group lanes, All drones' items
 // (those run on every drone, this group's included)
