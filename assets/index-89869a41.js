@@ -80196,8 +80196,8 @@ def enableHighLevelCommander(cf):
 ###
 
 
-# How long an LED change takes, as in the simulator (setColor in simulatorCommands.ts), so the commands after it start
-# at the same time on the drones as in the simulator
+# How long an LED change is assumed to take on a real drone, as the simulator models it (setColor in
+# simulatorCommands.ts). Not measured yet (issue #15).
 _led_change_time = 0.1
 
 
@@ -80208,7 +80208,10 @@ def setLEDColorFromHex(groupState, hex):
 def setLEDColor(groupState, r, g, b):
     for cf in groupState.crazyflies:
         cf.setLEDColor(r, g, b)
-    groupState.timeHelper.sleep(_led_change_time)
+    # Real drones take however long the change really takes. A modifier's recording (simCommand) counts the assumed
+    # time, so the modifier keeps the simulator's schedule; a real drone's own time is absorbed into it (_replay).
+    if isinstance(groupState.timeHelper, TimeHelperSimLogger):
+        groupState.timeHelper.sleep(_led_change_time)
 
 
 def setRandomLEDColor(groupState):
@@ -80515,12 +80518,15 @@ def addTrajectories(groupState, command1, command2, add=True):
         while drone.leds and drone.leds[0][0] <= until + 1e-9:
             drone.cf.setLEDColor(*drone.leds.pop(0)[2])
 
-    # Counted in whole steps: np.arange can add a step through rounding (12.6 / 0.05 = 252.00000000000003)
-    for step in range(int(np.ceil(duration * Hz - 1e-9))):
+    # Every 1/20 s on the clock, sending the position for the moment it's sent: time an LED change really takes on the
+    # drones delays the step it's in, not the rest of the path
+    begin = timeHelper.time()
+    while timeHelper.time() - begin < duration - 1e-9:
+        elapsed = timeHelper.time() - begin
         for drone in drones:
-            send_leds(drone, step / Hz)
-            drone.cf.cmdPosition(position_at(drone, step / Hz / duration))
-        timeHelper.sleepForRate(Hz)
+            send_leds(drone, elapsed)
+            drone.cf.cmdPosition(position_at(drone, elapsed / duration))
+        _sleep_until(timeHelper, begin + (int(elapsed * Hz + 1e-9) + 1) / Hz)
     for drone in drones:
         send_leds(drone, duration)
         end = position_at(drone, 1.0)
