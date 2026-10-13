@@ -28,7 +28,7 @@ export const blockColor: RobartBlockDefinition = {
 	block:{
 		init: function () {
 			this.appendDummyInput()
-				.appendField('set LED color:')
+				.appendField('set LED color to')
 				.appendField(new ColorWheelField('#00FF00', 150, {
 					layoutDirection: 'horizontal',
 				}), 'color');
@@ -59,7 +59,7 @@ export const blockRandomColor: RobartBlockDefinition = {
 	block:{
 		init: function () {
 			this.appendDummyInput()
-				.appendField('Random LED Color:');
+				.appendField('set LED color to random');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setTooltip("Change the color of the LED ring to a random color! (Picks three random numbers for red, green, and blue)")
