@@ -11,15 +11,16 @@ export const blockRotateTrajectoryDegrees: RobartBlockDefinition = {
 	block: {
 		init: function () {
 			this.appendDummyInput()
-				.appendField('Rotate Trajectory (degrees)')
+				.appendField('rotate trajectory by')
 				.appendField('x: ')
 				.appendField(new Blockly.FieldNumber(0), 'x')
 				.appendField(' y: ')
 				.appendField(new Blockly.FieldNumber(0), 'y')
 				.appendField(' z: ')
-				.appendField(new Blockly.FieldNumber(0), 'z');
+				.appendField(new Blockly.FieldNumber(0), 'z')
+				.appendField('degrees');
 			this.appendStatementInput('originalTraj')
-				.appendField('Trajectory: ');
+				.appendField('trajectory:');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);
@@ -46,15 +47,16 @@ export const blockRotateTrajectoryRadians: RobartBlockDefinition = {
 	block: {
 		init: function () {
 			this.appendDummyInput()
-				.appendField('Rotate Trajectory (radians)')
+				.appendField('rotate trajectory by')
 				.appendField('x: ')
 				.appendField(new Blockly.FieldNumber(0), 'x')
 				.appendField(' y: ')
 				.appendField(new Blockly.FieldNumber(0), 'y')
 				.appendField(' z: ')
-				.appendField(new Blockly.FieldNumber(0), 'z');
+				.appendField(new Blockly.FieldNumber(0), 'z')
+				.appendField('radians');
 			this.appendStatementInput('originalTraj')
-				.appendField('Trajectory: ');
+				.appendField('trajectory:');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);

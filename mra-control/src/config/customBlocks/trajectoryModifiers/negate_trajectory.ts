@@ -11,9 +11,9 @@ export const blockNegate: RobartBlockDefinition = {
 	block: {
 		init: function () {
 			this.appendDummyInput()
-				.appendField('Negate Trajectory');
+				.appendField('negate trajectory');
 			this.appendStatementInput('originalTraj')
-				.appendField('Trajectory:');
+				.appendField('trajectory:');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);

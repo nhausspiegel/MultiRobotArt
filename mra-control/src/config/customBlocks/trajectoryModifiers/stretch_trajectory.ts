@@ -11,7 +11,7 @@ export const blockStretchTrajectories: RobartBlockDefinition = {
 	block: {
 		init: function () {
 			this.appendDummyInput()
-				.appendField('Stretch Trajectory')
+				.appendField('stretch trajectory by')
 				.appendField('x: ')
 				.appendField(new Blockly.FieldNumber(1, 0.0), 'x')
 				.appendField(' y: ')
@@ -21,7 +21,7 @@ export const blockStretchTrajectories: RobartBlockDefinition = {
 				.appendField(' time: ')
 				.appendField(new Blockly.FieldNumber(1, 0.0), 't');
 			this.appendStatementInput('originalTraj')
-				.appendField('Trajectory: ');
+				.appendField('trajectory:');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);

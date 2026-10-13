@@ -19,7 +19,7 @@ export const blockParametricPath: RobartBlockDefinition = {
 	name: 'parametricPath',
 	block: {
 		init: function () {
-			this.appendDummyInput().appendField('Parametric path');
+			this.appendDummyInput().appendField('parametric path');
 			// Defaults: a figure eight in the horizontal plane at the current height
 			this.appendDummyInput().appendField('x(t) =').appendField(expressionField('sin(t)'), 'x');
 			this.appendDummyInput().appendField('y(t) =').appendField(expressionField('sin(2 * t) / 2'), 'y');

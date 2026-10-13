@@ -8,7 +8,7 @@ export const blockCircle: RobartBlockDefinition = {
 	block:{
 		init: function () {
 			this.appendDummyInput()
-				.appendField(new Blockly.FieldLabelSerializable('Go in circle of radius'), 'Circular motion')
+				.appendField('go in circle of radius')
 				.appendField(new Blockly.FieldNumber(1, 0.01), 'radius_m')
 				.appendField('m');
 			this.appendDummyInput()
@@ -18,7 +18,7 @@ export const blockCircle: RobartBlockDefinition = {
 			this.appendDummyInput()
 				.appendField('for')
 				.appendField(new Blockly.FieldNumber(360), 'angle_degrees')
-				.appendField('degrees,');
+				.appendField('degrees');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);
@@ -55,7 +55,7 @@ export const blockCircleRadians: RobartBlockDefinition = {
 	block:{
 		init: function () {
 			this.appendDummyInput()
-				.appendField(new Blockly.FieldLabelSerializable('Go in circle of radius'), 'Circular motion')
+				.appendField('go in circle of radius')
 				.appendField(new Blockly.FieldNumber(1, 0.01), 'radius_m')
 				.appendField('m');
 			this.appendDummyInput()
@@ -65,7 +65,7 @@ export const blockCircleRadians: RobartBlockDefinition = {
 			this.appendDummyInput()
 				.appendField('for')
 				.appendField(new Blockly.FieldNumber(6.28), 'angle_radians')
-				.appendField('radians,');
+				.appendField('radians');
 			// this.appendDummyInput()
 			// 	.appendField(new Blockly.FieldDropdown([['counterclockwise', 'ccw'], ['clockwise', 'cw']]), 'direction');
 			this.setPreviousStatement(true, null);

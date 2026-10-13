@@ -7,7 +7,7 @@ export const blockTranslateTrajectory: RobartBlockDefinition = {
 	block: {
 		init: function () {
 			this.appendDummyInput()
-				.appendField('Translate Trajectory')
+				.appendField('translate trajectory by')
 				.appendField('x: ')
 				.appendField(new Blockly.FieldNumber(0), 'x')
 				.appendField(' y: ')
@@ -15,7 +15,7 @@ export const blockTranslateTrajectory: RobartBlockDefinition = {
 				.appendField(' z: ')
 				.appendField(new Blockly.FieldNumber(0), 'z');
 			this.appendStatementInput('originalTraj')
-				.appendField('Trajectory: ');
+				.appendField('trajectory:');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);

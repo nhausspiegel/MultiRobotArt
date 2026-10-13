@@ -11,11 +11,11 @@ export const blockSubtractTrajectories: RobartBlockDefinition = {
 	block: {
 		init: function () {
 			this.appendDummyInput()
-				.appendField('Subtract Trajectories');
+				.appendField('subtract trajectories');
 			this.appendStatementInput('firstTrajectory')
-				.appendField('First Trajectory:');
+				.appendField('first trajectory:');
 			this.appendStatementInput('secondTrajectory')
-				.appendField('Second Trajectory:');
+				.appendField('second trajectory:');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);

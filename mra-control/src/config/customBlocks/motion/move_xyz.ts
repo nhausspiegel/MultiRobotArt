@@ -9,15 +9,15 @@ export const blockMoveXyz: RobartBlockDefinition = {
 	block: {
 		init: function () {
 			this.appendDummyInput()
-				.appendField('move X')
+				.appendField('move x')
 				.appendField(new Blockly.FieldNumber(0), 'x')
 				.appendField('meters');
 			this.appendDummyInput()
-				.appendField('move Y')
+				.appendField('move y')
 				.appendField(new Blockly.FieldNumber(0), 'y')
 				.appendField('meters');
 			this.appendDummyInput()
-				.appendField('move Z')
+				.appendField('move z')
 				.appendField(new Blockly.FieldNumber(0), 'z')
 				.appendField('meters');
 			this.appendDummyInput()

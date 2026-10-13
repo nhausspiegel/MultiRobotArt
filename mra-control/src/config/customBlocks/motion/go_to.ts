@@ -9,11 +9,11 @@ export const blockGoToSpeed: RobartBlockDefinition = {
 	block: {
 		init: function () {
 			this.appendDummyInput()
-				.appendField('go to X:')
+				.appendField('go to x:')
 				.appendField(new Blockly.FieldNumber(0), 'x_pos')
-				.appendField('Y:')
+				.appendField('y:')
 				.appendField(new Blockly.FieldNumber(0), 'y_pos')
-				.appendField('Z:')
+				.appendField('z:')
 				.appendField(new Blockly.FieldNumber(0), 'z_pos')
 				.appendField('at')
 				.appendField(new Blockly.FieldNumber(0.5, 0.01), 'speed')
