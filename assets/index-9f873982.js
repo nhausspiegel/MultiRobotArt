@@ -91040,6 +91040,7 @@ const BlockEditorPanel = () => {
     const clearSelection = () => {
       controls.multiDraggable.clearAll_();
       controls.dragSelection.clear();
+      controls.lastSelectedElement_ = null;
       const focusTarget = workspace.getWorkspaceFocusTarget();
       if (focusTarget)
         getFocusManager().focusNode(focusTarget);
