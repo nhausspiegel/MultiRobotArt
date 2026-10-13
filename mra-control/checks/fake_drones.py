@@ -14,11 +14,13 @@ from types import SimpleNamespace
 
 import numpy as np
 
-for name in ("rclpy", "rclpy.node", "rowan", "scipy", "scipy.spatial", "scipy.spatial.transform", "PIL"):
+# The templates are imported from src; leave no __pycache__ there
+sys.dont_write_bytecode = True
+for name in ("rclpy", "rclpy.node", "rowan", "PIL"):
     sys.modules[name] = types.ModuleType(name)
 sys.modules["rclpy.node"].Node = lambda name: None
-sys.modules["scipy.spatial.transform"].Rotation = None
-sys.modules["PIL"].ImageColor = None
+# Only "#rrggbb" to (r, g, b), which is all setLEDColorFromHex asks of it
+sys.modules["PIL"].ImageColor = SimpleNamespace(getcolor=lambda hex, mode: tuple(int(hex[i:i + 2], 16) for i in (1, 3, 5)))
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "src/tools/python-templates"))
 import blocklyTranslations  # noqa: E402
 

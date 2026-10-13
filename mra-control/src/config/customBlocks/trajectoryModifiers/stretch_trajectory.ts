@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import {type RobartBlockDefinition} from '../BlockDefinition';
+import {slotFunction, slotSequence} from './slots';
 import * as Blockly from 'blockly';
 import * as SIM from '@MRAControl/state/simulatorCommands';
 import {Simulation} from '@MRAControl/layout/simulation/Simulation';
@@ -29,25 +30,21 @@ export const blockStretchTrajectories: RobartBlockDefinition = {
 		},
 	},
 	pythonGenerator: (block, python) => {
-		var originalTraj = python.statementToCode(block, 'originalTraj');
-		originalTraj = originalTraj.trim();
 		const x = block.getFieldValue('x') as number;
 		const y = block.getFieldValue('y') as number;
 		const z = block.getFieldValue('z') as number;
 		const t = block.getFieldValue('t') as number;
 
 
-		return `stretchTrajectory(groupState, lambda groupState: ${originalTraj}, ${x}, ${y}, ${z}, ${t})\n`;
+		return `${slotFunction(block, python, 'originalTraj', '_body')}stretchTrajectory(groupState, _body, ${x}, ${y}, ${z}, ${t})\n`;
 	},
 	javascriptGenerator: (block, js) => {
-		var originalTraj = js.statementToCode(block, 'originalTraj');
-		originalTraj = originalTraj.trim();
 		const x = block.getFieldValue('x') as number;
 		const y = block.getFieldValue('y') as number;
 		const z = block.getFieldValue('z') as number;
 		const t = block.getFieldValue('t') as number;
 
 
-		return `simulator.stretchTrajectory(groupState, ${originalTraj}, ${x}, ${y}, ${z}, ${t})\n`;
+		return `simulator.stretchTrajectory(groupState, ${slotSequence(block, js, 'originalTraj')}, ${x}, ${y}, ${z}, ${t})\n`;
 	},
 };

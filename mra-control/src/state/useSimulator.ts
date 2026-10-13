@@ -300,7 +300,8 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					currTimestep.robotPositions[robotId] = newPos;
 				}
 
-				robots[robotId].color = get().robots[robotId].color;
+				// LED color changes are part of trajectories (setColor), so they happen when the trajectory reaches them
+				robots[robotId].color = get().robots[robotId].trajectory.lastColor?.(Math.min(trajectoryTime, 1))?.color ?? get().robots[robotId].color;
 
 				if (markerFrequency !== 0 && time % markerFrequency < deltaT) {
 					trajectoryMarkers.push({ position: new THREE.Vector3().copy(robots[robotId].pos), color: robots[robotId].color, id: robotId + time });

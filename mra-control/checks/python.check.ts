@@ -4,6 +4,7 @@
 // npx esbuild checks/python.check.ts --bundle --platform=node --format=cjs --packages=external --alias:@MRAControl=./src \
 //   --loader:.py=text --loader:.md=text --log-level=error --outfile=node_modules/.cache/checks/python.cjs && node node_modules/.cache/checks/python.cjs
 import './browserShims';
+import './documentShim';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import * as Blockly from 'blockly';
@@ -21,44 +22,81 @@ type Sent = {t: number; command: string; pos?: number[]; duration?: number; heig
 const stack = (...blocks: BlockJson[]) => blocks.reduceRight((next, block) => ({...block, next: {block: next}}));
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-6;
 
-// The block's Python, run on a fake drone starting at `start`
-const fly = (block: BlockJson, start = [0, 0, 0]) => {
+// A block's code: the exported Python and the simulator's line (a modifier writes one line)
+type Code = {python: string; javaScript: string};
+const codeOf = (block: BlockJson): Code => {
 	const workspace = new Blockly.Workspace();
 	Blockly.serialization.blocks.append(block, workspace);
-	const code = pythonGenerator.workspaceToCode(workspace);
-	const output = execFileSync('python3', ['-I', 'checks/fake_drones.py', JSON.stringify(start)], {input: code, encoding: 'utf8'});
-	// The last line: commands may print along the way
-	return {code, ...(JSON.parse(output.trim().split('\n').pop()!) as {log: Sent[]; end: number})};
+	return {python: pythonGenerator.workspaceToCode(workspace), javaScript: javascriptGenerator.workspaceToCode(workspace).trim()};
 };
 
-// The same block in the app's simulator, from the same start: its length and its position at any time
-const simulate = (block: BlockJson, start: number[]) => {
-	const workspace = new Blockly.Workspace();
-	Blockly.serialization.blocks.append(block, workspace);
-	const javaScript = javascriptGenerator.workspaceToCode(workspace).trim();
+// Python run on a fake drone starting at `start`
+const flyCode = (python: string, start = [0, 0, 0]) => {
+	const output = execFileSync('python3', ['-I', 'checks/fake_drones.py', JSON.stringify(start)], {input: python, encoding: 'utf8'});
+	// The last line: commands may print along the way
+	return {code: python, ...(JSON.parse(output.trim().split('\n').pop()!) as {log: Sent[]; end: number})};
+};
+const fly = (block: BlockJson, start = [0, 0, 0]) => flyCode(codeOf(block).python, start);
+
+// The simulator's code from the same start: its length, its position at any time, and its LED color changes
+const simulateCode = (javaScript: string, start: number[]) => {
 	useSimulator.getState().setRobots({drone: {id: 'drone', name: 'drone', type: 'crazyflie', startingPosition: start as [number, number, number]}});
 	// Named like in the simulator, for the block code
 	const simulator = SIM;
 	const groupState = {robotIDs: ['drone']};
 	const [duration, trajectories] = eval(javaScript) as [number, Map<string, Trajectory>];
-	return {duration, at: (t: number) => trajectories.get('drone')!.evaluate(Math.min(t / duration, 1)), simulator, groupState};
+	const trajectory = trajectories.get('drone')!;
+	// Each change's time (rounded to the millisecond) and color, as the simulator applies them while playing
+	const colors = new Map<string, number[]>();
+	for (let t = 0; t <= duration + 1e-9; t += 0.01) {
+		const change = trajectory.lastColor(Math.min(t / duration, 1));
+		if (change) colors.set((change.t * duration).toFixed(3), [change.color.r, change.color.g, change.color.b]);
+	}
+
+	return {duration, at: (t: number) => trajectory.evaluate(Math.min(t / duration, 1)), colors, simulator, groupState};
 };
 
-// Every position the exported Python sends is where the simulator has the drone at that moment (within `tolerance` m),
-// and the Python takes as long as the simulator (within one 1/20 s step)
-const sameAsSimulator = (block: BlockJson, start: number[], tolerance: number) => {
-	const {code, log, end} = fly(block, start);
-	const {duration, at} = simulate(block, start);
-	const positions = log.filter((sent) => sent.command === 'cmdPosition');
-	assert.ok(positions.length > 0, code);
-	for (const {t, pos} of positions) {
+// The firmware's go-to (and the simulator's robotGoTo): a degree 7 curve from rest to rest
+const goToCurve = (from: number[], to: number[], u: number) => {
+	const ease = u * u * u * u * (35 - (84 * u) + (70 * u * u) - (20 * u * u * u));
+	return from.map((v, i) => v + ((to[i] - v) * ease));
+};
+
+// What the exported Python tells the drone is what the simulator shows, within `tolerance` m:
+// - every streamed position is where the simulator has the drone at that moment
+// - every go-to (takeoff, land) follows the go-to curve to where the simulator is when it ends
+// - the LED changes are the simulator's, at the same times
+// - it takes as long as the simulator (within one 1/20 s step)
+const sameAsSimulator = ({python, javaScript}: Code, start: number[], tolerance: number) => {
+	const {log, end} = flyCode(python, start);
+	const {duration, at, colors} = simulateCode(javaScript, start);
+	const near = (sent: number[], t: number, what: string) => {
 		const expected = at(t);
-		const off = Math.hypot(pos![0] - expected.x, pos![1] - expected.y, pos![2] - expected.z);
-		assert.ok(off < tolerance, `${code}at ${t} s: sent ${pos!.map((v) => v.toFixed(3))}, simulator ${expected.toArray().map((v) => v.toFixed(3))}`);
+		const off = Math.hypot(sent[0] - expected.x, sent[1] - expected.y, sent[2] - expected.z);
+		assert.ok(off < tolerance, `${python}${what} at ${t.toFixed(3)} s: ${sent.map((v) => v.toFixed(3))}, simulator ${expected.toArray().map((v) => v.toFixed(3))}`);
+	};
+
+	let position = start;
+	const sentColors = new Map<string, number[]>();
+	for (const sent of log) {
+		if (sent.command === 'cmdPosition') {
+			near(sent.pos!, sent.t, 'streamed position');
+			position = sent.pos!;
+		} else if (['goTo', 'takeoff', 'land'].includes(sent.command)) {
+			const target = sent.command !== 'goTo' ? [position[0], position[1], sent.height!]
+				: sent.relative ? position.map((v, i) => v + sent.pos![i]) : sent.pos!;
+			for (const u of [0.25, 0.5, 1]) near(goToCurve(position, target, u), sent.t + (u * sent.duration!), `${sent.command} ${u * 100}% in`);
+			position = target;
+		} else if (sent.command === 'setLEDColor') {
+			sentColors.set(sent.t.toFixed(3), sent.color!);
+		}
 	}
-	assert.ok(Math.abs(end - duration) <= 1 / 20 + 1e-6, `${code}took ${end} s, simulator ${duration} s`);
+
+	assert.deepEqual([...sentColors], [...colors], `${python}LED changes ${JSON.stringify([...sentColors])}, simulator ${JSON.stringify([...colors])}`);
+	assert.ok(Math.abs(end - duration) <= 1 / 20 + 1e-6, `${python}took ${end} s, simulator ${duration} s`);
 	return {log, end};
 };
+const sameBlockAsSimulator = (block: BlockJson, start: number[], tolerance: number) => sameAsSimulator(codeOf(block), start, tolerance);
 
 const takeoff = {type: 'takeoff', fields: {height: 1, duration: 2}};
 const land = {type: 'land', fields: {height: 0, duration: 2}};
@@ -129,16 +167,60 @@ const land = {type: 'land', fields: {height: 0, duration: 2}};
 	const both = (type: string, first: BlockJson, second: BlockJson) => ({type, inputs: {firstTrajectory: {block: first}, secondTrajectory: {block: second}}});
 	// Go-tos follow the same polynomial on both sides, so these match exactly
 	// (The move block halves its speed, issue #10, so each of these moves takes 4 s on both sides)
-	const added = sameAsSimulator(both('addTrajectories', move(1, 0, 0), move(0, 1, 0)), [0, 0, 1], 1e-6);
+	const added = sameBlockAsSimulator(both('addTrajectories', move(1, 0, 0), move(0, 1, 0)), [0, 0, 1], 1e-6);
 	assert.equal(added.end, 4);
 	assert.deepEqual(added.log.slice(-2).map((sent) => sent.command), ['notifySetpointsStop', 'goTo']);
 	assert.deepEqual(added.log[added.log.length - 1].pos, [1, 1, 1]);
-	const subtracted = sameAsSimulator(both('subtractTrajectories', move(1, 0, 0), move(0, 1, 0)), [0, 0, 1], 1e-6);
+	const subtracted = sameBlockAsSimulator(both('subtractTrajectories', move(1, 0, 0), move(0, 1, 0)), [0, 0, 1], 1e-6);
 	assert.deepEqual(subtracted.log[subtracted.log.length - 1].pos, [1, -1, 1]);
 	// A 4 s move stretched over an 8 s one, the way the simulator stretches the shorter slot
-	sameAsSimulator(both('addTrajectories', move(1, 0, 0), move(0, 2, 0)), [0, 0, 1], 1e-6);
+	sameBlockAsSimulator(both('addTrajectories', move(1, 0, 0), move(0, 2, 0)), [0, 0, 1], 1e-6);
 	// A circle streams its own 1/20 s steps, so it can be up to a step (2.5 cm at 0.5 m/s) apart
-	sameAsSimulator(both('addTrajectories', {type: 'circle', fields: {radius_m: 1, velocity: 0.5, angle_degrees: 360}}, move(0, 0, 2)), [0, 0, 1], 0.05);
+	sameBlockAsSimulator(both('addTrajectories', {type: 'circle', fields: {radius_m: 1, velocity: 0.5, angle_degrees: 360}}, move(0, 0, 2)), [0, 0, 1], 0.05);
+}
+
+// Modifiers run whatever is in their slot (#4): several blocks, repeats, hovers, LED changes, other modifiers. The exported
+// Python must tell the drone exactly what the simulator shows. Before, stacked blocks or a repeat in a slot were a
+// SyntaxError, an LED change crashed, a hover was skipped, negating a move crashed, stretching a move went the wrong
+// way, and translate's move to the shifted start followed a different curve than the simulator's.
+{
+	const move = (x: number, y: number, z: number) => ({type: 'move_xyz', fields: {x, y, z, speed: 0.5}});
+	const goTo = (x: number, y: number, z: number) => ({type: 'go_to', fields: {x_pos: x, y_pos: y, z_pos: z, duration: 2}});
+	const hover = (duration: number) => ({type: 'stop', fields: {duration}});
+	const led = (color: string) => ({type: 'color', fields: {color}});
+	const slot = (...blocks: BlockJson[]) => ({originalTraj: {block: stack(...blocks)}});
+	const translate = (x: number, y: number, z: number, ...blocks: BlockJson[]) => ({type: 'translateTrajectory', fields: {x, y, z}, inputs: slot(...blocks)});
+	const rotate = (x: number, y: number, z: number, ...blocks: BlockJson[]) => ({type: 'rotateDegrees', fields: {x, y, z}, inputs: slot(...blocks)});
+	const negate = (...blocks: BlockJson[]) => ({type: 'negate', inputs: slot(...blocks)});
+	const stretch = (x: number, y: number, z: number, t: number, ...blocks: BlockJson[]) => ({type: 'stretch', fields: {x, y, z, t}, inputs: slot(...blocks)});
+	const add = (first: BlockJson[], second: BlockJson[]) => ({type: 'addTrajectories', inputs: {firstTrajectory: {block: stack(...first)}, secondTrajectory: {block: stack(...second)}}});
+	const from = [0, 0, 1];
+
+	sameBlockAsSimulator(translate(1, 0, 0, goTo(1, 0, 1), goTo(1, 1, 1)), from, 1e-6);
+	sameBlockAsSimulator(translate(1, 0, 0, goTo(1, 0, 1), hover(1), led('#ff0000'), goTo(1, 1, 1)), from, 1e-6);
+	// All three angles, so the order they're applied in matters
+	sameBlockAsSimulator(rotate(30, 45, 60, move(1, 0, 0)), from, 1e-6);
+	sameBlockAsSimulator(negate(move(1, 0, 0)), from, 1e-6);
+	sameBlockAsSimulator(negate(move(1, 0, 0), hover(1), move(0, 1, 0)), from, 1e-6);
+	sameBlockAsSimulator(stretch(2, 1, 1, 2, move(1, 0, 0), led('#ff0000'), move(0, 1, 0)), from, 1e-6);
+	sameBlockAsSimulator(translate(0, 1, 0, {type: 'repeat', fields: {times: 2}, inputs: {body: {block: move(1, 0, 0)}}}), from, 1e-6);
+	sameBlockAsSimulator(rotate(0, 0, 90, translate(1, 0, 0, move(1, 0, 0))), from, 1e-6);
+	// Takeoff and land are changed like everything else
+	sameBlockAsSimulator(translate(1, 0, 0, takeoff, land), from, 1e-6);
+	// A sequence in a slot: a circle that bobs up and down once. Circles stream 1/20 s steps (#7).
+	sameBlockAsSimulator(add([move(0, 0, 1), move(0, 0, -1)], [{type: 'circle', fields: {radius_m: 1, velocity: 0.5, angle_degrees: 360}}]), from, 0.05);
+	// Both slots change the color at the same moment: the second slot's color stays
+	const clash = sameBlockAsSimulator(add([led('#ff0000'), move(1, 0, 0)], [led('#0000ff'), move(0, 1, 0)]), from, 1e-6);
+	assert.deepEqual(clash.log.filter((sent) => sent.command === 'setLEDColor').map((sent) => sent.color), [[255, 0, 0], [0, 0, 255]]);
+
+	// Projects saved before this keep their old code (one command, as a lambda), which must still run the same way
+	const old = (python: string, javaScript: string) => sameAsSimulator({python: `${python}\n`, javaScript}, from, 1e-6);
+	old('negate(groupState, lambda groupState: goto_velocity_relative_position(groupState, 1,0,0,0.25))', 'simulator.negateTrajectory(groupState, simulator.moveSpeed(groupState, 1, 0, 0, 0.25))');
+	old('translate(groupState, lambda groupState: goto_duration(groupState, 1,0,1,2), 1, 0, 0)', 'simulator.translateTrajectory(groupState, simulator.goToXyzDuration(groupState, 1, 0, 1, 2), 1, 0, 0)');
+	old('rotate(groupState, lambda groupState: goto_velocity_relative_position(groupState, 1,0,0,0.25), 0, 0, 1.5707963267948966)', 'simulator.rotateTrajectory(groupState, simulator.moveSpeed(groupState, 1, 0, 0, 0.25), 0, 0, 1.5707963267948966)');
+	old('stretchTrajectory(groupState, lambda groupState: goto_velocity_relative_position(groupState, 1,0,0,0.25), 2, 1, 1, 2)', 'simulator.stretchTrajectory(groupState, simulator.moveSpeed(groupState, 1, 0, 0, 0.25), 2, 1, 1, 2)');
+	old('addTrajectories(groupState, lambda groupState: goto_velocity_relative_position(groupState, 1,0,0,0.25), lambda groupState: goto_velocity_relative_position(groupState, 0,1,0,0.25))', 'simulator.addTrajectories(groupState, simulator.moveSpeed(groupState, 1, 0, 0, 0.25), simulator.moveSpeed(groupState, 0, 1, 0, 0.25))');
+	old('subtractTrajectories(groupState, lambda groupState: goto_velocity_relative_position(groupState, 1,0,0,0.25), lambda groupState: goto_velocity_relative_position(groupState, 0,1,0,0.25), False)', 'simulator.addTrajectories(groupState, simulator.moveSpeed(groupState, 1, 0, 0, 0.25), simulator.moveSpeed(groupState, 0, 1, 0, 0.25), false)');
 }
 
 console.log('python ok');

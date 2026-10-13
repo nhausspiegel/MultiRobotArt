@@ -8,7 +8,7 @@
 
 import {useSimulator} from '@MRAControl/state/useSimulator';
 import {Vector3, Color} from 'three';
-import {AddTrajectories, CircleTrajectory, ComponentTrajectory, Hover, NegateTrajectory, NullTrajectory, ParametricTrajectory, RotationTrajectory, StretchTrajectory, TranslationTrajectory, type Trajectory} from './trajectories';
+import {AddTrajectories, CircleTrajectory, ComponentTrajectory, Hover, NegateTrajectory, NullTrajectory, ParametricTrajectory, RotationTrajectory, SequenceTrajectory, StretchTrajectory, TranslationTrajectory, type Trajectory} from './trajectories';
 
 export type SimulatorGroupState = {
 	robotIDs: string[];
@@ -39,21 +39,13 @@ export const goToXyzSpeed = (groupState: SimulatorGroupState, x: number, y: numb
 	return [duration, trajectories];
 };
 
+// The color is part of the trajectory, so it changes when the trajectory plays (advance() applies it), also when it's
+// inside a modifier
 export const setColor = (groupState: SimulatorGroupState, r = 0, g = 0, b = 0): [number, Map<string, Trajectory>] => {
-	let trajectories = new Map<string, Trajectory>();
-	groupState.robotIDs.forEach((robotID) =>{
-		let robot = {...useSimulator.getState().robots[robotID]};
-		// TODO Fix Colors! Need this line to work again and need trajectory to just hover. This will have issues with computing duration...
-		robot.color = new Color(r, g, b);
-
-		useSimulator.setState({
-			...useSimulator.getState(),
-			robots: {
-				...useSimulator.getState().robots,
-				[robotID]: robot,
-			},
-		});
-		trajectories.set(robotID, new Hover(robot.pos));
+	const trajectories = new Map<string, Trajectory>();
+	groupState.robotIDs.forEach((robotID) => {
+		const robot = useSimulator.getState().robots[robotID];
+		if (robot) trajectories.set(robotID, new Hover(robot.pos.clone(), 0.1, new Color(r, g, b)));
 	});
 	return [0.1, trajectories]; // There is actually a cost to switching LEDs
 };
@@ -216,6 +208,43 @@ export const makeParametricTrajectory = (groupState: SimulatorGroupState, x: str
 	const trajectories: Map<string, Trajectory> = new Map<string, Trajectory>();
 	groupState.robotIDs.forEach((robotId) => {
 		trajectories.set(robotId, new ParametricTrajectory(robots[robotId].pos, x, y, z, startT, endT, duration));
+	});
+	return [duration, trajectories];
+};
+
+type Command = () => [number, Map<string, Trajectory>];
+
+// A modifier's commands as one trajectory per robot: they run one after another, each as if the robot were where the one
+// before it ends, and the modifier then changes all of them together. Commands read the robot's position from the store,
+// so it's moved there for each one and put back after.
+export const sequence = (groupState: SimulatorGroupState, commands: Command[]): [number, Map<string, Trajectory>] => {
+	const trajectories = new Map<string, Trajectory>();
+	let duration = 0;
+	const placeRobot = (robotId: string, position: Vector3) => {
+		useSimulator.setState((state) => {
+			state.robots[robotId].pos = position;
+		});
+	};
+
+	groupState.robotIDs.forEach((robotId) => {
+		const robot = useSimulator.getState().robots[robotId];
+		if (!robot) return;
+		const start = robot.pos;
+		const pieces: Trajectory[] = [];
+		try {
+			commands.forEach((command) => {
+				const piece = command()[1].get(robotId);
+				if (!piece) return;
+				pieces.push(piece);
+				if (piece.duration > 0) placeRobot(robotId, piece.evaluate(1).clone());
+			});
+		} finally {
+			placeRobot(robotId, start);
+		}
+
+		const trajectory = new SequenceTrajectory(pieces, start);
+		trajectories.set(robotId, trajectory);
+		duration = Math.max(duration, trajectory.duration);
 	});
 	return [duration, trajectories];
 };

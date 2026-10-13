@@ -7,7 +7,6 @@ import random
 import time
 from crazyflieLoggers import *
 import rowan
-from scipy.spatial.transform import Rotation as R
 
 import traceback
 
@@ -193,19 +192,19 @@ def enableHighLevelCommander(cf):
 ###
 
 
+# How long an LED change takes, as in the simulator (setColor in simulatorCommands.ts), so the commands after it start
+# at the same time on the drones as in the simulator
+_led_change_time = 0.1
+
+
 def setLEDColorFromHex(groupState, hex):
-    # return
-    crazyflies = groupState.crazyflies
-    rgb = ImageColor.getcolor(hex, "RGB")
-    for cf in crazyflies:
-        cf.setLEDColor(*rgb)
+    setLEDColor(groupState, *ImageColor.getcolor(hex, "RGB"))
 
 
 def setLEDColor(groupState, r, g, b):
-    # return
-    crazyflies = groupState.crazyflies
-    for cf in crazyflies:
+    for cf in groupState.crazyflies:
         cf.setLEDColor(r, g, b)
+    groupState.timeHelper.sleep(_led_change_time)
 
 
 def setRandomLEDColor(groupState):
@@ -298,110 +297,104 @@ def parametric(groupState, x, y, z, start_t, end_t, duration):
 # Trajectory Modifiers...
 
 
-def negate(groupState, command):
-    originalGroupState = groupState
-    simCrazyflies = []
-    for cf in groupState.crazyflies:
-        # try:
-        #     if not isinstance(cf, CrazyflieSimLogger):
-        #         rclpy.spin_once(cf.node)
-        # except Exception:
-        #     cf.node.get_logger().error(traceback.format_exc())
-        simCrazyflies.append(CrazyflieSimLogger(cf.position()))
-    simTimeHelper = TimeHelperSimLogger()
-    simTimeHelper.currTime = originalGroupState.timeHelper.time()
-    groupState = SimpleNamespace(crazyflies=simCrazyflies, timeHelper=simTimeHelper)
-    # Execute Simulated Commands
-    command(groupState)
-    # Process commands to add startTime
-    setStartTimes(groupState)
-    # negate every command
-    for simcf, cf in zip(groupState.crazyflies, originalGroupState.crazyflies):
-        # try:
-        #     rclpy.spin_once(cf.node)
-        # except Exception:
-        #     cf.node.get_logger().error(traceback.format_exc())
-        #     print('negate2')
-        #     pass
-        initialPosition = cf.position()
-        for i, command in enumerate(simcf.commands):
-            cfCommand = command.command
-            if (
-                cfCommand == "goTo"
-                or cfCommand == "cmdPos"
-                or cfCommand == "takeoff"
-                or cfCommand == "land"
-            ):
-                # Negate the direction (Note, do not negate land...)
-                if command.relative == False:
-                    originalDestination = command.position
-                    # (Start - goal) gives, vector from start, so add back starting position for 2*start - goal
-                    negatedDestination = 2 * np.array(initialPosition) - np.array(
-                        originalDestination
-                    )
-                    simcf.commands[i].position = negatedDestination
-                    # print(negatedDestination, originalDestination, initialPosition)
+###
+#  Trajectory modifiers. Each runs its commands on stand-in crazyflies that record what they're sent and when
+#  (simCommand), then sends them to the real ones changed (_replay), or combined with another recording
+#  (addTrajectories). The simulator's versions are in trajectories.ts; checks/python.check.ts compares the two.
+###
+
+
+def simCommand(originalGroupState, command):
+    """Runs command on stand-in crazyflies (CrazyflieSimLogger) that record what they're sent and when, instead of
+    flying. Returns their group state, plus when the recording began and how long it lasts, waits included."""
+    clock = TimeHelperSimLogger()
+    clock.currTime = originalGroupState.timeHelper.time()
+    start = clock.currTime
+    crazyflies = [CrazyflieSimLogger(_safe_cf_position(cf), clock) for cf in originalGroupState.crazyflies]
+    command(SimpleNamespace(crazyflies=crazyflies, timeHelper=clock))
+    return SimpleNamespace(crazyflies=crazyflies, timeHelper=clock, start=start, duration=clock.currTime - start)
+
+
+def _sleep_until(timeHelper, time):
+    timeHelper.sleep(max(0.0, time - timeHelper.time()))
+
+
+def _replay(groupState, recording, transform, time_scale=1.0):
+    """Sends a recording (simCommand) to the crazyflies at its recorded times, slowed down by time_scale, with every
+    position changed by transform(start, position), start being where the crazyflie was when the recording began.
+    Go-tos stay go-tos (a relative one's vector changes the way its positions do), takeoffs and landings become go-tos
+    to their changed end, streamed positions are changed, and LED changes are sent as they are."""
+    timeHelper = groupState.timeHelper
+    begin = timeHelper.time()
+    drones = []
+    for simCF, cf in zip(recording.crazyflies, groupState.crazyflies):
+        start = np.array(simCF.initialPosition, dtype=float)
+        drones.append(SimpleNamespace(cf=cf, commands=simCF.commands, start=start, position=start.copy()))
+    streaming = False
+    # All crazyflies in a group are sent the same commands
+    for i, command in enumerate(recording.crazyflies[0].commands):
+        _sleep_until(timeHelper, begin + (command.startTime - recording.start) * time_scale)
+        for drone in drones:
+            sent = drone.commands[i]
+            moved = lambda point: transform(drone.start, np.array(point, dtype=float))
+            if sent.command == "goTo":
+                vector = np.array(sent.position, dtype=float)
+                goal = drone.position + vector if sent.relative else vector
+                if sent.relative:
+                    drone.cf.goTo(moved(goal) - moved(drone.position), sent.yaw, sent.duration * time_scale, relative=True)
                 else:
-                    originalDestination = command.position
-                    negatedDestination = -originalDestination
-                    simcf.commands[i].position = negatedDestination
+                    drone.cf.goTo(moved(goal), sent.yaw, sent.duration * time_scale)
+            elif sent.command in ("takeoff", "land"):
+                goal = np.array([drone.position[0], drone.position[1], sent.height], dtype=float)
+                drone.cf.goTo(moved(goal), 0, sent.duration * time_scale)
+            elif sent.command == "cmdPos":
+                goal = np.array(sent.position, dtype=float)
+                drone.cf.cmdPosition(moved(goal))
             else:
-                # Just run the original command, no need to alter anything
-                pass
-    execute_commands(groupState, originalGroupState)
+                if sent.command == "setLEDColor":
+                    drone.cf.setLEDColor(*sent.color)
+                elif sent.command == "notifySetpointsStop":
+                    drone.cf.notifySetpointsStop()
+                continue
+            drone.position = goal
+        if command.command in ("goTo", "takeoff", "land", "cmdPos", "notifySetpointsStop"):
+            streaming = command.command == "cmdPos"
+    _sleep_until(timeHelper, begin + recording.duration * time_scale)
+    # Ended streaming positions: hand control back to the high-level commander and hold the end, like circle() and
+    # parametric() do
+    if streaming:
+        for drone in drones:
+            drone.cf.notifySetpointsStop()
+            drone.cf.goTo(transform(drone.start, drone.position), 0, 2.0)
+
+
+def negate(groupState, command):
+    """Runs command mirrored through where each crazyflie starts (2 * start - position), like NegateTrajectory"""
+    _replay(groupState, simCommand(groupState, command), lambda start, point: 2 * start - point)
+
+
+def _rotation_matrix(x_rot, y_rot, z_rot):
+    """Rotation by Euler angles in radians, in the simulator's order (three.js Euler 'XYZ': Rx Ry Rz)"""
+    cx, sx, cy, sy, cz, sz = np.cos(x_rot), np.sin(x_rot), np.cos(y_rot), np.sin(y_rot), np.cos(z_rot), np.sin(z_rot)
+    rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
+    ry = np.array([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]])
+    rz = np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]])
+    return rx @ ry @ rz
 
 
 def rotate(groupState, command, x_rot, y_rot, z_rot):
-    simGroupState = simCommand(groupState, command)
-    while x_rot > np.pi:
-        x_rot -= 2 * np.pi
-    while y_rot > np.pi:
-        y_rot -= 2 * np.pi
-    while z_rot > 2 * np.pi:
-        z_rot -= 2 * np.pi
-    r = R.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=False)
-
-    for simcf, cf in zip(simGroupState.crazyflies, groupState.crazyflies):
-        # try:
-        #     if not isinstance(cf, CrazyflieSimLogger):
-        #         rclpy.spin_once(cf.node)
-        # except Exception:
-        #     cf.node.get_logger().error(traceback.format_exc())
-        initialPosition = cf.position()
-        for i, command in enumerate(simcf.commands):
-            cfCommand = command.command
-            if cfCommand == "goTo" or cfCommand == "cmdPos":
-                if command.relative == False:
-                    originalDestination = command.position
-                    directionVector = np.array(originalDestination) - np.array(
-                        initialPosition
-                    )
-                    rotatedVector = r.apply(directionVector)
-                    # rotQuat = rowan.from_euler(x_rot, y_rot, z_rot, convention='xyz')
-                    # rotatedVector = rowan.rotate(rotQuat, directionVector)
-                    newDestination = rotatedVector + initialPosition
-                    simcf.commands[i].position = newDestination
-                else:
-                    originalDestination = command.position
-                    directionVector = np.array(originalDestination)
-                    # rotQuat = rowan.from_euler(x_rot, y_rot, z_rot, convention='xyz')
-                    # rotatedVector = rowan.rotate(rotQuat, directionVector)
-                    rotatedVector = r.apply(directionVector)
-                    newDestination = rotatedVector
-                    simcf.commands[i].position = newDestination
-            else:
-                # Just run the original command, no need to alter anything
-                pass
-    execute_commands(simGroupState, groupState)
+    """Runs command rotated around where each crazyflie starts, like RotationTrajectory"""
+    matrix = _rotation_matrix(x_rot, y_rot, z_rot)
+    _replay(groupState, simCommand(groupState, command), lambda start, point: start + matrix @ (point - start))
 
 
 def translate(groupState, command, x, y, z, speed=0.5):
-    """Runs command shifted by (x, y, z) meters.
+    """Runs command shifted by (x, y, z) meters, like TranslationTrajectory.
 
     The drones first fly to the shifted start in a straight line at `speed` m/s, so the shifted path doesn't begin
-    with a jump. The simulator does the same (TranslationTrajectory).
+    with a jump.
     """
-    simGroupState = simCommand(groupState, command)
+    recording = simCommand(groupState, command)
     offset = np.array([x, y, z], dtype=float)
     distance = float(np.linalg.norm(offset))
     if distance > 0:
@@ -409,146 +402,14 @@ def translate(groupState, command, x, y, z, speed=0.5):
         for cf in groupState.crazyflies:
             cf.goTo(np.array(_safe_cf_position(cf), dtype=float) + offset, 0, duration)
         groupState.timeHelper.sleep(duration)
-
-    for simcf in simGroupState.crazyflies:
-        for recorded in simcf.commands:
-            if recorded.command in ("goTo", "cmdPos") and not recorded.relative:
-                recorded.position = np.array(recorded.position, dtype=float) + offset
-    execute_commands(simGroupState, groupState)
-
-def stretchTrajectory(
-    groupState, command, x_stretch, y_stretch, z_stretch, time_stretch
-):
-    simGroupState = simCommand(groupState, command)
-    for simcf, cf in zip(simGroupState.crazyflies, groupState.crazyflies):
-        # try:
-        #     if not isinstance(cf, CrazyflieSimLogger):
-        #         rclpy.spin_once(cf.node)
-        # except Exception:
-        #     cf.node.get_logger().error(traceback.format_exc())
-        initialPosition = cf.position()
-        for i, command in enumerate(simcf.commands):
-            cfCommand = command.command
-            if (
-                cfCommand == "goTo"
-                or cfCommand == "cmdPos"
-                or cfCommand == "takeoff"
-                or cfCommand == "land"
-            ):
-                if command.relative == False:
-                    originalDestination = command.position
-                    directionVector = np.array(originalDestination) - np.array(
-                        initialPosition
-                    )
-                    stretchedVector = np.multiply(
-                        directionVector, (x_stretch, y_stretch, z_stretch)
-                    )  # directionVector.multiply(np.array((x_stretch, y_stretch, z_stretch)))
-                    newDestination = stretchedVector + initialPosition
-                    simcf.commands[i].position = newDestination
-                    simcf.commands[i].duration *= time_stretch
-                else:
-                    originalDestination = command.position
-                    directionVector = np.array(initialPosition) - np.array(
-                        originalDestination
-                    )
-                    newDestination = np.multiply(
-                        directionVector, (x_stretch, y_stretch, z_stretch)
-                    )
-                    simcf.commands[i].position = newDestination
-                    simcf.commands[i].duration *= time_stretch
-            else:
-                # Just run the original command, no need to alter anything
-                pass
-    execute_commands(simGroupState, groupState)
+    _replay(groupState, recording, lambda start, point: point + offset)
 
 
-def simCommand(originalGroupState, command):
-    simCrazyflies = []
-    for cf in originalGroupState.crazyflies:
-        # try:
-        #     if not isinstance(cf, CrazyflieSimLogger):
-        #         rclpy.spin_once(cf.node)
-        # except Exception:
-        #     cf.node.get_logger().error(traceback.format_exc())
-        simCrazyflies.append(CrazyflieSimLogger(_safe_cf_position(cf)))
-    simTimeHelper1 = TimeHelperSimLogger()
-    simTimeHelper1.currTime = originalGroupState.timeHelper.time()
-    simGroupState = SimpleNamespace(crazyflies=simCrazyflies, timeHelper=simTimeHelper1)
-    # Execute Simulated Commands
-    command(simGroupState)
-
-    # Reset position
-    for cf in simGroupState.crazyflies:
-        cf.currPosition = cf.initialPosition
-
-    setStartTimes(simGroupState)
-    return simGroupState
-
-
-def _recorded_path(simCF, start):
-    """A stand-in crazyflie's recorded commands (see simCommand) as one path, like a simulator Trajectory: its duration
-    and its position at any time. Go-tos, takeoffs and landings follow the same degree 7 polynomial as the firmware and
-    the simulator (robotGoTo); each streamed position is held for its step."""
-    segments = []
-    position = np.array(start, dtype=float)
-    elapsed = 0.0
-    for command in simCF.commands:
-        if command.command == "goTo":
-            goal = np.array(command.position, dtype=float) + (position if command.relative else 0)
-        elif command.command in ("takeoff", "land"):
-            goal = np.array([position[0], position[1], command.height], dtype=float)
-        elif command.command == "cmdPos":
-            goal = np.array(command.position, dtype=float)
-        else:
-            continue  # LED changes and mode switches don't move the drone
-        if command.duration > 0:
-            if command.command == "cmdPos":
-                segments.append((elapsed, command.duration, lambda t, goal=goal: goal))
-            else:
-                polynomials = [goToPolynomial(command.duration, p, 0, 0, g, 0, 0) for p, g in zip(position, goal)]
-                segments.append((elapsed, command.duration, lambda t, fs=polynomials: np.array([f(t) for f in fs])))
-            elapsed += command.duration
-        position = goal
-
-    def position_at(t):
-        for segment_start, duration, segment in segments:
-            if t < segment_start + duration:
-                return segment(t - segment_start)
-        return position
-
-    return elapsed, position_at
-
-
-def addTrajectories(groupState, command1, command2, add=True):
-    """Flies command1 and command2 at the same time, adding up their movements, or subtracting command2's when add is
-    False. Mirrors the simulator's AddTrajectories (trajectories.ts): start + movement of 1 +/- movement of 2, with the
-    shorter one stretched to last as long as the longer one. Streams positions like parametric(), then hands control
-    back to the high-level commander and holds the end."""
-    crazyflies = groupState.crazyflies
-    timeHelper = groupState.timeHelper
-    starts = [np.array(_safe_cf_position(cf), dtype=float) for cf in crazyflies]
-    paths1 = [_recorded_path(simCF, start) for simCF, start in zip(simCommand(groupState, command1).crazyflies, starts)]
-    paths2 = [_recorded_path(simCF, start) for simCF, start in zip(simCommand(groupState, command2).crazyflies, starts)]
-    duration = max([path_duration for path_duration, _ in paths1 + paths2], default=0.0)
-    if duration <= 0:
-        return
-    sign = 1 if add else -1
-
-    def position_at(start, path1, path2, fraction):
-        (duration1, at1), (duration2, at2) = path1, path2
-        return start + (at1(fraction * duration1) - start) + sign * (at2(fraction * duration2) - start)
-
-    drones = list(zip(crazyflies, starts, paths1, paths2))
-    # Counted in whole steps: np.arange can add a step through rounding (12.6 / 0.05 = 252.00000000000003)
-    for step in range(int(np.ceil(duration * Hz - 1e-9))):
-        for cf, start, path1, path2 in drones:
-            cf.cmdPosition(position_at(start, path1, path2, step / Hz / duration))
-        timeHelper.sleepForRate(Hz)
-    for cf, start, path1, path2 in drones:
-        end = position_at(start, path1, path2, 1.0)
-        cf.cmdPosition(end)
-        cf.notifySetpointsStop()
-        cf.goTo(end, 0, 2.0)
+def stretchTrajectory(groupState, command, x_stretch, y_stretch, z_stretch, time_stretch):
+    """Runs command stretched away from where each crazyflie starts and slowed down by time_stretch, like
+    StretchTrajectory"""
+    factors = np.array([x_stretch, y_stretch, z_stretch], dtype=float)
+    _replay(groupState, simCommand(groupState, command), lambda start, point: start + (point - start) * factors, time_stretch)
 
 
 def goToPolynomial(T, p, v, a, p2, v2, a2):
@@ -578,55 +439,92 @@ def goToPolynomial(T, p, v, a, p2, v2, a2):
     return lambda t: sum([poly[i] * t**i for i in range(len(poly))])
 
 
-def subtractTrajectories(groupState, command1, command2, add=False):
-    """Like addTrajectories, subtracting command2's movement. The block passes add=False; it's ignored."""
-    addTrajectories(groupState, command1, command2, add=False)
+def _recorded_path(recording, simCF):
+    """A recorded stand-in crazyflie (simCommand) as one path, like the simulator's SequenceTrajectory: its position at
+    any time since the recording began, and its LED changes as (time, color). Go-tos, takeoffs and landings follow the
+    same degree 7 polynomial as the firmware and the simulator (robotGoTo); a streamed position is held until the
+    next."""
+    segments = []
+    leds = []
+    start = np.array(simCF.initialPosition, dtype=float)
+    position = start
+    for command in simCF.commands:
+        at = command.startTime - recording.start
+        if command.command == "setLEDColor":
+            leds.append((at, command.color))
+            continue
+        if command.command == "goTo":
+            vector = np.array(command.position, dtype=float)
+            goal = position + vector if command.relative else vector
+        elif command.command in ("takeoff", "land"):
+            goal = np.array([position[0], position[1], command.height], dtype=float)
+        elif command.command == "cmdPos":
+            goal = np.array(command.position, dtype=float)
+        else:
+            continue
+        moving = None
+        if command.command != "cmdPos" and command.duration > 0:
+            fs = [goToPolynomial(command.duration, p, 0, 0, g, 0, 0) for p, g in zip(position, goal)]
+            moving = lambda t, fs=fs: np.array([f(t) for f in fs])
+        segments.append((at, command.duration, moving, goal))
+        position = goal
+
+    def position_at(t):
+        current = start
+        for segment_start, duration, moving, goal in segments:
+            if segment_start > t + 1e-9:
+                break
+            current = moving(t - segment_start) if moving is not None and t - segment_start < duration else goal
+        return current
+
+    return position_at, leds
 
 
-def execute_commands(simGroupState, originalGroupState):
-    # Note, assumes all crazyflies in group are issued similar commands (all are told goTo)
-    # Assumes first command is to be executed immediately
-    # If not the case, different groups should be used
-    commandsForSingleCF = simGroupState.crazyflies[0].commands
-    highLevel = True
-    for i, command in enumerate(commandsForSingleCF):
-        if highLevel and command.command == "cmdPos":
-            highLevel = False
-        if not highLevel and command.command != "cmdPos":
-            highLevel = True
-            # for realCF in originalGroupState.crazyflies:
-            #     realCF.notifySetpointsStop()
-            # realCF.goTo(realCF.position(), 0, 0.5)
-        for simCF, realCF in zip(
-            simGroupState.crazyflies, originalGroupState.crazyflies
-        ):
-            execute_single_command(simCF.commands[i], realCF)
-        originalGroupState.timeHelper.sleep(command.duration)
-    if not highLevel:
-        for realCF in originalGroupState.crazyflies:
-            realCF.notifySetpointsStop()
-        # originalGroupState.timeHelper.sleep(0.1)
-        for realCF in originalGroupState.crazyflies:
-            realCF.goTo(realCF.position(), 0, 2.00)
-            # realCF.setLEDColor(0, 0, 0.5)
-
-
-def execute_single_command(command, crazyflie):
-    if command.command == "goTo":
-        crazyflie.goTo(
-            command.position, command.yaw, command.duration, command.relative
+def addTrajectories(groupState, command1, command2, add=True):
+    """Flies command1 and command2 at the same time, adding up their movements, or subtracting command2's when add is
+    False. Mirrors the simulator's AddTrajectories (trajectories.ts): start + movement of 1 +/- movement of 2, with the
+    shorter one stretched to last as long as the longer one. LED changes come at their stretched times; at the same
+    moment, command2's wins. Streams positions like parametric(), then hands control back to the high-level commander
+    and holds the end."""
+    timeHelper = groupState.timeHelper
+    recording1, recording2 = simCommand(groupState, command1), simCommand(groupState, command2)
+    duration = max(recording1.duration, recording2.duration)
+    if duration <= 0:
+        return
+    sign = 1 if add else -1
+    stretched = lambda t, recording: t * duration / recording.duration if recording.duration > 0 else 0.0
+    drones = []
+    for cf, simCF1, simCF2 in zip(groupState.crazyflies, recording1.crazyflies, recording2.crazyflies):
+        path1, leds1 = _recorded_path(recording1, simCF1)
+        path2, leds2 = _recorded_path(recording2, simCF2)
+        # Sorted by time, then slot, so on the same moment the second slot's change is sent last and stays
+        leds = sorted(
+            [(stretched(t, recording1), 0, color) for t, color in leds1] + [(stretched(t, recording2), 1, color) for t, color in leds2],
+            key=lambda change: change[:2],
         )
-    elif command.command == "cmdPos":
-        # print(command.position)
-        crazyflie.cmdPosition(command.position)
-    elif command.command == "takeoff":
-        crazyflie.takeoff(command.height, command.duration)
-    elif command.command == "land":
-        crazyflie.land(command.height, command.duration)
-    elif command.command == "setLEDColor":
-        crazyflie.setLEDColor(*command.color)
-    elif command.command == "position":
-        pass
-    elif command.command == "notifySetpointsStop":
-        crazyflie.notifySetpointsStop()
-        pass
+        drones.append(SimpleNamespace(cf=cf, start=np.array(simCF1.initialPosition, dtype=float), path1=path1, path2=path2, leds=leds))
+
+    def position_at(drone, fraction):
+        return drone.start + (drone.path1(fraction * recording1.duration) - drone.start) + sign * (drone.path2(fraction * recording2.duration) - drone.start)
+
+    def send_leds(drone, until):
+        while drone.leds and drone.leds[0][0] <= until + 1e-9:
+            drone.cf.setLEDColor(*drone.leds.pop(0)[2])
+
+    # Counted in whole steps: np.arange can add a step through rounding (12.6 / 0.05 = 252.00000000000003)
+    for step in range(int(np.ceil(duration * Hz - 1e-9))):
+        for drone in drones:
+            send_leds(drone, step / Hz)
+            drone.cf.cmdPosition(position_at(drone, step / Hz / duration))
+        timeHelper.sleepForRate(Hz)
+    for drone in drones:
+        send_leds(drone, duration)
+        end = position_at(drone, 1.0)
+        drone.cf.cmdPosition(end)
+        drone.cf.notifySetpointsStop()
+        drone.cf.goTo(end, 0, 2.0)
+
+
+def subtractTrajectories(groupState, command1, command2, add=False):
+    """Like addTrajectories, subtracting command2's movement. Saved projects pass add=False; it's ignored."""
+    addTrajectories(groupState, command1, command2, add=False)

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from rclpy.node import Node
 import string 
 import random
+import numpy as np
 
 Hz = 20
 
@@ -33,38 +34,30 @@ def generate_id():
     """    
     return ''.join(random.choice(string.ascii_lowercase) for _ in range(5))
 
-def setStartTimes(groupState):
-    """Set the appropriate start times for every command a simulated crazyflie ran (with a simulated timeHelper)
-
-    Args:
-        groupState : current (simulated) groupState (crazyflies and timehelper)
-    """    
-    # Takes simCF and simTimeHelper and adds start time to cf commands
-    simTimeHelper = groupState.timeHelper
-    simCFs = groupState.crazyflies
-
-    assert([len(cf.commands) == len(simTimeHelper.times) for cf in simCFs])
-
-    for cf in simCFs:
-        for (command, time) in zip(cf.commands, simTimeHelper.times):
-            command.startTime = time
-
 class CrazyflieSimLogger:
     """ 
     Crazyflie Logging class used instead of a standard Crazyflie object
     when commands should *not* be executed. For example, when all commands
-    will be rotated or negated.
+    will be rotated or negated. Each command is stamped with the time on the stand-in clock when it was sent, and the
+    logger keeps track of where the commands so far take it (assuming each one finishes).
     """    
     
-    def __init__(self, initial_position):
+    def __init__(self, initial_position, clock=None):
         """
         Args:
             initial_position [float, float ,float]: starting position of Crazyflie at time of construction
+            clock (TimeHelperSimLogger, optional): the stand-in clock the commands are stamped with
         """        
         self.node = Node('logger' + generate_id())
         self.commands = []
-        self.initialPosition = initial_position
-        self.currPosition = initial_position
+        self.clock = clock
+        # Copies: takeoff and land used to change the caller's position in place
+        self.initialPosition = np.array(initial_position, dtype=float)
+        self.currPosition = self.initialPosition.copy()
+
+    def _record(self, command):
+        command.startTime = self.clock.time() if self.clock is not None else 0.0
+        self.commands.append(command)
 
     def goTo(self, pos, yaw, duration, relative=False):
         """Simulate a goTo command
@@ -76,8 +69,9 @@ class CrazyflieSimLogger:
             relative (bool, optional): Whether pos and yaw are relative to the starting position. Defaults to False.
         """
         goToCommand = Command(command='goTo', position=pos, yaw=yaw, relative=relative, duration=duration)
-        self.commands.append(goToCommand)
-        self.currPosition = pos
+        self._record(goToCommand)
+        # A relative move's pos is a vector from where it is
+        self.currPosition = self.currPosition + np.array(pos, dtype=float) if relative else np.array(pos, dtype=float)
     
     def cmdPosition(self, pos):
         """Simulate cmdPos (low level command)
@@ -86,8 +80,8 @@ class CrazyflieSimLogger:
             pos [float, float, float]: desired position
         """        
         cmdPosCommand = Command(command='cmdPos', position=pos, duration=1/Hz)
-        self.commands.append(cmdPosCommand)
-        self.currPosition = pos
+        self._record(cmdPosCommand)
+        self.currPosition = np.array(pos, dtype=float)
     
     def setLEDColor(self, r, g, b):
         """Simulate setLEDColor 
@@ -100,7 +94,7 @@ class CrazyflieSimLogger:
             b float: blue
         """        
         colorCommand = Command(command='setLEDColor', color=(r, g, b))
-        self.currPosition.append(colorCommand)
+        self._record(colorCommand)
     
     def takeoff(self, height, duration):
         """Simulate takeoff command
@@ -110,8 +104,8 @@ class CrazyflieSimLogger:
             duration float: duration of command
         """        
         takeoffCommand = Command(command='takeoff', height=height, duration=duration)
-        self.commands.append(takeoffCommand)
-        self.currPosition[2] = height # Just set Z to height
+        self._record(takeoffCommand)
+        self.currPosition = np.array([self.currPosition[0], self.currPosition[1], height], dtype=float)
 
     def land(self, height, duration):
         """Simulate land command
@@ -121,8 +115,8 @@ class CrazyflieSimLogger:
             duration float: duration of command
         """
         landCommand = Command(command='land', height=height, duration=duration)
-        self.commands.append(landCommand)
-        self.currPosition[2] = height
+        self._record(landCommand)
+        self.currPosition = np.array([self.currPosition[0], self.currPosition[1], height], dtype=float)
 
     def position(self):
         """get Position
@@ -130,13 +124,13 @@ class CrazyflieSimLogger:
         Returns:
             [float, float, float]: current position
         """        
-        return self.currPosition
+        return self.currPosition.copy()
 
     def notifySetpointsStop(self):
         """Switch to high level mode
         """        
         # Just check mode in Evaluate phase
-        self.commands.append(Command(command='notifySetpointsStop'))
+        self._record(Command(command='notifySetpointsStop'))
 
 class TimeHelperSimLogger:
     """A simulated timer class to go with CrazyflieSimLogger

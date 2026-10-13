@@ -1,4 +1,5 @@
 import {type RobartBlockDefinition} from '../BlockDefinition';
+import {slotFunction, slotSequence} from './slots';
 import * as Blockly from 'blockly';
 
 export const blockTranslateTrajectory: RobartBlockDefinition = {
@@ -23,17 +24,15 @@ export const blockTranslateTrajectory: RobartBlockDefinition = {
 		},
 	},
 	pythonGenerator: (block, python) => {
-		const originalTraj = python.statementToCode(block, 'originalTraj').trim();
 		const x = block.getFieldValue('x') as number;
 		const y = block.getFieldValue('y') as number;
 		const z = block.getFieldValue('z') as number;
-		return `translate(groupState, lambda groupState: ${originalTraj}, ${x}, ${y}, ${z})\n`;
+		return `${slotFunction(block, python, 'originalTraj', '_body')}translate(groupState, _body, ${x}, ${y}, ${z})\n`;
 	},
 	javascriptGenerator: (block, js) => {
-		const originalTraj = js.statementToCode(block, 'originalTraj').trim();
 		const x = block.getFieldValue('x') as number;
 		const y = block.getFieldValue('y') as number;
 		const z = block.getFieldValue('z') as number;
-		return `simulator.translateTrajectory(groupState, ${originalTraj}, ${x}, ${y}, ${z})\n`;
+		return `simulator.translateTrajectory(groupState, ${slotSequence(block, js, 'originalTraj')}, ${x}, ${y}, ${z})\n`;
 	},
 };

@@ -4,12 +4,22 @@ import Sandbox from '@nyariv/sandboxjs';
 // The browser build exports the class directly; the Node build (used by checks/) puts it on .default
 const SandboxClass: typeof Sandbox = (Sandbox as unknown as {default?: typeof Sandbox}).default ?? Sandbox;
 
+// An LED color change at a point along a trajectory (t from 0 to 1, like evaluate)
+export type ColorChange = {t: number; color: THREE.Color};
+
 export abstract class Trajectory {
 	constructor(public duration: number) {
 		this.duration = duration;
 	}
 
 	abstract evaluate(t: number): THREE.Vector3;
+
+	// The most recent LED color change at or before t, if any. The simulator applies it as the trajectory plays, so a
+	// color change happens when a trajectory reaches it, also inside a modifier.
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	lastColor(t: number): ColorChange | undefined {
+		return undefined;
+	}
 }
 
 // export class TrajectoryWrapper extends Trajectory {
@@ -46,14 +56,73 @@ export class NullTrajectory extends Trajectory {
 
 export class Hover extends Trajectory {
 	position: THREE.Vector3;
-	constructor(position: THREE.Vector3, duration = 0.1) {
+	// Set for an LED color change (setColor), which hovers while it happens
+	color?: THREE.Color;
+	constructor(position: THREE.Vector3, duration = 0.1, color?: THREE.Color) {
 		super(duration);
 		this.position = position;
+		this.color = color;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	evaluate(_t: number): THREE.Vector3 {
 		return this.position;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	lastColor(_t: number): ColorChange | undefined {
+		return this.color && {t: 0, color: this.color};
+	}
+}
+
+/**
+ * Trajectories played one after another: a modifier's commands (sequence() in simulatorCommands.ts), each starting where
+ * the one before ends. Its length is theirs added up.
+ */
+export class SequenceTrajectory extends Trajectory {
+	pieces: Trajectory[];
+	// When each piece starts, in seconds
+	starts: number[];
+	start: THREE.Vector3;
+
+	constructor(pieces: Trajectory[], start: THREE.Vector3) {
+		const timed = pieces.filter((piece) => piece.duration > 0);
+		const starts: number[] = [];
+		let duration = 0;
+		timed.forEach((piece) => {
+			starts.push(duration);
+			duration += piece.duration;
+		});
+		super(duration);
+		this.pieces = timed;
+		this.starts = starts;
+		this.start = start.clone();
+	}
+
+	// The piece playing at t, and how far along it (0 to 1)
+	private pieceAt(t: number): {index: number; u: number} {
+		const elapsed = t * this.duration;
+		let index = 0;
+		while (index < this.pieces.length - 1 && elapsed >= this.starts[index + 1]) index += 1;
+		return {index, u: Math.min(1, Math.max(0, (elapsed - this.starts[index]) / this.pieces[index].duration))};
+	}
+
+	evaluate(t: number): THREE.Vector3 {
+		if (this.pieces.length === 0) return this.start.clone();
+		const {index, u} = this.pieceAt(t);
+		return this.pieces[index].evaluate(u);
+	}
+
+	lastColor(t: number): ColorChange | undefined {
+		if (this.pieces.length === 0) return undefined;
+		const {index, u} = this.pieceAt(t);
+		// The latest change in the piece playing, or else in the ones before it
+		for (let i = index; i >= 0; i--) {
+			const change = this.pieces[i].lastColor(i === index ? u : 1);
+			if (change) return {t: (this.starts[i] + (change.t * this.pieces[i].duration)) / this.duration, color: change.color};
+		}
+
+		return undefined;
 	}
 }
 
@@ -259,6 +328,11 @@ export class NegateTrajectory extends Trajectory {
 		const desiredPosition = initPos.multiplyScalar(2).sub(originalTrajectoryPosition);
 		return desiredPosition;
 	}
+
+	// Same timing as the original, so its color changes come at the same points
+	lastColor(t: number): ColorChange | undefined {
+		return this.originalTrajectory.lastColor(t);
+	}
 }
 
 export class AddTrajectories extends Trajectory {
@@ -285,6 +359,14 @@ export class AddTrajectories extends Trajectory {
 			return this.firstTrajectory.evaluate(t).sub(this.secondTrajectory.evaluate(t)).add(this.initPos); 
 		}
 	}
+
+	// Both play over the whole length, so their changes compare directly: the later one, or the second's on a tie
+	lastColor(t: number): ColorChange | undefined {
+		const first = this.firstTrajectory.lastColor(t);
+		const second = this.secondTrajectory.lastColor(t);
+		if (!first || !second) return second ?? first;
+		return second.t >= first.t ? second : first;
+	}
 }
 
 export class StretchTrajectory extends Trajectory {
@@ -309,6 +391,11 @@ export class StretchTrajectory extends Trajectory {
 		const newOffset = offset.multiply(this.positionStretch);
 		return newOffset.add(this.initialPosition);
 	}
+
+	// Same timing as the original, so its color changes come at the same points
+	lastColor(t: number): ColorChange | undefined {
+		return this.originalTrajectory.lastColor(t);
+	}
 }
 
 export class RotationTrajectory extends Trajectory {
@@ -327,6 +414,11 @@ export class RotationTrajectory extends Trajectory {
 
 	evaluate(t: number): THREE.Vector3 {
 		return this.originalTrajectory.evaluate(t).sub(this.initialPosition).applyEuler(this.rotationEuler).add(this.initialPosition);
+	}
+
+	// Same timing as the original, so its color changes come at the same points
+	lastColor(t: number): ColorChange | undefined {
+		return this.originalTrajectory.lastColor(t);
 	}
 }
 
@@ -355,14 +447,23 @@ export class TranslationTrajectory extends Trajectory {
 	evaluate(t: number): THREE.Vector3 {
 		const elapsed = t * this.duration;
 		if (elapsed < this.travelDuration) {
-			// Quintic ease in/out: starts and ends at rest
+			// The same degree 7 curve as a go-to (robotGoTo, and the firmware's goTo the exported Python sends)
 			const u = elapsed / this.travelDuration;
-			const ease = u * u * u * (10 - 15 * u + 6 * u * u);
+			const ease = u * u * u * u * (35 - (84 * u) + (70 * u * u) - (20 * u * u * u));
 			return this.initialPosition.clone().addScaledVector(this.offset, ease);
 		}
 
 		const originalDuration = this.originalTrajectory.duration;
 		const originalT = originalDuration > 0 ? Math.min(1, (elapsed - this.travelDuration) / originalDuration) : 1;
 		return this.originalTrajectory.evaluate(originalT).clone().add(this.offset);
+	}
+
+	// The original's color changes, after the travel to its shifted start
+	lastColor(t: number): ColorChange | undefined {
+		const elapsed = t * this.duration;
+		if (elapsed < this.travelDuration) return undefined;
+		const originalDuration = this.originalTrajectory.duration;
+		const change = this.originalTrajectory.lastColor(originalDuration > 0 ? Math.min(1, (elapsed - this.travelDuration) / originalDuration) : 1);
+		return change && {t: (this.travelDuration + (change.t * originalDuration)) / this.duration, color: change.color};
 	}
 }
