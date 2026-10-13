@@ -4,7 +4,7 @@ import {useRobartState} from '@MRAControl/state/useRobartState';
 import * as Blockly from 'blockly';
 import {ContinuousCategory, ContinuousFlyout, ContinuousToolbox, registerContinuousToolbox} from '@blockly/continuous-toolbox';
 import defaultTheme from 'tailwindcss/defaultTheme';
-import {inMultipleSelectionModeWeakMap, Multiselect} from '@mit-app-inventor/blockly-plugin-workspace-multiselect';
+import {dragSelectionWeakMap, inMultipleSelectionModeWeakMap, Multiselect} from '@mit-app-inventor/blockly-plugin-workspace-multiselect';
 import {javascriptGenerator} from 'blockly/javascript';
 import {pythonGenerator} from 'blockly/python';
 import React, {useEffect, useRef} from 'react';
@@ -85,8 +85,20 @@ type GestureInternals = {
 type GesturePrototype = GestureInternals & {
 	updateIsDragging: (this: GestureInternals, e: PointerEvent) => void;
 	setTargetBlock: (this: GestureInternals, block: Blockly.BlockSvg) => void;
+	handleRightClick: (this: GestureInternals, e: PointerEvent) => void;
 };
 const gesturePrototype = Blockly.Gesture.prototype as unknown as GesturePrototype;
+
+// Gives the block whose field was pressed the focus that setTargetBlock below held back, once the press turns out to be
+// more than a click on the field. Not when the block is in a multi-selection: the plugin has focused the whole selection
+// for this press, so that's what gets dragged or shows its menu.
+const focusFieldBlock = (gesture: GestureInternals) => {
+	const block = gesture.targetBlock;
+	if (!gesture.fieldPressUnselected || !block) return;
+	gesture.fieldPressUnselected = false;
+	if (!dragSelectionWeakMap.get(block.workspace)?.has(block.id)) Blockly.getFocusManager().focusNode(block);
+};
+
 const updateIsDragging = gesturePrototype.updateIsDragging;
 gesturePrototype.updateIsDragging = function (e) {
 	const onEmptySpace = !this.targetBlock && !this.startBubble && !this.startComment && !this.startIcon;
@@ -96,10 +108,7 @@ gesturePrototype.updateIsDragging = function (e) {
 	}
 
 	// A drag that starts on a field drags its block, which Blockly 13 does by dragging the selection: select it now
-	if (this.fieldPressUnselected && this.hasExceededDragRadius && this.targetBlock) {
-		this.fieldPressUnselected = false;
-		Blockly.getFocusManager().focusNode(this.targetBlock);
-	}
+	if (this.hasExceededDragRadius) focusFieldBlock(this);
 
 	updateIsDragging.call(this, e);
 };
@@ -117,6 +126,14 @@ gesturePrototype.setTargetBlock = function (block) {
 	}
 
 	setTargetBlock.call(this, block);
+};
+
+// A right-click (or a long press on a touch screen) shows the menu of whatever has focus, so on a field it showed the
+// previously selected block's menu
+const handleRightClick = gesturePrototype.handleRightClick;
+gesturePrototype.handleRightClick = function (e) {
+	focusFieldBlock(this);
+	handleRightClick.call(this, e);
 };
 
 // Space plays/pauses the simulation (TimelineSimulationButtons). Blockly also uses it, besides Enter, to act on the
