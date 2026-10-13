@@ -5,6 +5,7 @@ import React, {useRef, useState} from 'react';
 import {ConfirmationModal} from '@MRAControl/components/modal/ConfirmationModal';
 import {RenamableText} from '@MRAControl/components/utils/RenamableText';
 import {newBlockName} from './BlockEditorHeader';
+import {writesNoCode} from '../config/customBlocks/BlockDefinition';
 
 import {blockColor, type CodeBlock, useRobartState} from '../state/useRobartState';
 
@@ -134,7 +135,7 @@ export const BlockManagerPanel = () => {
 			>
 				{blocks.map((b) => {
 					// Empty blocks can't go on the timeline, so they look unfilled
-					const empty = b.javaScript.trim() === '';
+					const empty = writesNoCode(b.javaScript);
 					return (
 						<div
 							key={b.id}

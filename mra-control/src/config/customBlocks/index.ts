@@ -1,6 +1,6 @@
 import {pythonGenerator} from 'blockly/python';
 import {javascriptGenerator as js} from 'blockly/javascript';
-import {type BlocklyGenerator} from './BlockDefinition';
+import {type BlocklyGenerator, writesNoCode} from './BlockDefinition';
 import {blockCircle} from './curves/circle';
 import {blockCircleRadians} from './curves/circle';
 import {blockStop} from './motion/stop';
@@ -59,9 +59,9 @@ export const CUSTOM_BLOCKS = {
 // A command with an empty slot (a trajectory modifier or repeat with nothing inside) writes no code, so a block holding
 // only that counts as empty. Its code used to be a call with a missing argument, which the simulator skipped as an error,
 // yet the block looked filled, measured 0.1 s and could go on the timeline. A slot is empty when nothing in it writes
-// code: no blocks, or only ones that write none themselves, like an empty repeat (block comments don't count).
+// code: no blocks, or only ones that write none themselves, like an empty repeat.
 const hasEmptySlot = (b: Blockly.Block, generator: BlocklyGenerator) => b.inputList.some((input) => input instanceof Blockly.inputs.StatementInput
-	&& generator.statementToCode(b, input.name).split('\n').every((line) => /^\s*(\/\/.*|#.*)?$/.test(line)));
+	&& writesNoCode(generator.statementToCode(b, input.name)));
 
 Object.values(CUSTOM_BLOCKS).forEach((block) => {
 	Blockly.Blocks[block.name] = block.block;

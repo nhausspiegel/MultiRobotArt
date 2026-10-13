@@ -8,6 +8,7 @@ import * as Blockly from 'blockly';
 import {javascriptGenerator} from 'blockly/javascript';
 import {pythonGenerator} from 'blockly/python';
 import '@MRAControl/config/customBlocks';
+import {writesNoCode} from '@MRAControl/config/customBlocks/BlockDefinition';
 import {useSimulator} from '@MRAControl/state/useSimulator';
 
 // repeat 3 { take off, land }
@@ -56,5 +57,20 @@ addBlock.getInput('firstTrajectory')!.connection!.connect(add.newBlock('takeoff'
 assert.equal(javascriptGenerator.workspaceToCode(add).trim(), '');
 addBlock.getInput('secondTrajectory')!.connection!.connect(add.newBlock('land').previousConnection!);
 assert.match(javascriptGenerator.workspaceToCode(add), /^simulator\.addTrajectories\(/);
+
+// A block's comment is written as a comment line even when the block writes no code: a commented empty modifier, alone
+// or in a repeat, still leaves the block empty
+const commented = new Blockly.Workspace();
+const commentedNegate = commented.newBlock('negate');
+commentedNegate.setCommentText('a note');
+assert.ok(writesNoCode(javascriptGenerator.workspaceToCode(commented)));
+assert.ok(writesNoCode(pythonGenerator.workspaceToCode(commented)));
+const inRepeat = new Blockly.Workspace();
+const outerRepeat = inRepeat.newBlock('repeat');
+const innerNegate = inRepeat.newBlock('negate');
+innerNegate.setCommentText('a note');
+outerRepeat.getInput('body')!.connection!.connect(innerNegate.previousConnection!);
+assert.equal(javascriptGenerator.workspaceToCode(inRepeat).trim(), '');
+assert.equal(pythonGenerator.workspaceToCode(inRepeat).trim(), '');
 
 console.log('repeat ok');

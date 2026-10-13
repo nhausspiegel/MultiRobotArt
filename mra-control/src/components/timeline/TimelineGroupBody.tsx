@@ -11,6 +11,7 @@ import {lastItemEnd} from '../../layout/timeline/SimulationOptions';
 import {HoverTimelineBlock} from './HoverTimelineBlock';
 import {TimelineBlock, useItemDrag, useShowEnd} from './TimelineBlock';
 import {landingTime} from './placement';
+import {writesNoCode} from '../../config/customBlocks/BlockDefinition';
 import React from 'react';
 
 type TimelineGroupProps = {
@@ -104,7 +105,10 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 	const hasDrones = Object.keys(group.robots).length > 0;
 
 	// A block with nothing in it does nothing, so it isn't allowed on the timeline
-	const isEmptyBlock = (blockId: string | undefined) => blocks[blockId ?? '']?.javaScript.trim() === '';
+	const isEmptyBlock = (blockId: string | undefined) => {
+		const code = blocks[blockId ?? '']?.javaScript;
+		return code !== undefined && writesNoCode(code);
+	};
 
 	// Where a block from the block list is under the pointer: centered on it, but never starting before 0 (long blocks
 	// near the left edge would otherwise be refused)

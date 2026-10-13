@@ -32,3 +32,7 @@ export type RobartBlockDefinition = {
      */
 	javascriptGenerator: (block: Blockly.Block, js: BlocklyGenerator) => string;
 };
+
+// Whether generated code does nothing: blank, or only comments (Blockly writes a block's comment as a // or # line even
+// when the block itself writes no code). A block, or a slot, holding only such code counts as empty.
+export const writesNoCode = (code: string) => code.split('\n').every((line) => /^\s*(\/\/.*|#.*)?$/.test(line));
