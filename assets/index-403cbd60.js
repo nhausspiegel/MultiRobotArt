@@ -146927,6 +146927,12 @@ const HoverTimelineBlock = ({ scale, startTime, cannotDrop }) => {
     }
   );
 };
+const blockOverlaps = (occupiedItems, startTime, duration2, id2) => startTime === void 0 || startTime < 0 || occupiedItems.some((item) => item !== void 0 && item.id !== id2 && item.startTime + item.duration > startTime + 1e-9 && startTime + duration2 > item.startTime + 1e-9);
+const landingTime = (occupiedItems, startTime, duration2, reach, id2) => {
+  if (!blockOverlaps(occupiedItems, startTime, duration2, id2))
+    return startTime;
+  return occupiedItems.filter((item) => item !== void 0 && item.id !== id2).flatMap((item) => [item.startTime + item.duration, item.startTime - duration2]).filter((candidate) => Math.abs(candidate - startTime) <= reach && !blockOverlaps(occupiedItems, candidate, duration2, id2)).sort((a2, b2) => Math.abs(a2 - startTime) - Math.abs(b2 - startTime))[0];
+};
 const pixelsPerSecond = 100;
 const roomAfterLastBlock = 30;
 const minTimelineLength = 120;
@@ -146950,18 +146956,7 @@ const convertSecondsToPixels = (duration2, scale) => {
 const timelineStartPadding = 12;
 const tickArea = `calc(100% - ${timelineStartPadding}px)`;
 const timeToX = (seconds, scale) => timelineStartPadding + convertSecondsToPixels(seconds, scale);
-const blockOverlaps = (occupiedItems, startTime, duration2, id2) => startTime === void 0 || startTime < 0 || occupiedItems.some((items) => {
-  if (items === void 0) {
-    return false;
-  }
-  const currItemStart = items.startTime;
-  const currItemEnd = items.startTime + items.duration;
-  const newBlockStart = startTime;
-  const newBlockEnd = startTime + duration2;
-  if (id2 !== void 0 && id2 === items.id)
-    return false;
-  return !(currItemEnd < newBlockStart || newBlockEnd < currItemStart);
-});
+const snapReach = (duration2, scale) => Math.max(duration2, convertPixelsToSeconds(2 * minItemWidth, scale));
 const laneOccupiedItems = (groups, laneId) => {
   var _a3, _b2;
   return laneId === allDronesGroupId ? Object.values(groups).flatMap((group) => Object.values(group.items)) : [...Object.values(((_a3 = groups[laneId]) == null ? void 0 : _a3.items) ?? {}), ...Object.values(((_b2 = groups[allDronesGroupId]) == null ? void 0 : _b2.items) ?? {})];
@@ -146992,7 +146987,8 @@ const TimelineGroupBody = ({ group }) => {
       if (blockId === void 0 || blocks[blockId] === void 0)
         return;
       const offsetX = clientX - laneBodyRef.current.getBoundingClientRect().left - timelineStartPadding;
-      return Math.max(0, convertPixelsToSeconds(offsetX, scale) - blocks[blockId].duration / 2);
+      const { duration: duration2 } = blocks[blockId];
+      return landingTime(occupiedItems, Math.max(0, convertPixelsToSeconds(offsetX, scale) - duration2 / 2), duration2, snapReach(duration2, scale));
     }
   };
   const handleDragOver = (e2) => {
@@ -147097,11 +147093,13 @@ const TimelineBlock = ({ item, scale }) => {
       var _a4;
       return (_a4 = element.dataset) == null ? void 0 : _a4.laneId;
     }).find(Boolean) ?? item.groupId;
-    const startTime = Math.max(0, item.startTime + convertPixelsToSeconds(mx, scale));
+    const underPointer = Math.max(0, item.startTime + convertPixelsToSeconds(mx, scale));
+    const landing = landingTime(laneOccupiedItems(groups, laneId), underPointer, item.duration, snapReach(item.duration, scale), item.id);
+    const startTime = landing ?? underPointer;
     const laneHasDrones = Object.keys(((_a3 = groups[laneId]) == null ? void 0 : _a3.robots) ?? {}).length > 0;
-    const valid = (laneId === item.groupId || laneHasDrones) && !blockOverlaps(laneOccupiedItems(groups, laneId), startTime, item.duration, item.id);
+    const valid = (laneId === item.groupId || laneHasDrones) && landing !== void 0;
     if (active) {
-      setDrag({ x: mx, y: my, valid });
+      setDrag({ x: convertSecondsToPixels(startTime - item.startTime, scale), y: my, valid });
       useItemDrag.setState({ drag: { itemId: item.id, laneId, startTime } });
       return;
     }
