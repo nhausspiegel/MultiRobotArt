@@ -248,7 +248,7 @@ export const BlockEditorPanel = () => {
 		// - a block without Shift: off, Blockly's own selecting and dragging (a drag on a selected group moves all of it)
 		// It's turned off again once each press is done with it, which keeps the selection: a box when it's released, a
 		// click on the background when Blockly reports the click, a Shift-click on a block when Blockly reports the
-		// selection change (after the plugin has handled it in multi-select).
+		// selection change (after the plugin has handled it in multi-select), or on release if none comes.
 		const svg = workspace.getParentSvg();
 		const editor = workspace.getInjectionDiv();
 		// Where a press on the background started, until it moves far enough to be a box: Blockly's own drag distance, so
@@ -256,6 +256,8 @@ export const BlockEditorPanel = () => {
 		let pressStart: {x: number; y: number} | undefined;
 		let boxPress = false;
 		let shiftBlockPress = false;
+		// A Shift-press on a block that was already selected, and where: released there, it's a click that takes it out
+		let shiftPressOnSelected: {id: string; x: number; y: number} | undefined;
 		const turnOn = () => {
 			if (!isOn()) controls.enableMultiselect(); // Enabling twice leaks a box-select instance
 		};
@@ -278,6 +280,7 @@ export const BlockEditorPanel = () => {
 			pressStart = undefined;
 			boxPress = false;
 			shiftBlockPress = false;
+			shiftPressOnSelected = undefined;
 			if (event.button !== 0 || !svg.contains(event.target as Node)) return;
 			const target = event.target as Element;
 			const onBackground = target.classList.contains('blocklyMainBackground');
@@ -292,7 +295,9 @@ export const BlockEditorPanel = () => {
 				turnOn();
 			} else if (onBlock && event.shiftKey) {
 				shiftBlockPress = true;
-				turnOn();
+				turnOn(); // Also adds a block that was selected on its own
+				const id = target.closest<SVGElement>('[data-id]')?.dataset.id;
+				if (id && controls.dragSelection.has(id)) shiftPressOnSelected = {id, x: event.clientX, y: event.clientY};
 			} else if (onBackground || onBlock) {
 				turnOff();
 			}
@@ -311,6 +316,24 @@ export const BlockEditorPanel = () => {
 			pressStart = undefined;
 			// A box is done (a click waits for Blockly's click, below)
 			if (boxPress && boxStarted) turnOff();
+
+			// A Shift-click on a block, once Blockly is done with it: takes the block out if it was already selected (the box
+			// select only adds), and ends multi-select if Blockly reported no selection change (none comes for a block that
+			// was already selected on its own)
+			if (!shiftBlockPress && !shiftPressOnSelected) return;
+			const press = shiftPressOnSelected;
+			const takeOut = press && Math.hypot(event.clientX - press.x, event.clientY - press.y) <= Blockly.config.dragRadius
+				? workspace.getBlockById(press.id) : null;
+			shiftBlockPress = false;
+			shiftPressOnSelected = undefined;
+			setTimeout(() => {
+				if (takeOut && controls.dragSelection.has(takeOut.id)) {
+					turnOn();
+					controls.updateDraggables_(takeOut);
+				}
+
+				turnOff();
+			}, 0);
 		};
 		const onWorkspaceEvent = (event: Blockly.Events.Abstract) => {
 			// After the plugin's own listener has seen the selection change (it was added first); once the whole batch of
