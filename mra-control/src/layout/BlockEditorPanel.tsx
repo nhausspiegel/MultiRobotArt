@@ -217,6 +217,9 @@ export const BlockEditorPanel = () => {
 		const clearSelection = () => {
 			controls.multiDraggable.clearAll_(); // Also unhighlights them
 			controls.dragSelection.clear();
+			// The plugin remembers the last block selected on its own, and adds it back when multi-select reports a selection
+			// change: after a click away from one selected block, it flickered back before the click cleared it
+			controls.lastSelectedElement_ = null;
 			// Deselects a single selected block, the way the plugin does (selection follows focus in Blockly 13)
 			const focusTarget = workspace.getWorkspaceFocusTarget();
 			if (focusTarget) Blockly.getFocusManager().focusNode(focusTarget);
