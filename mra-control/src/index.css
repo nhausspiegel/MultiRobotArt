@@ -96,3 +96,14 @@ body .blocklyTooltipDiv {
 .injectionDiv .blocklyPathSelected {
   fill: none;
 }
+
+/* Shift-drag on the editor's background pans (a plain drag box-selects): a hand while Shift is held, closed while
+   panning. Classes set in BlockEditorPanel. */
+.injectionDiv.shiftPan .blocklyMainBackground {
+  cursor: grab;
+}
+
+.injectionDiv.shiftPanning,
+.injectionDiv.shiftPanning * {
+  cursor: grabbing !important;
+}

@@ -157,6 +157,8 @@ export const BlockEditorPanel = () => {
 		});
 
 		const isOn = () => inMultipleSelectionModeWeakMap.get(workspace) === true;
+		// False while a press on the background hasn't moved yet: that's a click, not a box (see the box handlers below)
+		let boxStarted = true;
 
 		// Box select only adds. The plugin toggled every block the box touched, so blocks already selected (the one clicked
 		// before Shift, or ones from an earlier box) were deselected when the box passed over them. This reaches into the
@@ -175,6 +177,13 @@ export const BlockEditorPanel = () => {
 			dragSelect.PubSub.subscribers.elementselect = [(event: {item: Element}) => {
 				const block = blockOf(event);
 				if (!isOn() || !block || controls.dragSelection.has(block.id)) return;
+				// The box touches blocks by their bounding boxes, which take in the gap inside a C-shaped block and corners
+				// outside its outline, so a click there picked the block. Until the press moves it's a click: let the box drop
+				// the block (unreported), and it finds it again once it's really drawn.
+				if (!boxStarted) {
+					dragSelect.removeSelection(event.item);
+					return;
+				}
 				addedByBox.add(block.id);
 				controls.updateDraggables_(block);
 			}];
@@ -201,8 +210,11 @@ export const BlockEditorPanel = () => {
 		// A press that turned it on turns it off afterwards, which keeps the selection. Not right away: Blockly reports the
 		// click a frame and a timer later, and the plugin must still be in multi-select then.
 		const svg = workspace.getParentSvg();
+		const editor = workspace.getInjectionDiv();
 		let presses = 0;
 		let turnedOn = false;
+		// Where a press on the background started, until it moves far enough to be a box
+		let pressStart: {x: number; y: number} | undefined;
 		const turnOn = () => {
 			if (isOn()) return; // Enabling twice leaks a box-select instance
 			controls.enableMultiselect();
@@ -214,11 +226,16 @@ export const BlockEditorPanel = () => {
 		};
 		const onPointerDown = (event: PointerEvent) => {
 			presses += 1;
+			boxStarted = true;
+			pressStart = undefined;
 			if (event.button !== 0 || !svg.contains(event.target as Node)) return;
 			const target = event.target as Element;
 			const onBackground = target.classList.contains('blocklyMainBackground');
 			const onBlock = !onBackground && target.closest('.blocklyDraggable') !== null;
+			if (onBackground && event.shiftKey) editor.classList.add('shiftPanning');
 			if (onBackground && !event.shiftKey) {
+				boxStarted = false;
+				pressStart = {x: event.clientX, y: event.clientY};
 				// A new box: the old selection goes (enabling would otherwise add the selected block to it)
 				controls.multiDraggable.clearAll_();
 				controls.dragSelection.clear();
@@ -232,23 +249,56 @@ export const BlockEditorPanel = () => {
 				turnOff();
 			}
 		};
+		// Capturing, so the box handlers above see a press as started on the move that starts it
+		const onPointerMove = (event: PointerEvent) => {
+			if (pressStart && Math.hypot(event.clientX - pressStart.x, event.clientY - pressStart.y) > 4) {
+				boxStarted = true;
+				pressStart = undefined;
+			}
+		};
 		const onPointerUp = () => {
+			editor.classList.remove('shiftPanning');
 			if (!turnedOn) return;
 			const press = presses;
+			// A press on the background that never moved: a click, which clears the selection
+			const click = !boxStarted;
 			// After Blockly's events (requestAnimationFrame, then a timer), unless another press has started since
 			requestAnimationFrame(() => setTimeout(() => {
-				if (press === presses && turnedOn) turnOff();
+				if (press !== presses || !turnedOn) return;
+				turnOff();
+				if (!click) return;
+				// Again, after Blockly and the plugin have handled the click in multi-select (which can bring a block back)
+				controls.multiDraggable.clearAll_();
+				controls.dragSelection.clear();
+				const focusTarget = workspace.getWorkspaceFocusTarget();
+				if (focusTarget) Blockly.getFocusManager().focusNode(focusTarget);
 			}, 0));
 		};
+		// Shift pans the background: an open hand while it's held, a closed one while panning (index.css)
+		const onShift = (event: KeyboardEvent | PointerEvent) => {
+			if (!(event instanceof KeyboardEvent) || event.key === 'Shift') editor.classList.toggle('shiftPan', event.shiftKey);
+		};
+		const onWindowBlur = () => {
+			editor.classList.remove('shiftPan', 'shiftPanning');
+		};
 		// Capturing: before Blockly and the plugin's box start handling the same press
-		const editor = workspace.getInjectionDiv();
 		editor.addEventListener('pointerdown', onPointerDown, true);
+		editor.addEventListener('pointermove', onShift);
+		window.addEventListener('pointermove', onPointerMove, true);
 		window.addEventListener('pointerup', onPointerUp);
 		window.addEventListener('pointercancel', onPointerUp);
+		window.addEventListener('keydown', onShift);
+		window.addEventListener('keyup', onShift);
+		window.addEventListener('blur', onWindowBlur);
 		return () => {
 			editor.removeEventListener('pointerdown', onPointerDown, true);
+			editor.removeEventListener('pointermove', onShift);
+			window.removeEventListener('pointermove', onPointerMove, true);
 			window.removeEventListener('pointerup', onPointerUp);
 			window.removeEventListener('pointercancel', onPointerUp);
+			window.removeEventListener('keydown', onShift);
+			window.removeEventListener('keyup', onShift);
+			window.removeEventListener('blur', onWindowBlur);
 			workspace.removeChangeListener(onWorkspaceClick);
 			multiselect.dispose();
 		};
