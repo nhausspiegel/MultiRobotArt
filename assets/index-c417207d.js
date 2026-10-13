@@ -42577,7 +42577,7 @@ const blockNegate = {
   block: {
     init: function() {
       this.appendDummyInput().appendField("negate trajectory");
-      this.appendStatementInput("originalTraj").appendField("trajectory:");
+      this.appendStatementInput("originalTraj");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42598,9 +42598,10 @@ const blockAddTrajectories = {
   name: "addTrajectories",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("add trajectories");
-      this.appendStatementInput("firstTrajectory").appendField("first trajectory:");
-      this.appendStatementInput("secondTrajectory").appendField("second trajectory:");
+      this.appendDummyInput().appendField("add trajectory");
+      this.appendStatementInput("firstTrajectory");
+      this.appendDummyInput().appendField("to trajectory");
+      this.appendStatementInput("secondTrajectory");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42621,9 +42622,10 @@ const blockSubtractTrajectories = {
   name: "subtractTrajectories",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("subtract trajectories");
-      this.appendStatementInput("firstTrajectory").appendField("first trajectory:");
-      this.appendStatementInput("secondTrajectory").appendField("second trajectory:");
+      this.appendDummyInput().appendField("from trajectory");
+      this.appendStatementInput("firstTrajectory");
+      this.appendDummyInput().appendField("subtract trajectory");
+      this.appendStatementInput("secondTrajectory");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42645,7 +42647,7 @@ const blockStretchTrajectories = {
   block: {
     init: function() {
       this.appendDummyInput().appendField("stretch trajectory by").appendField("x: ").appendField(new FieldNumber(1, 0), "x").appendField(" y: ").appendField(new FieldNumber(1, 0), "y").appendField(" z: ").appendField(new FieldNumber(1, 0), "z").appendField(" time: ").appendField(new FieldNumber(1, 0), "t");
-      this.appendStatementInput("originalTraj").appendField("trajectory:");
+      this.appendStatementInput("originalTraj");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42675,7 +42677,7 @@ const blockRotateTrajectoryDegrees = {
   block: {
     init: function() {
       this.appendDummyInput().appendField("rotate trajectory by").appendField("x: ").appendField(new FieldNumber(0), "x").appendField(" y: ").appendField(new FieldNumber(0), "y").appendField(" z: ").appendField(new FieldNumber(0), "z").appendField("degrees");
-      this.appendStatementInput("originalTraj").appendField("trajectory:");
+      this.appendStatementInput("originalTraj");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42703,7 +42705,7 @@ const blockRotateTrajectoryRadians = {
   block: {
     init: function() {
       this.appendDummyInput().appendField("rotate trajectory by").appendField("x: ").appendField(new FieldNumber(0), "x").appendField(" y: ").appendField(new FieldNumber(0), "y").appendField(" z: ").appendField(new FieldNumber(0), "z").appendField("radians");
-      this.appendStatementInput("originalTraj").appendField("trajectory:");
+      this.appendStatementInput("originalTraj");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
@@ -42731,7 +42733,7 @@ const blockTranslateTrajectory = {
   block: {
     init: function() {
       this.appendDummyInput().appendField("translate trajectory by").appendField("x: ").appendField(new FieldNumber(0), "x").appendField(" y: ").appendField(new FieldNumber(0), "y").appendField(" z: ").appendField(new FieldNumber(0), "z");
-      this.appendStatementInput("originalTraj").appendField("trajectory:");
+      this.appendStatementInput("originalTraj");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(90);
