@@ -64,9 +64,10 @@ export class Hover extends Trajectory {
 		this.color = color;
 	}
 
+	// A copy: stretch, rotate and add change the position they're given in place
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	evaluate(_t: number): THREE.Vector3 {
-		return this.position;
+		return this.position.clone();
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars

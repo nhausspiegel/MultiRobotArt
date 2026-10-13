@@ -26,20 +26,27 @@ import blocklyTranslations  # noqa: E402
 
 
 class FakeClock:
+    """Reads like the real clock, in seconds since 1970: at that size a float only resolves about 0.0000002 s, which
+    exported code has to cope with (time differences come out slightly off). The waits themselves are added up
+    exactly, and that's what's logged."""
+
+    start = 1760000000.123
+
     def __init__(self):
-        self.now = 0.0
+        self.elapsed = 0.0
 
     def time(self):
-        return self.now
+        return self.start + self.elapsed
 
     def sleep(self, duration):
-        self.now += duration
+        self.elapsed += duration
 
     def sleepForRate(self, rate):
-        self.now += 1 / rate
+        self.elapsed += 1 / rate
 
     def sleepUntil(self, time):
-        self.now = max(self.now, time)
+        # Like TimeHelper.sleepUntil: a time since the show started
+        self.elapsed = max(self.elapsed, time)
 
 
 class FakeCrazyflie:
@@ -49,7 +56,7 @@ class FakeCrazyflie:
         self.log = []
 
     def record(self, command, **details):
-        self.log.append({"t": round(self.clock.now, 6), "command": command, **details})
+        self.log.append({"t": round(self.clock.elapsed, 6), "command": command, **details})
 
     def position(self):
         return self.pos.copy()
@@ -81,4 +88,4 @@ clock = FakeClock()
 drone = FakeCrazyflie(clock, json.loads(sys.argv[1]) if len(sys.argv) > 1 else [0, 0, 0])
 names = {name: value for name, value in vars(blocklyTranslations).items() if not name.startswith("_")}
 exec(sys.stdin.read(), {**names, "groupState": SimpleNamespace(crazyflies=[drone], timeHelper=clock)})
-print(json.dumps({"log": drone.log, "end": round(clock.now, 6)}))
+print(json.dumps({"log": drone.log, "end": round(clock.elapsed, 6)}))

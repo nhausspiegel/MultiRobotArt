@@ -15,7 +15,7 @@ import * as SIM from '@MRAControl/state/simulatorCommands';
 import {type Trajectory} from '@MRAControl/state/trajectories';
 import {useSimulator} from '@MRAControl/state/useSimulator';
 
-type BlockJson = {type: string; fields?: Record<string, number | string>; inputs?: Record<string, {block: BlockJson}>; next?: {block: BlockJson}};
+type BlockJson = {type: string; fields?: Record<string, number | string>; inputs?: Record<string, {block: BlockJson}>; next?: {block: BlockJson}; icons?: Record<string, unknown>};
 type Sent = {t: number; command: string; pos?: number[]; duration?: number; height?: number; color?: number[]};
 
 // Blocks one after another
@@ -32,7 +32,8 @@ const codeOf = (block: BlockJson): Code => {
 
 // Python run on a fake drone starting at `start`
 const flyCode = (python: string, start = [0, 0, 0]) => {
-	const output = execFileSync('python3', ['-I', 'checks/fake_drones.py', JSON.stringify(start)], {input: python, encoding: 'utf8'});
+	// A hang (e.g. a loop that stops advancing the clock) fails the check instead of stalling it
+	const output = execFileSync('python3', ['-I', 'checks/fake_drones.py', JSON.stringify(start)], {input: python, encoding: 'utf8', timeout: 30_000});
 	// The last line: commands may print along the way
 	return {code: python, ...(JSON.parse(output.trim().split('\n').pop()!) as {log: Sent[]; end: number})};
 };
@@ -62,34 +63,54 @@ const goToCurve = (from: number[], to: number[], u: number) => {
 	return from.map((v, i) => v + ((to[i] - v) * ease));
 };
 
+// Where the drone was told to be at any time, from what it was sent: a go-to (takeoff, land) follows the go-to curve from
+// where it was until the next command, and a streamed position holds until the next one
+const toldPath = (log: Sent[], start: number[]) => {
+	const segments: Array<{t: number; from: number[]; to: number[]; duration: number; streamed: boolean}> = [];
+	const last = (t: number) => segments.filter((segment) => segment.t <= t + 1e-9).pop();
+	const at = (t: number): number[] => {
+		const segment = last(t);
+		if (!segment) return start;
+		if (segment.streamed) return segment.to;
+		return goToCurve(segment.from, segment.to, segment.duration > 0 ? Math.min(1, (t - segment.t) / segment.duration) : 1);
+	};
+
+	for (const sent of log) {
+		if (!['cmdPosition', 'goTo', 'takeoff', 'land'].includes(sent.command)) continue;
+		const from = at(sent.t);
+		const to = sent.command === 'cmdPosition' ? sent.pos!
+			: sent.command !== 'goTo' ? [from[0], from[1], sent.height!]
+				: sent.relative ? from.map((v, i) => v + sent.pos![i]) : sent.pos!;
+		segments.push({t: sent.t, from, to, duration: sent.duration ?? 0, streamed: sent.command === 'cmdPosition'});
+	}
+
+	return {at, streamingAt: (t: number) => last(t)?.streamed === true};
+};
+
 // What the exported Python tells the drone is what the simulator shows, within `tolerance` m:
-// - every streamed position is where the simulator has the drone at that moment
-// - every go-to (takeoff, land) follows the go-to curve to where the simulator is when it ends
+// - every streamed position is where the simulator has the drone when it's sent
+// - every 1/20 s, while the drone isn't streaming (going to a point or holding one), it's told to be where the simulator
+//   has it. (Between two streamed positions the drone is told the last one, so that's only compared when it's sent.)
 // - the LED changes are the simulator's, at the same times
 // - it takes as long as the simulator (within one 1/20 s step)
 const sameAsSimulator = ({python, javaScript}: Code, start: number[], tolerance: number) => {
 	const {log, end} = flyCode(python, start);
 	const {duration, at, colors} = simulateCode(javaScript, start);
-	const near = (sent: number[], t: number, what: string) => {
+	const told = toldPath(log, start);
+	const near = (position: number[], t: number, what: string) => {
 		const expected = at(t);
-		const off = Math.hypot(sent[0] - expected.x, sent[1] - expected.y, sent[2] - expected.z);
-		assert.ok(off < tolerance, `${python}${what} at ${t.toFixed(3)} s: ${sent.map((v) => v.toFixed(3))}, simulator ${expected.toArray().map((v) => v.toFixed(3))}`);
+		const off = Math.hypot(position[0] - expected.x, position[1] - expected.y, position[2] - expected.z);
+		assert.ok(off < tolerance, `${python}${what} at ${t.toFixed(3)} s: ${position.map((v) => v.toFixed(3))}, simulator ${expected.toArray().map((v) => v.toFixed(3))}`);
 	};
 
-	let position = start;
 	const sentColors = new Map<string, number[]>();
 	for (const sent of log) {
-		if (sent.command === 'cmdPosition') {
-			near(sent.pos!, sent.t, 'streamed position');
-			position = sent.pos!;
-		} else if (['goTo', 'takeoff', 'land'].includes(sent.command)) {
-			const target = sent.command !== 'goTo' ? [position[0], position[1], sent.height!]
-				: sent.relative ? position.map((v, i) => v + sent.pos![i]) : sent.pos!;
-			for (const u of [0.25, 0.5, 1]) near(goToCurve(position, target, u), sent.t + (u * sent.duration!), `${sent.command} ${u * 100}% in`);
-			position = target;
-		} else if (sent.command === 'setLEDColor') {
-			sentColors.set(sent.t.toFixed(3), sent.color!);
-		}
+		if (sent.command === 'cmdPosition') near(sent.pos!, sent.t, 'streamed position');
+		if (sent.command === 'setLEDColor') sentColors.set(sent.t.toFixed(3), sent.color!);
+	}
+
+	for (let t = 0; t <= Math.max(end, duration) + 1e-9; t += 0.05) {
+		if (!told.streamingAt(t)) near(told.at(t), t, 'told position');
 	}
 
 	assert.deepEqual([...sentColors], [...colors], `${python}LED changes ${JSON.stringify([...sentColors])}, simulator ${JSON.stringify([...colors])}`);
@@ -212,6 +233,25 @@ const land = {type: 'land', fields: {height: 0, duration: 2}};
 	// Both slots change the color at the same moment: the second slot's color stays
 	const clash = sameBlockAsSimulator(add([led('#ff0000'), move(1, 0, 0)], [led('#0000ff'), move(0, 1, 0)]), from, 1e-6);
 	assert.deepEqual(clash.log.filter((sent) => sent.command === 'setLEDColor').map((sent) => sent.color), [[255, 0, 0], [0, 0, 255]]);
+	// LED changes in add come at their own moment, not the next 1/20 s step (this one: 4.1 s stretched over 8 s, 7.805 s)
+	sameBlockAsSimulator(add([move(1, 0, 0), led('#ff0000')], [move(0, 2, 0)]), from, 1e-6);
+	sameBlockAsSimulator(add([led('#ff0000'), move(1, 0, 0)], [move(0, 1, 0), led('#0000ff')]), from, 1e-6);
+
+	// Hovers (and LED changes, which hover) inside modifiers that change positions in place: the drone holds still
+	sameBlockAsSimulator(stretch(2, 1, 1, 1, move(1, 0, 0), hover(1), move(0, 1, 0)), from, 1e-6);
+	sameBlockAsSimulator(rotate(0, 0, 90, move(1, 0, 0), hover(1), move(0, 1, 0)), from, 1e-6);
+	sameBlockAsSimulator(add([move(1, 0, 0), hover(4)], [move(0, 2, 0)]), from, 1e-6);
+	sameBlockAsSimulator({type: 'subtractTrajectories', inputs: {firstTrajectory: {block: stack(move(1, 0, 0), hover(2))}, secondTrajectory: {block: stretch(1, 1, 1, 2, move(0, 1, 0))}}}, from, 1e-6);
+
+	// An add inside another modifier: its loop runs on a stand-in clock, which once stopped advancing
+	sameBlockAsSimulator(negate(add([move(1, 0, 0)], [move(0, 1, 0)])), from, 1e-6);
+	// A slot whose blocks write no code (an empty repeat): the Python must still be valid
+	sameBlockAsSimulator(negate({type: 'repeat', fields: {times: 2}, inputs: {}}, move(1, 0, 0)), from, 1e-6);
+	const emptyBody = codeOf(negate({type: 'repeat', fields: {times: 2}, inputs: {}}));
+	assert.equal(emptyBody.python.includes('pass'), true, emptyBody.python);
+	flyCode(emptyBody.python, from);
+	// A comment on a block in a slot: the simulator still runs the slot
+	sameBlockAsSimulator(translate(1, 0, 0, {...move(1, 0, 0), icons: {comment: {text: 'a note', pinned: false, height: 80, width: 160}}} as BlockJson, move(0, 1, 0)), from, 1e-6);
 
 	// Projects saved before this keep their old code (one command, as a lambda), which must still run the same way
 	const old = (python: string, javaScript: string) => sameAsSimulator({python: `${python}\n`, javaScript}, from, 1e-6);

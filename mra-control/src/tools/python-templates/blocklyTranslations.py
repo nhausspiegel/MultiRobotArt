@@ -310,9 +310,10 @@ def parametric(groupState, x, y, z, start_t, end_t, duration):
 def simCommand(originalGroupState, command):
     """Runs command on stand-in crazyflies (CrazyflieSimLogger) that record what they're sent and when, instead of
     flying. Returns their group state, plus when the recording began and how long it lasts, waits included."""
+    # From 0: only times since the recording began matter, and the real clock's size (seconds since 1970) would cost
+    # precision
     clock = TimeHelperSimLogger()
-    clock.currTime = originalGroupState.timeHelper.time()
-    start = clock.currTime
+    start = clock.currTime = 0.0
     crazyflies = [CrazyflieSimLogger(_safe_cf_position(cf), clock) for cf in originalGroupState.crazyflies]
     command(SimpleNamespace(crazyflies=crazyflies, timeHelper=clock))
     return SimpleNamespace(crazyflies=crazyflies, timeHelper=clock, start=start, duration=clock.currTime - start)
@@ -515,14 +516,24 @@ def addTrajectories(groupState, command1, command2, add=True):
             drone.cf.setLEDColor(*drone.leds.pop(0)[2])
 
     # Every 1/20 s on the clock, sending the position for the moment it's sent: time an LED change really takes on the
-    # drones delays the step it's in, not the rest of the path
+    # drones delays the step it's in, not the rest of the path. The step count, not the clock, decides when it's done:
+    # on a clock in seconds since 1970, a time difference can come out a hair short of the step it reached.
     begin = timeHelper.time()
-    while timeHelper.time() - begin < duration - 1e-9:
-        elapsed = timeHelper.time() - begin
+    steps = int(np.ceil(duration * Hz - 1e-9))
+    step = 0
+    while step < steps:
+        elapsed = max(step / Hz, timeHelper.time() - begin)
         for drone in drones:
             send_leds(drone, elapsed)
-            drone.cf.cmdPosition(position_at(drone, elapsed / duration))
-        _sleep_until(timeHelper, begin + (int(elapsed * Hz + 1e-9) + 1) / Hz)
+            drone.cf.cmdPosition(position_at(drone, min(1.0, elapsed / duration)))
+        step = max(step + 1, int(elapsed * Hz + 1e-6) + 1)
+        next_step = min(step / Hz, duration)
+        # LED changes before the next step go out at their own moment
+        for at in sorted({change[0] for drone in drones for change in drone.leds if change[0] < next_step - 1e-9}):
+            _sleep_until(timeHelper, begin + at)
+            for drone in drones:
+                send_leds(drone, at)
+        _sleep_until(timeHelper, begin + next_step)
     for drone in drones:
         send_leds(drone, duration)
         end = position_at(drone, 1.0)
