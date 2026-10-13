@@ -42600,7 +42600,7 @@ const blockAddTrajectories = {
     init: function() {
       this.appendDummyInput().appendField("add trajectory");
       this.appendStatementInput("firstTrajectory");
-      this.appendDummyInput().appendField("to trajectory");
+      this.appendDummyInput().appendField("to trajectory").appendField(new FieldLabel(""));
       this.appendStatementInput("secondTrajectory");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -42624,7 +42624,7 @@ const blockSubtractTrajectories = {
     init: function() {
       this.appendDummyInput().appendField("from trajectory");
       this.appendStatementInput("firstTrajectory");
-      this.appendDummyInput().appendField("subtract trajectory");
+      this.appendDummyInput().appendField("subtract trajectory").appendField(new FieldLabel(""));
       this.appendStatementInput("secondTrajectory");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
