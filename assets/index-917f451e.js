@@ -90768,7 +90768,7 @@ function clsx() {
     (e2 = arguments[f2++]) && (t2 = r$5(e2)) && (n2 && (n2 += " "), n2 += t2);
   return n2;
 }
-const RenamableText = ({ text, updateText, className }) => {
+const RenamableText = ({ text, updateText, className, bare }) => {
   const [showRenameInput, setShowRenameInput] = reactExports.useState(false);
   const [inputValue, setInputValue] = reactExports.useState("");
   const [width, setWidth] = reactExports.useState(0);
@@ -90780,7 +90780,7 @@ const RenamableText = ({ text, updateText, className }) => {
       return;
     setWidth((_a3 = span.current) == null ? void 0 : _a3.offsetWidth);
   }, [inputValue]);
-  const defaultClassName = "h-min w-fit rounded-md border-2 border-white hover:border-black";
+  const defaultClassName = bare ? "cursor-text rounded px-1" : "h-min w-fit rounded-md border-2 border-white hover:border-black";
   return !showRenameInput ? /* @__PURE__ */ jsx(
     "h2",
     {
@@ -90806,7 +90806,7 @@ const RenamableText = ({ text, updateText, className }) => {
         /* @__PURE__ */ jsx(
           "input",
           {
-            className: clsx(defaultClassName, className),
+            className: clsx(defaultClassName, className, bare && "bg-white outline-none ring-1 ring-black/30"),
             value: inputValue,
             style: { width: `calc(${width}px + 1ch)` },
             onChange: (e2) => {
@@ -97962,6 +97962,8 @@ const BlockManagerPanel = () => {
   const selectedBlock = useRobartState((state2) => state2.blocks[selectedBlockId ?? ""]);
   const selectedBlockUses = useRobartState((state2) => Object.values(state2.timelineState.groups).flatMap((group) => Object.values(group.items)).filter((item) => item.blockId === selectedBlockId).length);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = reactExports.useState(false);
+  const renameBlock = useRobartState((state2) => state2.renameBlock);
+  const [renamingId, setRenamingId] = reactExports.useState();
   const listRef = reactExports.useRef(null);
   const addCopy = (block) => {
     setEditingBlock(copyBlock(block));
@@ -97986,6 +97988,8 @@ const BlockManagerPanel = () => {
     {
       className: "flex h-full flex-col",
       onKeyDown: (e2) => {
+        if (e2.target.closest("input"))
+          return;
         const key = e2.key.toLowerCase();
         if ((key === "delete" || key === "backspace") && !e2.metaKey && !e2.ctrlKey && !e2.altKey && selectedBlock) {
           deleteSelected();
@@ -98069,12 +98073,20 @@ const BlockManagerPanel = () => {
               tabIndex: 0,
               "data-selected": selectedBlockId === b2.id,
               className: clsx(
-                "flex max-w-full cursor-grab items-baseline gap-1.5 rounded-xl border px-2.5 py-1.5 text-sm focus:outline-none",
+                "flex max-w-full cursor-grab items-baseline gap-1 rounded-xl border px-1.5 py-1.5 text-sm focus:outline-none",
                 empty2 ? "border-dashed border-gray-400 bg-white text-gray-400" : "border-black/15",
                 selectedBlockId === b2.id && "ring-2 ring-indigo-600 ring-offset-2"
               ),
               style: { backgroundColor: empty2 ? void 0 : blockColor(b2) },
-              draggable: true,
+              draggable: renamingId !== b2.id,
+              onFocusCapture: (e2) => {
+                if (e2.target instanceof HTMLInputElement)
+                  setRenamingId(b2.id);
+              },
+              onBlurCapture: (e2) => {
+                if (e2.target instanceof HTMLInputElement)
+                  setRenamingId(void 0);
+              },
               onDragStart: (e2) => {
                 e2.dataTransfer.setData("text/plain", b2.id);
                 e2.dataTransfer.effectAllowed = "copy";
@@ -98085,8 +98097,8 @@ const BlockManagerPanel = () => {
                 setEditingBlock(b2.id);
               },
               children: [
-                /* @__PURE__ */ jsx("span", { className: "truncate", children: b2.name }),
-                !empty2 && /* @__PURE__ */ jsxs("span", { className: "shrink-0 text-xs tabular-nums text-black/55", children: [
+                selectedBlockId === b2.id ? /* @__PURE__ */ jsx(RenamableText, { bare: true, className: "min-w-0 truncate", text: b2.name, updateText: (name2) => renameBlock(name2 === "" ? newBlockName() : name2) }) : /* @__PURE__ */ jsx("span", { className: "truncate px-1", children: b2.name }),
+                !empty2 && /* @__PURE__ */ jsxs("span", { className: "shrink-0 pr-1 text-xs tabular-nums text-black/55", children: [
                   b2.duration.toFixed(1),
                   " s"
                 ] })
