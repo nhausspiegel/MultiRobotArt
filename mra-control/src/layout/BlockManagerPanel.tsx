@@ -3,6 +3,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import clsx from 'clsx';
 import React, {useRef, useState} from 'react';
 import {ConfirmationModal} from '@MRAControl/components/modal/ConfirmationModal';
+import {RenamableText} from '@MRAControl/components/utils/RenamableText';
 import {newBlockName} from './BlockEditorHeader';
 
 import {blockColor, type CodeBlock, useRobartState} from '../state/useRobartState';
@@ -37,6 +38,9 @@ export const BlockManagerPanel = () => {
 		.flatMap((group) => Object.values(group.items))
 		.filter((item) => item.blockId === selectedBlockId).length);
 	const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+	const renameBlock = useRobartState((state) => state.renameBlock);
+	// The block whose name is being typed: it can't be dragged meanwhile, or selecting its text would drag it
+	const [renamingId, setRenamingId] = useState<string>();
 	const listRef = useRef<HTMLDivElement>(null);
 
 	const addCopy = (block: CodeBlock) => {
@@ -59,6 +63,8 @@ export const BlockManagerPanel = () => {
 			className="flex h-full flex-col"
 			// Copy, paste and delete blocks while something in the list has focus (e.g. after clicking a block)
 			onKeyDown={(e) => {
+				// Typing a block's new name (Backspace included) isn't a shortcut
+				if ((e.target as HTMLElement).closest('input')) return;
 				const key = e.key.toLowerCase();
 				// Mac's delete key reports Backspace
 				if ((key === 'delete' || key === 'backspace') && !e.metaKey && !e.ctrlKey && !e.altKey && selectedBlock) {
@@ -129,12 +135,18 @@ export const BlockManagerPanel = () => {
 							tabIndex={0}
 							data-selected={selectedBlockId === b.id}
 							className={clsx(
-								'flex max-w-full cursor-grab items-baseline gap-1.5 rounded-xl border px-2.5 py-1.5 text-sm focus:outline-none',
+								'flex max-w-full cursor-grab items-baseline gap-1 rounded-xl border px-1.5 py-1.5 text-sm focus:outline-none',
 								empty ? 'border-dashed border-gray-400 bg-white text-gray-400' : 'border-black/15',
 								selectedBlockId === b.id && 'ring-2 ring-indigo-600 ring-offset-2',
 							)}
 							style={{backgroundColor: empty ? undefined : blockColor(b)}}
-							draggable
+							draggable={renamingId !== b.id}
+							onFocusCapture={(e) => {
+								if (e.target instanceof HTMLInputElement) setRenamingId(b.id);
+							}}
+							onBlurCapture={(e) => {
+								if (e.target instanceof HTMLInputElement) setRenamingId(undefined);
+							}}
 							onDragStart={(e) => {
 								e.dataTransfer.setData('text/plain', b.id);
 								e.dataTransfer.effectAllowed = 'copy';
@@ -145,8 +157,11 @@ export const BlockManagerPanel = () => {
 								setEditingBlock(b.id);
 							}}
 						>
-							<span className="truncate">{b.name}</span>
-							{!empty && <span className="shrink-0 text-xs tabular-nums text-black/55">{b.duration.toFixed(1)} s</span>}
+							{/* The selected block's name renames on click, like the name above the editor */}
+							{selectedBlockId === b.id
+								? <RenamableText bare className="min-w-0 truncate" text={b.name} updateText={(name) => renameBlock(name === '' ? newBlockName() : name)} />
+								: <span className="truncate px-1">{b.name}</span>}
+							{!empty && <span className="shrink-0 pr-1 text-xs tabular-nums text-black/55">{b.duration.toFixed(1)} s</span>}
 						</div>
 					);
 				})}

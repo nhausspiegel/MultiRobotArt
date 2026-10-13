@@ -5,9 +5,11 @@ type RenamableTextProps = {
 	text: string;
 	className?: string;
 	updateText: (updatedText: string) => void;
+	// Plain text, for a name inside something else (a block in the block list); otherwise a heading with a hover outline
+	bare?: boolean;
 };
 
-export const RenamableText = ({text, updateText, className}: RenamableTextProps) => {
+export const RenamableText = ({text, updateText, className, bare}: RenamableTextProps) => {
 	const [showRenameInput, setShowRenameInput] = useState(false);
 	const [inputValue, setInputValue] = useState('');
 	const [width, setWidth] = useState(0);
@@ -22,7 +24,7 @@ export const RenamableText = ({text, updateText, className}: RenamableTextProps)
 		setWidth(span.current?.offsetWidth);
 	}, [inputValue]);
 
-	const defaultClassName = 'h-min w-fit rounded-md border-2 border-white hover:border-black';
+	const defaultClassName = bare ? 'cursor-text rounded px-1' : 'h-min w-fit rounded-md border-2 border-white hover:border-black';
 
 	return !showRenameInput ? (
 		<h2
@@ -48,7 +50,7 @@ export const RenamableText = ({text, updateText, className}: RenamableTextProps)
 				{inputValue}
 			</span>
 			<input
-				className={clsx(defaultClassName, className)}
+				className={clsx(defaultClassName, className, bare && 'bg-white outline-none ring-1 ring-black/30')}
 				value={inputValue}
 				style={{width: `calc(${width}px + 1ch)`}}
 				onChange={(e) => {
