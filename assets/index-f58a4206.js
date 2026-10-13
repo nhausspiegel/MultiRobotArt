@@ -90928,7 +90928,22 @@ gesturePrototype.updateIsDragging = function(e2) {
     this.calledUpdateIsDragging = true;
     return;
   }
+  if (this.fieldPressUnselected && this.hasExceededDragRadius && this.targetBlock) {
+    this.fieldPressUnselected = false;
+    getFocusManager().focusNode(this.targetBlock);
+  }
   updateIsDragging.call(this, e2);
+};
+const setTargetBlock = gesturePrototype.setTargetBlock;
+gesturePrototype.setTargetBlock = function(block) {
+  var _a3;
+  if (((_a3 = this.startField) == null ? void 0 : _a3.isClickable()) && !block.isShadow()) {
+    this.targetBlock = block;
+    block.bringToFront();
+    this.fieldPressUnselected = true;
+    return;
+  }
+  setTargetBlock.call(this, block);
 };
 for (const name2 of [ShortcutItems.names.PERFORM_ACTION, ShortcutItems.names.FINISH_MOVE]) {
   ShortcutRegistry.registry.removeKeyMapping(String(utils.KeyCodes.SPACE), name2, true);
