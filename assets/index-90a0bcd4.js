@@ -90768,12 +90768,24 @@ function clsx() {
     (e2 = arguments[f2++]) && (t2 = r$5(e2)) && (n2 && (n2 += " "), n2 += t2);
   return n2;
 }
-const RenamableText = ({ text, updateText, className, bare }) => {
+const RenamableText = ({ text, updateText, className, bare, onEditingChange }) => {
   const [showRenameInput, setShowRenameInput] = reactExports.useState(false);
   const [inputValue, setInputValue] = reactExports.useState("");
   const [width, setWidth] = reactExports.useState(0);
   const span = reactExports.useRef(null);
   const finished = reactExports.useRef(false);
+  const editingChange = reactExports.useRef(onEditingChange);
+  editingChange.current = onEditingChange;
+  reactExports.useEffect(() => {
+    var _a3;
+    if (!showRenameInput)
+      return;
+    (_a3 = editingChange.current) == null ? void 0 : _a3.call(editingChange, true);
+    return () => {
+      var _a4;
+      return (_a4 = editingChange.current) == null ? void 0 : _a4.call(editingChange, false);
+    };
+  }, [showRenameInput]);
   reactExports.useLayoutEffect(() => {
     var _a3;
     if (span.current === null)
@@ -98088,14 +98100,6 @@ const BlockManagerPanel = () => {
                   ),
                   style: { backgroundColor: empty2 ? void 0 : blockColor(b2) },
                   draggable: renamingId !== b2.id,
-                  onFocusCapture: (e2) => {
-                    if (e2.target instanceof HTMLInputElement)
-                      setRenamingId(b2.id);
-                  },
-                  onBlurCapture: (e2) => {
-                    if (e2.target instanceof HTMLInputElement)
-                      setRenamingId(void 0);
-                  },
                   onDragStart: (e2) => {
                     e2.dataTransfer.setData("text/plain", b2.id);
                     e2.dataTransfer.effectAllowed = "copy";
@@ -98107,7 +98111,16 @@ const BlockManagerPanel = () => {
                       setEditingBlock(b2.id);
                   },
                   children: [
-                    selectedBlockId === b2.id ? /* @__PURE__ */ jsx(RenamableText, { bare: true, className: "min-w-0 truncate", text: b2.name, updateText: (name2) => renameBlock(name2 === "" ? newBlockName() : name2) }) : /* @__PURE__ */ jsx("span", { className: "truncate px-1", children: b2.name }),
+                    selectedBlockId === b2.id ? /* @__PURE__ */ jsx(
+                      RenamableText,
+                      {
+                        bare: true,
+                        className: "min-w-0 truncate",
+                        text: b2.name,
+                        updateText: (name2) => renameBlock(name2 === "" ? newBlockName() : name2),
+                        onEditingChange: (editing) => setRenamingId(editing ? b2.id : void 0)
+                      }
+                    ) : /* @__PURE__ */ jsx("span", { className: "truncate px-1", children: b2.name }),
                     !empty2 && /* @__PURE__ */ jsxs("span", { className: "shrink-0 pr-1 text-xs tabular-nums text-black/55", children: [
                       b2.duration.toFixed(1),
                       " s"
