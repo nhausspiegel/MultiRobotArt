@@ -76,8 +76,17 @@ Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, Blockly.ToolboxCat
 
 // In multi-select mode, a drag that starts on empty space draws the selection box. Blockly 13 drags whatever is selected
 // when a drag starts, and the multi-select plugin keeps the selected blocks selected there, so they followed the pointer.
-type GestureInternals = {targetBlock?: unknown; startBubble?: unknown; startComment?: unknown; startIcon?: unknown; startWorkspace_?: Blockly.WorkspaceSvg; calledUpdateIsDragging: boolean};
-const gesturePrototype = Blockly.Gesture.prototype as unknown as GestureInternals & {updateIsDragging: (this: GestureInternals, e: PointerEvent) => void};
+type GestureInternals = {
+	targetBlock?: Blockly.BlockSvg; startField?: Blockly.Field; startBubble?: unknown; startComment?: unknown; startIcon?: unknown;
+	startWorkspace_?: Blockly.WorkspaceSvg; calledUpdateIsDragging: boolean; hasExceededDragRadius: boolean;
+	// Set by setTargetBlock below: a press on a field that hasn't selected its block
+	fieldPressUnselected?: boolean;
+};
+type GesturePrototype = GestureInternals & {
+	updateIsDragging: (this: GestureInternals, e: PointerEvent) => void;
+	setTargetBlock: (this: GestureInternals, block: Blockly.BlockSvg) => void;
+};
+const gesturePrototype = Blockly.Gesture.prototype as unknown as GesturePrototype;
 const updateIsDragging = gesturePrototype.updateIsDragging;
 gesturePrototype.updateIsDragging = function (e) {
 	const onEmptySpace = !this.targetBlock && !this.startBubble && !this.startComment && !this.startIcon;
@@ -85,7 +94,29 @@ gesturePrototype.updateIsDragging = function (e) {
 		this.calledUpdateIsDragging = true;
 		return;
 	}
+
+	// A drag that starts on a field drags its block, which Blockly 13 does by dragging the selection: select it now
+	if (this.fieldPressUnselected && this.hasExceededDragRadius && this.targetBlock) {
+		this.fieldPressUnselected = false;
+		Blockly.getFocusManager().focusNode(this.targetBlock);
+	}
+
 	updateIsDragging.call(this, e);
+};
+
+// A click on a block's field (a number to type, a dropdown) doesn't select the block, like in Scratch. Blockly 13 selects
+// whatever has focus: it focused the block on the press, then opening the field's editor moved focus to the field, so
+// the block flickered selected and back.
+const setTargetBlock = gesturePrototype.setTargetBlock;
+gesturePrototype.setTargetBlock = function (block) {
+	if (this.startField?.isClickable() && !block.isShadow()) {
+		this.targetBlock = block;
+		block.bringToFront();
+		this.fieldPressUnselected = true;
+		return;
+	}
+
+	setTargetBlock.call(this, block);
 };
 
 // Space plays/pauses the simulation (TimelineSimulationButtons). Blockly also uses it, besides Enter, to act on the
