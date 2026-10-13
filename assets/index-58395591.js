@@ -37317,7 +37317,7 @@ const blockTakeoff = {
   name: "takeoff",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("takeoff to").appendField(new FieldNumber(1, 0), "height").appendField("meters over").appendField(new FieldNumber(3, 0.1), "duration").appendField("seconds");
+      this.appendDummyInput().appendField("take off to").appendField(new FieldNumber(1, 0), "height").appendField("meters over").appendField(new FieldNumber(3, 0.1), "duration").appendField("seconds");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(230);
@@ -42472,7 +42472,7 @@ const blockColor$1 = {
   name: "color",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("set LED color:").appendField(new ColorWheelField("#00FF00", 150, {
+      this.appendDummyInput().appendField("set LED color to").appendField(new ColorWheelField("#00FF00", 150, {
         layoutDirection: "horizontal"
       }), "color");
       this.setPreviousStatement(true, null);
@@ -42496,7 +42496,7 @@ const blockRandomColor = {
   name: "randomColor",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("Random LED Color:");
+      this.appendDummyInput().appendField("set LED color to random");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setTooltip("Change the color of the LED ring to a random color! (Picks three random numbers for red, green, and blue)");
@@ -42514,7 +42514,7 @@ const blockColorOff = {
   name: "colorOff",
   block: {
     init: function() {
-      this.appendDummyInput().appendField("Turn LED Off");
+      this.appendDummyInput().appendField("turn LED off");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setTooltip("Turn the LED ring off. (Set red, green, and blue to 0)");
