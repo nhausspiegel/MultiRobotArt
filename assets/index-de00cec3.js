@@ -42571,7 +42571,7 @@ const slotSequence = (block, js, input) => {
   return `simulator.sequence(groupState, [${commands.map((command2) => `() => ${command2}`).join(", ")}])`;
 };
 const slotFunction = (block, python2, input, name2) => `def ${name2}(groupState):
-${python2.statementToCode(block, input) || "  pass\n"}`;
+${python2.statementToCode(block, input)}`;
 const blockNegate = {
   name: "negate",
   block: {
@@ -76033,14 +76033,11 @@ const CUSTOM_BLOCKS = {
   blockRandomColor,
   blockRepeat
 };
-const hasEmptySlot = (b2) => b2.inputList.some((input) => {
-  var _a3;
-  return input instanceof inputs.StatementInput && !((_a3 = input.connection) == null ? void 0 : _a3.targetBlock());
-});
+const hasEmptySlot = (b2, generator) => b2.inputList.some((input) => input instanceof inputs.StatementInput && generator.statementToCode(b2, input.name).split("\n").every((line) => /^\s*(\/\/.*|#.*)?$/.test(line)));
 Object.values(CUSTOM_BLOCKS).forEach((block) => {
   Blocks[block.name] = block.block;
-  pythonGenerator.forBlock[block.name] = (b2) => hasEmptySlot(b2) ? "" : block.pythonGenerator(b2, pythonGenerator);
-  javascriptGenerator.forBlock[block.name] = (b2) => hasEmptySlot(b2) ? "" : block.javascriptGenerator(b2, javascriptGenerator);
+  pythonGenerator.forBlock[block.name] = (b2) => hasEmptySlot(b2, pythonGenerator) ? "" : block.pythonGenerator(b2, pythonGenerator);
+  javascriptGenerator.forBlock[block.name] = (b2) => hasEmptySlot(b2, javascriptGenerator) ? "" : block.javascriptGenerator(b2, javascriptGenerator);
 });
 const blockToToolbox = (block) => ({
   kind: "block",
