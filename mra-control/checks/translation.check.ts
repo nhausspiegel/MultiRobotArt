@@ -22,6 +22,9 @@ const start = new THREE.Vector3(1, 2, 0.5);
 const offset = new THREE.Vector3(0, 3, 4); // 5 m away
 const translated = new TranslationTrajectory(start, new Line(start), offset);
 
+// The move to the shifted start peaks at 35/16 of its average speed (the go-to curve): under the default 1 m/s limit
+assert.ok(translationTravelSpeed * 35 / 16 < 1);
+
 const travel = 5 / translationTravelSpeed;
 assert.equal(translated.travelDuration, travel);
 assert.equal(translated.duration, travel + 4);

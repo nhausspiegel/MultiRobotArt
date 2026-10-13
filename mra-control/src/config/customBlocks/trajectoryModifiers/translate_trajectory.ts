@@ -19,7 +19,7 @@ export const blockTranslateTrajectory: RobartBlockDefinition = {
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);
-			this.setTooltip('Shift the given trajectory by x, y, z meters. The drones first fly to the shifted start at 0.5 m/s.');
+			this.setTooltip('Shift the given trajectory by x, y, z meters. The drones first fly to the shifted start at 0.4 m/s.');
 			this.setHelpUrl('');
 		},
 	},

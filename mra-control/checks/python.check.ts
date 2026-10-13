@@ -136,12 +136,12 @@ const land = {type: 'land', fields: {height: 0, duration: 2}};
 	assert.equal(end, 6, code);
 }
 
-// translate (1, 0, 0) { go to (1, 0, 1) over 2 s } from (0, 0, 1): first to the shifted start, at 0.5 m/s, then to (2, 0, 1)
+// translate (1, 0, 0) { go to (1, 0, 1) over 2 s } from (0, 0, 1): first to the shifted start, at 0.4 m/s, then to (2, 0, 1)
 {
 	const goTo = {type: 'go_to', fields: {x_pos: 1, y_pos: 0, z_pos: 1, duration: 2}};
 	const {code, log, end} = fly({type: 'translateTrajectory', fields: {x: 1, y: 0, z: 0}, inputs: {originalTraj: {block: goTo}}}, [0, 0, 1]);
-	assert.deepEqual(log.map((sent) => [sent.command, sent.t, sent.pos, sent.duration]), [['goTo', 0, [1, 0, 1], 2], ['goTo', 2, [2, 0, 1], 2]], code);
-	assert.equal(end, 4, code);
+	assert.deepEqual(log.map((sent) => [sent.command, sent.t, sent.pos, sent.duration]), [['goTo', 0, [1, 0, 1], 2.5], ['goTo', 2.5, [2, 0, 1], 2]], code);
+	assert.equal(end, 4.5, code);
 }
 
 // circle of radius 1 at 0.5 m/s for 360°, then land: positions every 1/20 s for 2π·1 / 0.5 s, around the start in the

@@ -392,7 +392,7 @@ def rotate(groupState, command, x_rot, y_rot, z_rot):
     _replay(groupState, simCommand(groupState, command), lambda start, point: start + matrix @ (point - start))
 
 
-def translate(groupState, command, x, y, z, speed=0.5):
+def translate(groupState, command, x, y, z, speed=0.4):
     """Runs command shifted by (x, y, z) meters, like TranslationTrajectory.
 
     The drones first fly to the shifted start in a straight line at `speed` m/s, so the shifted path doesn't begin

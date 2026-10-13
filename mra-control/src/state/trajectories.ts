@@ -423,8 +423,9 @@ export class RotationTrajectory extends Trajectory {
 	}
 }
 
-// Speed (m/s) of the move to a translated trajectory's start; matches translate() in the exported Python
-export const translationTravelSpeed = 0.5;
+// Average speed (m/s) of the move to a translated trajectory's start. On the go-to curve it peaks at 35/16 of that, so
+// 0.4 peaks at 0.875 m/s, under the default 1 m/s speed limit. Matches translate() in the exported Python.
+export const translationTravelSpeed = 0.4;
 
 /**
  * The original trajectory shifted by an offset. It first eases from the starting position to the shifted start, so the
