@@ -357,7 +357,6 @@ export const useRobartState = create<MRAState & MRAActions>()(
 						exportROS(state, fileName);
 					},
 					getWarnings: () => {
-						//TODO update warnings on call or on step?
 						return (get().warnings ?? []).join('');
 					},
 					resetProject: () => {

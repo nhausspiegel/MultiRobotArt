@@ -289,7 +289,6 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					trajectory: get().robots[robotId].trajectory,
 					trajectoryStartTime: get().robots[robotId].trajectoryStartTime,
 				};
-				// TODO: switch to next trajectory if available...
 				if (robots[robotId].timeAlongTrajectory >= 1) {
 					robots[robotId].trajectory = nullTrajectory;
 					robots[robotId].timeAlongTrajectory = 0;
