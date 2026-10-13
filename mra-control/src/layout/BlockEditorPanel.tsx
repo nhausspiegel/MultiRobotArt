@@ -141,13 +141,17 @@ export const BlockEditorPanel = () => {
 		ref: workspaceRef,
 	});
 
-	// Multi-select: Shift-click adds/removes blocks, Shift-drag on the background box-selects (workspace-multiselect plugin)
+	// Multi-select (workspace-multiselect plugin): a drag on the background box-selects, Shift-drag on it pans, and Shift-click
+	// adds or removes a block
 	useEffect(() => {
 		if (!workspace) return;
 		const multiselect = new Multiselect(workspace);
 		multiselect.init({
 			workspaceAutoFocus: false, // Its default focuses the editor whenever the pointer enters it, taking focus from text fields
-			multiselectIcon: {hideIcon: true}, // Shift does the same; its default icons load from GitHub
+			multiselectIcon: {hideIcon: true}, // Its default icons load from GitHub
+			// Its own key for multi-select mode, held down, would fight the presses that decide it below (and a held Shift
+			// repeats on some systems, turning it back on mid-pan); a key name that no key has
+			multiSelectKeys: ['(set per press)'],
 			bumpNeighbours: true, // Keep Blockly's nudging of overlapping blocks (the plugin turns it off by default)
 			multiselectCopyPaste: {crossTab: true, menu: false}, // Keyboard copy/paste only, no extra menu items
 		});
@@ -181,7 +185,7 @@ export const BlockEditorPanel = () => {
 			}];
 		};
 
-		// Clicking empty space (without Shift) clears the multi-selection. The plugin clears it on Blockly's selection events,
+		// Clicking empty space clears the multi-selection. The plugin clears it on Blockly's selection events,
 		// which Blockly 13 doesn't fire for that click, so the blocks looked unselected but the next box added to them.
 		const onWorkspaceClick = (event: Blockly.Events.Abstract) => {
 			if (event.type !== Blockly.Events.CLICK || (event as Blockly.Events.Click).targetType !== 'workspace' || isOn()) return;
@@ -190,34 +194,61 @@ export const BlockEditorPanel = () => {
 		};
 		workspace.addChangeListener(onWorkspaceClick);
 
-		// The plugin only hears Shift while the editor has keyboard focus, which it often doesn't (e.g. after clicking
-		// the timeline). Pass Shift on from the whole page while the pointer is over the editor, without taking focus.
+		// Each press in the editor decides whether multi-select is on, rather than holding a key:
+		// - the background: a box, starting a new selection; with Shift, off, so Blockly pans
+		// - a block with Shift: on, so a click adds or removes it and a drag moves the whole selection
+		// - a block without Shift: off, Blockly's own selecting and dragging (a drag on a selected group moves all of it)
+		// A press that turned it on turns it off afterwards, which keeps the selection. Not right away: Blockly reports the
+		// click a frame and a timer later, and the plugin must still be in multi-select then.
+		const svg = workspace.getParentSvg();
+		let presses = 0;
+		let turnedOn = false;
+		const turnOn = () => {
+			if (isOn()) return; // Enabling twice leaks a box-select instance
+			controls.enableMultiselect();
+			turnedOn = true;
+		};
+		const turnOff = () => {
+			turnedOn = false;
+			if (isOn()) controls.disableMultiselect(); // Disabling when off clears the selection
+		};
+		const onPointerDown = (event: PointerEvent) => {
+			presses += 1;
+			if (event.button !== 0 || !svg.contains(event.target as Node)) return;
+			const target = event.target as Element;
+			const onBackground = target.classList.contains('blocklyMainBackground');
+			const onBlock = !onBackground && target.closest('.blocklyDraggable') !== null;
+			if (onBackground && !event.shiftKey) {
+				// A new box: the old selection goes (enabling would otherwise add the selected block to it)
+				controls.multiDraggable.clearAll_();
+				controls.dragSelection.clear();
+				// Deselects the selected block, the way the plugin does (selection follows focus in Blockly 13)
+				const focusTarget = workspace.getWorkspaceFocusTarget();
+				if (focusTarget) Blockly.getFocusManager().focusNode(focusTarget);
+				turnOn();
+			} else if (onBlock && event.shiftKey) {
+				turnOn();
+			} else if (onBackground || onBlock) {
+				turnOff();
+			}
+		};
+		const onPointerUp = () => {
+			if (!turnedOn) return;
+			const press = presses;
+			// After Blockly's events (requestAnimationFrame, then a timer), unless another press has started since
+			requestAnimationFrame(() => setTimeout(() => {
+				if (press === presses && turnedOn) turnOff();
+			}, 0));
+		};
+		// Capturing: before Blockly and the plugin's box start handling the same press
 		const editor = workspace.getInjectionDiv();
-		let pointerInside = false;
-		const onPointerEnter = (event: PointerEvent) => {
-			pointerInside = true;
-			// Shift pressed before the pointer came in
-			if (event.shiftKey && !isOn()) multiselect.controls_?.enableMultiselect();
-		};
-		const onPointerLeave = () => {
-			pointerInside = false;
-		};
-		// Only switch when it changes: enabling twice leaks a box-select instance, and disabling when off clears the selection
-		const onKeyDown = (event: KeyboardEvent) => {
-			if (event.key === 'Shift' && pointerInside && !isOn()) multiselect.controls_?.enableMultiselect();
-		};
-		const onKeyUp = (event: KeyboardEvent) => {
-			if (event.key === 'Shift' && isOn()) multiselect.controls_?.disableMultiselect();
-		};
-		editor.addEventListener('pointerenter', onPointerEnter);
-		editor.addEventListener('pointerleave', onPointerLeave);
-		window.addEventListener('keydown', onKeyDown);
-		window.addEventListener('keyup', onKeyUp);
+		editor.addEventListener('pointerdown', onPointerDown, true);
+		window.addEventListener('pointerup', onPointerUp);
+		window.addEventListener('pointercancel', onPointerUp);
 		return () => {
-			editor.removeEventListener('pointerenter', onPointerEnter);
-			editor.removeEventListener('pointerleave', onPointerLeave);
-			window.removeEventListener('keydown', onKeyDown);
-			window.removeEventListener('keyup', onKeyUp);
+			editor.removeEventListener('pointerdown', onPointerDown, true);
+			window.removeEventListener('pointerup', onPointerUp);
+			window.removeEventListener('pointercancel', onPointerUp);
 			workspace.removeChangeListener(onWorkspaceClick);
 			multiselect.dispose();
 		};
