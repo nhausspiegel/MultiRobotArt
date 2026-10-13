@@ -11,11 +11,11 @@ export const blockAddTrajectories: RobartBlockDefinition = {
 	block: {
 		init: function () {
 			this.appendDummyInput()
-				.appendField('add trajectories');
-			this.appendStatementInput('firstTrajectory')
-				.appendField('first trajectory:');
-			this.appendStatementInput('secondTrajectory')
-				.appendField('second trajectory:');
+				.appendField('add trajectory');
+			this.appendStatementInput('firstTrajectory');
+			this.appendDummyInput()
+				.appendField('to trajectory');
+			this.appendStatementInput('secondTrajectory');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);

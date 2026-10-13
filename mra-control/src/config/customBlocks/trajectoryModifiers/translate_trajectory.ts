@@ -14,8 +14,7 @@ export const blockTranslateTrajectory: RobartBlockDefinition = {
 				.appendField(new Blockly.FieldNumber(0), 'y')
 				.appendField(' z: ')
 				.appendField(new Blockly.FieldNumber(0), 'z');
-			this.appendStatementInput('originalTraj')
-				.appendField('trajectory:');
+			this.appendStatementInput('originalTraj');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);

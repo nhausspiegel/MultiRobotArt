@@ -19,8 +19,7 @@ export const blockRotateTrajectoryDegrees: RobartBlockDefinition = {
 				.appendField(' z: ')
 				.appendField(new Blockly.FieldNumber(0), 'z')
 				.appendField('degrees');
-			this.appendStatementInput('originalTraj')
-				.appendField('trajectory:');
+			this.appendStatementInput('originalTraj');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);
@@ -55,8 +54,7 @@ export const blockRotateTrajectoryRadians: RobartBlockDefinition = {
 				.appendField(' z: ')
 				.appendField(new Blockly.FieldNumber(0), 'z')
 				.appendField('radians');
-			this.appendStatementInput('originalTraj')
-				.appendField('trajectory:');
+			this.appendStatementInput('originalTraj');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);

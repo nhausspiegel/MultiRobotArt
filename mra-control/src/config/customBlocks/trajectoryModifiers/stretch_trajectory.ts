@@ -20,8 +20,7 @@ export const blockStretchTrajectories: RobartBlockDefinition = {
 				.appendField(new Blockly.FieldNumber(1, 0.0), 'z')
 				.appendField(' time: ')
 				.appendField(new Blockly.FieldNumber(1, 0.0), 't');
-			this.appendStatementInput('originalTraj')
-				.appendField('trajectory:');
+			this.appendStatementInput('originalTraj');
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setColour(90);
