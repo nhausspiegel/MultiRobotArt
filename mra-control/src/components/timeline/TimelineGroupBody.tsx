@@ -10,6 +10,7 @@ import {type MRAState, type TimelineGroupState, type TimelineItem, useRobartStat
 import {lastItemEnd} from '../../layout/timeline/SimulationOptions';
 import {HoverTimelineBlock} from './HoverTimelineBlock';
 import {TimelineBlock, useItemDrag, useShowEnd} from './TimelineBlock';
+import {blockOverlaps, landingTime} from './placement';
 import React from 'react';
 
 type TimelineGroupProps = {
@@ -63,27 +64,9 @@ export const tickArea = `calc(100% - ${timelineStartPadding}px)`;
 // x of a time within a lane, and within the timeline's scroll area (lanes start at its left edge)
 export const timeToX = (seconds: number, scale: number) => timelineStartPadding + convertSecondsToPixels(seconds, scale);
 
-export const blockOverlaps = (
-	occupiedItems: TimelineItem[],
-	startTime: number | undefined,
-	duration: number,
-	id?: string,
-) =>
-	startTime === undefined ||
-  startTime < 0 ||
-  occupiedItems.some((items) => {
-  	if (items === undefined) {
-  		return false;
-  	}
-
-  	const currItemStart = items.startTime;
-  	const currItemEnd = items.startTime + items.duration;
-  	const newBlockStart = startTime;
-  	const newBlockEnd = startTime + duration;
-
-  	if (id !== undefined && id === items.id) return false;
-  	return !(currItemEnd < newBlockStart || newBlockEnd < currItemStart);
-  });
+// How far a dropped or dragged block may snap to sit against a neighbor (landingTime): its own length, and for short
+// blocks at least two minimum widths
+export const snapReach = (duration: number, scale: number) => Math.max(duration, convertPixelsToSeconds(2 * minItemWidth, scale));
 
 // What a block placed on this lane must not overlap: the lane's own items and, on group lanes, All drones' items
 // (those run on every drone, this group's included)
@@ -128,8 +111,10 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 			if (blockId === undefined || blocks[blockId] === undefined) return;
 			// The lane's on-screen rect already reflects scrolling
 			const offsetX = clientX - laneBodyRef.current.getBoundingClientRect().left - timelineStartPadding;
-			// Centered on the pointer, but never starting before 0 (long blocks near the left edge would otherwise be refused)
-			return Math.max(0, convertPixelsToSeconds(offsetX, scale) - blocks[blockId].duration / 2);
+			// Centered on the pointer, but never starting before 0 (long blocks near the left edge would otherwise be refused),
+			// and against a neighbor it would overlap
+			const {duration} = blocks[blockId];
+			return landingTime(occupiedItems, Math.max(0, convertPixelsToSeconds(offsetX, scale) - duration / 2), duration, snapReach(duration, scale));
 		}
 	};
 

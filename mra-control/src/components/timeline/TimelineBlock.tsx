@@ -5,7 +5,8 @@ import clsx from 'clsx';
 import React, {useState} from 'react';
 import {create} from 'zustand';
 
-import {blockOverlaps, convertPixelsToSeconds, laneOccupiedItems, minItemWidth, pixelsPerSecond, timeToX} from './TimelineGroupBody';
+import {convertPixelsToSeconds, convertSecondsToPixels, laneOccupiedItems, minItemWidth, pixelsPerSecond, snapReach, timeToX} from './TimelineGroupBody';
+import {landingTime} from './placement';
 
 // The timeline item being dragged, where it would land: read by what follows it before the drop (the show's end line,
 // and All drones' busy stripes on the other lanes)
@@ -35,14 +36,17 @@ export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}
 		const laneId = document.elementsFromPoint(x, y)
 			.map((element) => (element as HTMLElement).dataset?.laneId)
 			.find(Boolean) ?? item.groupId;
-		const startTime = Math.max(0, item.startTime + convertPixelsToSeconds(mx, scale));
+		// Under the pointer but not before 0, and against a neighbor it would overlap
+		const underPointer = Math.max(0, item.startTime + convertPixelsToSeconds(mx, scale));
+		const landing = landingTime(laneOccupiedItems(groups, laneId), underPointer, item.duration, snapReach(item.duration, scale), item.id);
+		const startTime = landing ?? underPointer;
 		// Can't move into a lane with no drones; moving within its own lane is fine
 		const laneHasDrones = Object.keys(groups[laneId]?.robots ?? {}).length > 0;
-		const valid = (laneId === item.groupId || laneHasDrones)
-			&& !blockOverlaps(laneOccupiedItems(groups, laneId), startTime, item.duration, item.id);
+		const valid = (laneId === item.groupId || laneHasDrones) && landing !== undefined;
 
 		if (active) {
-			setDrag({x: mx, y: my, valid});
+			// Drawn where it would land
+			setDrag({x: convertSecondsToPixels(startTime - item.startTime, scale), y: my, valid});
 			useItemDrag.setState({drag: {itemId: item.id, laneId, startTime}});
 			return;
 		}
