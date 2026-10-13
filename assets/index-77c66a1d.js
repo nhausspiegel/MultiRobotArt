@@ -146980,7 +146980,7 @@ const convertSecondsToPixels = (duration2, scale) => {
 const timelineStartPadding = 12;
 const tickArea = `calc(100% - ${timelineStartPadding}px)`;
 const timeToX = (seconds, scale) => timelineStartPadding + convertSecondsToPixels(seconds, scale);
-const snapReach = (duration2, scale) => Math.max(duration2, convertPixelsToSeconds(2 * minItemWidth, scale));
+const snapReach = (duration2, scale) => Math.max(duration2 / 2, convertPixelsToSeconds(2 * minItemWidth, scale));
 const laneOccupiedItems = (groups, laneId) => {
   var _a3, _b2;
   return laneId === allDronesGroupId ? Object.values(groups).flatMap((group) => Object.values(group.items)) : [...Object.values(((_a3 = groups[laneId]) == null ? void 0 : _a3.items) ?? {}), ...Object.values(((_b2 = groups[allDronesGroupId]) == null ? void 0 : _b2.items) ?? {})];
@@ -147140,7 +147140,7 @@ const TimelineBlock = ({ item, scale }) => {
     else
       moveItem(item.groupId, item.id, laneId, startTime);
   }, { pointer: { keys: false }, filterTaps: true });
-  return /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       tabIndex: 0,
@@ -147165,7 +147165,10 @@ const TimelineBlock = ({ item, scale }) => {
         removeItem(item.groupId, item.id);
       },
       ...bind(),
-      children: /* @__PURE__ */ jsx("span", { className: "block overflow-hidden text-ellipsis whitespace-nowrap", children: blockName })
+      children: [
+        drag && !drag.valid && /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: faXmarkCircle, className: "mx-1 shrink-0 text-red-700" }),
+        /* @__PURE__ */ jsx("span", { className: "block overflow-hidden text-ellipsis whitespace-nowrap", children: blockName })
+      ]
     }
   );
 };
