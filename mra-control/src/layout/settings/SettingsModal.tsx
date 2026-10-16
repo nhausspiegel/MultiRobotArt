@@ -6,7 +6,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {CancelButton} from '../../components/buttons/CancelButton';
 import {IconButton} from '../../components/buttons/IconButton';
 import {ConfirmationModal} from '../../components/modal/ConfirmationModal';
-import {defaultBoundingBoxSize, defaultLimits, useRobartState} from '../../state/useRobartState';
+import {useRobartState} from '../../state/useRobartState';
 import {useUIState} from '../../state/useUIState';
 import {CurveEditorModal} from '../curveEditor/CurveEditorModal';
 import {type Group} from 'three';
@@ -17,7 +17,7 @@ const isPositiveNumber = (value: string) => value.trim() !== '' && Number(value)
 
 // The boxes keep whatever is typed; the size is only saved while all three are positive numbers
 const BoundingBoxSizeEditor = () => {
-	const size = useRobartState((state) => state.boundingBoxSize ?? defaultBoundingBoxSize);
+	const size = useRobartState((state) => state.boundingBoxSize);
 	const setSize = useRobartState((state) => state.setBoundingBoxSize);
 	const [values, setValues] = useState(size.map(String));
 	// Follow changes made elsewhere (Reset Project, Load Project), but not the ones typed here
@@ -56,7 +56,7 @@ const fieldClass = (valid: boolean) => clsx('w-20 rounded px-2 py-1 disabled:opa
 
 // What measuring the show warns about. Like the box size, fields keep whatever is typed and are only saved while valid.
 const LimitsEditor = () => {
-	const limits = useRobartState((state) => state.limits ?? defaultLimits);
+	const limits = useRobartState((state) => state.limits);
 	const setLimits = useRobartState((state) => state.setLimits);
 	const area = [...limits.workAreaMin, ...limits.workAreaMax];
 	const [speed, setSpeed] = useState(String(limits.speedLimit));

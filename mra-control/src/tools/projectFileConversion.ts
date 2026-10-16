@@ -1,4 +1,4 @@
-import {type MRAState} from '../state/useRobartState';
+import {type MRAState, type ProjectFile} from '../state/useRobartState';
 import {saveToFile} from './saveToFile';
 import {exportToROS} from './exportToROS';
 
@@ -8,8 +8,8 @@ export const saveProjectToFile = (projectState: MRAState, fileName: string | und
 	saveToFile(fileName, projectStateJson);
 };
 
-export const loadProjectFromFile = (fileContents: string): MRAState => {
-	const projectState = JSON.parse(fileContents) as MRAState;
+export const loadProjectFromFile = (fileContents: string): ProjectFile => {
+	const projectState = JSON.parse(fileContents) as ProjectFile;
 	// Loading something else would replace the project with a state the app can't render
 	if (typeof projectState?.blocks !== 'object' || typeof projectState.robots !== 'object' || typeof projectState.timelineState?.groups !== 'object') {
 		throw new Error('This file is not a Robart project.');

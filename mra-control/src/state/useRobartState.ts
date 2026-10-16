@@ -121,14 +121,18 @@ export type MRAState = {
 	notices?: string[];
 	/**
    * Full x, y, z size (m) of the box around each robot, centered on it. Overlapping boxes count as a collision.
-   * Set in Settings; unset in older projects (defaultBoundingBoxSize).
+   * Set in Settings. Older project files don't have it; loading fills in defaultBoundingBoxSize.
    */
-	boundingBoxSize?: [number, number, number];
+	boundingBoxSize: [number, number, number];
 	/**
-   * Speed limit and work area that measuring the show warns about. Set in Settings; unset in older projects (defaultLimits).
+   * Speed limit and work area that measuring the show warns about. Set in Settings. Older project files don't have it;
+   * loading fills in defaultLimits.
    */
-	limits?: Limits;
+	limits: Limits;
 };
+
+// A project as saved, which may predate the box size and limits
+export type ProjectFile = Omit<MRAState, 'boundingBoxSize' | 'limits'> & Partial<Pick<MRAState, 'boundingBoxSize' | 'limits'>>;
 
 export const defaultBoundingBoxSize: [number, number, number] = [0.4, 0.4, 0.7];
 
@@ -151,18 +155,6 @@ export const defaultLimits: Limits = {
 };
 
 export type TimelineActions = {
-	/**
-   * Saves a given group of the timeline. Assumes that the group already exists.
-   * @param groupId The Id of the group to update.
-   * @param group A partial containing properties of the group we want to save.
-   */
-	saveGroup: (groupId: string, group: Partial<TimelineGroupState>) => void;
-	/**
-   * Creates a new group in the timeline and returns its unique ID.
-   * @param name The name of the group to create.
-   * @returns The Id of the newly created timeline group.
-   */
-	createGroup: (name: string) => string;
 	/**
    * Adds a block to timeline and returns its unique ID.
    * @param groupId The id of the group to add the block to
@@ -227,12 +219,6 @@ export type BlockActions = {
    */
 	copyBlock: (block: CodeBlock) => string;
 	/**
-   * Used to modify duration of block for placing on timeline
-   * @param blockId the id of the block to set duration of
-   * @param duration the duration of the block
-   */
-	setDuration: (blockId: string, duration: number) => void;
-	/**
    * Sets the currently selected block.
    * @param blockId The ID of the block to select in the block editor for editing.
    */
@@ -255,8 +241,6 @@ export type MRAGeneralActions = {
 	resetProject: () => void;
 	setProjectName: (projectName: string) => void;
 	exportToROS: (filename: string) => void;
-	getWarnings: () => string;
-	addWarning: (warning: string) => void;
 	/**
    * @returns The new group's id.
    */
@@ -353,11 +337,10 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							version: ROBART_VERSION,
 							robots: get().robots,
 							warnings: get().warnings,
+							boundingBoxSize: get().boundingBoxSize,
+							limits: get().limits,
 						};
 						exportROS(state, fileName);
-					},
-					getWarnings: () => {
-						return (get().warnings ?? []).join('');
 					},
 					resetProject: () => {
 						set(defaultRobartState);
@@ -365,21 +348,6 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					},
 					setProjectName: (name) => {
 						set({projectName: name}); 
-					},
-					saveGroup: (groupId, group) => {},
-					createGroup: (name) => {
-						const id = uuid();
-						const group: TimelineGroupState = {
-							id,
-							name,
-							items: {},
-							robots: {},
-							duration: 120,
-						};
-						set((state) => {
-							state.timelineState.groups[id] = group;
-						});
-						return id;
 					},
 					addBlockToTimeline: (groupId: string, blockId: string, startTime: number, isTrajectory: boolean) => {
 						// The block's last measured length; the timeline re-measures by simulating shortly after (setMeasuredDurations)
@@ -399,11 +367,6 @@ export const useRobartState = create<MRAState & MRAActions>()(
 						set((state) => {
 							state.timelineState.groups[groupId].items = oldItems;
 						});
-					},
-					addWarning: (warning: string) => {
-						const state = get();
-						const newWarnings = [...state.warnings, warning];
-						set({...state, warnings: newWarnings});
 					},
 					updateBlockInTimeline: (groupId, itemId, startTime) => {
 						const newItem = {
@@ -434,7 +397,7 @@ export const useRobartState = create<MRAState & MRAActions>()(
 						set({boundingBoxSize: size});
 					},
 					setLimits: (limits) => {
-						set({limits: {...(get().limits ?? defaultLimits), ...limits}});
+						set({limits: {...get().limits, ...limits}});
 					},
 					setTimelineScale: (scale) => {
 						set((state) => {
@@ -506,26 +469,17 @@ export const useRobartState = create<MRAState & MRAActions>()(
 
 						return newBlock.id;
 					},
-					setDuration: (blockId, duration) => {
-						set((state) => {
-							state.blocks[blockId].duration = duration;
-						});
-					},
 					setMeasuredDurations: (durations, blockLengths) => {
+						// Only real changes are written; a set() that writes nothing leaves the state as it was, and notifies no one
 						const changed = (measured: number | undefined, current: number) => measured !== undefined && Math.abs(measured - current) > 1e-3;
-						const items = Object.values(get().timelineState.groups).flatMap((group) => Object.values(group.items));
-						// Skip no-op writes: every write to the timeline or blocks triggers another measurement
-						if (!items.some((item) => changed(durations[item.id], item.duration))
-							&& !Object.values(get().blocks).some((block) => changed(blockLengths[block.id], block.duration))) return;
-
 						set((state) => {
 							Object.values(state.timelineState.groups).forEach((group) => {
 								Object.values(group.items).forEach((item) => {
-									if (durations[item.id] !== undefined) item.duration = durations[item.id];
+									if (changed(durations[item.id], item.duration)) item.duration = durations[item.id];
 								});
 							});
 							Object.values(state.blocks).forEach((block) => {
-								if (blockLengths[block.id] !== undefined) block.duration = blockLengths[block.id];
+								if (changed(blockLengths[block.id], block.duration)) block.duration = blockLengths[block.id];
 							});
 						});
 					},

@@ -1,12 +1,12 @@
 /* eslint-disable react/no-unknown-property */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Crazyflie } from '@MRAControl/components/vector/Crazyflie';
-import { defaultLimits, useRobartState } from '@MRAControl/state/useRobartState';
+import { useRobartState } from '@MRAControl/state/useRobartState';
 import { useSimulator } from '@MRAControl/state/useSimulator';
 import { CatmullRomLine, GizmoHelper, GizmoViewport, Grid, Line, OrbitControls, Plane, Sphere } from '@react-three/drei';
-import { allDronesGroupId } from '@MRAControl/state/groupMigration';
+import { noGroupColor, robotGroup } from '@MRAControl/state/groupMigration';
 import { useThree } from '@react-three/fiber';
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import React from 'react';
 import type THREE from 'three';
 import { type Group, type Vector3 } from 'three';
@@ -27,6 +27,8 @@ export const Simulation = () => {
 	const robartState = useRobartState();
 	const simulatorState = useSimulator();
 	const renderBB = simulatorState.renderBoundingBoxes;
+	// Built once per change: a new outline each render (every frame while playing) rebuilt its geometry every frame
+	const workAreaEdges = useMemo(() => boxEdges(robartState.limits.workAreaMin, robartState.limits.workAreaMax), [robartState.limits]);
 
 	const trajectoryMarkers: Array<{ position: Vector3; color: THREE.Color; id: string }> = useSimulator((state) => state.trajectoryMarkers);
 
@@ -81,10 +83,7 @@ export const Simulation = () => {
 
 				</group>
 			))}
-			{simulatorState.showWorkArea && (() => {
-				const { workAreaMin, workAreaMax } = robartState.limits ?? defaultLimits;
-				return <Line points={boxEdges(workAreaMin, workAreaMax)} segments color="white" lineWidth={1} transparent opacity={0.5} />;
-			})()}
+			{simulatorState.showWorkArea && <Line points={workAreaEdges} segments color="white" lineWidth={1} transparent opacity={0.5} />}
 			{/* Each robot's whole planned flight, in its group's color; drones that never move have no line */}
 			{simulatorState.showPaths && Object.entries(simulatorState.plannedPaths)
 				.filter(([, points]) => points.some((point) => !point.equals(points[0])))
@@ -92,8 +91,7 @@ export const Simulation = () => {
 					<Line
 						key={`path-${robotId}`}
 						points={points}
-						color={Object.values(robartState.timelineState.groups)
-							.find((group) => group.id !== allDronesGroupId && robotId in group.robots)?.color ?? '#9ca3af'}
+						color={robotGroup(robartState.timelineState.groups, robotId)?.color ?? noGroupColor}
 						lineWidth={1.5}
 						transparent
 						opacity={0.6}

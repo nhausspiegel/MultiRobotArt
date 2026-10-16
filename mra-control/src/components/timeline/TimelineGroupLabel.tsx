@@ -3,7 +3,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import clsx from 'clsx';
 import React, {type DragEvent, useState} from 'react';
 
-import {allDronesGroupId} from '../../state/groupMigration';
+import {allDronesGroupId, noGroupColor} from '../../state/groupMigration';
 import {type TimelineGroupState, useRobartState} from '../../state/useRobartState';
 import {useUIState} from '../../state/useUIState';
 import {ConfirmationModal} from '../modal/ConfirmationModal';
@@ -11,7 +11,6 @@ import {RenamableText} from '../utils/RenamableText';
 
 // Drag data type for robot name tags. Lanes accept blocks (text/plain) and ignore it.
 const robotDragType = 'application/x-robart-robot';
-const defaultGroupColor = '#9ca3af';
 
 const acceptRobotDrop = (onRobot: (robotId: string) => void) => ({
 	onDragOver: (e: DragEvent) => {
@@ -77,7 +76,7 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 		);
 	}
 
-	const color = group.color ?? defaultGroupColor;
+	const color = group.color ?? noGroupColor;
 	const robotIds = Object.keys(group.robots);
 
 	if (group.collapsed) {

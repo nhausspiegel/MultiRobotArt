@@ -18,16 +18,15 @@ export const blockRepeat: RobartBlockDefinition = {
 			this.setHelpUrl('');
 		},
 	},
+	// (An empty body writes no code at all: hasEmptySlot in ../index.ts)
 	pythonGenerator: (block, python) => {
 		const body = python.statementToCode(block, 'body');
-		if (body.trim() === '') return '';
 		// Exported commands wait until they finish, so the loop runs them in turn like the simulator's copies
 		return `for _ in range(${block.getFieldValue('times') as number}):\n${body}`;
 	},
 	javascriptGenerator: (block, js) => {
 		// The simulator runs block code one line (one command) at a time, so the loop is written out instead
 		const lines = js.statementToCode(block, 'body').split('\n').map((line) => line.trim()).filter((line) => line !== '');
-		if (lines.length === 0) return '';
 		return lines.map((line) => `${line}\n`).join('').repeat(block.getFieldValue('times') as number);
 	},
 };

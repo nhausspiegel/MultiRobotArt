@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import {Button, Modal} from 'flowbite-react';
 import React, {useState} from 'react';
 
-import {allDronesGroupId} from '../../state/groupMigration';
+import {allDronesGroupId, noGroupColor, robotGroup} from '../../state/groupMigration';
 import {useRobartState} from '../../state/useRobartState';
 import {useUIState} from '../../state/useUIState';
 import {ConfirmationModal} from '../modal/ConfirmationModal';
@@ -47,7 +47,7 @@ const GroupSelect = ({robotId}: {robotId: string}) => {
 	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
 	// Every drone is in exactly one group besides All drones
 	const otherGroups = Object.values(groups).filter((group) => group.id !== allDronesGroupId);
-	const currentGroup = otherGroups.find((group) => robotId in group.robots);
+	const currentGroup = robotGroup(groups, robotId);
 
 	return (
 		<div className="flex items-center gap-3">
@@ -55,7 +55,7 @@ const GroupSelect = ({robotId}: {robotId: string}) => {
 			<select
 				id="drone-group"
 				className="rounded border-gray-300"
-				style={{borderLeft: `8px solid ${currentGroup?.color ?? '#9ca3af'}`}}
+				style={{borderLeft: `8px solid ${currentGroup?.color ?? noGroupColor}`}}
 				value={currentGroup?.id}
 				onChange={(e) => {
 					setRobotGroup(robotId, e.target.value);

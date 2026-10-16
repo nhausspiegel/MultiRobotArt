@@ -80,11 +80,19 @@ export const Timeline = () => {
 	// Item lengths come from simulating the show; redo it shortly after the timeline, blocks or robots change.
 	useEffect(() => {
 		let timer: ReturnType<typeof setTimeout>;
+		// Measuring writes the lengths it found, which isn't a change to measure again
+		let measuring = false;
 		const remeasure = () => {
 			clearTimeout(timer);
 			timer = setTimeout(() => {
 				const {status, time, measureShowLength, seek} = useSimulator.getState();
-				measureShowLength();
+				measuring = true;
+				try {
+					measureShowLength();
+				} finally {
+					measuring = false;
+				}
+
 				// Measuring rewinds to the start; put a paused or running simulation back where it was
 				if (status !== 'STOPPED') seek(time);
 			}, 300);
@@ -92,6 +100,7 @@ export const Timeline = () => {
 
 		remeasure();
 		const unsubscribe = useRobartState.subscribe((state, previous) => {
+			if (measuring) return;
 			if (state.timelineState.groups !== previous.timelineState.groups || state.blocks !== previous.blocks || state.robots !== previous.robots
 				|| state.boundingBoxSize !== previous.boundingBoxSize || state.limits !== previous.limits) {
 				remeasure();

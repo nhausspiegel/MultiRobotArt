@@ -8,7 +8,7 @@ import { immer } from 'zustand/middleware/immer';
 import { Queue } from 'queue-typescript';
 import { type SimulatorGroupState } from './simulatorCommands';
 import * as SIM from './simulatorCommands';
-import { defaultBoundingBoxSize, defaultLimits, type Limits, type RobotState, useRobartState } from './useRobartState';
+import { type Limits, type RobotState, useRobartState } from './useRobartState';
 import * as traj from './trajectories';
 import { collisionWarning, overlappingPairs, speedWarning, type TimedWarning, workAreaWarning } from './warnings';
 export const fps = 60;
@@ -303,8 +303,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			};
 			// Each step: robots whose bounding boxes (size from Settings) overlap, and robots over the speed limit or outside the
 			// work area (Settings). Warned once per stretch, not once per frame.
-			const boxSize = useRobartState.getState().boundingBoxSize ?? defaultBoundingBoxSize;
-			const limits = useRobartState.getState().limits ?? defaultLimits;
+			const { boundingBoxSize: boxSize, limits } = useRobartState.getState();
 			const workArea = workAreaBox(limits);
 			const robotNames = useRobartState.getState().robots;
 			const nameOf = (robotId: string) => robotNames[robotId]?.name ?? 'Deleted robot';

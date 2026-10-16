@@ -3,6 +3,11 @@ import type {MRAState, RobotState, TimelineGroupState} from './useRobartState';
 // The lane whose blocks run on every robot. Kept as groupAllCFs so older projects and exported file names still match.
 export const allDronesGroupId = 'groupAllCFs';
 
+// A robot's group besides All drones (it's in at most one), and the color shown for a robot in none
+export const robotGroup = (groups: Record<string, TimelineGroupState>, robotId: string) =>
+	Object.values(groups).find((group) => group.id !== allDronesGroupId && robotId in group.robots);
+export const noGroupColor = '#9ca3af';
+
 export const groupColors = ['#ef4444', '#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 // First palette color no group uses yet; cycles once all are taken
