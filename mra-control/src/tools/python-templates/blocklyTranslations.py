@@ -6,7 +6,6 @@ import rclpy
 import random
 import time
 from crazyflieLoggers import *
-import rowan
 
 import traceback
 
@@ -291,10 +290,26 @@ def parametric(groupState, x, y, z, start_t, end_t, duration):
             cf.cmdPosition(initPos + offset)
         timeHelper.sleepForRate(Hz)
 
-    # Like execute_commands: stop streaming, then hold the end position with the high-level commander
     for initPos, cf in zip(initialPositions, crazyflies):
-        cf.notifySetpointsStop()
-        cf.goTo(initPos + path_at(end_t) - path_start, 0, 2.0)
+        _hand_back(cf, initPos + path_at(end_t) - path_start)
+
+
+def _hand_back(cf, position):
+    """After streaming positions: hand control back to the high-level commander, which holds the drone at position"""
+    cf.notifySetpointsStop()
+    cf.goTo(position, 0, 2.0)
+
+
+def _command_goal(command, position):
+    """Where a recorded command takes a drone that's at position; None for one that doesn't move it"""
+    if command.command == "goTo":
+        vector = np.array(command.position, dtype=float)
+        return position + vector if command.relative else vector
+    if command.command in ("takeoff", "land"):
+        return np.array([position[0], position[1], command.height], dtype=float)
+    if command.command == "cmdPos":
+        return np.array(command.position, dtype=float)
+    return None
 
 
 # Trajectory Modifiers...
@@ -341,35 +356,29 @@ def _replay(groupState, recording, transform, time_scale=1.0):
         for drone in drones:
             sent = drone.commands[i]
             moved = lambda point: transform(drone.start, np.array(point, dtype=float))
-            if sent.command == "goTo":
-                vector = np.array(sent.position, dtype=float)
-                goal = drone.position + vector if sent.relative else vector
-                if sent.relative:
-                    drone.cf.goTo(moved(goal) - moved(drone.position), sent.yaw, sent.duration * time_scale, relative=True)
-                else:
-                    drone.cf.goTo(moved(goal), sent.yaw, sent.duration * time_scale)
-            elif sent.command in ("takeoff", "land"):
-                goal = np.array([drone.position[0], drone.position[1], sent.height], dtype=float)
-                drone.cf.goTo(moved(goal), 0, sent.duration * time_scale)
-            elif sent.command == "cmdPos":
-                goal = np.array(sent.position, dtype=float)
-                drone.cf.cmdPosition(moved(goal))
-            else:
+            goal = _command_goal(sent, drone.position)
+            if goal is None:
                 if sent.command == "setLEDColor":
                     drone.cf.setLEDColor(*sent.color)
                 elif sent.command == "notifySetpointsStop":
                     drone.cf.notifySetpointsStop()
                 continue
+            if sent.command == "goTo" and sent.relative:
+                drone.cf.goTo(moved(goal) - moved(drone.position), sent.yaw, sent.duration * time_scale, relative=True)
+            elif sent.command == "goTo":
+                drone.cf.goTo(moved(goal), sent.yaw, sent.duration * time_scale)
+            elif sent.command == "cmdPos":
+                drone.cf.cmdPosition(moved(goal))
+            else:
+                drone.cf.goTo(moved(goal), 0, sent.duration * time_scale)
             drone.position = goal
         if command.command in ("goTo", "takeoff", "land", "cmdPos", "notifySetpointsStop"):
             streaming = command.command == "cmdPos"
     _sleep_until(timeHelper, begin + recording.duration * time_scale)
-    # Ended streaming positions: hand control back to the high-level commander and hold the end, like circle() and
-    # parametric() do
+    # Ended streaming positions, like parametric() does
     if streaming:
         for drone in drones:
-            drone.cf.notifySetpointsStop()
-            drone.cf.goTo(transform(drone.start, drone.position), 0, 2.0)
+            _hand_back(drone.cf, transform(drone.start, drone.position))
 
 
 def negate(groupState, command):
@@ -457,14 +466,8 @@ def _recorded_path(recording, simCF):
         if command.command == "setLEDColor":
             leds.append((at, command.color))
             continue
-        if command.command == "goTo":
-            vector = np.array(command.position, dtype=float)
-            goal = position + vector if command.relative else vector
-        elif command.command in ("takeoff", "land"):
-            goal = np.array([position[0], position[1], command.height], dtype=float)
-        elif command.command == "cmdPos":
-            goal = np.array(command.position, dtype=float)
-        else:
+        goal = _command_goal(command, position)
+        if goal is None:
             continue
         moving = None
         if command.command != "cmdPos" and command.duration > 0:
@@ -538,8 +541,7 @@ def addTrajectories(groupState, command1, command2, add=True):
         send_leds(drone, duration)
         end = position_at(drone, 1.0)
         drone.cf.cmdPosition(end)
-        drone.cf.notifySetpointsStop()
-        drone.cf.goTo(end, 0, 2.0)
+        _hand_back(drone.cf, end)
 
 
 def subtractTrajectories(groupState, command1, command2, add=False):

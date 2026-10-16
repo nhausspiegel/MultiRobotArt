@@ -11,13 +11,13 @@ import numpy as np
 
 source = pathlib.Path(__file__).parent.parent / "src/tools/python-templates/blocklyTranslations.py"
 module = ast.parse(source.read_text())
-wanted = {"_parametric_names", "_parametric_function", "parametric"}
+wanted = {"_parametric_names", "_parametric_function", "parametric", "_hand_back"}
 nodes = [
     node for node in module.body
     if (isinstance(node, ast.FunctionDef) and node.name in wanted)
     or (isinstance(node, ast.Assign) and any(getattr(target, "id", None) in wanted for target in node.targets))
 ]
-assert len(nodes) == 3, "parametric code not found"
+assert len(nodes) == len(wanted), "parametric code not found"
 
 
 class FakeCrazyflie:

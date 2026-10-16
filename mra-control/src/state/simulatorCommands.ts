@@ -41,21 +41,15 @@ export const goToXyzSpeed = (groupState: SimulatorGroupState, x: number, y: numb
 
 // The color is part of the trajectory, so it changes when the trajectory plays (advance() applies it), also when it's
 // inside a modifier
-export const setColor = (groupState: SimulatorGroupState, r = 0, g = 0, b = 0): [number, Map<string, Trajectory>] => {
-	const trajectories = new Map<string, Trajectory>();
-	groupState.robotIDs.forEach((robotID) => {
-		const robot = useSimulator.getState().robots[robotID];
-		if (robot) trajectories.set(robotID, new Hover(robot.pos.clone(), 0.1, new Color(r, g, b)));
-	});
-	return [0.1, trajectories]; // There is actually a cost to switching LEDs
-};
+// (There is actually a cost to switching LEDs: 0.1 s.)
+export const setColor = (groupState: SimulatorGroupState, r = 0, g = 0, b = 0) => hover(groupState, 0.1, new Color(r, g, b));
 
-// The robots hold where they are for the duration
-export const hover = (groupState: SimulatorGroupState, duration: number): [number, Map<string, Trajectory>] => {
+// The robots hold where they are for the duration, changing color at the start if one is given
+export const hover = (groupState: SimulatorGroupState, duration: number, color?: Color): [number, Map<string, Trajectory>] => {
 	const trajectories = new Map<string, Trajectory>();
 	groupState.robotIDs.forEach((robotId) => {
 		const robot = useSimulator.getState().robots[robotId];
-		if (robot) trajectories.set(robotId, new Hover(robot.pos.clone(), duration));
+		if (robot) trajectories.set(robotId, new Hover(robot.pos.clone(), duration, color));
 	});
 	return [duration, trajectories];
 };

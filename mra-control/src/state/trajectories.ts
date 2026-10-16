@@ -252,9 +252,12 @@ const parametricScope = {
 export const compileExpression = (expression: string): ((t: number) => number) => {
 	try {
 		const run = new SandboxClass().compile<number>(`return (${expression});`);
+		// One scope, t updated per call: building a new one each call doubled the cost of measuring parametric paths
+		const scope = {...parametricScope, t: 0};
 		return (t: number) => {
 			try {
-				const value = Number(run({...parametricScope, t}).run());
+				scope.t = t;
+				const value = Number(run(scope).run());
 				return Number.isFinite(value) ? value : 0;
 			} catch {
 				return 0;
@@ -455,17 +458,20 @@ export class TranslationTrajectory extends Trajectory {
 			return this.initialPosition.clone().addScaledVector(this.offset, ease);
 		}
 
-		const originalDuration = this.originalTrajectory.duration;
-		const originalT = originalDuration > 0 ? Math.min(1, (elapsed - this.travelDuration) / originalDuration) : 1;
-		return this.originalTrajectory.evaluate(originalT).clone().add(this.offset);
+		return this.originalTrajectory.evaluate(this.originalT(elapsed)).clone().add(this.offset);
 	}
 
 	// The original's color changes, after the travel to its shifted start
 	lastColor(t: number): ColorChange | undefined {
 		const elapsed = t * this.duration;
 		if (elapsed < this.travelDuration) return undefined;
+		const change = this.originalTrajectory.lastColor(this.originalT(elapsed));
+		return change && {t: (this.travelDuration + (change.t * this.originalTrajectory.duration)) / this.duration, color: change.color};
+	}
+
+	// Where the original is, elapsed seconds into this trajectory (after the travel)
+	private originalT(elapsed: number) {
 		const originalDuration = this.originalTrajectory.duration;
-		const change = this.originalTrajectory.lastColor(originalDuration > 0 ? Math.min(1, (elapsed - this.travelDuration) / originalDuration) : 1);
-		return change && {t: (this.travelDuration + (change.t * originalDuration)) / this.duration, color: change.color};
+		return originalDuration > 0 ? Math.min(1, (elapsed - this.travelDuration) / originalDuration) : 1;
 	}
 }

@@ -16,7 +16,7 @@ import numpy as np
 
 # The templates are imported from src; leave no __pycache__ there
 sys.dont_write_bytecode = True
-for name in ("rclpy", "rclpy.node", "rowan", "PIL"):
+for name in ("rclpy", "rclpy.node", "PIL"):
     sys.modules[name] = types.ModuleType(name)
 sys.modules["rclpy.node"].Node = lambda name: None
 # Only "#rrggbb" to (r, g, b), which is all setLEDColorFromHex asks of it

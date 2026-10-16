@@ -137,7 +137,6 @@ class TimeHelperSimLogger:
     Does not actually sleep, but logs sleep durations to be used by a non-sim time helper
     """    
     def __init__(self):
-        self.times = []
         self.currTime = 0
 
     def time(self):
@@ -154,7 +153,6 @@ class TimeHelperSimLogger:
         Args:
             duration float: duration of sleep
         """        
-        self.times.append(self.currTime)
         self.currTime += duration
     
     def sleepForRate(self, Hz):
@@ -163,7 +161,6 @@ class TimeHelperSimLogger:
         Args:
             Hz float: rate to sleep at
         """        
-        self.times.append(self.currTime)
         self.currTime += 1/Hz
     
     def sleepUntil(self, time):
@@ -172,5 +169,4 @@ class TimeHelperSimLogger:
         Args:
             time float: time to sleep until (in seconds)
         """        
-        self.times.append(self.currTime)
         self.currTime = time
