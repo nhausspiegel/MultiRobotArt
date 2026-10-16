@@ -10,6 +10,7 @@ import { type SimulatorGroupState } from './simulatorCommands';
 import * as SIM from './simulatorCommands';
 import { type Limits, type RobotState, useRobartState } from './useRobartState';
 import * as traj from './trajectories';
+import { commandLines } from '../config/customBlocks/BlockDefinition';
 import { collisionWarning, overlappingPairs, speedWarning, type TimedWarning, workAreaWarning } from './warnings';
 export const fps = 60;
 
@@ -42,7 +43,8 @@ export type RobotSimState = {
 	trajectoryDuration: number;
 	timeAlongTrajectory: number;
 	trajectoryStartTime: number;
-	trajectoryQueue: Queue<{ line: string; itemId: string }>;
+	// Block code lines to run, with the timeline item each came from and when that item starts
+	trajectoryQueue: Queue<{ line: string; itemId: string; start: number }>;
 };
 
 export type TrajectorySimState = {
@@ -158,8 +160,7 @@ export type SimulatorActions = {
    * @returns
    */
 	setRobots: (robots: Record<string, RobotState>) => void;
-	updateTrajectory: (robotId: string, trajectory: traj.Trajectory, duration: number) => void;
-	addTrajectory: (robotId: string, trajectory: string, itemId: string) => void;
+	addTrajectory: (robotId: string, trajectory: string, itemId: string, start: number) => void;
 	getMostRecentTrajectory: (robotId: string, time: number) => [traj.Trajectory | undefined, number];
 	robotGoTo: (robotId: string, position: THREE.Vector3, velocity: THREE.Vector3, acceleration: THREE.Vector3, duration: number) => traj.Trajectory;
 	robotCircle: (robotId: string, radius?: number, axes?: string[], radians?: number, clockwise?: boolean, duration?: number) => traj.Trajectory;
@@ -212,7 +213,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				const item = pendingItems.shift();
 				item.lines.forEach((line) => {
 					item.robotIds.forEach((robotId) => {
-						get().addTrajectory(robotId, line, item.itemId);
+						get().addTrajectory(robotId, line, item.itemId, item.time);
 					});
 				});
 			}
@@ -225,50 +226,52 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			Object.keys(robots).forEach((robotId) => {
 				if (robots[robotId] == undefined)
 					return;
+				const robot = { ...robots[robotId] };
+				let moved = false;
+				// Seconds of this step left for this robot. A command that ends partway through the step hands the rest to the
+				// next one, so a run of short commands takes exactly what they add up to, like the exported Python's waits.
+				let remaining = deltaT;
+				for (;;) {
+					if (!(robot.trajectory?.duration > 0)) {
+						if (robot.trajectoryQueue.length === 0) break;
+						// The next queued command, from where the robot is now: commands read its position from the store. Every
+						// robot in a group has the group's lines queued, so each line runs for its own robot only.
+						set({ robots: { ...get().robots, [robotId]: robot } });
+						const next = robot.trajectoryQueue.dequeue();
+						runningItemIds[robotId] = next.itemId;
+						// Not before its timeline item starts, which can be partway through this step
+						remaining = Math.min(remaining, newSimTime - next.start);
+						// A command that fails (e.g. a modifier block with nothing inside) is skipped instead of stopping the simulation
+						try {
+							const trajectory = runCommand(next.line, robotId)[1].get(robotId);
+							if (trajectory) Object.assign(robot, { trajectory, timeAlongTrajectory: 0, trajectoryStartTime: newSimTime - remaining });
+						} catch (error) {
+							console.warn('Skipped a block command that failed:', next.line, error);
+						}
 
-				// The next queued command, once the current one is done. Every robot in a group has the group's lines queued,
-				// so each line runs for its own robot only.
-				if (robots[robotId].trajectoryQueue.length > 0 && robots[robotId].trajectory.duration <= 0) {
-					const next = robots[robotId].trajectoryQueue.dequeue();
-					runningItemIds[robotId] = next.itemId;
-					// A command that fails (e.g. a modifier block with nothing inside) is skipped instead of stopping the simulation
-					try {
-						const [duration, trajectories] = runCommand(next.line, robotId);
-						const trajectory = trajectories.get(robotId);
-						if (trajectory) get().updateTrajectory(robotId, trajectory, duration);
-					} catch (error) {
-						console.warn('Skipped a block command that failed:', next.line, error);
+						continue;
 					}
+
+					const { trajectory } = robot;
+					const timeLeft = (1 - robot.timeAlongTrajectory) * trajectory.duration;
+					const finishes = remaining >= timeLeft - 1e-9;
+					// Not past the end: trajectories extrapolate there
+					robot.timeAlongTrajectory = finishes ? 1 : robot.timeAlongTrajectory + (remaining / trajectory.duration);
+					robot.pos = trajectory.evaluate(robot.timeAlongTrajectory);
+					// LED color changes are part of trajectories (setColor), so they happen when the trajectory reaches them
+					robot.color = trajectory.lastColor?.(robot.timeAlongTrajectory)?.color ?? robot.color;
+					moved = true;
+					remaining = finishes ? Math.max(0, remaining - timeLeft) : 0;
+					itemEndTimes[runningItemIds[robotId]] = newSimTime - remaining;
+					if (!finishes) break;
+					robot.trajectory = nullTrajectory;
+					robot.timeAlongTrajectory = 0;
 				}
 
-				// if trajectory doesn't exist or has non-positive duration, do nothing
-				if (get().robots[robotId]?.trajectory.duration === undefined || get().robots[robotId].trajectory.duration <= 0) {
-					return;
-				}
-
-				const trajectoryTime = get().robots[robotId].timeAlongTrajectory + deltaT / get().robots[robotId].trajectory?.duration;
-				// Not past the end: trajectories extrapolate there, so the last step overshot the target (by more for shorter moves)
-				const newPos = get().robots[robotId].trajectory.evaluate(Math.min(trajectoryTime, 1));
-				itemEndTimes[runningItemIds[robotId]] = newSimTime;
-
-				robots[robotId] = {
-					...robots[robotId],
-					pos: newPos,
-					timeAlongTrajectory: trajectoryTime,
-					trajectory: get().robots[robotId].trajectory,
-					trajectoryStartTime: get().robots[robotId].trajectoryStartTime,
-				};
-				if (robots[robotId].timeAlongTrajectory >= 1) {
-					robots[robotId].trajectory = nullTrajectory;
-					robots[robotId].timeAlongTrajectory = 0;
-				}
-
-				// LED color changes are part of trajectories (setColor), so they happen when the trajectory reaches them
-				robots[robotId].color = get().robots[robotId].trajectory.lastColor?.(Math.min(trajectoryTime, 1))?.color ?? get().robots[robotId].color;
-
-				if (markerFrequency !== 0 && time % markerFrequency < deltaT) {
+				robots[robotId] = robot;
+				if (moved && markerFrequency !== 0 && time % markerFrequency < deltaT) {
 					if (trajectoryMarkers === currentMarkers) trajectoryMarkers = currentMarkers.slice();
-					trajectoryMarkers.push({ position: new THREE.Vector3().copy(robots[robotId].pos), color: robots[robotId].color, id: robotId + time });
+					trajectoryMarkers.push({ position: new THREE.Vector3().copy(robot.pos), color: robot.color, id: robotId + time });
 				}
 			});
 
@@ -382,7 +385,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			get().setRobots({ standIn: { id: 'standIn', name: 'standIn', type: 'crazyflie', startingPosition: [0, 0, 0] } });
 			itemEndTimes = {};
 			pendingItems.length = 0;
-			pendingItems.push({ itemId: 'standIn', time: 0, robotIds: ['standIn'], lines: javaScript.split('\n').filter((line) => line.length > 0) });
+			pendingItems.push({ itemId: 'standIn', time: 0, robotIds: ['standIn'], lines: commandLines(javaScript) });
 			while (!isFinished(get().robots) && get().time < maxShowLength) {
 				get().advance(1 / fps);
 			}
@@ -414,25 +417,16 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					trajectoryDuration: -1,
 					trajectories: new Map<string, traj.Trajectory[]>,
 					trajectoryStartTime: -1,
-					trajectoryQueue: new Queue<{ line: string; itemId: string }>,
+					trajectoryQueue: new Queue<{ line: string; itemId: string; start: number }>,
 				};
 			});
 			set({ robots: simRobots });
 		},
-		updateTrajectory: (robotId, trajectory, duration) => {
-			set((state) => {
-				if (state.robots[robotId] !== undefined)
-					state.robots[robotId].timeAlongTrajectory = 0;
-				state.robots[robotId].trajectory = trajectory;
-				state.robots[robotId].trajectoryDuration = duration;
-				state.robots[robotId].trajectoryStartTime = state.time;
-			});
-		},
-		addTrajectory: (robotId, javascriptLine, itemId) => {
+		addTrajectory: (robotId, javascriptLine, itemId, start) => {
 			// Add trajectory to trajectories Map
 			set((state) => {
 				if (state.robots[robotId] !== undefined)
-					state.robots[robotId].trajectoryQueue.enqueue({ line: javascriptLine, itemId });
+					state.robots[robotId].trajectoryQueue.enqueue({ line: javascriptLine, itemId, start });
 			});
 		},
 		getMostRecentTrajectory: (robotId: string, time: number): [traj.Trajectory | undefined, number] => {
@@ -526,7 +520,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 						itemId: timelineItem.id,
 						time: timelineItem.startTime,
 						robotIds: Object.keys(group.robots),
-						lines: blocks[timelineItem.blockId].javaScript.split('\n').filter((line) => line.length > 0),
+						lines: commandLines(blocks[timelineItem.blockId].javaScript),
 					});
 				});
 			});

@@ -36,3 +36,7 @@ export type RobartBlockDefinition = {
 // Whether generated code does nothing: blank, or only comments (Blockly writes a block's comment as a // or # line even
 // when the block itself writes no code). A block, or a slot, holding only such code counts as empty.
 export const writesNoCode = (code: string) => code.split('\n').every((line) => /^\s*(\/\/.*|#.*)?$/.test(line));
+
+// Simulator code as the commands it runs, one per line: without blank lines or comments (Blockly writes a block's comment
+// as a // line, which ran as a command that failed)
+export const commandLines = (code: string) => code.split('\n').map((line) => line.trim()).filter((line) => line !== '' && !line.startsWith('//'));

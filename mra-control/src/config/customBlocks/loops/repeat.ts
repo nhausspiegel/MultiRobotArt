@@ -1,4 +1,4 @@
-import {type RobartBlockDefinition} from '../BlockDefinition';
+import {commandLines, type RobartBlockDefinition} from '../BlockDefinition';
 import * as Blockly from 'blockly';
 
 export const blockRepeat: RobartBlockDefinition = {
@@ -26,7 +26,6 @@ export const blockRepeat: RobartBlockDefinition = {
 	},
 	javascriptGenerator: (block, js) => {
 		// The simulator runs block code one line (one command) at a time, so the loop is written out instead
-		const lines = js.statementToCode(block, 'body').split('\n').map((line) => line.trim()).filter((line) => line !== '');
-		return lines.map((line) => `${line}\n`).join('').repeat(block.getFieldValue('times') as number);
+		return commandLines(js.statementToCode(block, 'body')).map((line) => `${line}\n`).join('').repeat(block.getFieldValue('times') as number);
 	},
 };
