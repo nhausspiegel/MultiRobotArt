@@ -1,7 +1,6 @@
 import {faSync} from '@fortawesome/free-solid-svg-icons';
 import {Button, Checkbox, Label, Modal, Tabs, TabsRef, TextInput} from 'flowbite-react';
-import clsx from 'clsx';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {CancelButton} from '../../components/buttons/CancelButton';
 import {IconButton} from '../../components/buttons/IconButton';
@@ -9,50 +8,16 @@ import {ConfirmationModal} from '../../components/modal/ConfirmationModal';
 import {useRobartState} from '../../state/useRobartState';
 import {useUIState} from '../../state/useUIState';
 import {CurveEditorModal} from '../curveEditor/CurveEditorModal';
-import {type Group} from 'three';
 import { useSimulator } from '@MRAControl/state/useSimulator';
 import { Crazyflie, CrazyflieProps } from '@MRAControl/components/vector/Crazyflie';
+import {fieldClass, isNumber, isPositiveNumber, XyzInputs} from '../../components/utils/XyzInputs';
 
-const isPositiveNumber = (value: string) => value.trim() !== '' && Number(value) > 0;
-
-// The boxes keep whatever is typed; the size is only saved while all three are positive numbers
+// The size is only saved while all three are positive numbers
 const BoundingBoxSizeEditor = () => {
 	const size = useRobartState((state) => state.boundingBoxSize);
 	const setSize = useRobartState((state) => state.setBoundingBoxSize);
-	const [values, setValues] = useState(size.map(String));
-	// Follow changes made elsewhere (Reset Project, Load Project), but not the ones typed here
-	useEffect(() => {
-		if (!values.every((value, i) => Number(value) === size[i])) setValues(size.map(String));
-	}, [size]);
-
-	return (
-		<div>
-			<div className="mb-1 font-bold">Bounding box dimensions (m):</div>
-			<div className="flex gap-3">
-				{['x', 'y', 'z'].map((axis, i) => (
-					<label key={axis} className="flex items-center gap-1">
-						{axis}
-						<input
-							// border: preflight zeroes input border widths, so a color alone draws nothing
-							className={clsx('w-20 rounded px-2 py-1', isPositiveNumber(values[i]) ? 'border border-gray-300' : 'border-2 border-red-500')}
-							inputMode="decimal"
-							value={values[i]}
-							onChange={(e) => {
-								const next = values.map((value, j) => (j === i ? e.target.value : value));
-								setValues(next);
-								if (next.every(isPositiveNumber)) setSize(next.map(Number) as [number, number, number]);
-							}}
-						/>
-					</label>
-				))}
-			</div>
-		</div>
-	);
+	return <XyzInputs title="Bounding box dimensions (m):" value={size} isValid={isPositiveNumber} onSave={setSize} />;
 };
-
-const isNumber = (value: string) => value.trim() !== '' && Number.isFinite(Number(value));
-// border: preflight zeroes input border widths, so a color alone draws nothing
-const fieldClass = (valid: boolean) => clsx('w-20 rounded px-2 py-1 disabled:opacity-50', valid ? 'border border-gray-300' : 'border-2 border-red-500');
 
 // What measuring the show warns about. Like the box size, fields keep whatever is typed and are only saved while valid.
 const LimitsEditor = () => {
@@ -132,8 +97,6 @@ export const SettingsModal = () => {
 	const projectName = useRobartState((state) => state.projectName);
 	const setProjectName = useRobartState((state) => state.setProjectName);
 	const toggleCurveEditor = useUIState((state) => state.toggleCurveEditor);
-	const marker = useRef<Group>(null!);
-	const robots = useSimulator((state) => state.robots);
 
 	const [confirmOpen, setConfirmOpen] = useState(false);
 	const renderBoundingBoxes = useSimulator((state) => state.renderBoundingBoxes);

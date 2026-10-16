@@ -3,23 +3,22 @@ import {fps, useSimulator} from '@MRAControl/state/useSimulator';
 import {laneOverlapWarnings} from '@MRAControl/state/warnings';
 import {faTriangleExclamation} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useMemo, useRef} from 'react';
 
 import {formatTime} from '../timeline/SimulationOptions';
 
 // The warnings up to the playhead, oldest first, so scrubbing back hides later ones. Both this corner list and the
 // Warnings tab show these.
 export const useReachedWarnings = () => {
-	const time = useSimulator((state) => state.time);
-	const atStart = useSimulator((state) => state.status === 'STOPPED' && state.time === 0);
 	const timedWarnings = useSimulator((state) => state.timedWarnings);
 	const overlapWarnings = useRobartState(laneOverlapWarnings);
-	if (atStart) return [];
-	return [...timedWarnings, ...overlapWarnings]
-		// One step of slack: warnings are timed in measuring's 1/fps steps, and playback (in screen frames) can finish a
-		// moment before the step a warning at the very end landed on
-		.filter((warning) => warning.time <= time + 1 / fps)
-		.sort((a, b) => a.time - b.time);
+	const all = useMemo(() => [...timedWarnings, ...overlapWarnings].sort((a, b) => a.time - b.time), [timedWarnings, overlapWarnings]);
+	// How many are reached, rather than the time: a number re-renders only when it changes, not every frame of playback.
+	// One step of slack: warnings are timed in measuring's 1/fps steps, and playback (in screen frames) can finish a
+	// moment before the step a warning at the very end landed on.
+	const reached = useSimulator((state) => (state.status === 'STOPPED' && state.time === 0
+		? 0 : all.filter((warning) => warning.time <= state.time + 1 / fps).length));
+	return useMemo(() => all.slice(0, reached), [all, reached]);
 };
 
 // Corner list of the reached warnings, newest at the bottom, so they're noticed while watching. Scrolls when longer than

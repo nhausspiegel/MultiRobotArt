@@ -21,7 +21,8 @@ export const useShowEnd = () => {
 		Object.values(group.items).map((item) => (item.id === drag?.itemId ? drag.startTime : item.startTime) + item.duration))));
 };
 
-export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}) => {
+// Memoized: dragging an item re-renders its lane on every pointer move, and the other items' props stay the same
+export const TimelineBlock = React.memo(function TimelineBlock({item, scale}: {item: TimelineItem; scale: number}) {
 	const blockName = useRobartState((state) => state.blocks[item.blockId]?.name);
 	// The block's color, as in the block list
 	const color = useRobartState((state) => (state.blocks[item.blockId] ? blockColor(state.blocks[item.blockId]) : undefined));
@@ -93,4 +94,4 @@ export const TimelineBlock = ({item, scale}: {item: TimelineItem; scale: number}
 			<span className="block overflow-hidden text-ellipsis whitespace-nowrap">{blockName}</span>
 		</div>
 	);
-};
+});

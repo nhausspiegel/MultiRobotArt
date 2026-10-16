@@ -1,4 +1,3 @@
-import clsx from 'clsx';
 import {Button, Modal} from 'flowbite-react';
 import React, {useState} from 'react';
 
@@ -7,39 +6,15 @@ import {useRobartState} from '../../state/useRobartState';
 import {useUIState} from '../../state/useUIState';
 import {ConfirmationModal} from '../modal/ConfirmationModal';
 import {RenamableText} from '../utils/RenamableText';
+import {XyzInputs, isNumber} from '../utils/XyzInputs';
 
-const axes = ['x', 'y', 'z'];
-const isNumber = (value: string) => value.trim() !== '' && Number.isFinite(Number(value));
-
-// The boxes keep whatever is typed; the drone is only updated while all three are numbers
+// The drone is only updated while all three are numbers
 const StartingPosition = ({robotId}: {robotId: string}) => {
 	const startingPosition = useRobartState((state) => state.robots[robotId].startingPosition);
 	const saveRobot = useRobartState((state) => state.saveRobot);
-	const [values, setValues] = useState(startingPosition.map(String));
-
-	return (
-		<div>
-			<div className="mb-1 font-bold">Starting position</div>
-			<div className="flex gap-3">
-				{axes.map((axis, i) => (
-					<label key={axis} className="flex items-center gap-1">
-						{axis}
-						<input
-							// border: preflight zeroes input border widths, so a color alone draws nothing
-							className={clsx('w-20 rounded px-2 py-1', isNumber(values[i]) ? 'border border-gray-300' : 'border-2 border-red-500')}
-							inputMode="decimal"
-							value={values[i]}
-							onChange={(e) => {
-								const next = values.map((value, j) => (j === i ? e.target.value : value));
-								setValues(next);
-								if (next.every(isNumber)) saveRobot(robotId, {startingPosition: next.map(Number) as [number, number, number]});
-							}}
-						/>
-					</label>
-				))}
-			</div>
-		</div>
-	);
+	return <XyzInputs title="Starting position" value={startingPosition} isValid={isNumber} onSave={(position) => {
+		saveRobot(robotId, {startingPosition: position});
+	}} />;
 };
 
 const GroupSelect = ({robotId}: {robotId: string}) => {

@@ -173,21 +173,33 @@ export const BlockEditorPanel = () => {
 			renderer: 'zelos', // Scratch's block look
 			sounds: false, // Blockly 12+ plays a click when a block is dropped
 		},
-		onWorkspaceChange: (workspaceChanged) => {
-			if (!loadedBlockId.current) return;
+		ref: workspaceRef,
+	});
+
+	// Saves the loaded block's layout and code as it's edited. Not on UI events (selecting, scrolling, zooming, starting a
+	// drag), which change neither and each regenerated all the code; but on opening or closing a comment, which the layout
+	// keeps.
+	useEffect(() => {
+		if (!workspace) return;
+		const save = (event: Blockly.Events.Abstract) => {
+			if (!loadedBlockId.current || (event.isUiEvent && event.type !== Blockly.Events.BUBBLE_OPEN)) return;
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-			const python = pythonGenerator.workspaceToCode(workspaceChanged) as string;
+			const python = pythonGenerator.workspaceToCode(workspace) as string;
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-			const javaScript = javascriptGenerator.workspaceToCode(workspaceChanged) as string;
-			// Read the layout from the workspace itself; the hook's xml copy updates 200 ms late, so saving it dropped the latest edit
-			const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspaceChanged));
-			// Blockly also reports selecting, scrolling and zooming; saving those anyway re-measured the whole show
+			const javaScript = javascriptGenerator.workspaceToCode(workspace) as string;
+			// Read the layout from the workspace itself; react-blockly's xml copy updates 200 ms late, so saving it dropped
+			// the latest edit
+			const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace));
+			// Unchanged (e.g. a block dropped back where it was): saving anyway re-measured the whole show
 			const saved = useRobartState.getState().blocks[loadedBlockId.current];
 			if (saved?.xml === xml && saved.python === python && saved.javaScript === javaScript) return;
 			saveBlock(loadedBlockId.current, {xml, python, javaScript});
-		},
-		ref: workspaceRef,
-	});
+		};
+		workspace.addChangeListener(save);
+		return () => {
+			workspace.removeChangeListener(save);
+		};
+	}, [workspace, saveBlock]);
 
 	// Multi-select (workspace-multiselect plugin): a drag on the background box-selects, Shift-drag on it pans, and Shift-click
 	// adds or removes a block
