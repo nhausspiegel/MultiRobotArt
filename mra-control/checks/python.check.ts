@@ -11,9 +11,7 @@ import * as Blockly from 'blockly';
 import {javascriptGenerator} from 'blockly/javascript';
 import {pythonGenerator} from 'blockly/python';
 import '@MRAControl/config/customBlocks';
-import * as SIM from '@MRAControl/state/simulatorCommands';
-import {type Trajectory} from '@MRAControl/state/trajectories';
-import {useSimulator} from '@MRAControl/state/useSimulator';
+import {runCommand, useSimulator} from '@MRAControl/state/useSimulator';
 
 type BlockJson = {type: string; fields?: Record<string, number | string>; inputs?: Record<string, {block: BlockJson}>; next?: {block: BlockJson}; icons?: Record<string, unknown>};
 type Sent = {t: number; command: string; pos?: number[]; duration?: number; height?: number; color?: number[]};
@@ -42,10 +40,7 @@ const fly = (block: BlockJson, start = [0, 0, 0]) => flyCode(codeOf(block).pytho
 // The simulator's code from the same start: its length, its position at any time, and its LED color changes
 const simulateCode = (javaScript: string, start: number[]) => {
 	useSimulator.getState().setRobots({drone: {id: 'drone', name: 'drone', type: 'crazyflie', startingPosition: start as [number, number, number]}});
-	// Named like in the simulator, for the block code
-	const simulator = SIM;
-	const groupState = {robotIDs: ['drone']};
-	const [duration, trajectories] = eval(javaScript) as [number, Map<string, Trajectory>];
+	const [duration, trajectories] = runCommand(javaScript.trim(), 'drone');
 	const trajectory = trajectories.get('drone')!;
 	// Each change's time (rounded to the millisecond) and color, as the simulator applies them while playing
 	const colors = new Map<string, number[]>();
@@ -54,7 +49,7 @@ const simulateCode = (javaScript: string, start: number[]) => {
 		if (change) colors.set((change.t * duration).toFixed(3), [change.color.r, change.color.g, change.color.b]);
 	}
 
-	return {duration, at: (t: number) => trajectory.evaluate(Math.min(t / duration, 1)), colors, simulator, groupState};
+	return {duration, at: (t: number) => trajectory.evaluate(Math.min(t / duration, 1)), colors};
 };
 
 // The firmware's go-to (and the simulator's robotGoTo): a degree 7 curve from rest to rest

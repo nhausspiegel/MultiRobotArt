@@ -1,6 +1,6 @@
 // Run: node --experimental-strip-types checks/collisions.check.ts (from mra-control)
 import assert from 'node:assert/strict';
-import {collisionWarning, overlappingPairs} from '../src/state/warnings.ts';
+import {collisionWarning, overlappingPairs, speedWarning, workAreaWarning} from '../src/state/warnings.ts';
 
 const box = [0.4, 0.4, 0.7];
 const at = (x: number, y: number, z: number) => ({x, y, z});
@@ -13,4 +13,6 @@ assert.deepEqual(overlappingPairs({a: at(0, 0, 1), b: at(0.4, 0, 1)}, box), []);
 assert.deepEqual(overlappingPairs({a: at(0, 0, 1), b: at(1, 0, 1), c: at(1.1, 0, 1)}, box), [['b', 'c']]);
 assert.equal(collisionWarning(4.2, 'CF 1', 'CF 2').short, 'CF 1 and CF 2 too close');
 assert.equal(collisionWarning(4.2, 'CF 1', 'CF 2').full, 'robots CF 1 and CF 2 came too close at time 4.20 (their bounding boxes overlapped).\n');
+assert.equal(speedWarning(3.87, 'CF 1', 1.094).full, 'robot CF 1 has violated a velocity constraint at time 3.87. It was travelling at 1.09 m/s.\n');
+assert.equal(workAreaWarning(3.6, 'CF 1', at(2.03, 0, 1)).short, 'CF 1 outside the work area');
 console.log('collisions ok');

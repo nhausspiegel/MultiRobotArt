@@ -8,11 +8,19 @@ import { immer } from 'zustand/middleware/immer';
 import { Queue } from 'queue-typescript';
 import { type SimulatorGroupState } from './simulatorCommands';
 import * as SIM from './simulatorCommands';
-import { defaultBoundingBoxSize, type RobotState, useRobartState } from './useRobartState';
+import { defaultBoundingBoxSize, defaultLimits, type Limits, type RobotState, useRobartState } from './useRobartState';
 import * as traj from './trajectories';
-import { useCrazyflieConstraintState } from './useConstraintState';
-import { collisionWarning, overlappingPairs, type TimedWarning } from './warnings';
+import { collisionWarning, overlappingPairs, speedWarning, type TimedWarning, workAreaWarning } from './warnings';
 export const fps = 60;
+
+// The work area from Settings, with 1 cm leeway so a robot resting on the floor (z = 0) counts as inside; undefined when
+// the check is off. Shared by the warning and the red hitbox.
+export const workAreaBox = ({ workAreaOn, workAreaMin, workAreaMax }: Limits) =>
+	(workAreaOn ? new THREE.Box3(new THREE.Vector3(...workAreaMin), new THREE.Vector3(...workAreaMax)).expandByScalar(0.01) : undefined);
+
+// Runs one line of block code, a call like simulator.takeoff(groupState, 1, 3), for one robot
+export const runCommand = (line: string, robotId: string): [number, Map<string, traj.Trajectory>] =>
+	new Function('simulator', 'groupState', `return (${line})`)(SIM, { robotIDs: [robotId] } satisfies SimulatorGroupState);
 
 // type TrajectoryPolynomial =
 //   | [THREE.Vector3, THREE.Vector3, THREE.Vector3, THREE.Vector3, THREE.Vector3, THREE.Vector3, THREE.Vector3, THREE.Vector3]
@@ -25,7 +33,6 @@ export const fps = 60;
 
 export type RobotSimState = {
 	id: string;
-	boundingBox?: THREE.Box3;
 	pos: THREE.Vector3;
 	vel: THREE.Vector3;
 	acc: THREE.Vector3;
@@ -151,8 +158,6 @@ export type SimulatorActions = {
    * @returns
    */
 	setRobots: (robots: Record<string, RobotState>) => void;
-	updateRobotBoundingBox: (robotId: string, boundingBox: THREE.Box3) => void;
-	checkCollisions: (robotId: string) => boolean;
 	updateTrajectory: (robotId: string, trajectory: traj.Trajectory, duration: number) => void;
 	addTrajectory: (robotId: string, trajectory: string, itemId: string) => void;
 	getMostRecentTrajectory: (robotId: string, time: number) => [traj.Trajectory | undefined, number];
@@ -212,66 +217,32 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				});
 			}
 
-			const { time, robots: currentRobots, markerFrequency } = get();
-			const trajectoryMarkers = get().trajectoryMarkers.slice();
+			const { time, robots: currentRobots, markerFrequency, trajectoryMarkers: currentMarkers } = get();
+			// Copied only when a marker is added: the list grows all show long
+			let trajectoryMarkers = currentMarkers;
 			const robots = { ...currentRobots };
 
-			const simulator = SIM;
-
-
-			const state = useCrazyflieConstraintState.getState();
-
-			const positionHistory = state.positionHistory;
-			positionHistory.push({ timestep: newSimTime, robotPositions: [] });
-			// update trajectories from most recent trajectory
 			Object.keys(robots).forEach((robotId) => {
 				if (robots[robotId] == undefined)
 					return;
 
-				// Every robot in a group has the group's lines queued, so each line runs for its own robot only.
-				// Must be named groupState: the eval'd block code references it.
-				const groupState: SimulatorGroupState = {
-					robotIDs: [robotId],
-				};
-
-				if (robots[robotId].timeAlongTrajectory >= 1) {
-					//switch trajectories
-					let newTraj: Map<string, traj.Trajectory>;
-					let duration = 0;
-					if (robots[robotId].trajectoryQueue.length > 0) {
-						const next = robots[robotId].trajectoryQueue.dequeue();
-						runningItemIds[robotId] = next.itemId;
-						// A command that fails (e.g. a modifier block with nothing inside) is skipped instead of stopping the simulation
-						try {
-							[duration, newTraj] = eval(next.line);
-							const trajectory = newTraj.get(robotId);
-							if (trajectory) get().updateTrajectory(robotId, trajectory, duration);
-						} catch (error) {
-							console.warn('Skipped a block command that failed:', next.line, error);
-						}
-					} else {
-						get().updateTrajectory(robotId, new traj.NullTrajectory(), -1);
-					}
-				} else if (robots[robotId].trajectoryQueue.length > 0 && robots[robotId].trajectory.duration <= 0) {
-					let newTraj: Map<string, traj.Trajectory>;
-					let duration = 0;
+				// The next queued command, once the current one is done. Every robot in a group has the group's lines queued,
+				// so each line runs for its own robot only.
+				if (robots[robotId].trajectoryQueue.length > 0 && robots[robotId].trajectory.duration <= 0) {
 					const next = robots[robotId].trajectoryQueue.dequeue();
 					runningItemIds[robotId] = next.itemId;
 					// A command that fails (e.g. a modifier block with nothing inside) is skipped instead of stopping the simulation
 					try {
-						[duration, newTraj] = eval(next.line);
-						const trajectory = newTraj.get(robotId);
+						const [duration, trajectories] = runCommand(next.line, robotId);
+						const trajectory = trajectories.get(robotId);
 						if (trajectory) get().updateTrajectory(robotId, trajectory, duration);
 					} catch (error) {
 						console.warn('Skipped a block command that failed:', next.line, error);
 					}
 				}
 
-
 				// if trajectory doesn't exist or has non-positive duration, do nothing
 				if (get().robots[robotId]?.trajectory.duration === undefined || get().robots[robotId].trajectory.duration <= 0) {
-					// Still recorded, so a drone left outside the work area is warned about
-					if (positionHistory) positionHistory[positionHistory.length - 1].robotPositions[robotId] = robots[robotId].pos;
 					return;
 				}
 
@@ -280,11 +251,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				const newPos = get().robots[robotId].trajectory.evaluate(Math.min(trajectoryTime, 1));
 				itemEndTimes[runningItemIds[robotId]] = newSimTime;
 
-				const offset = newPos.clone().sub(get().robots[robotId].pos);
 				robots[robotId] = {
 					...robots[robotId],
 					pos: newPos,
-					boundingBox: get().robots[robotId].boundingBox?.clone().translate(offset),
 					timeAlongTrajectory: trajectoryTime,
 					trajectory: get().robots[robotId].trajectory,
 					trajectoryStartTime: get().robots[robotId].trajectoryStartTime,
@@ -294,20 +263,12 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					robots[robotId].timeAlongTrajectory = 0;
 				}
 
-				if (positionHistory) {
-					const currTimestep = positionHistory[positionHistory.length - 1];
-					currTimestep.robotPositions[robotId] = newPos;
-				}
-
 				// LED color changes are part of trajectories (setColor), so they happen when the trajectory reaches them
 				robots[robotId].color = get().robots[robotId].trajectory.lastColor?.(Math.min(trajectoryTime, 1))?.color ?? get().robots[robotId].color;
 
 				if (markerFrequency !== 0 && time % markerFrequency < deltaT) {
+					if (trajectoryMarkers === currentMarkers) trajectoryMarkers = currentMarkers.slice();
 					trajectoryMarkers.push({ position: new THREE.Vector3().copy(robots[robotId].pos), color: robots[robotId].color, id: robotId + time });
-				}
-				// Do not delete! Needed to keep variables from being removed for being unused
-				if (time > 99999) {
-					console.log(groupState, simulator);
 				}
 			});
 
@@ -340,29 +301,49 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					(plannedPaths[robot.id] ??= []).push(robot.pos.clone());
 				});
 			};
-			// Robots whose bounding boxes (size from Settings) overlap; warned once per stretch of overlap, not once per frame
+			// Each step: robots whose bounding boxes (size from Settings) overlap, and robots over the speed limit or outside the
+			// work area (Settings). Warned once per stretch, not once per frame.
 			const boxSize = useRobartState.getState().boundingBoxSize ?? defaultBoundingBoxSize;
+			const limits = useRobartState.getState().limits ?? defaultLimits;
+			const workArea = workAreaBox(limits);
 			const robotNames = useRobartState.getState().robots;
-			const collisionWarnings: TimedWarning[] = [];
+			const nameOf = (robotId: string) => robotNames[robotId]?.name ?? 'Deleted robot';
+			const timedWarnings: TimedWarning[] = [];
 			let overlapping = new Set<string>();
-			const checkCollisions = () => {
+			const tooFast = new Set<string>();
+			const outside = new Set<string>();
+			const previousPositions: Record<string, THREE.Vector3> = {};
+			const checkWarnings = () => {
+				const time = get().time;
 				const positions = Object.fromEntries(Object.values(get().robots).map((robot) => [robot.id, robot.pos]));
 				const nowOverlapping = new Set<string>();
 				overlappingPairs(positions, boxSize).forEach(([a, b]) => {
 					const pair = `${a} ${b}`;
 					nowOverlapping.add(pair);
-					if (!overlapping.has(pair)) {
-						collisionWarnings.push(collisionWarning(get().time, robotNames[a]?.name ?? 'Deleted robot', robotNames[b]?.name ?? 'Deleted robot'));
-					}
+					if (!overlapping.has(pair)) timedWarnings.push(collisionWarning(time, nameOf(a), nameOf(b)));
 				});
 				overlapping = nowOverlapping;
+
+				Object.entries(positions).forEach(([robotId, position]) => {
+					const previous = previousPositions[robotId];
+					previousPositions[robotId] = position;
+					if (limits.speedLimitOn && previous) {
+						const speed = position.distanceTo(previous) * fps;
+						if (speed > limits.speedLimit && !tooFast.has(robotId)) timedWarnings.push(speedWarning(time, nameOf(robotId), speed));
+						if (speed > limits.speedLimit) tooFast.add(robotId); else tooFast.delete(robotId);
+					}
+
+					const isOutside = workArea?.containsPoint(position) === false;
+					if (isOutside && !outside.has(robotId)) timedWarnings.push(workAreaWarning(time, nameOf(robotId), position));
+					if (isOutside) outside.add(robotId); else outside.delete(robotId);
+				});
 			};
 			recordPositions();
-			checkCollisions();
+			checkWarnings();
 			let nextSampleTime = pathSampleInterval;
 			while (!isFinished(get().robots) && get().time < maxShowLength) {
 				get().advance(1 / fps);
-				checkCollisions();
+				checkWarnings();
 				if (get().time >= nextSampleTime) {
 					recordPositions();
 					nextSampleTime += pathSampleInterval;
@@ -379,13 +360,6 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					if (itemEndTimes[item.id] !== undefined) durations[item.id] = Math.max(0.1, itemEndTimes[item.id] - item.startTime);
 				});
 			});
-
-			// Speed and work area, from the positions just recorded (before block measuring and the reset overwrite them)
-			const constraintWarnings = useCrazyflieConstraintState.getState().checkConstraints(Object.keys(get().robots)) ?? [];
-			const timedWarnings = [
-				...constraintWarnings.map((warning) => ({ time: warning.time, short: warning.short, full: warning.repr })),
-				...collisionWarnings,
-			].sort((a, b) => a.time - b.time);
 
 			// Each block's own length, so the drop preview is right before the block is on the timeline
 			const blockLengths: Record<string, number> = {};
@@ -429,14 +403,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		},
 		setRobots: (robots) => {
 			const simRobots: Record<string, RobotSimState> = {};
-			// Half of the box size set in Settings (the box is centered on the robot)
-			const [boxX, boxY, boxZ] = useRobartState.getState().boundingBoxSize ?? defaultBoundingBoxSize;
-			const bboxSize = new THREE.Vector3(boxX / 2, boxY / 2, boxZ / 2);
 			Object.values(robots).forEach((robot) => {
-				const position = new THREE.Vector3(robot.startingPosition[0], robot.startingPosition[1], robot.startingPosition[2])
 				simRobots[robot.id] = {
 					id: robot.id,
-					// boundingBox: new THREE.Box3(),
 					pos: new THREE.Vector3(...robot.startingPosition),
 					vel: new THREE.Vector3(),
 					acc: new THREE.Vector3(),
@@ -447,42 +416,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					trajectories: new Map<string, traj.Trajectory[]>,
 					trajectoryStartTime: -1,
 					trajectoryQueue: new Queue<{ line: string; itemId: string }>,
-					boundingBox: new THREE.Box3(position.clone().sub(bboxSize), position.clone().add(bboxSize)),
-
 				};
-				// simRobots[robot.id].boundingBox?.setFromObject()
 			});
 			set({ robots: simRobots });
-		},
-		updateRobotBoundingBox: (robotId, boundingBox) => {
-			set((state) => {
-				if (state.robots[robotId] !== undefined)
-					state.robots[robotId].boundingBox = boundingBox;
-			});
-		},
-		checkCollisions: (robotId) => {
-			const thisRobot = get().robots[robotId];
-			const robots = Object.entries(get().robots);
-
-			if (thisRobot.boundingBox === undefined) return false;
-
-			return robots.some(([otherRobotId, otherRobot]) => {
-				// there's a collision if
-				// 1. the other robot is not this robot
-				// 2. the other robot has a bounding box
-				// 3. this robot has a bounding box
-				// 4. the bounding boxes intersect
-
-				if (
-					otherRobotId !== robotId &&
-					otherRobot.boundingBox &&
-					thisRobot.boundingBox &&
-					thisRobot.boundingBox.intersectsBox(otherRobot.boundingBox)
-				)
-					return (
-						otherRobotId !== robotId && otherRobot.boundingBox && thisRobot.boundingBox && thisRobot.boundingBox.intersectsBox(otherRobot.boundingBox)
-					);
-			});
 		},
 		updateTrajectory: (robotId, trajectory, duration) => {
 			set((state) => {
@@ -577,20 +513,11 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			if (startTime === 0) {
 				set({ time: 0, trajectoryMarkers: [] });
 				get().setRobots(robartRobots);
-				// Constraint warnings are computed from this; without the reset they repeat across runs and replays
-				useCrazyflieConstraintState.setState({ positionHistory: [] });
 				itemEndTimes = {};
 			}
 			pendingItems.length = 0;
 
 			Object.values(timeline.groups).forEach((group) => {
-				// Need the following local variables so that the EVAL works properly.
-				/*const groupState: SimulatorGroupState = {
-					robotIDs: Object.keys(group.robots),
-				};
-				const simulator = SIM; // This is the simulator object for commands, necessary for the eval to work.*/
-				// END: The need of said local variables
-
 				Object.values(group.items).forEach(timelineItem => {
 					if (timelineItem.startTime < startTime) return;
 					// A project file can have an item whose block is gone

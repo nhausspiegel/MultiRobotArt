@@ -49,3 +49,15 @@ export const collisionWarning = (time: number, nameA: string, nameB: string): Ti
 	short: `${nameA} and ${nameB} too close`,
 	full: `robots ${nameA} and ${nameB} came too close at time ${time.toFixed(2)} (their bounding boxes overlapped).\n`,
 });
+
+export const speedWarning = (time: number, name: string, speed: number): TimedWarning => ({
+	time,
+	short: `${name} too fast (${speed.toFixed(1)} m/s)`,
+	full: `robot ${name} has violated a velocity constraint at time ${time.toFixed(2)}. It was travelling at ${speed.toFixed(2)} m/s.\n`,
+});
+
+export const workAreaWarning = (time: number, name: string, position: Position): TimedWarning => ({
+	time,
+	short: `${name} outside the work area`,
+	full: `robot ${name} has violated a workspace constraint at time ${time.toFixed(2)}. Its position was ${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}\n`,
+});
