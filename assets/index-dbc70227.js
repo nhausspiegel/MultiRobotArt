@@ -37112,6 +37112,7 @@ const javascript$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.define
   javascriptGenerator
 }, Symbol.toStringTag, { value: "Module" }));
 const writesNoCode = (code) => code.split("\n").every((line) => /^\s*(\/\/.*|#.*)?$/.test(line));
+const commandLines = (code) => code.split("\n").map((line) => line.trim()).filter((line) => line !== "" && !line.startsWith("//"));
 const blockCircle = {
   name: "circle",
   block: {
@@ -42568,8 +42569,7 @@ const blockCircleArc = {
   }
 };
 const slotSequence = (block, js, input) => {
-  const commands = js.statementToCode(block, input).split("\n").map((line) => line.trim()).filter((line) => line !== "" && !line.startsWith("//"));
-  return `simulator.sequence(groupState, [${commands.map((command2) => `() => ${command2}`).join(", ")}])`;
+  return `simulator.sequence(groupState, [${commandLines(js.statementToCode(block, input)).map((command2) => `() => ${command2}`).join(", ")}])`;
 };
 const slotFunction = (block, python2, input, name2) => `def ${name2}(groupState):
 ${python2.statementToCode(block, input)}`;
@@ -76005,8 +76005,7 @@ const blockRepeat = {
 ${body}`;
   },
   javascriptGenerator: (block, js) => {
-    const lines = js.statementToCode(block, "body").split("\n").map((line) => line.trim()).filter((line) => line !== "");
-    return lines.map((line) => `${line}
+    return commandLines(js.statementToCode(block, "body")).map((line) => `${line}
 `).join("").repeat(block.getFieldValue("times"));
   }
 };
@@ -81564,7 +81563,7 @@ const useSimulator = create$2()(
         const item = pendingItems.shift();
         item.lines.forEach((line) => {
           item.robotIds.forEach((robotId) => {
-            get().addTrajectory(robotId, line, item.itemId);
+            get().addTrajectory(robotId, line, item.itemId, item.time);
           });
         });
       }
@@ -81572,43 +81571,48 @@ const useSimulator = create$2()(
       let trajectoryMarkers = currentMarkers;
       const robots = { ...currentRobots };
       Object.keys(robots).forEach((robotId) => {
-        var _a3, _b2, _c2, _d, _e2;
+        var _a3, _b2, _c2;
         if (robots[robotId] == void 0)
           return;
-        if (robots[robotId].trajectoryQueue.length > 0 && robots[robotId].trajectory.duration <= 0) {
-          const next = robots[robotId].trajectoryQueue.dequeue();
-          runningItemIds[robotId] = next.itemId;
-          try {
-            const [duration, trajectories] = runCommand(next.line, robotId);
-            const trajectory = trajectories.get(robotId);
-            if (trajectory)
-              get().updateTrajectory(robotId, trajectory, duration);
-          } catch (error) {
-            console.warn("Skipped a block command that failed:", next.line, error);
+        const robot = { ...robots[robotId] };
+        let moved = false;
+        let remaining = deltaT;
+        for (; ; ) {
+          if (!(((_a3 = robot.trajectory) == null ? void 0 : _a3.duration) > 0)) {
+            if (robot.trajectoryQueue.length === 0)
+              break;
+            set({ robots: { ...get().robots, [robotId]: robot } });
+            const next = robot.trajectoryQueue.dequeue();
+            runningItemIds[robotId] = next.itemId;
+            remaining = Math.min(remaining, newSimTime - next.start);
+            try {
+              const trajectory2 = runCommand(next.line, robotId)[1].get(robotId);
+              if (trajectory2)
+                Object.assign(robot, { trajectory: trajectory2, timeAlongTrajectory: 0, trajectoryStartTime: newSimTime - remaining });
+            } catch (error) {
+              console.warn("Skipped a block command that failed:", next.line, error);
+            }
+            continue;
           }
+          const { trajectory } = robot;
+          const timeLeft = (1 - robot.timeAlongTrajectory) * trajectory.duration;
+          const finishes = remaining >= timeLeft - 1e-9;
+          robot.timeAlongTrajectory = finishes ? 1 : robot.timeAlongTrajectory + remaining / trajectory.duration;
+          robot.pos = trajectory.evaluate(robot.timeAlongTrajectory);
+          robot.color = ((_c2 = (_b2 = trajectory.lastColor) == null ? void 0 : _b2.call(trajectory, robot.timeAlongTrajectory)) == null ? void 0 : _c2.color) ?? robot.color;
+          moved = true;
+          remaining = finishes ? Math.max(0, remaining - timeLeft) : 0;
+          itemEndTimes[runningItemIds[robotId]] = newSimTime - remaining;
+          if (!finishes)
+            break;
+          robot.trajectory = nullTrajectory;
+          robot.timeAlongTrajectory = 0;
         }
-        if (((_a3 = get().robots[robotId]) == null ? void 0 : _a3.trajectory.duration) === void 0 || get().robots[robotId].trajectory.duration <= 0) {
-          return;
-        }
-        const trajectoryTime = get().robots[robotId].timeAlongTrajectory + deltaT / ((_b2 = get().robots[robotId].trajectory) == null ? void 0 : _b2.duration);
-        const newPos = get().robots[robotId].trajectory.evaluate(Math.min(trajectoryTime, 1));
-        itemEndTimes[runningItemIds[robotId]] = newSimTime;
-        robots[robotId] = {
-          ...robots[robotId],
-          pos: newPos,
-          timeAlongTrajectory: trajectoryTime,
-          trajectory: get().robots[robotId].trajectory,
-          trajectoryStartTime: get().robots[robotId].trajectoryStartTime
-        };
-        if (robots[robotId].timeAlongTrajectory >= 1) {
-          robots[robotId].trajectory = nullTrajectory;
-          robots[robotId].timeAlongTrajectory = 0;
-        }
-        robots[robotId].color = ((_e2 = (_d = (_c2 = get().robots[robotId].trajectory).lastColor) == null ? void 0 : _d.call(_c2, Math.min(trajectoryTime, 1))) == null ? void 0 : _e2.color) ?? get().robots[robotId].color;
-        if (markerFrequency !== 0 && time % markerFrequency < deltaT) {
+        robots[robotId] = robot;
+        if (moved && markerFrequency !== 0 && time % markerFrequency < deltaT) {
           if (trajectoryMarkers === currentMarkers)
             trajectoryMarkers = currentMarkers.slice();
-          trajectoryMarkers.push({ position: new Vector3().copy(robots[robotId].pos), color: robots[robotId].color, id: robotId + time });
+          trajectoryMarkers.push({ position: new Vector3().copy(robot.pos), color: robot.color, id: robotId + time });
         }
       });
       set({
@@ -81722,7 +81726,7 @@ const useSimulator = create$2()(
       get().setRobots({ standIn: { id: "standIn", name: "standIn", type: "crazyflie", startingPosition: [0, 0, 0] } });
       itemEndTimes = {};
       pendingItems.length = 0;
-      pendingItems.push({ itemId: "standIn", time: 0, robotIds: ["standIn"], lines: javaScript.split("\n").filter((line) => line.length > 0) });
+      pendingItems.push({ itemId: "standIn", time: 0, robotIds: ["standIn"], lines: commandLines(javaScript) });
       while (!isFinished(get().robots) && get().time < maxShowLength) {
         get().advance(1 / fps);
       }
@@ -81759,19 +81763,10 @@ const useSimulator = create$2()(
       });
       set({ robots: simRobots });
     },
-    updateTrajectory: (robotId, trajectory, duration) => {
+    addTrajectory: (robotId, javascriptLine, itemId, start) => {
       set((state) => {
         if (state.robots[robotId] !== void 0)
-          state.robots[robotId].timeAlongTrajectory = 0;
-        state.robots[robotId].trajectory = trajectory;
-        state.robots[robotId].trajectoryDuration = duration;
-        state.robots[robotId].trajectoryStartTime = state.time;
-      });
-    },
-    addTrajectory: (robotId, javascriptLine, itemId) => {
-      set((state) => {
-        if (state.robots[robotId] !== void 0)
-          state.robots[robotId].trajectoryQueue.enqueue({ line: javascriptLine, itemId });
+          state.robots[robotId].trajectoryQueue.enqueue({ line: javascriptLine, itemId, start });
       });
     },
     getMostRecentTrajectory: (robotId, time) => {
@@ -81826,7 +81821,7 @@ const useSimulator = create$2()(
             itemId: timelineItem.id,
             time: timelineItem.startTime,
             robotIds: Object.keys(group.robots),
-            lines: blocks[timelineItem.blockId].javaScript.split("\n").filter((line) => line.length > 0)
+            lines: commandLines(blocks[timelineItem.blockId].javaScript)
           });
         });
       });
