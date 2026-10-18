@@ -25577,7 +25577,7 @@ ${b2} to its parent, because: ${a2}`);
           this.ascenderHeight = this.height;
         }
       };
-      var up = class extends jp {
+      var up2 = class extends jp {
         constructor(a2, b2) {
           super(a2);
           this.icon = b2;
@@ -26252,7 +26252,7 @@ ${b2} to its parent, because: ${a2}`);
           this.inputRows.push(a2);
           var b2 = this.block_.getIcons();
           for (let c2 = 0, d2; d2 = b2[c2]; c2++) {
-            let e2 = new up(this.constants_, d2);
+            let e2 = new up2(this.constants_, d2);
             this.isCollapsed && !d2.isShownWhenCollapsed() || a2.elements.push(e2);
           }
           b2 = void 0;
@@ -26596,7 +26596,7 @@ ${b2} to its parent, because: ${a2}`);
       Np.ExternalValueInput = rp;
       Np.Field = sp;
       Np.Hat = tp;
-      Np.Icon = up;
+      Np.Icon = up2;
       Np.InRowSpacer = vp;
       Np.InlineInput = wp;
       Np.InputConnection = qp;
@@ -46381,22 +46381,22 @@ class Matrix4 {
   makeRotationFromQuaternion(q3) {
     return this.compose(_zero, q3, _one);
   }
-  lookAt(eye, target2, up) {
+  lookAt(eye, target2, up2) {
     const te2 = this.elements;
     _z.subVectors(eye, target2);
     if (_z.lengthSq() === 0) {
       _z.z = 1;
     }
     _z.normalize();
-    _x.crossVectors(up, _z);
+    _x.crossVectors(up2, _z);
     if (_x.lengthSq() === 0) {
-      if (Math.abs(up.z) === 1) {
+      if (Math.abs(up2.z) === 1) {
         _z.x += 1e-4;
       } else {
         _z.z += 1e-4;
       }
       _z.normalize();
-      _x.crossVectors(up, _z);
+      _x.crossVectors(up2, _z);
     }
     _x.normalize();
     _y.crossVectors(_z, _x);
@@ -46770,11 +46770,11 @@ class Matrix4 {
     scale.z = sz;
     return this;
   }
-  makePerspective(left, right, top2, bottom, near, far) {
+  makePerspective(left, right2, top2, bottom, near, far) {
     const te2 = this.elements;
-    const x2 = 2 * near / (right - left);
+    const x2 = 2 * near / (right2 - left);
     const y2 = 2 * near / (top2 - bottom);
-    const a2 = (right + left) / (right - left);
+    const a2 = (right2 + left) / (right2 - left);
     const b2 = (top2 + bottom) / (top2 - bottom);
     const c2 = -(far + near) / (far - near);
     const d2 = -2 * far * near / (far - near);
@@ -46796,12 +46796,12 @@ class Matrix4 {
     te2[15] = 0;
     return this;
   }
-  makeOrthographic(left, right, top2, bottom, near, far) {
+  makeOrthographic(left, right2, top2, bottom, near, far) {
     const te2 = this.elements;
-    const w2 = 1 / (right - left);
+    const w2 = 1 / (right2 - left);
     const h2 = 1 / (top2 - bottom);
     const p2 = 1 / (far - near);
-    const x2 = (right + left) * w2;
+    const x2 = (right2 + left) * w2;
     const y2 = (top2 + bottom) * h2;
     const z2 = (far + near) * p2;
     te2[0] = 2 * w2;
@@ -52154,14 +52154,14 @@ function WebGLCubeMaps(renderer) {
   };
 }
 let OrthographicCamera$1 = class OrthographicCamera extends Camera {
-  constructor(left = -1, right = 1, top2 = 1, bottom = -1, near = 0.1, far = 2e3) {
+  constructor(left = -1, right2 = 1, top2 = 1, bottom = -1, near = 0.1, far = 2e3) {
     super();
     this.isOrthographicCamera = true;
     this.type = "OrthographicCamera";
     this.zoom = 1;
     this.view = null;
     this.left = left;
-    this.right = right;
+    this.right = right2;
     this.top = top2;
     this.bottom = bottom;
     this.near = near;
@@ -52213,18 +52213,18 @@ let OrthographicCamera$1 = class OrthographicCamera extends Camera {
     const cx = (this.right + this.left) / 2;
     const cy = (this.top + this.bottom) / 2;
     let left = cx - dx;
-    let right = cx + dx;
+    let right2 = cx + dx;
     let top2 = cy + dy;
     let bottom = cy - dy;
     if (this.view !== null && this.view.enabled) {
       const scaleW = (this.right - this.left) / this.view.fullWidth / this.zoom;
       const scaleH = (this.top - this.bottom) / this.view.fullHeight / this.zoom;
       left += scaleW * this.view.offsetX;
-      right = left + scaleW * this.view.width;
+      right2 = left + scaleW * this.view.width;
       top2 -= scaleH * this.view.offsetY;
       bottom = top2 - scaleH * this.view.height;
     }
-    this.projectionMatrix.makeOrthographic(left, right, top2, bottom, this.near, this.far);
+    this.projectionMatrix.makeOrthographic(left, right2, top2, bottom, this.near, this.far);
     this.projectionMatrixInverse.copy(this.projectionMatrix).invert();
   }
   toJSON(meta2) {
@@ -58289,7 +58289,7 @@ class WebXRManager extends EventDispatcher {
       const leftFov = (projL[8] - 1) / projL[0];
       const rightFov = (projR[8] + 1) / projR[0];
       const left = near * leftFov;
-      const right = near * rightFov;
+      const right2 = near * rightFov;
       const zOffset = ipd / (-leftFov + rightFov);
       const xOffset = zOffset * -leftFov;
       cameraL2.matrixWorld.decompose(camera.position, camera.quaternion, camera.scale);
@@ -58300,10 +58300,10 @@ class WebXRManager extends EventDispatcher {
       const near2 = near + zOffset;
       const far2 = far + zOffset;
       const left2 = left - xOffset;
-      const right2 = right + (ipd - xOffset);
+      const right22 = right2 + (ipd - xOffset);
       const top2 = topFov * far / far2 * near2;
       const bottom2 = bottomFov * far / far2 * near2;
-      camera.projectionMatrix.makePerspective(left2, right2, top2, bottom2, near2, far2);
+      camera.projectionMatrix.makePerspective(left2, right22, top2, bottom2, near2, far2);
     }
     function updateCamera2(camera, parent) {
       if (parent === null) {
@@ -65695,7 +65695,7 @@ class Interpolant {
     let i1 = this._cachedIndex, t1 = pp[i1], t0 = pp[i1 - 1];
     validate_interval: {
       seek: {
-        let right;
+        let right2;
         linear_scan: {
           forward_scan:
             if (!(t2 < t1)) {
@@ -65715,7 +65715,7 @@ class Interpolant {
                   break seek;
                 }
               }
-              right = pp.length;
+              right2 = pp.length;
               break linear_scan;
             }
           if (!(t2 >= t0)) {
@@ -65737,16 +65737,16 @@ class Interpolant {
                 break seek;
               }
             }
-            right = i1;
+            right2 = i1;
             i1 = 0;
             break linear_scan;
           }
           break validate_interval;
         }
-        while (i1 < right) {
-          const mid = i1 + right >>> 1;
+        while (i1 < right2) {
+          const mid = i1 + right2 >>> 1;
           if (t2 < pp[mid]) {
-            right = mid;
+            right2 = mid;
           } else {
             i1 = mid + 1;
           }
@@ -68825,7 +68825,7 @@ class AudioListener extends Object3D {
   updateMatrixWorld(force) {
     super.updateMatrixWorld(force);
     const listener2 = this.context.listener;
-    const up = this.up;
+    const up2 = this.up;
     this.timeDelta = this._clock.getDelta();
     this.matrixWorld.decompose(_position$1, _quaternion$1, _scale$1);
     _orientation$1.set(0, 0, -1).applyQuaternion(_quaternion$1);
@@ -68837,12 +68837,12 @@ class AudioListener extends Object3D {
       listener2.forwardX.linearRampToValueAtTime(_orientation$1.x, endTime);
       listener2.forwardY.linearRampToValueAtTime(_orientation$1.y, endTime);
       listener2.forwardZ.linearRampToValueAtTime(_orientation$1.z, endTime);
-      listener2.upX.linearRampToValueAtTime(up.x, endTime);
-      listener2.upY.linearRampToValueAtTime(up.y, endTime);
-      listener2.upZ.linearRampToValueAtTime(up.z, endTime);
+      listener2.upX.linearRampToValueAtTime(up2.x, endTime);
+      listener2.upY.linearRampToValueAtTime(up2.y, endTime);
+      listener2.upZ.linearRampToValueAtTime(up2.z, endTime);
     } else {
       listener2.setPosition(_position$1.x, _position$1.y, _position$1.z);
-      listener2.setOrientation(_orientation$1.x, _orientation$1.y, _orientation$1.z, up.x, up.y, up.z);
+      listener2.setOrientation(_orientation$1.x, _orientation$1.y, _orientation$1.z, up2.x, up2.y, up2.z);
     }
   }
 }
@@ -71398,7 +71398,7 @@ class CameraHelper extends LineSegments {
     const colorCross = new Color(3355443);
     this.setColors(colorFrustum, colorCone, colorUp, colorTarget, colorCross);
   }
-  setColors(frustum, cone, up, target2, cross) {
+  setColors(frustum, cone, up2, target2, cross) {
     const geometry = this.geometry;
     const colorAttribute = geometry.getAttribute("color");
     colorAttribute.setXYZ(0, frustum.r, frustum.g, frustum.b);
@@ -71433,12 +71433,12 @@ class CameraHelper extends LineSegments {
     colorAttribute.setXYZ(29, cone.r, cone.g, cone.b);
     colorAttribute.setXYZ(30, cone.r, cone.g, cone.b);
     colorAttribute.setXYZ(31, cone.r, cone.g, cone.b);
-    colorAttribute.setXYZ(32, up.r, up.g, up.b);
-    colorAttribute.setXYZ(33, up.r, up.g, up.b);
-    colorAttribute.setXYZ(34, up.r, up.g, up.b);
-    colorAttribute.setXYZ(35, up.r, up.g, up.b);
-    colorAttribute.setXYZ(36, up.r, up.g, up.b);
-    colorAttribute.setXYZ(37, up.r, up.g, up.b);
+    colorAttribute.setXYZ(32, up2.r, up2.g, up2.b);
+    colorAttribute.setXYZ(33, up2.r, up2.g, up2.b);
+    colorAttribute.setXYZ(34, up2.r, up2.g, up2.b);
+    colorAttribute.setXYZ(35, up2.r, up2.g, up2.b);
+    colorAttribute.setXYZ(36, up2.r, up2.g, up2.b);
+    colorAttribute.setXYZ(37, up2.r, up2.g, up2.b);
     colorAttribute.setXYZ(38, target2.r, target2.g, target2.b);
     colorAttribute.setXYZ(39, target2.r, target2.g, target2.b);
     colorAttribute.setXYZ(40, cross.r, cross.g, cross.b);
@@ -84666,15 +84666,15 @@ class MultiselectDraggable {
     let top2 = Infinity;
     let bottom = -Infinity;
     let left = Infinity;
-    let right = -Infinity;
+    let right2 = -Infinity;
     this.subDraggables.forEach((coord, subDraggable) => {
       const boundingBox = subDraggable.getBoundingRectangle();
       top2 = Math.min(top2, boundingBox.top);
       bottom = Math.max(bottom, boundingBox.bottom);
       left = Math.min(left, boundingBox.left);
-      right = Math.max(right, boundingBox.right);
+      right2 = Math.max(right2, boundingBox.right);
     });
-    return new utils$1.Rect(top2, bottom, left, right);
+    return new utils$1.Rect(top2, bottom, left, right2);
   }
   // Backpack plugin support
   /**
@@ -89631,8 +89631,8 @@ class MultiselectControls {
    */
   getBoundingRectangle() {
     const bottom = this.top_ + HEIGHT;
-    const right = this.left_ + WIDTH;
-    return new utils$1.Rect(this.top_, bottom, this.left_, right);
+    const right2 = this.left_ + WIDTH;
+    return new utils$1.Rect(this.top_, bottom, this.left_, right2);
   }
   /**
    * Positions the multi select controls.
@@ -107449,7 +107449,7 @@ function useMeasure(_temp) {
         width,
         height,
         bottom,
-        right,
+        right: right2,
         x: x2,
         y: y2
       } = state.current.element.getBoundingClientRect();
@@ -107459,7 +107459,7 @@ function useMeasure(_temp) {
         width,
         height,
         bottom,
-        right,
+        right: right2,
         x: x2,
         y: y2
       };
@@ -108586,11 +108586,11 @@ const coordinatesConfigResolver = _objectSpread2(_objectSpread2({}, commonConfig
     }
     const {
       left = -Infinity,
-      right = Infinity,
+      right: right2 = Infinity,
       top: top2 = -Infinity,
       bottom = Infinity
     } = value;
-    return [[left, right], [top2, bottom]];
+    return [[left, right2], [top2, bottom]];
   }
 });
 const KEYS_DELTA_MAP = {
@@ -110246,15 +110246,15 @@ let OrbitControls$1 = class OrbitControls extends EventDispatcher {
     };
     this.update = (() => {
       const offset = new Vector3();
-      const up = new Vector3(0, 1, 0);
-      const quat = new Quaternion().setFromUnitVectors(object.up, up);
+      const up2 = new Vector3(0, 1, 0);
+      const quat = new Quaternion().setFromUnitVectors(object.up, up2);
       const quatInverse = quat.clone().invert();
       const lastPosition = new Vector3();
       const lastQuaternion = new Quaternion();
       const twoPI = 2 * Math.PI;
       return function update() {
         const position = scope.object.position;
-        quat.setFromUnitVectors(object.up, up);
+        quat.setFromUnitVectors(object.up, up2);
         quatInverse.copy(quat).invert();
         offset.copy(position).sub(scope.target);
         offset.applyQuaternion(quat);
@@ -118677,10 +118677,10 @@ function parserFactory(Typr, woff2otf) {
                 const coverageIndex = Typr._lctf.coverageIndex(tab2.coverage, glyphIds[prevGlyphIndex]);
                 if (coverageIndex !== -1) {
                   if (tab2.fmt === 1) {
-                    const right = tab2.pairsets[coverageIndex];
-                    for (let k2 = 0; k2 < right.length; k2++) {
-                      if (right[k2].gid2 === glyphId)
-                        adj = right[k2];
+                    const right2 = tab2.pairsets[coverageIndex];
+                    for (let k2 = 0; k2 < right2.length; k2++) {
+                      if (right2[k2].gid2 === glyphId)
+                        adj = right2[k2];
                     }
                   } else if (tab2.fmt === 2) {
                     const c1 = Typr.U._getGlyphClass(glyphIds[prevGlyphIndex], tab2.classDef1);
@@ -119531,7 +119531,7 @@ function createTypesetter(resolveFonts, bidi) {
             );
             for (let fi2 = 0; fi2 < flips.length; fi2++) {
               const [start, end2] = flips[fi2];
-              let left = Infinity, right = -Infinity;
+              let left = Infinity, right2 = -Infinity;
               for (let i = 0; i < lineGlyphCount; i++) {
                 if (line.glyphAt(i).charIndex >= start) {
                   let startInLine = i, endInLine = i;
@@ -119542,12 +119542,12 @@ function createTypesetter(resolveFonts, bidi) {
                     }
                     if (endInLine < lineGlyphCount - trailingWhitespaceCount) {
                       left = Math.min(left, info.x);
-                      right = Math.max(right, info.x + info.width);
+                      right2 = Math.max(right2, info.x + info.width);
                     }
                   }
                   for (let j2 = startInLine; j2 < endInLine; j2++) {
                     const glyphInfo = line.glyphAt(j2);
-                    glyphInfo.x = right - (glyphInfo.x + glyphInfo.width - left);
+                    glyphInfo.x = right2 - (glyphInfo.x + glyphInfo.width - left);
                   }
                   break;
                 }
@@ -131242,10 +131242,10 @@ function dispatchKey(elt, name2, code) {
   let down = new KeyboardEvent("keydown", options);
   down.synthetic = true;
   elt.dispatchEvent(down);
-  let up = new KeyboardEvent("keyup", options);
-  up.synthetic = true;
-  elt.dispatchEvent(up);
-  return down.defaultPrevented || up.defaultPrevented;
+  let up2 = new KeyboardEvent("keyup", options);
+  up2.synthetic = true;
+  elt.dispatchEvent(up2);
+  return down.defaultPrevented || up2.defaultPrevented;
 }
 function getRoot(node) {
   while (node) {
@@ -133622,11 +133622,11 @@ class DocView extends ContentView {
     let mLeft = 0, mRight = 0, mTop = 0, mBottom = 0;
     for (let margins of this.view.state.facet(scrollMargins).map((f2) => f2(this.view)))
       if (margins) {
-        let { left, right, top: top2, bottom } = margins;
+        let { left, right: right2, top: top2, bottom } = margins;
         if (left != null)
           mLeft = Math.max(mLeft, left);
-        if (right != null)
-          mRight = Math.max(mRight, right);
+        if (right2 != null)
+          mRight = Math.max(mRight, right2);
         if (top2 != null)
           mTop = Math.max(mTop, top2);
         if (bottom != null)
@@ -133892,11 +133892,11 @@ function domPosInText(node, x2, y2) {
         generalSide = x2 - rect.left;
       let dy = (rect.top > y2 ? rect.top - y2 : y2 - rect.bottom) - 1;
       if (rect.left - 1 <= x2 && rect.right + 1 >= x2 && dy < closestDY) {
-        let right = x2 >= (rect.left + rect.right) / 2, after = right;
+        let right2 = x2 >= (rect.left + rect.right) / 2, after = right2;
         if (browser.chrome || browser.gecko) {
           let rectBefore = textRange(node, i).getBoundingClientRect();
           if (rectBefore.left == rect.right)
-            after = !right;
+            after = !right2;
         }
         if (dy <= 0)
           return { node, offset: i + (after ? 1 : 0) };
@@ -135159,11 +135159,11 @@ class HeightMapGap extends HeightMap {
   }
 }
 class HeightMapBranch extends HeightMap {
-  constructor(left, brk, right) {
-    super(left.length + brk + right.length, left.height + right.height, brk | (left.outdated || right.outdated ? 2 : 0));
+  constructor(left, brk, right2) {
+    super(left.length + brk + right2.length, left.height + right2.height, brk | (left.outdated || right2.outdated ? 2 : 0));
     this.left = left;
-    this.right = right;
-    this.size = left.size + right.size;
+    this.right = right2;
+    this.size = left.size + right2.size;
   }
   get break() {
     return this.flags & 1;
@@ -135216,9 +135216,9 @@ class HeightMapBranch extends HeightMap {
     if (from > 0)
       mergeGaps(result, left - 1);
     if (to < this.length) {
-      let right = result.length;
+      let right2 = result.length;
       this.decomposeRight(to, result);
-      mergeGaps(result, right);
+      mergeGaps(result, right2);
     }
     return HeightMap.of(result);
   }
@@ -135236,38 +135236,38 @@ class HeightMapBranch extends HeightMap {
       this.right.decomposeLeft(to - left, result);
   }
   decomposeRight(from, result) {
-    let left = this.left.length, right = left + this.break;
-    if (from >= right)
-      return this.right.decomposeRight(from - right, result);
+    let left = this.left.length, right2 = left + this.break;
+    if (from >= right2)
+      return this.right.decomposeRight(from - right2, result);
     if (from < left)
       this.left.decomposeRight(from, result);
-    if (this.break && from < right)
+    if (this.break && from < right2)
       result.push(null);
     result.push(this.right);
   }
-  balanced(left, right) {
-    if (left.size > 2 * right.size || right.size > 2 * left.size)
-      return HeightMap.of(this.break ? [left, null, right] : [left, right]);
+  balanced(left, right2) {
+    if (left.size > 2 * right2.size || right2.size > 2 * left.size)
+      return HeightMap.of(this.break ? [left, null, right2] : [left, right2]);
     this.left = left;
-    this.right = right;
-    this.height = left.height + right.height;
-    this.outdated = left.outdated || right.outdated;
-    this.size = left.size + right.size;
-    this.length = left.length + this.break + right.length;
+    this.right = right2;
+    this.height = left.height + right2.height;
+    this.outdated = left.outdated || right2.outdated;
+    this.size = left.size + right2.size;
+    this.length = left.length + this.break + right2.length;
     return this;
   }
   updateHeight(oracle, offset = 0, force = false, measured) {
-    let { left, right } = this, rightStart = offset + left.length + this.break, rebalance = null;
+    let { left, right: right2 } = this, rightStart = offset + left.length + this.break, rebalance = null;
     if (measured && measured.from <= offset + left.length && measured.more)
       rebalance = left = left.updateHeight(oracle, offset, force, measured);
     else
       left.updateHeight(oracle, offset, force);
-    if (measured && measured.from <= rightStart + right.length && measured.more)
-      rebalance = right = right.updateHeight(oracle, rightStart, force, measured);
+    if (measured && measured.from <= rightStart + right2.length && measured.more)
+      rebalance = right2 = right2.updateHeight(oracle, rightStart, force, measured);
     else
-      right.updateHeight(oracle, rightStart, force);
+      right2.updateHeight(oracle, rightStart, force);
     if (rebalance)
-      return this.balanced(left, right);
+      return this.balanced(left, right2);
     this.height = this.left.height + this.right.height;
     this.outdated = false;
     return this;
@@ -135418,7 +135418,7 @@ class DecorationComparator {
 function visiblePixelRange(dom2, paddingTop) {
   let rect = dom2.getBoundingClientRect();
   let doc2 = dom2.ownerDocument, win = doc2.defaultView || window;
-  let left = Math.max(0, rect.left), right = Math.min(win.innerWidth, rect.right);
+  let left = Math.max(0, rect.left), right2 = Math.min(win.innerWidth, rect.right);
   let top2 = Math.max(0, rect.top), bottom = Math.min(win.innerHeight, rect.bottom);
   for (let parent = dom2.parentNode; parent && parent != doc2.body; ) {
     if (parent.nodeType == 1) {
@@ -135427,7 +135427,7 @@ function visiblePixelRange(dom2, paddingTop) {
       if ((elt.scrollHeight > elt.clientHeight || elt.scrollWidth > elt.clientWidth) && style.overflow != "visible") {
         let parentRect = elt.getBoundingClientRect();
         left = Math.max(left, parentRect.left);
-        right = Math.min(right, parentRect.right);
+        right2 = Math.min(right2, parentRect.right);
         top2 = Math.max(top2, parentRect.top);
         bottom = parent == dom2.parentNode ? parentRect.bottom : Math.min(bottom, parentRect.bottom);
       }
@@ -135440,7 +135440,7 @@ function visiblePixelRange(dom2, paddingTop) {
   }
   return {
     left: left - rect.left,
-    right: Math.max(left, right) - rect.left,
+    right: Math.max(left, right2) - rect.left,
     top: top2 - (rect.top + paddingTop),
     bottom: Math.max(top2, bottom) - (rect.top + paddingTop)
   };
@@ -135770,18 +135770,18 @@ class ViewState {
       } else {
         let totalWidth = structure.total * this.heightOracle.charWidth;
         let marginWidth = margin * this.heightOracle.charWidth;
-        let left, right;
+        let left, right2;
         if (target2 != null) {
           let targetFrac = findFraction(structure, target2);
           let spaceFrac = ((this.pixelViewport.right - this.pixelViewport.left) / 2 + marginWidth) / totalWidth;
           left = targetFrac - spaceFrac;
-          right = targetFrac + spaceFrac;
+          right2 = targetFrac + spaceFrac;
         } else {
           left = (this.pixelViewport.left - marginWidth) / totalWidth;
-          right = (this.pixelViewport.right + marginWidth) / totalWidth;
+          right2 = (this.pixelViewport.right + marginWidth) / totalWidth;
         }
         viewFrom = findPosition(structure, left);
-        viewTo = findPosition(structure, right);
+        viewTo = findPosition(structure, right2);
       }
       if (viewFrom > line.from)
         addGap(line.from, viewFrom, line, structure);
@@ -137867,12 +137867,12 @@ function rectanglesForRange(view, className, range) {
       top2.bottom = bottom.top = (top2.bottom + bottom.top) / 2;
     return pieces(top2).concat(between).concat(pieces(bottom));
   }
-  function piece(left, top2, right, bottom) {
+  function piece(left, top2, right2, bottom) {
     return new RectangleMarker(
       className,
       left - base2.left,
       top2 - base2.top - 0.01,
-      right - left,
+      right2 - left,
       bottom - top2 + 0.01
       /* C.Epsilon */
     );
@@ -138779,10 +138779,10 @@ const tooltipPlugin = /* @__PURE__ */ ViewPlugin.fromClass(class {
         dom2.style.height = "";
       }
       let top2 = above ? pos.top - height - arrowHeight - offset.y : pos.bottom + arrowHeight + offset.y;
-      let right = left + width;
+      let right2 = left + width;
       if (tView.overlap !== true) {
         for (let r2 of others)
-          if (r2.left < right && r2.right > left && r2.top < top2 + height && r2.bottom > top2)
+          if (r2.left < right2 && r2.right > left && r2.top < top2 + height && r2.bottom > top2)
             top2 = above ? r2.top - height - 2 - arrowHeight : r2.bottom + arrowHeight + 2;
       }
       if (this.position == "absolute") {
@@ -138795,7 +138795,7 @@ const tooltipPlugin = /* @__PURE__ */ ViewPlugin.fromClass(class {
       if (arrow2)
         arrow2.style.left = `${pos.left + (ltr ? offset.x : -offset.x) - (left + 14 - 7)}px`;
       if (tView.overlap !== true)
-        others.push({ left, top: top2, right, bottom: top2 + height });
+        others.push({ left, top: top2, right: right2, bottom: top2 + height });
       dom2.classList.toggle("cm-tooltip-above", above);
       dom2.classList.toggle("cm-tooltip-below", !above);
       if (tView.positioned)
@@ -146242,6 +146242,16 @@ const BlockPythonCodePanel = () => {
   const currentBlock = useRobartState((state) => state.blocks[currentBlockId ?? ""]);
   return /* @__PURE__ */ jsx("div", { className: "h-full w-full overflow-auto", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: currentBlock == null ? void 0 : currentBlock.python, className: "h-full w-full", extensions: [python()], readOnly: true }) });
 };
+const right = new Vector3();
+const up = new Vector3();
+const panView = (camera, target2, dx, dy, screenHeight) => {
+  camera.updateMatrix();
+  const perPixel = 2 * camera.position.distanceTo(target2) * Math.tan(camera.fov * Math.PI / 360) / screenHeight;
+  right.setFromMatrixColumn(camera.matrix, 0).multiplyScalar(dx * perPixel);
+  up.setFromMatrixColumn(camera.matrix, 1).multiplyScalar(-dy * perPixel);
+  camera.position.add(right).add(up);
+  target2.add(right).add(up);
+};
 let init = true;
 const boxEdges = (min, max) => {
   const corner = (i) => [i & 1 ? max[0] : min[0], i & 2 ? max[1] : min[1], i & 4 ? max[2] : min[2]];
@@ -146271,7 +146281,45 @@ const Simulation = () => {
       setRobots(robartRobots);
     }
   }
-  const { size, viewport, camera } = useThree();
+  const { size, viewport, camera, gl: gl2 } = useThree();
+  const controls = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const canvas = gl2.domElement;
+    const zoom = (scale) => {
+      const { target: target2 } = controls.current;
+      camera.position.sub(target2).multiplyScalar(scale).add(target2);
+      controls.current.update();
+    };
+    const onWheel = (event) => {
+      event.preventDefault();
+      const lines = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : 1;
+      if (event.ctrlKey || event.metaKey) {
+        zoom(Math.exp(Math.max(-0.2, Math.min(0.2, event.deltaY * lines * 0.01))));
+      } else {
+        panView(camera, controls.current.target, event.deltaX * lines, event.deltaY * lines, canvas.clientHeight);
+        controls.current.update();
+      }
+    };
+    let previousScale = 1;
+    const onGestureStart = (event) => {
+      event.preventDefault();
+      previousScale = 1;
+    };
+    const onGestureChange = (event) => {
+      event.preventDefault();
+      const { scale } = event;
+      zoom(previousScale / scale);
+      previousScale = scale;
+    };
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    canvas.addEventListener("gesturestart", onGestureStart);
+    canvas.addEventListener("gesturechange", onGestureChange);
+    return () => {
+      canvas.removeEventListener("wheel", onWheel);
+      canvas.removeEventListener("gesturestart", onGestureStart);
+      canvas.removeEventListener("gesturechange", onGestureChange);
+    };
+  }, [gl2, camera]);
   if (init || (camera.up.x !== 0 || camera.up.y !== 0 || camera.up.z !== 1)) {
     camera.position.set(-5, 0, 2);
     camera.up.set(0, 0, 1);
@@ -146279,7 +146327,7 @@ const Simulation = () => {
   }
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx("color", { attach: "background", args: ["black"] }),
-    /* @__PURE__ */ jsx(OrbitControls2, { maxPolarAngle: Math.PI * (1 / 2 - 1 / 20), minPolarAngle: 0, minAzimuthAngle: -Math.PI / 2, maxAzimuthAngle: Math.PI / 2, minDistance: 0.5, maxDistance: 5, object: camera }),
+    /* @__PURE__ */ jsx(OrbitControls2, { ref: controls, enableZoom: false, maxPolarAngle: Math.PI * (1 / 2 - 1 / 20), minPolarAngle: 0, minAzimuthAngle: -Math.PI / 2, maxAzimuthAngle: Math.PI / 2, minDistance: 0.5, maxDistance: 5, object: camera }),
     /* @__PURE__ */ jsx(GizmoHelper, { alignment: "bottom-right", margin: [80, 80], children: /* @__PURE__ */ jsx(GizmoViewport, { labels: ["X", "Y", "Z"], axisColors: ["#9d4b4b", "#2f7f4f", "#3b5b9d"], labelColor: "white" }) }),
     /* @__PURE__ */ jsx(
       Grid,
