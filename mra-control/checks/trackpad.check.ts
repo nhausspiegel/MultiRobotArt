@@ -9,7 +9,8 @@ const onScreen = (camera: PerspectiveCamera, point: Vector3) => {
 	const p = point.clone().project(camera);
 	return [(p.x + 1) * 400, (1 - p.y) * 300];
 };
-const near = (a: number[], b: number[]) => a.every((value, i) => Math.abs(value - b[i]) < 1e-6);
+// Within a tenth of a pixel: moving along the floor also changes the depth a little
+const near = (a: number[], b: number[]) => a.every((value, i) => Math.abs(value - b[i]) < 0.1);
 
 const camera = new PerspectiveCamera(75, 800 / 600);
 camera.up.set(0, 0, 1);
@@ -19,8 +20,11 @@ camera.lookAt(target);
 const point = target.clone();
 const offset = camera.position.clone().sub(target);
 
-// Scrolling right 30 and up 20 moves the scene left 30 and down 20, and keeps the view's angle and distance
-panView(camera, target, 30, -20, 600);
-assert.ok(near(onScreen(camera, point), [370, 320]), String(onScreen(camera, point)));
+const height = camera.position.z;
+
+// Scrolling right 3 and up 2 moves the orbit point left 3 and down 2, and keeps the view's angle, distance and height
+panView(camera, target, 3, -2, 600);
+assert.ok(near(onScreen(camera, point), [397, 302]), String(onScreen(camera, point)));
 assert.ok(camera.position.clone().sub(target).distanceTo(offset) < 1e-9);
+assert.ok(Math.abs(camera.position.z - height) < 1e-9);
 console.log('trackpad ok');
