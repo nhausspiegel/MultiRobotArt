@@ -56,7 +56,7 @@ export const Simulation = () => {
 		const zoom = (scale: number) => {
 			const {target} = controls.current;
 			camera.position.sub(target).multiplyScalar(scale).add(target);
-			controls.current.update(); // Also keeps the distance within the limits
+			controls.current.update();
 		};
 
 		const onWheel = (event: WheelEvent) => {
@@ -102,7 +102,10 @@ export const Simulation = () => {
 	return (
 		<>
 			<color attach="background" args={['black']} />
-			<OrbitControls ref={controls} enableZoom={false} maxPolarAngle={Math.PI * (1 / 2 - 1 / 20)} minPolarAngle={0} minAzimuthAngle={-Math.PI / 2} maxAzimuthAngle={Math.PI / 2} minDistance={.5} maxDistance={5} object={camera} />
+			{/* No object={camera} (the camera is the default): drei passes object on and it replaced the controls, so every
+			    setting here, from turning off the wheel zoom to angle and distance limits, went to the camera and did nothing.
+			    The limits are left off and damping is off, as the view has always behaved. */}
+			<OrbitControls ref={controls} enableZoom={false} enableDamping={false} />
 			{/* <FlyControls></FlyControls> */}
 			<GizmoHelper alignment="bottom-right" margin={[80, 80]}>
 				<GizmoViewport labels={['X', 'Y', 'Z']} axisColors={['#9d4b4b', '#2f7f4f', '#3b5b9d']} labelColor="white" />
