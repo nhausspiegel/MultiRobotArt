@@ -25577,7 +25577,7 @@ ${b2} to its parent, because: ${a2}`);
           this.ascenderHeight = this.height;
         }
       };
-      var up2 = class extends jp {
+      var up = class extends jp {
         constructor(a2, b2) {
           super(a2);
           this.icon = b2;
@@ -26252,7 +26252,7 @@ ${b2} to its parent, because: ${a2}`);
           this.inputRows.push(a2);
           var b2 = this.block_.getIcons();
           for (let c2 = 0, d2; d2 = b2[c2]; c2++) {
-            let e2 = new up2(this.constants_, d2);
+            let e2 = new up(this.constants_, d2);
             this.isCollapsed && !d2.isShownWhenCollapsed() || a2.elements.push(e2);
           }
           b2 = void 0;
@@ -26596,7 +26596,7 @@ ${b2} to its parent, because: ${a2}`);
       Np.ExternalValueInput = rp;
       Np.Field = sp;
       Np.Hat = tp;
-      Np.Icon = up2;
+      Np.Icon = up;
       Np.InRowSpacer = vp;
       Np.InlineInput = wp;
       Np.InputConnection = qp;
@@ -46381,22 +46381,22 @@ class Matrix4 {
   makeRotationFromQuaternion(q3) {
     return this.compose(_zero, q3, _one);
   }
-  lookAt(eye, target2, up2) {
+  lookAt(eye, target2, up) {
     const te2 = this.elements;
     _z.subVectors(eye, target2);
     if (_z.lengthSq() === 0) {
       _z.z = 1;
     }
     _z.normalize();
-    _x.crossVectors(up2, _z);
+    _x.crossVectors(up, _z);
     if (_x.lengthSq() === 0) {
-      if (Math.abs(up2.z) === 1) {
+      if (Math.abs(up.z) === 1) {
         _z.x += 1e-4;
       } else {
         _z.z += 1e-4;
       }
       _z.normalize();
-      _x.crossVectors(up2, _z);
+      _x.crossVectors(up, _z);
     }
     _x.normalize();
     _y.crossVectors(_z, _x);
@@ -68825,7 +68825,7 @@ class AudioListener extends Object3D {
   updateMatrixWorld(force) {
     super.updateMatrixWorld(force);
     const listener2 = this.context.listener;
-    const up2 = this.up;
+    const up = this.up;
     this.timeDelta = this._clock.getDelta();
     this.matrixWorld.decompose(_position$1, _quaternion$1, _scale$1);
     _orientation$1.set(0, 0, -1).applyQuaternion(_quaternion$1);
@@ -68837,12 +68837,12 @@ class AudioListener extends Object3D {
       listener2.forwardX.linearRampToValueAtTime(_orientation$1.x, endTime);
       listener2.forwardY.linearRampToValueAtTime(_orientation$1.y, endTime);
       listener2.forwardZ.linearRampToValueAtTime(_orientation$1.z, endTime);
-      listener2.upX.linearRampToValueAtTime(up2.x, endTime);
-      listener2.upY.linearRampToValueAtTime(up2.y, endTime);
-      listener2.upZ.linearRampToValueAtTime(up2.z, endTime);
+      listener2.upX.linearRampToValueAtTime(up.x, endTime);
+      listener2.upY.linearRampToValueAtTime(up.y, endTime);
+      listener2.upZ.linearRampToValueAtTime(up.z, endTime);
     } else {
       listener2.setPosition(_position$1.x, _position$1.y, _position$1.z);
-      listener2.setOrientation(_orientation$1.x, _orientation$1.y, _orientation$1.z, up2.x, up2.y, up2.z);
+      listener2.setOrientation(_orientation$1.x, _orientation$1.y, _orientation$1.z, up.x, up.y, up.z);
     }
   }
 }
@@ -71398,7 +71398,7 @@ class CameraHelper extends LineSegments {
     const colorCross = new Color(3355443);
     this.setColors(colorFrustum, colorCone, colorUp, colorTarget, colorCross);
   }
-  setColors(frustum, cone, up2, target2, cross) {
+  setColors(frustum, cone, up, target2, cross) {
     const geometry = this.geometry;
     const colorAttribute = geometry.getAttribute("color");
     colorAttribute.setXYZ(0, frustum.r, frustum.g, frustum.b);
@@ -71433,12 +71433,12 @@ class CameraHelper extends LineSegments {
     colorAttribute.setXYZ(29, cone.r, cone.g, cone.b);
     colorAttribute.setXYZ(30, cone.r, cone.g, cone.b);
     colorAttribute.setXYZ(31, cone.r, cone.g, cone.b);
-    colorAttribute.setXYZ(32, up2.r, up2.g, up2.b);
-    colorAttribute.setXYZ(33, up2.r, up2.g, up2.b);
-    colorAttribute.setXYZ(34, up2.r, up2.g, up2.b);
-    colorAttribute.setXYZ(35, up2.r, up2.g, up2.b);
-    colorAttribute.setXYZ(36, up2.r, up2.g, up2.b);
-    colorAttribute.setXYZ(37, up2.r, up2.g, up2.b);
+    colorAttribute.setXYZ(32, up.r, up.g, up.b);
+    colorAttribute.setXYZ(33, up.r, up.g, up.b);
+    colorAttribute.setXYZ(34, up.r, up.g, up.b);
+    colorAttribute.setXYZ(35, up.r, up.g, up.b);
+    colorAttribute.setXYZ(36, up.r, up.g, up.b);
+    colorAttribute.setXYZ(37, up.r, up.g, up.b);
     colorAttribute.setXYZ(38, target2.r, target2.g, target2.b);
     colorAttribute.setXYZ(39, target2.r, target2.g, target2.b);
     colorAttribute.setXYZ(40, cross.r, cross.g, cross.b);
@@ -110246,15 +110246,15 @@ let OrbitControls$1 = class OrbitControls extends EventDispatcher {
     };
     this.update = (() => {
       const offset = new Vector3();
-      const up2 = new Vector3(0, 1, 0);
-      const quat = new Quaternion().setFromUnitVectors(object.up, up2);
+      const up = new Vector3(0, 1, 0);
+      const quat = new Quaternion().setFromUnitVectors(object.up, up);
       const quatInverse = quat.clone().invert();
       const lastPosition = new Vector3();
       const lastQuaternion = new Quaternion();
       const twoPI = 2 * Math.PI;
       return function update() {
         const position = scope.object.position;
-        quat.setFromUnitVectors(object.up, up2);
+        quat.setFromUnitVectors(object.up, up);
         quatInverse.copy(quat).invert();
         offset.copy(position).sub(scope.target);
         offset.applyQuaternion(quat);
@@ -127968,8 +127968,8 @@ function isRegionalIndicator(code) {
   return code >= 127462 && code <= 127487;
 }
 const ZWJ = 8205;
-function findClusterBreak(str, pos, forward = true, includeExtending = true) {
-  return (forward ? nextClusterBreak : prevClusterBreak)(str, pos, includeExtending);
+function findClusterBreak(str, pos, forward2 = true, includeExtending = true) {
+  return (forward2 ? nextClusterBreak : prevClusterBreak)(str, pos, includeExtending);
 }
 function nextClusterBreak(str, pos, includeExtending) {
   if (pos == str.length)
@@ -130446,17 +130446,17 @@ class LayerCursor {
     this.gotoInner(pos, side, false);
     return this;
   }
-  gotoInner(pos, side, forward) {
+  gotoInner(pos, side, forward2) {
     while (this.chunkIndex < this.layer.chunk.length) {
       let next = this.layer.chunk[this.chunkIndex];
       if (!(this.skip && this.skip.has(next) || this.layer.chunkEnd(this.chunkIndex) < pos || next.maxPoint < this.minPoint))
         break;
       this.chunkIndex++;
-      forward = false;
+      forward2 = false;
     }
     if (this.chunkIndex < this.layer.chunk.length) {
       let rangeIndex = this.layer.chunk[this.chunkIndex].findIndex(pos - this.layer.chunkPos[this.chunkIndex], side, true);
-      if (!forward || this.rangeIndex < rangeIndex)
+      if (!forward2 || this.rangeIndex < rangeIndex)
         this.setRangeIndex(rangeIndex);
     }
     this.next();
@@ -131242,10 +131242,10 @@ function dispatchKey(elt, name2, code) {
   let down = new KeyboardEvent("keydown", options);
   down.synthetic = true;
   elt.dispatchEvent(down);
-  let up2 = new KeyboardEvent("keyup", options);
-  up2.synthetic = true;
-  elt.dispatchEvent(up2);
-  return down.defaultPrevented || up2.defaultPrevented;
+  let up = new KeyboardEvent("keyup", options);
+  up.synthetic = true;
+  elt.dispatchEvent(up);
+  return down.defaultPrevented || up.defaultPrevented;
 }
 function getRoot(node) {
   while (node) {
@@ -133158,18 +133158,18 @@ function trivialOrder(length) {
   return [new BidiSpan(0, length, 0)];
 }
 let movedOver = "";
-function moveVisually(line, order, dir, start, forward) {
+function moveVisually(line, order, dir, start, forward2) {
   var _a3;
   let startIndex = start.head - line.from, spanI = -1;
   if (startIndex == 0) {
-    if (!forward || !line.length)
+    if (!forward2 || !line.length)
       return null;
     if (order[0].level != dir) {
       startIndex = order[0].side(false, dir);
       spanI = 0;
     }
   } else if (startIndex == line.length) {
-    if (forward)
+    if (forward2)
       return null;
     let last = order[order.length - 1];
     if (last.level != dir) {
@@ -133180,21 +133180,21 @@ function moveVisually(line, order, dir, start, forward) {
   if (spanI < 0)
     spanI = BidiSpan.find(order, startIndex, (_a3 = start.bidiLevel) !== null && _a3 !== void 0 ? _a3 : -1, start.assoc);
   let span = order[spanI];
-  if (startIndex == span.side(forward, dir)) {
-    span = order[spanI += forward ? 1 : -1];
-    startIndex = span.side(!forward, dir);
+  if (startIndex == span.side(forward2, dir)) {
+    span = order[spanI += forward2 ? 1 : -1];
+    startIndex = span.side(!forward2, dir);
   }
-  let indexForward = forward == (span.dir == dir);
+  let indexForward = forward2 == (span.dir == dir);
   let nextIndex = findClusterBreak(line.text, startIndex, indexForward);
   movedOver = line.text.slice(Math.min(startIndex, nextIndex), Math.max(startIndex, nextIndex));
-  if (nextIndex != span.side(forward, dir))
+  if (nextIndex != span.side(forward2, dir))
     return EditorSelection.cursor(nextIndex + line.from, indexForward ? -1 : 1, span.level);
-  let nextSpan = spanI == (forward ? order.length - 1 : 0) ? null : order[spanI + (forward ? 1 : -1)];
+  let nextSpan = spanI == (forward2 ? order.length - 1 : 0) ? null : order[spanI + (forward2 ? 1 : -1)];
   if (!nextSpan && span.level != dir)
-    return EditorSelection.cursor(forward ? line.to : line.from, forward ? -1 : 1, dir);
+    return EditorSelection.cursor(forward2 ? line.to : line.from, forward2 ? -1 : 1, dir);
   if (nextSpan && nextSpan.level < span.level)
-    return EditorSelection.cursor(nextSpan.side(!forward, dir) + line.from, forward ? 1 : -1, nextSpan.level);
-  return EditorSelection.cursor(nextIndex + line.from, forward ? -1 : 1, span.level);
+    return EditorSelection.cursor(nextSpan.side(!forward2, dir) + line.from, forward2 ? 1 : -1, nextSpan.level);
+  return EditorSelection.cursor(nextIndex + line.from, forward2 ? -1 : 1, span.level);
 }
 const LineBreakPlaceholder = "￿";
 class DOMReader {
@@ -134010,35 +134010,35 @@ function isSuspiciousChromeCaretResult(node, offset, x2) {
   let rect = node.nodeType == 1 ? node.getBoundingClientRect() : textRange(node, 0, Math.max(node.nodeValue.length, 1)).getBoundingClientRect();
   return x2 - rect.left > 5;
 }
-function moveToLineBoundary(view, start, forward, includeWrap) {
+function moveToLineBoundary(view, start, forward2, includeWrap) {
   let line = view.state.doc.lineAt(start.head);
   let coords = !includeWrap || !view.lineWrapping ? null : view.coordsAtPos(start.assoc < 0 && start.head > line.from ? start.head - 1 : start.head);
   if (coords) {
     let editorRect = view.dom.getBoundingClientRect();
     let direction = view.textDirectionAt(line.from);
     let pos = view.posAtCoords({
-      x: forward == (direction == Direction.LTR) ? editorRect.right - 1 : editorRect.left + 1,
+      x: forward2 == (direction == Direction.LTR) ? editorRect.right - 1 : editorRect.left + 1,
       y: (coords.top + coords.bottom) / 2
     });
     if (pos != null)
-      return EditorSelection.cursor(pos, forward ? -1 : 1);
+      return EditorSelection.cursor(pos, forward2 ? -1 : 1);
   }
   let lineView = LineView.find(view.docView, start.head);
-  let end2 = lineView ? forward ? lineView.posAtEnd : lineView.posAtStart : forward ? line.to : line.from;
-  return EditorSelection.cursor(end2, forward ? -1 : 1);
+  let end2 = lineView ? forward2 ? lineView.posAtEnd : lineView.posAtStart : forward2 ? line.to : line.from;
+  return EditorSelection.cursor(end2, forward2 ? -1 : 1);
 }
-function moveByChar(view, start, forward, by) {
+function moveByChar(view, start, forward2, by) {
   let line = view.state.doc.lineAt(start.head), spans = view.bidiSpans(line);
   let direction = view.textDirectionAt(line.from);
   for (let cur2 = start, check = null; ; ) {
-    let next = moveVisually(line, spans, direction, cur2, forward), char = movedOver;
+    let next = moveVisually(line, spans, direction, cur2, forward2), char = movedOver;
     if (!next) {
-      if (line.number == (forward ? view.state.doc.lines : 1))
+      if (line.number == (forward2 ? view.state.doc.lines : 1))
         return cur2;
       char = "\n";
-      line = view.state.doc.line(line.number + (forward ? 1 : -1));
+      line = view.state.doc.line(line.number + (forward2 ? 1 : -1));
       spans = view.bidiSpans(line);
-      next = EditorSelection.cursor(forward ? line.from : line.to);
+      next = EditorSelection.cursor(forward2 ? line.from : line.to);
     }
     if (!check) {
       if (!by)
@@ -134060,9 +134060,9 @@ function byGroup(view, pos, start) {
     return cat == nextCat;
   };
 }
-function moveVertically(view, start, forward, distance) {
-  let startPos = start.head, dir = forward ? 1 : -1;
-  if (startPos == (forward ? view.state.doc.length : 0))
+function moveVertically(view, start, forward2, distance) {
+  let startPos = start.head, dir = forward2 ? 1 : -1;
+  if (startPos == (forward2 ? view.state.doc.length : 0))
     return EditorSelection.cursor(startPos, start.assoc);
   let goal = start.goalColumn, startY;
   let rect = view.contentDOM.getBoundingClientRect();
@@ -137291,16 +137291,16 @@ class EditorView {
   a predicate that determines, for each subsequent cluster,
   whether it should also be moved over.
   */
-  moveByChar(start, forward, by) {
-    return skipAtoms(this, start, moveByChar(this, start, forward, by));
+  moveByChar(start, forward2, by) {
+    return skipAtoms(this, start, moveByChar(this, start, forward2, by));
   }
   /**
   Move a cursor position across the next group of either
   [letters](https://codemirror.net/6/docs/ref/#state.EditorState.charCategorizer) or non-letter
   non-whitespace characters.
   */
-  moveByGroup(start, forward) {
-    return skipAtoms(this, start, moveByChar(this, start, forward, (initial2) => byGroup(this, start.head, initial2)));
+  moveByGroup(start, forward2) {
+    return skipAtoms(this, start, moveByChar(this, start, forward2, (initial2) => byGroup(this, start.head, initial2)));
   }
   /**
   Move to the next line boundary in the given direction. If
@@ -137309,8 +137309,8 @@ class EditorView {
   returned. Otherwise this function will return the start or end
   of the line.
   */
-  moveToLineBoundary(start, forward, includeWrap = true) {
-    return moveToLineBoundary(this, start, forward, includeWrap);
+  moveToLineBoundary(start, forward2, includeWrap = true) {
+    return moveToLineBoundary(this, start, forward2, includeWrap);
   }
   /**
   Move a cursor position vertically. When `distance` isn't given,
@@ -137325,8 +137325,8 @@ class EditorView {
   cursor will have its goal column set to whichever column was
   used.
   */
-  moveVertically(start, forward, distance) {
-    return skipAtoms(this, start, moveVertically(this, start, forward, distance));
+  moveVertically(start, forward2, distance) {
+    return skipAtoms(this, start, moveVertically(this, start, forward2, distance));
   }
   /**
   Find the DOM parent node and offset (child offset if `node` is
@@ -141976,7 +141976,7 @@ const completionState = /* @__PURE__ */ StateField.define({
     EditorView.contentAttributes.from(f2, (state) => state.attrs)
   ]
 });
-function moveCompletionSelection(forward, by = "option") {
+function moveCompletionSelection(forward2, by = "option") {
   return (view) => {
     let cState = view.state.field(completionState, false);
     if (!cState || !cState.open || cState.open.disabled || Date.now() - cState.open.timestamp < view.state.facet(completionConfig).interactionDelay)
@@ -141985,7 +141985,7 @@ function moveCompletionSelection(forward, by = "option") {
     if (by == "page" && (tooltip = getTooltip(view, cState.open.tooltip)))
       step = Math.max(2, Math.floor(tooltip.dom.offsetHeight / tooltip.dom.querySelector("li").offsetHeight) - 1);
     let { length } = cState.open.options;
-    let selected = cState.open.selected > -1 ? cState.open.selected + step * (forward ? 1 : -1) : forward ? 0 : length - 1;
+    let selected = cState.open.selected > -1 ? cState.open.selected + step * (forward2 ? 1 : -1) : forward2 ? 0 : length - 1;
     if (selected < 0)
       selected = by == "page" ? 0 : length - 1;
     else if (selected >= length)
@@ -143585,19 +143585,19 @@ function moveSel({ state, dispatch }, how) {
   dispatch(setSel(state, selection2));
   return true;
 }
-function rangeEnd(range, forward) {
-  return EditorSelection.cursor(forward ? range.to : range.from);
+function rangeEnd(range, forward2) {
+  return EditorSelection.cursor(forward2 ? range.to : range.from);
 }
-function cursorByChar(view, forward) {
-  return moveSel(view, (range) => range.empty ? view.moveByChar(range, forward) : rangeEnd(range, forward));
+function cursorByChar(view, forward2) {
+  return moveSel(view, (range) => range.empty ? view.moveByChar(range, forward2) : rangeEnd(range, forward2));
 }
 function ltrAtCursor(view) {
   return view.textDirectionAt(view.state.selection.main.head) == Direction.LTR;
 }
 const cursorCharLeft = (view) => cursorByChar(view, !ltrAtCursor(view));
 const cursorCharRight = (view) => cursorByChar(view, ltrAtCursor(view));
-function cursorByGroup(view, forward) {
-  return moveSel(view, (range) => range.empty ? view.moveByGroup(range, forward) : rangeEnd(range, forward));
+function cursorByGroup(view, forward2) {
+  return moveSel(view, (range) => range.empty ? view.moveByGroup(range, forward2) : rangeEnd(range, forward2));
 }
 const cursorGroupLeft = (view) => cursorByGroup(view, !ltrAtCursor(view));
 const cursorGroupRight = (view) => cursorByGroup(view, ltrAtCursor(view));
@@ -143607,33 +143607,33 @@ function interestingNode(state, node, bracketProp) {
   let len = node.to - node.from;
   return len && (len > 2 || /[^\s,.;:]/.test(state.sliceDoc(node.from, node.to))) || node.firstChild;
 }
-function moveBySyntax(state, start, forward) {
+function moveBySyntax(state, start, forward2) {
   let pos = syntaxTree(state).resolveInner(start.head);
-  let bracketProp = forward ? NodeProp.closedBy : NodeProp.openedBy;
+  let bracketProp = forward2 ? NodeProp.closedBy : NodeProp.openedBy;
   for (let at2 = start.head; ; ) {
-    let next = forward ? pos.childAfter(at2) : pos.childBefore(at2);
+    let next = forward2 ? pos.childAfter(at2) : pos.childBefore(at2);
     if (!next)
       break;
     if (interestingNode(state, next, bracketProp))
       pos = next;
     else
-      at2 = forward ? next.to : next.from;
+      at2 = forward2 ? next.to : next.from;
   }
   let bracket2 = pos.type.prop(bracketProp), match, newPos;
-  if (bracket2 && (match = forward ? matchBrackets(state, pos.from, 1) : matchBrackets(state, pos.to, -1)) && match.matched)
-    newPos = forward ? match.end.to : match.end.from;
+  if (bracket2 && (match = forward2 ? matchBrackets(state, pos.from, 1) : matchBrackets(state, pos.to, -1)) && match.matched)
+    newPos = forward2 ? match.end.to : match.end.from;
   else
-    newPos = forward ? pos.to : pos.from;
-  return EditorSelection.cursor(newPos, forward ? -1 : 1);
+    newPos = forward2 ? pos.to : pos.from;
+  return EditorSelection.cursor(newPos, forward2 ? -1 : 1);
 }
 const cursorSyntaxLeft = (view) => moveSel(view, (range) => moveBySyntax(view.state, range, !ltrAtCursor(view)));
 const cursorSyntaxRight = (view) => moveSel(view, (range) => moveBySyntax(view.state, range, ltrAtCursor(view)));
-function cursorByLine(view, forward) {
+function cursorByLine(view, forward2) {
   return moveSel(view, (range) => {
     if (!range.empty)
-      return rangeEnd(range, forward);
-    let moved = view.moveVertically(range, forward);
-    return moved.head != range.head ? moved : view.moveToLineBoundary(range, forward);
+      return rangeEnd(range, forward2);
+    let moved = view.moveVertically(range, forward2);
+    return moved.head != range.head ? moved : view.moveToLineBoundary(range, forward2);
   });
 }
 const cursorLineUp = (view) => cursorByLine(view, false);
@@ -143660,10 +143660,10 @@ function pageInfo(view) {
     height: Math.max(view.defaultLineHeight, height - 5)
   };
 }
-function cursorByPage(view, forward) {
+function cursorByPage(view, forward2) {
   let page = pageInfo(view);
   let { state } = view, selection2 = updateSel(state.selection, (range) => {
-    return range.empty ? view.moveVertically(range, forward, page.height) : rangeEnd(range, forward);
+    return range.empty ? view.moveVertically(range, forward2, page.height) : rangeEnd(range, forward2);
   });
   if (selection2.eq(state.selection))
     return false;
@@ -143680,11 +143680,11 @@ function cursorByPage(view, forward) {
 }
 const cursorPageUp = (view) => cursorByPage(view, false);
 const cursorPageDown = (view) => cursorByPage(view, true);
-function moveByLineBoundary(view, start, forward) {
-  let line = view.lineBlockAt(start.head), moved = view.moveToLineBoundary(start, forward);
-  if (moved.head == start.head && moved.head != (forward ? line.to : line.from))
-    moved = view.moveToLineBoundary(start, forward, false);
-  if (!forward && moved.head == line.from && line.length) {
+function moveByLineBoundary(view, start, forward2) {
+  let line = view.lineBlockAt(start.head), moved = view.moveToLineBoundary(start, forward2);
+  if (moved.head == start.head && moved.head != (forward2 ? line.to : line.from))
+    moved = view.moveToLineBoundary(start, forward2, false);
+  if (!forward2 && moved.head == line.from && line.length) {
     let space2 = /^\s*/.exec(view.state.sliceDoc(line.from, Math.min(line.from + 100, line.to)))[0].length;
     if (space2 && start.head != line.from + space2)
       moved = EditorSelection.cursor(line.from + space2);
@@ -143722,25 +143722,25 @@ function extendSel(view, how) {
   view.dispatch(setSel(view.state, selection2));
   return true;
 }
-function selectByChar(view, forward) {
-  return extendSel(view, (range) => view.moveByChar(range, forward));
+function selectByChar(view, forward2) {
+  return extendSel(view, (range) => view.moveByChar(range, forward2));
 }
 const selectCharLeft = (view) => selectByChar(view, !ltrAtCursor(view));
 const selectCharRight = (view) => selectByChar(view, ltrAtCursor(view));
-function selectByGroup(view, forward) {
-  return extendSel(view, (range) => view.moveByGroup(range, forward));
+function selectByGroup(view, forward2) {
+  return extendSel(view, (range) => view.moveByGroup(range, forward2));
 }
 const selectGroupLeft = (view) => selectByGroup(view, !ltrAtCursor(view));
 const selectGroupRight = (view) => selectByGroup(view, ltrAtCursor(view));
 const selectSyntaxLeft = (view) => extendSel(view, (range) => moveBySyntax(view.state, range, !ltrAtCursor(view)));
 const selectSyntaxRight = (view) => extendSel(view, (range) => moveBySyntax(view.state, range, ltrAtCursor(view)));
-function selectByLine(view, forward) {
-  return extendSel(view, (range) => view.moveVertically(range, forward));
+function selectByLine(view, forward2) {
+  return extendSel(view, (range) => view.moveVertically(range, forward2));
 }
 const selectLineUp = (view) => selectByLine(view, false);
 const selectLineDown = (view) => selectByLine(view, true);
-function selectByPage(view, forward) {
-  return extendSel(view, (range) => view.moveVertically(range, forward, pageInfo(view).height));
+function selectByPage(view, forward2) {
+  return extendSel(view, (range) => view.moveVertically(range, forward2, pageInfo(view).height));
 }
 const selectPageUp = (view) => selectByPage(view, false);
 const selectPageDown = (view) => selectByPage(view, true);
@@ -143829,18 +143829,18 @@ function deleteBy(target2, by) {
   }));
   return true;
 }
-function skipAtomic(target2, pos, forward) {
+function skipAtomic(target2, pos, forward2) {
   if (target2 instanceof EditorView)
     for (let ranges of target2.state.facet(EditorView.atomicRanges).map((f2) => f2(target2)))
       ranges.between(pos, pos, (from, to) => {
         if (from < pos && to > pos)
-          pos = forward ? to : from;
+          pos = forward2 ? to : from;
       });
   return pos;
 }
-const deleteByChar = (target2, forward) => deleteBy(target2, (pos) => {
+const deleteByChar = (target2, forward2) => deleteBy(target2, (pos) => {
   let { state } = target2, line = state.doc.lineAt(pos), before, targetPos;
-  if (!forward && pos > line.from && pos < line.from + 200 && !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
+  if (!forward2 && pos > line.from && pos < line.from + 200 && !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
     if (before[before.length - 1] == "	")
       return pos - 1;
     let col = countColumn(before, state.tabSize), drop = col % getIndentUnit(state) || getIndentUnit(state);
@@ -143848,24 +143848,24 @@ const deleteByChar = (target2, forward) => deleteBy(target2, (pos) => {
       pos--;
     targetPos = pos;
   } else {
-    targetPos = findClusterBreak(line.text, pos - line.from, forward, forward) + line.from;
-    if (targetPos == pos && line.number != (forward ? state.doc.lines : 1))
-      targetPos += forward ? 1 : -1;
+    targetPos = findClusterBreak(line.text, pos - line.from, forward2, forward2) + line.from;
+    if (targetPos == pos && line.number != (forward2 ? state.doc.lines : 1))
+      targetPos += forward2 ? 1 : -1;
   }
   return targetPos;
 });
 const deleteCharBackward = (view) => deleteByChar(view, false);
 const deleteCharForward = (view) => deleteByChar(view, true);
-const deleteByGroup = (target2, forward) => deleteBy(target2, (start) => {
+const deleteByGroup = (target2, forward2) => deleteBy(target2, (start) => {
   let pos = start, { state } = target2, line = state.doc.lineAt(pos);
   let categorize = state.charCategorizer(pos);
   for (let cat = null; ; ) {
-    if (pos == (forward ? line.to : line.from)) {
-      if (pos == start && line.number != (forward ? state.doc.lines : 1))
-        pos += forward ? 1 : -1;
+    if (pos == (forward2 ? line.to : line.from)) {
+      if (pos == start && line.number != (forward2 ? state.doc.lines : 1))
+        pos += forward2 ? 1 : -1;
       break;
     }
-    let next = findClusterBreak(line.text, pos - line.from, forward) + line.from;
+    let next = findClusterBreak(line.text, pos - line.from, forward2) + line.from;
     let nextChar2 = line.text.slice(Math.min(pos, next) - line.from, Math.max(pos, next) - line.from);
     let nextCat = categorize(nextChar2);
     if (cat != null && nextCat != cat)
@@ -143934,16 +143934,16 @@ function selectedLineBlocks(state) {
   }
   return blocks;
 }
-function moveLine(state, dispatch, forward) {
+function moveLine(state, dispatch, forward2) {
   if (state.readOnly)
     return false;
   let changes = [], ranges = [];
   for (let block of selectedLineBlocks(state)) {
-    if (forward ? block.to == state.doc.length : block.from == 0)
+    if (forward2 ? block.to == state.doc.length : block.from == 0)
       continue;
-    let nextLine = state.doc.lineAt(forward ? block.to + 1 : block.from - 1);
+    let nextLine = state.doc.lineAt(forward2 ? block.to + 1 : block.from - 1);
     let size = nextLine.length + 1;
-    if (forward) {
+    if (forward2) {
       changes.push({ from: block.to, to: nextLine.to }, { from: block.from, insert: nextLine.text + state.lineBreak });
       for (let r2 of block.ranges)
         ranges.push(EditorSelection.range(Math.min(state.doc.length, r2.anchor + size), Math.min(state.doc.length, r2.head + size)));
@@ -143965,12 +143965,12 @@ function moveLine(state, dispatch, forward) {
 }
 const moveLineUp = ({ state, dispatch }) => moveLine(state, dispatch, false);
 const moveLineDown = ({ state, dispatch }) => moveLine(state, dispatch, true);
-function copyLine(state, dispatch, forward) {
+function copyLine(state, dispatch, forward2) {
   if (state.readOnly)
     return false;
   let changes = [];
   for (let block of selectedLineBlocks(state)) {
-    if (forward)
+    if (forward2)
       changes.push({ from: block.from, insert: state.doc.slice(block.from, block.to) + state.lineBreak });
     else
       changes.push({ from: block.to, insert: state.lineBreak + state.doc.slice(block.from, block.to) });
@@ -146243,14 +146243,18 @@ const BlockPythonCodePanel = () => {
   return /* @__PURE__ */ jsx("div", { className: "h-full w-full overflow-auto", children: /* @__PURE__ */ jsx(ReactCodeMirror, { value: currentBlock == null ? void 0 : currentBlock.python, className: "h-full w-full", extensions: [python()], readOnly: true }) });
 };
 const right = new Vector3();
-const up = new Vector3();
+const forward = new Vector3();
 const panView = (camera, target2, dx, dy, screenHeight) => {
+  const distance = camera.position.distanceTo(target2);
+  const perPixel = 2 * distance * Math.tan(camera.fov * Math.PI / 360) / screenHeight;
+  const sinDown = (camera.position.z - target2.z) / distance;
   camera.updateMatrix();
-  const perPixel = 2 * camera.position.distanceTo(target2) * Math.tan(camera.fov * Math.PI / 360) / screenHeight;
-  right.setFromMatrixColumn(camera.matrix, 0).multiplyScalar(dx * perPixel);
-  up.setFromMatrixColumn(camera.matrix, 1).multiplyScalar(-dy * perPixel);
-  camera.position.add(right).add(up);
-  target2.add(right).add(up);
+  right.setFromMatrixColumn(camera.matrix, 0);
+  forward.crossVectors(camera.up, right);
+  right.multiplyScalar(dx * perPixel);
+  forward.multiplyScalar(-dy * perPixel / sinDown);
+  camera.position.add(right).add(forward);
+  target2.add(right).add(forward);
 };
 let init = true;
 const boxEdges = (min, max) => {
