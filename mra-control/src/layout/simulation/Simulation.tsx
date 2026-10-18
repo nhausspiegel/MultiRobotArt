@@ -6,10 +6,11 @@ import { useSimulator } from '@MRAControl/state/useSimulator';
 import { CatmullRomLine, GizmoHelper, GizmoViewport, Grid, Line, OrbitControls, Plane, Sphere } from '@react-three/drei';
 import { noGroupColor, robotGroup } from '@MRAControl/state/groupMigration';
 import { useThree } from '@react-three/fiber';
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import React from 'react';
 import type THREE from 'three';
-import { type Group, type Vector3 } from 'three';
+import { type Group, type PerspectiveCamera, type Vector3 } from 'three';
+import { panView } from './trackpad';
 
 let init = true;
 
@@ -47,7 +48,50 @@ export const Simulation = () => {
 		}
 	}
 
-	const { size, viewport, camera } = useThree();
+	const { size, viewport, camera, gl } = useThree();
+	const controls = useRef<React.ElementRef<typeof OrbitControls>>(null!);
+	// Trackpad: two-finger scrolling pans, pinching (ctrl+wheel; gesture events in Safari) and cmd+scrolling zoom
+	useEffect(() => {
+		const canvas = gl.domElement;
+		const zoom = (scale: number) => {
+			const {target} = controls.current;
+			camera.position.sub(target).multiplyScalar(scale).add(target);
+			controls.current.update(); // Also keeps the distance within the limits
+		};
+
+		const onWheel = (event: WheelEvent) => {
+			event.preventDefault(); // Otherwise the page scrolls or zooms
+			const lines = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : 1;
+			if (event.ctrlKey || event.metaKey) {
+				zoom(Math.exp(Math.max(-0.2, Math.min(0.2, event.deltaY * lines * 0.01))));
+			} else {
+				panView(camera as PerspectiveCamera, controls.current.target, event.deltaX * lines, event.deltaY * lines, canvas.clientHeight);
+				controls.current.update();
+			}
+		};
+
+		let previousScale = 1;
+		const onGestureStart = (event: Event) => {
+			event.preventDefault();
+			previousScale = 1;
+		};
+
+		const onGestureChange = (event: Event) => {
+			event.preventDefault();
+			const {scale} = event as Event & {scale: number};
+			zoom(previousScale / scale);
+			previousScale = scale;
+		};
+
+		canvas.addEventListener('wheel', onWheel, {passive: false});
+		canvas.addEventListener('gesturestart', onGestureStart);
+		canvas.addEventListener('gesturechange', onGestureChange);
+		return () => {
+			canvas.removeEventListener('wheel', onWheel);
+			canvas.removeEventListener('gesturestart', onGestureStart);
+			canvas.removeEventListener('gesturechange', onGestureChange);
+		};
+	}, [gl, camera]);
 	// if (init || camera.up !== new THREE.Vector3(0, 0, 1)) {
 	if (init || (camera.up.x !== 0 || camera.up.y !== 0 || camera.up.z !== 1)) {
 		camera.position.set(-5, 0, 2);
@@ -58,7 +102,7 @@ export const Simulation = () => {
 	return (
 		<>
 			<color attach="background" args={['black']} />
-			<OrbitControls maxPolarAngle={Math.PI * (1 / 2 - 1 / 20)} minPolarAngle={0} minAzimuthAngle={-Math.PI / 2} maxAzimuthAngle={Math.PI / 2} minDistance={.5} maxDistance={5} object={camera} />
+			<OrbitControls ref={controls} enableZoom={false} maxPolarAngle={Math.PI * (1 / 2 - 1 / 20)} minPolarAngle={0} minAzimuthAngle={-Math.PI / 2} maxAzimuthAngle={Math.PI / 2} minDistance={.5} maxDistance={5} object={camera} />
 			{/* <FlyControls></FlyControls> */}
 			<GizmoHelper alignment="bottom-right" margin={[80, 80]}>
 				<GizmoViewport labels={['X', 'Y', 'Z']} axisColors={['#9d4b4b', '#2f7f4f', '#3b5b9d']} labelColor="white" />
