@@ -146331,7 +146331,7 @@ const Simulation = () => {
   }
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx("color", { attach: "background", args: ["black"] }),
-    /* @__PURE__ */ jsx(OrbitControls2, { ref: controls, enableZoom: false, maxPolarAngle: Math.PI * (1 / 2 - 1 / 20), minPolarAngle: 0, minAzimuthAngle: -Math.PI / 2, maxAzimuthAngle: Math.PI / 2, minDistance: 0.5, maxDistance: 5, object: camera }),
+    /* @__PURE__ */ jsx(OrbitControls2, { ref: controls, enableZoom: false, enableDamping: false }),
     /* @__PURE__ */ jsx(GizmoHelper, { alignment: "bottom-right", margin: [80, 80], children: /* @__PURE__ */ jsx(GizmoViewport, { labels: ["X", "Y", "Z"], axisColors: ["#9d4b4b", "#2f7f4f", "#3b5b9d"], labelColor: "white" }) }),
     /* @__PURE__ */ jsx(
       Grid,
