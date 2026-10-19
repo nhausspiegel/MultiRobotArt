@@ -99626,11 +99626,21 @@ const UploadFileModal = ({
     /* @__PURE__ */ jsx(Modal.Footer, { children: /* @__PURE__ */ jsx(CancelButton, { onClick: close }) })
   ] });
 };
+const panSpeedKey = "mra-pan-speed";
+const savedPanSpeed = () => {
+  try {
+    const panSpeed = Number(localStorage.getItem(panSpeedKey));
+    return panSpeed > 0 ? panSpeed : 1;
+  } catch {
+    return 1;
+  }
+};
 const useUIState = create$2()((set, get) => ({
   settingsModalOpen: false,
   curveEditorOpen: false,
   openSimulation: false,
   editingRobotId: void 0,
+  panSpeed: savedPanSpeed(),
   toggleSettingsModal: () => {
     set({ settingsModalOpen: !get().settingsModalOpen });
   },
@@ -99642,6 +99652,13 @@ const useUIState = create$2()((set, get) => ({
   },
   toggleSimulation: () => {
     set({ openSimulation: !get().openSimulation });
+  },
+  setPanSpeed: (panSpeed) => {
+    set({ panSpeed });
+    try {
+      localStorage.setItem(panSpeedKey, String(panSpeed));
+    } catch {
+    }
   }
 }));
 var constants = { exports: {} };
@@ -123515,6 +123532,20 @@ const BoundingBoxSizeEditor = () => {
   const setSize = useRobartState((state) => state.setBoundingBoxSize);
   return /* @__PURE__ */ jsx(XyzInputs, { title: "Bounding box dimensions (m):", value: size, isValid: isPositiveNumber, onSave: setSize });
 };
+const PanSpeedSlider = () => {
+  const panSpeed = useUIState((state) => state.panSpeed);
+  const setPanSpeed = useUIState((state) => state.setPanSpeed);
+  return /* @__PURE__ */ jsxs("div", { className: "mt-4 flex items-center gap-3", children: [
+    /* @__PURE__ */ jsx("span", { className: "whitespace-nowrap", children: "Scroll pan speed" }),
+    /* @__PURE__ */ jsx(RangeSlider, { className: "w-48", min: 0.4, max: 3, step: 0.1, value: panSpeed, onChange: (e2) => {
+      setPanSpeed(Number(e2.target.value));
+    } }),
+    /* @__PURE__ */ jsxs("span", { className: "tabular-nums", children: [
+      panSpeed.toFixed(1),
+      "×"
+    ] })
+  ] });
+};
 const LimitsEditor = () => {
   const limits = useRobartState((state) => state.limits);
   const setLimits = useRobartState((state) => state.setLimits);
@@ -123620,6 +123651,7 @@ const SettingsModal = () => {
             ),
             /* @__PURE__ */ jsx("span", { style: { marginLeft: "10px" }, children: "Remove Bounding Boxes" })
           ] }),
+          /* @__PURE__ */ jsx(PanSpeedSlider, {}),
           /* @__PURE__ */ jsx(LimitsEditor, {})
         ] }),
         /* @__PURE__ */ jsx(Tabs.Item, { title: "Utilities", children: /* @__PURE__ */ jsx(Button, { onClick: toggleCurveEditor, children: "Curve Editor" }) })
@@ -146296,7 +146328,8 @@ const Simulation = () => {
       if (event.ctrlKey || event.metaKey) {
         zoom(Math.exp(Math.max(-0.2, Math.min(0.2, event.deltaY * lines * 0.01))));
       } else {
-        panView(camera, controls.current.target, event.deltaX * lines, event.deltaY * lines, canvas.clientHeight);
+        const speed = lines * 0.5 * useUIState.getState().panSpeed;
+        panView(camera, controls.current.target, event.deltaX * speed, event.deltaY * speed, canvas.clientHeight);
         controls.current.update();
       }
     };
