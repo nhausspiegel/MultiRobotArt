@@ -1,5 +1,5 @@
 import {faSync} from '@fortawesome/free-solid-svg-icons';
-import {Button, Checkbox, Label, Modal, Tabs, TabsRef, TextInput} from 'flowbite-react';
+import {Button, Checkbox, Label, Modal, RangeSlider, Tabs, TabsRef, TextInput} from 'flowbite-react';
 import React, {useEffect, useState} from 'react';
 
 import {CancelButton} from '../../components/buttons/CancelButton';
@@ -17,6 +17,20 @@ const BoundingBoxSizeEditor = () => {
 	const size = useRobartState((state) => state.boundingBoxSize);
 	const setSize = useRobartState((state) => state.setBoundingBoxSize);
 	return <XyzInputs title="Bounding box dimensions (m):" value={size} isValid={isPositiveNumber} onSave={setSize} />;
+};
+
+const PanSpeedSlider = () => {
+	const panSpeed = useUIState((state) => state.panSpeed);
+	const setPanSpeed = useUIState((state) => state.setPanSpeed);
+	return (
+		<div className="mt-4 flex items-center gap-3">
+			<span className="whitespace-nowrap">Scroll pan speed</span>
+			<RangeSlider className="w-48" min={0.4} max={3} step={0.1} value={panSpeed} onChange={(e) => {
+				setPanSpeed(Number(e.target.value));
+			}} />
+			<span className="tabular-nums">{panSpeed.toFixed(1)}×</span>
+		</div>
+	);
 };
 
 // What measuring the show warns about. Like the box size, fields keep whatever is typed and are only saved while valid.
@@ -128,6 +142,7 @@ export const SettingsModal = () => {
 									onChange={handleBoundingBoxChange} />
 								<span style={{ marginLeft: '10px' }}>Remove Bounding Boxes</span>
 							</div>
+							<PanSpeedSlider />
 							<LimitsEditor />
 						</Tabs.Item>
 						<Tabs.Item title="Utilities">

@@ -3,6 +3,7 @@
 import { Crazyflie } from '@MRAControl/components/vector/Crazyflie';
 import { useRobartState } from '@MRAControl/state/useRobartState';
 import { useSimulator } from '@MRAControl/state/useSimulator';
+import { useUIState } from '@MRAControl/state/useUIState';
 import { CatmullRomLine, GizmoHelper, GizmoViewport, Grid, Line, OrbitControls, Plane, Sphere } from '@react-three/drei';
 import { noGroupColor, robotGroup } from '@MRAControl/state/groupMigration';
 import { useThree } from '@react-three/fiber';
@@ -65,7 +66,9 @@ export const Simulation = () => {
 			if (event.ctrlKey || event.metaKey) {
 				zoom(Math.exp(Math.max(-0.2, Math.min(0.2, event.deltaY * lines * 0.01))));
 			} else {
-				panView(camera as PerspectiveCamera, controls.current.target, event.deltaX * lines, event.deltaY * lines, canvas.clientHeight);
+				// Half of moving 1:1 with the fingers at the default speed
+				const speed = lines * 0.5 * useUIState.getState().panSpeed;
+				panView(camera as PerspectiveCamera, controls.current.target, event.deltaX * speed, event.deltaY * speed, canvas.clientHeight);
 				controls.current.update();
 			}
 		};
