@@ -2812,6 +2812,13 @@ svg[display='none'] {
   display: none;
 }
 
+/* Swiping two fingers sideways (panning the simulation, scrolling the timeline) made Chrome on macOS go back a page.
+   This turns off swiping between pages for the app; the back button and Cmd+[ still work. */
+html,
+body {
+  overscroll-behavior-x: none;
+}
+
 /* Blockly scrollbars: subtle translucent handles instead of grey bars. Prefixed with .injectionDiv to outrank
    Blockly's own styles, which are added after this file. */
 .injectionDiv .blocklyScrollbarHandle,
