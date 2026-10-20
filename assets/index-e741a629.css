@@ -1248,6 +1248,9 @@ input:checked + .toggle-bg {
 .h-96 {
   height: 24rem;
 }
+.h-\[13px\] {
+  height: 13px;
+}
 .h-\[30px\] {
   height: 30px;
 }
@@ -1354,6 +1357,9 @@ input:checked + .toggle-bg {
 }
 .w-8 {
   width: 2rem;
+}
+.w-\[13px\] {
+  width: 13px;
 }
 .w-\[30px\] {
   width: 30px;
@@ -2465,6 +2471,10 @@ input:checked + .toggle-bg {
 .leading-tight {
   line-height: 1.25;
 }
+.text-black {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity));
+}
 .text-blue-100 {
   --tw-text-opacity: 1;
   color: rgb(225 239 254 / var(--tw-text-opacity));
@@ -3109,11 +3119,6 @@ body .blocklyTooltipDiv {
 .hover\:\!text-gray-900:hover {
   --tw-text-opacity: 1 !important;
   color: rgb(17 24 39 / var(--tw-text-opacity)) !important;
-}
-
-.hover\:text-black:hover {
-  --tw-text-opacity: 1;
-  color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
 .hover\:text-blue-700:hover {
