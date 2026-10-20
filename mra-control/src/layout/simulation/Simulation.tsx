@@ -12,6 +12,7 @@ import React from 'react';
 import type THREE from 'three';
 import { type Group, type PerspectiveCamera, type Vector3 } from 'three';
 import { panView } from './trackpad';
+import { onSafariPinch } from '@MRAControl/components/utils/safariPinch';
 
 let init = true;
 
@@ -74,26 +75,13 @@ export const Simulation = () => {
 			}
 		};
 
-		let previousScale = 1;
-		const onGestureStart = (event: Event) => {
-			event.preventDefault();
-			previousScale = 1;
-		};
-
-		const onGestureChange = (event: Event) => {
-			event.preventDefault();
-			const {scale} = event as Event & {scale: number};
-			zoom(previousScale / scale);
-			previousScale = scale;
-		};
-
 		canvas.addEventListener('wheel', onWheel, {passive: false});
-		canvas.addEventListener('gesturestart', onGestureStart);
-		canvas.addEventListener('gesturechange', onGestureChange);
+		const stopPinch = onSafariPinch(canvas, (ratio) => {
+			zoom(1 / ratio);
+		});
 		return () => {
 			canvas.removeEventListener('wheel', onWheel);
-			canvas.removeEventListener('gesturestart', onGestureStart);
-			canvas.removeEventListener('gesturechange', onGestureChange);
+			stopPinch();
 		};
 	}, [gl, camera]);
 	// if (init || camera.up !== new THREE.Vector3(0, 0, 1)) {

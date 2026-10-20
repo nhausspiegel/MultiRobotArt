@@ -41,9 +41,7 @@ export type RobotSimState = {
 	color: THREE.Color;
 	trajectories: Map<string, traj.Trajectory[]>;
 	trajectory: traj.Trajectory | undefined;
-	trajectoryDuration: number;
 	timeAlongTrajectory: number;
-	trajectoryStartTime: number;
 	// Block code lines to run, with the timeline item each came from and when that item starts
 	trajectoryQueue: Queue<{ line: string; itemId: string; start: number }>;
 };
@@ -249,7 +247,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 						// A command that fails (e.g. a modifier block with nothing inside) is skipped instead of stopping the simulation
 						try {
 							const trajectory = runCommand(next.line, robotId)[1].get(robotId);
-							if (trajectory) Object.assign(robot, { trajectory, timeAlongTrajectory: 0, trajectoryStartTime: newSimTime - remaining });
+							if (trajectory) Object.assign(robot, { trajectory, timeAlongTrajectory: 0 });
 						} catch (error) {
 							console.warn('Skipped a block command that failed:', next.line, error);
 						}
@@ -423,9 +421,7 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 					color: new THREE.Color(255, 255, 255),
 					timeAlongTrajectory: 0,
 					trajectory: nullTrajectory,
-					trajectoryDuration: -1,
 					trajectories: new Map<string, traj.Trajectory[]>,
-					trajectoryStartTime: -1,
 					trajectoryQueue: new Queue<{ line: string; itemId: string; start: number }>,
 				};
 			});

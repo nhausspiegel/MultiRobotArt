@@ -11,6 +11,7 @@ import React, {useEffect, useRef} from 'react';
 import {useBlocklyWorkspace} from 'react-blockly';
 
 import {BlockEditorHeader} from './BlockEditorHeader';
+import {onSafariPinch} from '../components/utils/safariPinch';
 
 const zoomScaleSpeed = 1.2;
 // Scratch-style blocks (zelos) are big at full size; this makes them about the size the classic ones were
@@ -395,29 +396,15 @@ export const BlockEditorPanel = () => {
 		};
 	}, [workspace]);
 
-	// Safari reports trackpad pinches as gesture events instead of ctrl+wheel, so Blockly's wheel zoom misses them
+	// Safari's trackpad pinches aren't ctrl+wheel, so Blockly's wheel zoom misses them
 	useEffect(() => {
 		const element = workspaceRef.current;
 		if (!workspace || !element) return;
-		let previousScale = 1;
-		const onGestureStart = (event: Event) => {
-			event.preventDefault(); // Otherwise Safari zooms the whole page
-			previousScale = 1;
-		};
-		const onGestureChange = (event: Event) => {
-			event.preventDefault();
-			const {scale, clientX, clientY} = event as Event & {scale: number; clientX: number; clientY: number};
+		return onSafariPinch(element, (ratio, clientX, clientY) => {
 			const rect = element.getBoundingClientRect();
 			// zoom() counts in steps of scaleSpeed
-			workspace.zoom(clientX - rect.left, clientY - rect.top, Math.log(scale / previousScale) / Math.log(zoomScaleSpeed));
-			previousScale = scale;
-		};
-		element.addEventListener('gesturestart', onGestureStart);
-		element.addEventListener('gesturechange', onGestureChange);
-		return () => {
-			element.removeEventListener('gesturestart', onGestureStart);
-			element.removeEventListener('gesturechange', onGestureChange);
-		};
+			workspace.zoom(clientX - rect.left, clientY - rect.top, Math.log(ratio) / Math.log(zoomScaleSpeed));
+		});
 	}, [workspace]);
 
 	useEffect(() => {

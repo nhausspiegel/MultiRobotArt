@@ -11,7 +11,7 @@ import {immer} from 'zustand/middleware/immer';
 import {ROBART_VERSION} from '../config/Version';
 import {exportROS, loadProjectFromFile, saveProjectToFile} from '../tools/projectFileConversion';
 import {useSimulator} from './useSimulator';
-import {allDronesGroupId, migrateGroups, newGroup, withoutHiddenGroups} from './groupMigration';
+import {allDronesGroupId, migrateGroups, newGroup, otherGroups, withoutHiddenGroups} from './groupMigration';
 
 export type CodeBlock = {
 	/**
@@ -85,10 +85,6 @@ export type TimelineGroupState = {
    */
 	color?: string;
 	/**
-   * Lane shown as a thin strip to save space. Display only; it still runs.
-   */
-	collapsed?: boolean;
-	/**
    * Its robots are left out of the simulation and the export (the eye on its label). Unset for All drones.
    */
 	hidden?: boolean;
@@ -97,6 +93,10 @@ export type TimelineGroupState = {
 export type TimelineState = {
 	groups: Record<string, TimelineGroupState>;
 	scale: number;
+	/**
+   * Every lane shown as a thin strip to save space (the toggle beside + New group). Display only; they still run.
+   */
+	collapsed?: boolean;
 };
 
 export type RobotType = 'crazyflie';
@@ -183,11 +183,11 @@ export type TimelineActions = {
 	setTimelineScale: (scale: number) => void;
 	setBoundingBoxSize: (size: [number, number, number]) => void;
 	setLimits: (limits: Partial<Limits>) => void;
+	setGroupsCollapsed: (collapsed: boolean) => void;
 	/**
-   * Collapses every lane, or expands them all (the toggle beside + New group)
+   * All drones' eye hides or shows every group.
    */
-	setAllGroupsCollapsed: (collapsed: boolean) => void;
-	setGroupsHidden: (groupIds: string[], hidden: boolean) => void;
+	setGroupHidden: (groupId: string, hidden: boolean) => void;
 	/**
    * Stores lengths measured by simulating: how long timeline items take in the show, and how long each block takes
    * on its own (used for the drop preview and the initial length of new timeline items).
@@ -396,18 +396,18 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							state.timelineState.groups[toGroupId].items[itemId] = item;
 						});
 					},
-					setGroupsHidden: (groupIds, hidden) => {
+					setGroupHidden: (groupId, hidden) => {
 						set((state) => {
-							groupIds.forEach((groupId) => {
-								state.timelineState.groups[groupId].hidden = hidden;
+							const {groups} = state.timelineState;
+							(groupId === allDronesGroupId ? otherGroups(groups) : [groups[groupId]]).forEach((group) => {
+								group.hidden = hidden;
 							});
 						});
 					},
-					setAllGroupsCollapsed: (collapsed) => {
+					setGroupsCollapsed: (collapsed) => {
+						// Not on the groups, so collapsing doesn't re-measure the show
 						set((state) => {
-							Object.values(state.timelineState.groups).forEach((group) => {
-								group.collapsed = collapsed;
-							});
+							state.timelineState.collapsed = collapsed;
 						});
 					},
 					setBoundingBoxSize: (size) => {
@@ -576,8 +576,6 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					},
 					addGroup: (groupName: string) => {
 						const group = newGroup(groupName, get().timelineState.groups);
-						// Matches the collapse-all toggle
-						if (Object.values(get().timelineState.groups).every((other) => other.collapsed)) group.collapsed = true;
 						set((state) => {
 							state.timelineState.groups[group.id] = group;
 						});
@@ -613,9 +611,9 @@ export const useRobartState = create<MRAState & MRAActions>()(
 
 useRobartState.subscribe(
 	(state) => state.robots,
-	(robots) => {
+	() => {
 		// Only while stopped: mid-show this put every drone back at its start and emptied its queue, which could end the
 		// show. Timeline's re-measure updates a paused or running show instead.
-		if (useSimulator.getState().status === 'STOPPED') useSimulator.getState().setRobots(withoutHiddenGroups({robots, timelineState: useRobartState.getState().timelineState}).robots);
+		if (useSimulator.getState().status === 'STOPPED') useSimulator.getState().setRobots(withoutHiddenGroups(useRobartState.getState()).robots);
 	},
 );

@@ -68,20 +68,21 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 	const removeGroup = useRobartState((state) => state.removeGroup);
 	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
 	const createRobot = useRobartState((state) => state.createRobot);
-	const setGroupsHidden = useRobartState((state) => state.setGroupsHidden);
+	const setGroupHidden = useRobartState((state) => state.setGroupHidden);
 	const hidden = useRobartState((state) => isGroupHidden(state.timelineState.groups, group.id));
+	const collapsed = useRobartState((state) => Boolean(state.timelineState.collapsed));
 	const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
 	const isAllDrones = group.id === allDronesGroupId;
 
 	// Hidden groups' robots are left out of the simulation and the export. All drones' eye hides or shows every group.
+	const eyeLabel = isAllDrones ? (hidden ? 'Show all groups' : 'Hide all groups') : (hidden ? 'Show in simulation' : 'Hide from simulation');
 	const eyeButton = (
 		<button
-			aria-label={isAllDrones ? (hidden ? 'Show all groups' : 'Hide all groups') : (hidden ? 'Show in simulation' : 'Hide from simulation')}
-			title={isAllDrones ? (hidden ? 'Show all groups' : 'Hide all groups') : (hidden ? 'Show in simulation' : 'Hide from simulation')}
+			aria-label={eyeLabel}
+			title={eyeLabel}
 			className="flex w-4 shrink-0 items-center justify-center text-black"
 			onClick={() => {
-				const groupIds = isAllDrones ? Object.keys(useRobartState.getState().timelineState.groups).filter((id) => id !== allDronesGroupId) : [group.id];
-				setGroupsHidden(groupIds, !hidden);
+				setGroupHidden(group.id, !hidden);
 			}}
 		>
 			<EyeIcon closed={hidden} />
@@ -90,7 +91,7 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 
 	if (isAllDrones) {
 		return (
-			<div className={clsx('flex w-52 items-center gap-1 rounded bg-green-400 px-2', group.collapsed ? 'h-7' : 'h-16', hidden && 'opacity-50')}>
+			<div className={clsx('flex w-52 items-center gap-1 rounded bg-green-400 px-2', collapsed ? 'h-7' : 'h-16', hidden && 'opacity-50')}>
 				{eyeButton}
 				<div className="truncate font-bold">{group.name}</div>
 			</div>
@@ -100,7 +101,7 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 	const color = group.color ?? noGroupColor;
 	const robotIds = Object.keys(group.robots);
 
-	if (group.collapsed) {
+	if (collapsed) {
 		return (
 			<div
 				className={clsx('flex h-7 w-52 items-center gap-1 rounded bg-white px-2', hidden && 'opacity-50')}

@@ -33,7 +33,6 @@ export const goToXyzSpeed = (groupState: SimulatorGroupState, x: number, y: numb
 		var currDuration = currPosition.distanceTo(new Vector3(x, y, z)) / speed;
 		duration = Math.max(currDuration, duration);
 		const newTrajectory = useSimulator.getState().robotGoTo(robotId, new Vector3(x, y, z), new Vector3(0, 0, 0), new Vector3(0, 0, 0), currDuration);
-		//useSimulator.getState().updateTrajectory(robotId, newTrajectory, duration);
 		trajectories.set(robotId, newTrajectory);
 	});
 	return [duration, trajectories];
@@ -64,7 +63,6 @@ export const goToXyzDuration = (groupState: SimulatorGroupState, x: number, y: n
 	groupState.robotIDs.forEach((robotId) => {
 		const newTrajectory = useSimulator.getState().robotGoTo(robotId, new Vector3(x, y, z), new Vector3(0, 0, 0), new Vector3(0, 0, 0), duration);
 		trajectories.set(robotId, newTrajectory);
-		// useSimulator.getState().updateTrajectory(robotId, newTrajectory, duration);
 	});
 	return [duration, trajectories];
 };
@@ -84,7 +82,6 @@ export const land = (groupState: SimulatorGroupState, height: number, duration: 
 		goalPosition.z = height;
 
 		const newTrajectory = useSimulator.getState().robotGoTo(robotId, goalPosition, new Vector3(0, 0, 0), new Vector3(0, 0, 0), duration);
-		//useSimulator.getState().updateTrajectory(robotId, newTrajectory, duration);
 		trajectories.set(robotId, newTrajectory);
 	});
 	return [duration, trajectories];
@@ -104,7 +101,6 @@ export const takeoff = (groupState: SimulatorGroupState, height: number, duratio
 		var goalPosition = currPosition;
 		goalPosition.z = height;
 		const newTrajectory = useSimulator.getState().robotGoTo(robotId, goalPosition, new Vector3(0, 0, 0), new Vector3(0, 0, 0), duration);
-		//useSimulator.getState().updateTrajectory(robotId, newTrajectory, duration);
 		trajectories.set(robotId, newTrajectory);
 	});
 	return [duration, trajectories];
@@ -130,7 +126,6 @@ export const moveSpeed = (groupState: SimulatorGroupState, x: number, y: number,
 		const newTrajectory = useSimulator.getState().robotGoTo(robotId, goalPosition, new Vector3(0, 0, 0), new Vector3(0, 0, 0), currDuration);
 		duration = Math.max(currDuration, duration);
 		trajectories.set(robotId, newTrajectory);
-		//useSimulator.getState().updateTrajectory(robotId, newTrajectory, duration);
 	});
 	return [duration, trajectories];
 };
@@ -148,7 +143,6 @@ export const moveCircleVel = (groupState: SimulatorGroupState, radius: number, v
 		// console.log('duration', duration, 'arclength', arclength)
 		const circleTraj = useSimulator.getState().robotCircle(robotId, radius, axes, radians, clockwise, duration);
 		trajectories.set(robotId, circleTraj);
-		// useSimulator.getState().updateTrajectory(robotId, circleTraj, duration);
 	});
 	return [duration, trajectories];
 };

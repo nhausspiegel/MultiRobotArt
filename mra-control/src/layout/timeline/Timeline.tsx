@@ -26,8 +26,9 @@ export const Timeline = () => {
 	const timelineState = useRobartState((state) => state.timelineState);
 	const groups = Object.values(timelineState.groups);
 	const isEmpty = useRobartState((state) => lastItemEnd(state) === 0);
-	const allCollapsed = useRobartState((state) => Object.values(state.timelineState.groups).every((group) => group.collapsed));
-	const setAllGroupsCollapsed = useRobartState((state) => state.setAllGroupsCollapsed);
+	const collapsed = Boolean(timelineState.collapsed);
+	const setGroupsCollapsed = useRobartState((state) => state.setGroupsCollapsed);
+	const collapseLabel = collapsed ? 'Expand all groups' : 'Collapse all groups';
 	const setTimelineScale = useRobartState((state) => state.setTimelineScale);
 
 	// Pinch to zoom, keeping the time under the fingers in place
@@ -132,16 +133,16 @@ export const Timeline = () => {
 							<button className="h-8 flex-1 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200" onClick={addNewGroup}>
 								+ New group
 							</button>
-							{/* Collapses every lane to a thin strip, or expands them all once all are collapsed; display only */}
+							{/* Collapses every lane to a thin strip, or expands them all; display only */}
 							<button
-								aria-label={allCollapsed ? 'Expand all groups' : 'Collapse all groups'}
-								title={allCollapsed ? 'Expand all groups' : 'Collapse all groups'}
+								aria-label={collapseLabel}
+								title={collapseLabel}
 								className="h-8 w-8 rounded text-blue-900 hover:bg-blue-200"
 								onClick={() => {
-									setAllGroupsCollapsed(!allCollapsed);
+									setGroupsCollapsed(!collapsed);
 								}}
 							>
-								<FontAwesomeIcon icon={allCollapsed ? faAnglesDown : faAnglesUp} />
+								<FontAwesomeIcon icon={collapsed ? faAnglesDown : faAnglesUp} />
 							</button>
 						</div>
 					</div>

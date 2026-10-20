@@ -3,15 +3,18 @@ import type {MRAState, RobotState, TimelineGroupState} from './useRobartState';
 // The lane whose blocks run on every robot. Kept as groupAllCFs so older projects and exported file names still match.
 export const allDronesGroupId = 'groupAllCFs';
 
+// Every group besides All drones
+export const otherGroups = (groups: Record<string, TimelineGroupState>) => Object.values(groups).filter((group) => group.id !== allDronesGroupId);
+
 // A robot's group besides All drones (it's in at most one), and the color shown for a robot in none
 export const robotGroup = (groups: Record<string, TimelineGroupState>, robotId: string) =>
-	Object.values(groups).find((group) => group.id !== allDronesGroupId && robotId in group.robots);
+	otherGroups(groups).find((group) => robotId in group.robots);
 export const noGroupColor = '#9ca3af';
 
 // Whether a group's eye is closed. All drones' eye hides or shows every group, so it's closed when they all are.
 export const isGroupHidden = (groups: Record<string, TimelineGroupState>, groupId: string) => {
 	if (groupId !== allDronesGroupId) return Boolean(groups[groupId]?.hidden);
-	const others = Object.values(groups).filter((group) => group.id !== allDronesGroupId);
+	const others = otherGroups(groups);
 	return others.length > 0 && others.every((group) => group.hidden);
 };
 
@@ -90,7 +93,7 @@ export const migrateGroups = <T extends Pick<MRAState, 'robots' | 'timelineState
 
 	const ungrouped = Object.values(state.robots).filter((robot) => !keptIn.has(robot.id));
 	if (ungrouped.length > 0) {
-		let target = Object.values(groups).find((group) => group.id !== allDronesGroupId);
+		let target: TimelineGroupState | undefined = otherGroups(groups)[0];
 		if (target === undefined) {
 			target = newGroup(nextGroupName(groups), groups);
 			groups[target.id] = target;

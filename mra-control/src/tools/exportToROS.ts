@@ -131,7 +131,7 @@ export const exportToROS = async (projectState: MRAState, fileName: string) => {
 	}
 	startingPositions += 'names:\n';
 	for (const robot in projectState.robots) {
-		startingPositions += `    - ${JSON.stringify(projectState.robots[robot]?.name ?? '')}\n`;
+		startingPositions += `    - ${JSON.stringify(projectState.robots[robot].name)}\n`;
 	}
 
 	const startingPosFile = new Blob([startingPositions], {type: 'text/plain'});

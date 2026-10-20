@@ -1,7 +1,7 @@
 import {Button, Modal} from 'flowbite-react';
 import React, {useState} from 'react';
 
-import {allDronesGroupId, noGroupColor, robotGroup} from '../../state/groupMigration';
+import {noGroupColor, otherGroups, robotGroup} from '../../state/groupMigration';
 import {useRobartState} from '../../state/useRobartState';
 import {useUIState} from '../../state/useUIState';
 import {ConfirmationModal} from '../modal/ConfirmationModal';
@@ -21,7 +21,7 @@ const GroupSelect = ({robotId}: {robotId: string}) => {
 	const groups = useRobartState((state) => state.timelineState.groups);
 	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
 	// Every drone is in exactly one group besides All drones
-	const otherGroups = Object.values(groups).filter((group) => group.id !== allDronesGroupId);
+	const choices = otherGroups(groups);
 	const currentGroup = robotGroup(groups, robotId);
 
 	return (
@@ -36,7 +36,7 @@ const GroupSelect = ({robotId}: {robotId: string}) => {
 					setRobotGroup(robotId, e.target.value);
 				}}
 			>
-				{otherGroups.map((group) => (
+				{choices.map((group) => (
 					<option key={group.id} value={group.id}>{group.name}</option>
 				))}
 			</select>

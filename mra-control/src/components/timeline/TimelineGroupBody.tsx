@@ -105,6 +105,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 	const hasDrones = Object.keys(group.robots).length > 0;
 	// Dimmed like its label while its group is hidden (left out of the simulation and export)
 	const hidden = isGroupHidden(groups, group.id);
+	const collapsed = useRobartState((state) => Boolean(state.timelineState.collapsed));
 
 	// A block with nothing in it does nothing, so it isn't allowed on the timeline
 	const isEmptyBlock = (blockId: string | undefined) => {
@@ -167,7 +168,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 
 	return (
 		<div
-			className={clsx('relative rounded', group.collapsed ? 'h-7' : 'h-16', hasDrones ? 'bg-blue-300' : 'bg-gray-300', hidden && 'opacity-50')}
+			className={clsx('relative rounded', collapsed ? 'h-7' : 'h-16', hasDrones ? 'bg-blue-300' : 'bg-gray-300', hidden && 'opacity-50')}
 			ref={laneBodyRef}
 			// Found by timeline items dragged between lanes
 			data-lane-id={group.id}
