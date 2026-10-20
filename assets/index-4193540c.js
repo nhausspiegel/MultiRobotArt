@@ -82118,8 +82118,8 @@ const useRobartState = create$2()(
               ...block,
               id: uuid$2(),
               name: `Copy of ${block.name}`,
-              // Same color as the original, so copies are easy to spot
-              color: blockColor(block)
+              // The next color in turn, as for a new block
+              color: nextBlockColor(get().blocks)
             };
             set((state) => {
               state.blocks[newBlock.id] = newBlock;
