@@ -91,7 +91,8 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 
 	if (isAllDrones) {
 		return (
-			<div className={clsx('flex w-52 items-center gap-1 rounded bg-green-400 px-2', collapsed ? 'h-7' : 'h-16', hidden && 'opacity-50')}>
+			// The same 8px left edge as the other groups' color stripe, in its own green, so the eyes and names line up
+			<div className={clsx('flex w-52 items-center gap-1 rounded border-l-8 border-transparent bg-green-400 px-2', collapsed ? 'h-7' : 'h-16', hidden && 'opacity-50')}>
 				{eyeButton}
 				<div className="truncate font-bold">{group.name}</div>
 			</div>
