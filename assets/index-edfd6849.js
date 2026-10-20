@@ -79966,8 +79966,8 @@ print("You will need {} crazyflies".format(n_robots))
 print("Which crazyflies (by ID) will you use?")
 
 cfs = []
-for i in range(n_robots):
-    cf = input("crazyflie #{}: ".format(i + 1))
+for name in starting_positions['names']:
+    cf = input("Crazyflie ID for {}: ".format(name))
     cfs.append(cf)
 
     
@@ -80859,6 +80859,7 @@ const extractLineNumber = (text, toMatch) => {
   return text.substring(0, index2).split("\n").length;
 };
 const exportToROS = async (projectState, fileName) => {
+  var _a3;
   const execBlocksLine = extractLineNumber(workerNodeTemplate, "---------Insert Execution Code Here------------");
   let launcherNodeLine = extractLineNumber(launcherNode, "-----------Insert Nodes Here-----------");
   var mainNode = launcherNode.split("\n");
@@ -80934,6 +80935,11 @@ const exportToROS = async (projectState, fileName) => {
     if (projectState.robots[robot] != void 0)
       pos = projectState.robots[robot].startingPosition;
     startingPositions += `    - [${pos[0]}, ${pos[1]}, ${pos[2]}]
+`;
+  }
+  startingPositions += "names:\n";
+  for (const robot in projectState.robots) {
+    startingPositions += `    - ${JSON.stringify(((_a3 = projectState.robots[robot]) == null ? void 0 : _a3.name) ?? "")}
 `;
   }
   const startingPosFile = new Blob([startingPositions], { type: "text/plain" });
@@ -81959,7 +81965,7 @@ const defaultLimits = {
   workAreaMin: [-4, -2.5, 0],
   workAreaMax: [2, 2.5, 2.5]
 };
-const firstDrone = { id: uuid$2(), name: "CF 1", type: "crazyflie", startingPosition: [0, 0, 0] };
+const firstDrone = { id: uuid$2(), name: "Drone 1", type: "crazyflie", startingPosition: [0, 0, 0] };
 const firstGroup = { ...newGroup("Group 1", {}), robots: { [firstDrone.id]: firstDrone } };
 const defaultRobartState = {
   blocks: {},
@@ -82201,12 +82207,12 @@ const useRobartState = create$2()(
               }
             }
             let number2 = 1;
-            while (robots.some((robot) => robot.name === `CF ${number2}`))
+            while (robots.some((robot) => robot.name === `Drone ${number2}`))
               number2++;
             set((state) => {
               state.robots[id2] = {
                 id: id2,
-                name: `CF ${number2}`,
+                name: `Drone ${number2}`,
                 type: "crazyflie",
                 startingPosition
               };
