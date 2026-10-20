@@ -1,5 +1,3 @@
-import {faChevronDown, faChevronRight} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import clsx from 'clsx';
 import React, {type DragEvent, useState} from 'react';
 
@@ -51,26 +49,11 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 	const removeGroup = useRobartState((state) => state.removeGroup);
 	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
 	const createRobot = useRobartState((state) => state.createRobot);
-	const toggleCollapsed = useRobartState((state) => state.toggleGroupCollapsed);
 	const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
-
-	// Collapses the lane to a thin strip; display only
-	const collapseButton = (
-		<button
-			aria-label={group.collapsed ? `Expand ${group.name}` : `Collapse ${group.name}`}
-			className="w-4 shrink-0 text-xs text-gray-600 hover:text-black"
-			onClick={() => {
-				toggleCollapsed(group.id);
-			}}
-		>
-			<FontAwesomeIcon icon={group.collapsed ? faChevronRight : faChevronDown} />
-		</button>
-	);
 
 	if (group.id === allDronesGroupId) {
 		return (
 			<div className={clsx('flex w-52 items-center gap-1 rounded bg-green-400 px-2', group.collapsed ? 'h-7' : 'h-16')}>
-				{collapseButton}
 				<div className="truncate font-bold">{group.name}</div>
 			</div>
 		);
@@ -88,7 +71,6 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 					setRobotGroup(robotId, group.id);
 				})}
 			>
-				{collapseButton}
 				<div className="truncate font-bold">{group.name}</div>
 			</div>
 		);
@@ -103,7 +85,6 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 			})}
 		>
 			<div className="flex items-center gap-1">
-				{collapseButton}
 				{/* Click to rename. Only the name changes; the id (used in exported file names) stays. */}
 				<div className="min-w-0 flex-1 truncate">
 					<RenamableText

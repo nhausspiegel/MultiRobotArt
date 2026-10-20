@@ -179,7 +179,10 @@ export type TimelineActions = {
 	setTimelineScale: (scale: number) => void;
 	setBoundingBoxSize: (size: [number, number, number]) => void;
 	setLimits: (limits: Partial<Limits>) => void;
-	toggleGroupCollapsed: (groupId: string) => void;
+	/**
+   * Collapses every lane, or expands them all (the toggle beside + New group)
+   */
+	setAllGroupsCollapsed: (collapsed: boolean) => void;
 	/**
    * Stores lengths measured by simulating: how long timeline items take in the show, and how long each block takes
    * on its own (used for the drop preview and the initial length of new timeline items).
@@ -387,10 +390,11 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							state.timelineState.groups[toGroupId].items[itemId] = item;
 						});
 					},
-					toggleGroupCollapsed: (groupId) => {
+					setAllGroupsCollapsed: (collapsed) => {
 						set((state) => {
-							const group = state.timelineState.groups[groupId];
-							group.collapsed = !group.collapsed;
+							Object.values(state.timelineState.groups).forEach((group) => {
+								group.collapsed = collapsed;
+							});
 						});
 					},
 					setBoundingBoxSize: (size) => {
@@ -559,6 +563,8 @@ export const useRobartState = create<MRAState & MRAActions>()(
 					},
 					addGroup: (groupName: string) => {
 						const group = newGroup(groupName, get().timelineState.groups);
+						// Matches the collapse-all toggle
+						if (Object.values(get().timelineState.groups).every((other) => other.collapsed)) group.collapsed = true;
 						set((state) => {
 							state.timelineState.groups[group.id] = group;
 						});
