@@ -42527,7 +42527,7 @@ const blockColorOff = {
     return code;
   },
   javascriptGenerator: (block, _js) => {
-    return "simulator.setColor(groupState, 0, 0, 0)\n";
+    return "simulator.turnLEDOff(groupState)\n";
   }
 };
 const blockCircleArc = {
@@ -81195,6 +81195,8 @@ const goToXyzSpeed = (groupState, x2, y2, z2, speed) => {
   return [duration, trajectories];
 };
 const setColor = (groupState, r2 = 0, g2 = 0, b2 = 0) => hover(groupState, 0.1, new Color(r2, g2, b2));
+const ledOff = new Color(0, 0, 0);
+const turnLEDOff = (groupState) => hover(groupState, 0.1, ledOff);
 const hover = (groupState, duration, color) => {
   const trajectories = /* @__PURE__ */ new Map();
   groupState.robotIDs.forEach((robotId) => {
@@ -81434,6 +81436,7 @@ const SIM = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty(
   goToXyzSpeed,
   hover,
   land,
+  ledOff,
   makeParametricTrajectory,
   moveCircleArcVel,
   moveCircleVel,
@@ -81445,7 +81448,8 @@ const SIM = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty(
   stretchTrajectory,
   takeoff,
   toRadians,
-  translateTrajectory
+  translateTrajectory,
+  turnLEDOff
 }, Symbol.toStringTag, { value: "Module" }));
 const laneOverlapWarnings = (state) => {
   const warnings = [];
@@ -81610,7 +81614,7 @@ const useSimulator = create$2()(
           robot.timeAlongTrajectory = 0;
         }
         robots[robotId] = robot;
-        if (moved && markerFrequency !== 0 && time % markerFrequency < deltaT) {
+        if (moved && robot.color !== ledOff && markerFrequency !== 0 && time % markerFrequency < deltaT) {
           if (trajectoryMarkers === currentMarkers)
             trajectoryMarkers = currentMarkers.slice();
           trajectoryMarkers.push({ position: new Vector3().copy(robot.pos), color: robot.color, id: robotId + time });
