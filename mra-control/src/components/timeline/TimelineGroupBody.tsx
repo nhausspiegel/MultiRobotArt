@@ -5,7 +5,7 @@
 import clsx from 'clsx';
 import {type DragEventHandler, useRef, useState} from 'react';
 
-import {allDronesGroupId} from '../../state/groupMigration';
+import {allDronesGroupId, isGroupHidden} from '../../state/groupMigration';
 import {type MRAState, type TimelineGroupState, type TimelineItem, useRobartState} from '../../state/useRobartState';
 import {lastItemEnd} from '../../layout/timeline/SimulationOptions';
 import {HoverTimelineBlock} from './HoverTimelineBlock';
@@ -103,6 +103,8 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 
 	// A lane with no drones runs nothing, so it takes no new blocks (with no drones at all, that includes All drones)
 	const hasDrones = Object.keys(group.robots).length > 0;
+	// Dimmed like its label while its group is hidden (left out of the simulation and export)
+	const hidden = isGroupHidden(groups, group.id);
 
 	// A block with nothing in it does nothing, so it isn't allowed on the timeline
 	const isEmptyBlock = (blockId: string | undefined) => {
@@ -165,7 +167,7 @@ export const TimelineGroupBody = ({group}: TimelineGroupProps) => {
 
 	return (
 		<div
-			className={clsx('relative rounded', group.collapsed ? 'h-7' : 'h-16', hasDrones ? 'bg-blue-300' : 'bg-gray-300')}
+			className={clsx('relative rounded', group.collapsed ? 'h-7' : 'h-16', hasDrones ? 'bg-blue-300' : 'bg-gray-300', hidden && 'opacity-50')}
 			ref={laneBodyRef}
 			// Found by timeline items dragged between lanes
 			data-lane-id={group.id}

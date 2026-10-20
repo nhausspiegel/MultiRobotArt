@@ -74,4 +74,10 @@ const trailDots = (javaScript: string) => {
 const move = 'simulator.goToXyzDuration(groupState, 1, 0, 1, 1)';
 assert.equal(trailDots(`simulator.turnLEDOff(groupState)\n${move}`), 0);
 assert.ok(trailDots(`simulator.setColor(groupState, 0, 0, 0)\n${move}`) > 0);
+
+// A hidden group's drones aren't simulated: no path, no warnings
+useRobartState.setState((state) => ({timelineState: {...state.timelineState, groups: {g1: {...state.timelineState.groups.g1, hidden: true}}}}) as never);
+useSimulator.getState().measureShowLength();
+assert.deepEqual(Object.keys(useSimulator.getState().robots), []);
+assert.deepEqual(Object.keys(useSimulator.getState().plannedPaths), []);
 console.log('sim timing ok');

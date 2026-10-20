@@ -5,7 +5,7 @@ import { useRobartState } from '@MRAControl/state/useRobartState';
 import { useSimulator } from '@MRAControl/state/useSimulator';
 import { useUIState } from '@MRAControl/state/useUIState';
 import { CatmullRomLine, GizmoHelper, GizmoViewport, Grid, Line, OrbitControls, Plane, Sphere } from '@react-three/drei';
-import { noGroupColor, robotGroup } from '@MRAControl/state/groupMigration';
+import { noGroupColor, robotGroup, withoutHiddenGroups } from '@MRAControl/state/groupMigration';
 import { useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import React from 'react';
@@ -24,7 +24,6 @@ const boxEdges = (min: number[], max: number[]) => {
 export const Simulation = () => {
 	const marker = useRef<Group>(null!);
 	const robots = useSimulator((state) => state.robots);
-	const robartRobots = useRobartState((state) => state.robots);
 	const setRobots = useSimulator((state) => state.setRobots);
 	const robartState = useRobartState();
 	const simulatorState = useSimulator();
@@ -44,8 +43,10 @@ export const Simulation = () => {
 		}
 
 	} else {
-		if (Object.keys(robartRobots).length !== 0) {
-			setRobots(robartRobots);
+		// Hidden groups' robots aren't simulated
+		const shownRobots = withoutHiddenGroups(robartState).robots;
+		if (Object.keys(shownRobots).length !== 0) {
+			setRobots(shownRobots);
 		}
 	}
 

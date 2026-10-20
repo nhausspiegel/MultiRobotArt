@@ -11,7 +11,7 @@ import {immer} from 'zustand/middleware/immer';
 import {ROBART_VERSION} from '../config/Version';
 import {exportROS, loadProjectFromFile, saveProjectToFile} from '../tools/projectFileConversion';
 import {useSimulator} from './useSimulator';
-import {allDronesGroupId, migrateGroups, newGroup} from './groupMigration';
+import {allDronesGroupId, migrateGroups, newGroup, withoutHiddenGroups} from './groupMigration';
 
 export type CodeBlock = {
 	/**
@@ -88,6 +88,10 @@ export type TimelineGroupState = {
    * Lane shown as a thin strip to save space. Display only; it still runs.
    */
 	collapsed?: boolean;
+	/**
+   * Its robots are left out of the simulation and the export (the eye on its label). Unset for All drones.
+   */
+	hidden?: boolean;
 };
 
 export type TimelineState = {
@@ -183,6 +187,7 @@ export type TimelineActions = {
    * Collapses every lane, or expands them all (the toggle beside + New group)
    */
 	setAllGroupsCollapsed: (collapsed: boolean) => void;
+	setGroupsHidden: (groupIds: string[], hidden: boolean) => void;
 	/**
    * Stores lengths measured by simulating: how long timeline items take in the show, and how long each block takes
    * on its own (used for the drop preview and the initial length of new timeline items).
@@ -343,7 +348,7 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							boundingBoxSize: get().boundingBoxSize,
 							limits: get().limits,
 						};
-						exportROS(state, fileName);
+						exportROS(withoutHiddenGroups(state), fileName);
 					},
 					resetProject: () => {
 						set(defaultRobartState);
@@ -388,6 +393,13 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							const item = {...state.timelineState.groups[fromGroupId].items[itemId], groupId: toGroupId, startTime};
 							delete state.timelineState.groups[fromGroupId].items[itemId];
 							state.timelineState.groups[toGroupId].items[itemId] = item;
+						});
+					},
+					setGroupsHidden: (groupIds, hidden) => {
+						set((state) => {
+							groupIds.forEach((groupId) => {
+								state.timelineState.groups[groupId].hidden = hidden;
+							});
 						});
 					},
 					setAllGroupsCollapsed: (collapsed) => {
@@ -603,6 +615,6 @@ useRobartState.subscribe(
 	(robots) => {
 		// Only while stopped: mid-show this put every drone back at its start and emptied its queue, which could end the
 		// show. Timeline's re-measure updates a paused or running show instead.
-		if (useSimulator.getState().status === 'STOPPED') useSimulator.getState().setRobots(robots);
+		if (useSimulator.getState().status === 'STOPPED') useSimulator.getState().setRobots(withoutHiddenGroups({robots, timelineState: useRobartState.getState().timelineState}).robots);
 	},
 );

@@ -1,7 +1,9 @@
+import {faEye, faEyeSlash} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import clsx from 'clsx';
 import React, {type DragEvent, useState} from 'react';
 
-import {allDronesGroupId, noGroupColor} from '../../state/groupMigration';
+import {allDronesGroupId, isGroupHidden, noGroupColor} from '../../state/groupMigration';
 import {type TimelineGroupState, useRobartState} from '../../state/useRobartState';
 import {useUIState} from '../../state/useUIState';
 import {ConfirmationModal} from '../modal/ConfirmationModal';
@@ -49,11 +51,30 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 	const removeGroup = useRobartState((state) => state.removeGroup);
 	const setRobotGroup = useRobartState((state) => state.setRobotGroup);
 	const createRobot = useRobartState((state) => state.createRobot);
+	const setGroupsHidden = useRobartState((state) => state.setGroupsHidden);
+	const hidden = useRobartState((state) => isGroupHidden(state.timelineState.groups, group.id));
 	const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
+	const isAllDrones = group.id === allDronesGroupId;
 
-	if (group.id === allDronesGroupId) {
+	// Hidden groups' robots are left out of the simulation and the export. All drones' eye hides or shows every group.
+	const eyeButton = (
+		<button
+			aria-label={isAllDrones ? (hidden ? 'Show all groups' : 'Hide all groups') : (hidden ? 'Show in simulation' : 'Hide from simulation')}
+			title={isAllDrones ? (hidden ? 'Show all groups' : 'Hide all groups') : (hidden ? 'Show in simulation' : 'Hide from simulation')}
+			className="w-4 shrink-0 text-xs text-gray-600 hover:text-black"
+			onClick={() => {
+				const groupIds = isAllDrones ? Object.keys(useRobartState.getState().timelineState.groups).filter((id) => id !== allDronesGroupId) : [group.id];
+				setGroupsHidden(groupIds, !hidden);
+			}}
+		>
+			<FontAwesomeIcon icon={hidden ? faEyeSlash : faEye} />
+		</button>
+	);
+
+	if (isAllDrones) {
 		return (
-			<div className={clsx('flex w-52 items-center gap-1 rounded bg-green-400 px-2', group.collapsed ? 'h-7' : 'h-16')}>
+			<div className={clsx('flex w-52 items-center gap-1 rounded bg-green-400 px-2', group.collapsed ? 'h-7' : 'h-16', hidden && 'opacity-50')}>
+				{eyeButton}
 				<div className="truncate font-bold">{group.name}</div>
 			</div>
 		);
@@ -65,12 +86,13 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 	if (group.collapsed) {
 		return (
 			<div
-				className="flex h-7 w-52 items-center gap-1 rounded bg-white px-2"
+				className={clsx('flex h-7 w-52 items-center gap-1 rounded bg-white px-2', hidden && 'opacity-50')}
 				style={{borderLeft: `8px solid ${color}`}}
 				{...acceptRobotDrop((robotId) => {
 					setRobotGroup(robotId, group.id);
 				})}
 			>
+				{eyeButton}
 				<div className="truncate font-bold">{group.name}</div>
 			</div>
 		);
@@ -78,13 +100,14 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 
 	return (
 		<div
-			className="flex h-16 w-52 flex-col justify-center gap-1 rounded bg-white px-2"
+			className={clsx('flex h-16 w-52 flex-col justify-center gap-1 rounded bg-white px-2', hidden && 'opacity-50')}
 			style={{borderLeft: `8px solid ${color}`}}
 			{...acceptRobotDrop((robotId) => {
 				setRobotGroup(robotId, group.id);
 			})}
 		>
 			<div className="flex items-center gap-1">
+				{eyeButton}
 				{/* Click to rename. Only the name changes; the id (used in exported file names) stays. */}
 				<div className="min-w-0 flex-1 truncate">
 					<RenamableText

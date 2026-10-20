@@ -12,6 +12,7 @@ import { type Limits, type RobotState, useRobartState } from './useRobartState';
 import * as traj from './trajectories';
 import { commandLines } from '../config/customBlocks/BlockDefinition';
 import { collisionWarning, overlappingPairs, speedWarning, type TimedWarning, workAreaWarning } from './warnings';
+import { withoutHiddenGroups } from './groupMigration';
 export const fps = 60;
 
 // The work area from Settings, with 1 cm leeway so a robot resting on the floor (z = 0) counts as inside; undefined when
@@ -508,9 +509,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 			//   const robartRobots = useRobartState().robots;
 			//   get().setRobots(robartRobots);
 			// }
-			const timeline = useRobartState.getState().timelineState;
+			// Hidden groups' robots aren't simulated
+			const { timelineState: timeline, robots: robartRobots } = withoutHiddenGroups(useRobartState.getState());
 			const blocks = useRobartState.getState().blocks;
-			const robartRobots = useRobartState.getState().robots;
 			if (startTime === 0) {
 				set({ time: 0, trajectoryMarkers: [] });
 				get().setRobots(robartRobots);

@@ -1,6 +1,6 @@
 // Run: node --experimental-strip-types checks/groupMigration.check.ts (from mra-control)
 import assert from 'node:assert/strict';
-import {allDronesGroupId, migrateGroups} from '../src/state/groupMigration.ts';
+import {allDronesGroupId, isGroupHidden, migrateGroups, withoutHiddenGroups} from '../src/state/groupMigration.ts';
 
 const robot = (id: string, name: string) => ({id, name, type: 'crazyflie' as const, startingPosition: [0, 0, 0] as [number, number, number]});
 const robots = {a: robot('a', 'CF 1'), b: robot('b', 'CF 2'), c: robot('c', 'CF 3')};
@@ -62,5 +62,26 @@ const lonely = migrateGroups({robots: {a: robots.a}, timelineState: {scale: 1, g
 assert.deepEqual(Object.keys(lonely.timelineState.groups), [allDronesGroupId, 'Group1']);
 assert.equal(lonely.timelineState.groups.Group1.name, 'Group 1');
 assert.deepEqual(Object.keys(lonely.timelineState.groups.Group1.robots), ['a']);
+
+// A hidden group's robots are left out everywhere, also from All drones' lane; its blocks stay
+const project = {
+	robots,
+	timelineState: {scale: 1, groups: {
+		[allDronesGroupId]: lane(allDronesGroupId, 'All drones', ['a', 'b', 'c']),
+		group1: lane('group1', 'Group 1', ['a', 'b']),
+		group2: {...lane('group2', 'Group 2', ['c'], {i: item}), hidden: true},
+	}},
+};
+const shown = withoutHiddenGroups(project);
+assert.deepEqual(Object.keys(shown.robots), ['a', 'b']);
+assert.deepEqual(Object.keys(shown.timelineState.groups[allDronesGroupId].robots), ['a', 'b']);
+assert.deepEqual(Object.keys(shown.timelineState.groups.group2.robots), []);
+assert.deepEqual(Object.keys(shown.timelineState.groups.group2.items), ['i']);
+assert.equal(Object.keys(project.robots).length, 3, 'the project itself is unchanged');
+assert.equal(withoutHiddenGroups(old), old, 'nothing hidden, nothing copied');
+// All drones' eye is closed only when every other group is hidden
+assert.equal(isGroupHidden(project.timelineState.groups, 'group2'), true);
+assert.equal(isGroupHidden(project.timelineState.groups, allDronesGroupId), false);
+assert.equal(isGroupHidden({...project.timelineState.groups, group1: {...project.timelineState.groups.group1, hidden: true}}, allDronesGroupId), true);
 
 console.log('group migration ok');
