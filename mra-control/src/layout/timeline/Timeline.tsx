@@ -119,7 +119,7 @@ export const Timeline = () => {
 
 	return (
 		<div className="flex h-full w-full flex-col gap-2 rounded bg-blue-100">
-			<div className="overflow-y-auto pt-2">
+			<div className="overflow-y-auto pb-3 pt-2">
 				<div className="flex flex-shrink-0 gap-2">
 					{/* The sim buttons sit in the corner beside the ruler, as tall as it, so rows stay aligned */}
 					<div className="ml-2 flex h-full flex-col gap-2">
