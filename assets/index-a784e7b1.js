@@ -81507,6 +81507,7 @@ const defaultSimulatorState = {
   plannedPaths: {},
   timedWarnings: [],
   showPaths: true,
+  showTrails: true,
   showWorkArea: false,
   trajectoryQueue: new Queue_1(),
   trajectoryMarkers: [],
@@ -81740,6 +81741,9 @@ const useSimulator = create$2()(
     },
     togglePaths: () => {
       set({ showPaths: !get().showPaths });
+    },
+    toggleTrails: () => {
+      set({ showTrails: !get().showTrails });
     },
     toggleWorkArea: () => {
       set({ showWorkArea: !get().showWorkArea });
@@ -146393,7 +146397,7 @@ const Simulation = () => {
         `path-${robotId}`
       );
     }),
-    Object.values(trajectoryMarkers).map((trajectoryMarker) => /* @__PURE__ */ jsx("group", { position: trajectoryMarker.position, children: /* @__PURE__ */ jsx(Sphere2, { args: [0.03], children: /* @__PURE__ */ jsx("meshBasicMaterial", { color: [trajectoryMarker.color.r / 255, trajectoryMarker.color.g / 255, trajectoryMarker.color.b / 255] }) }) }, trajectoryMarker.id)),
+    simulatorState.showTrails && trajectoryMarkers.map((trajectoryMarker) => /* @__PURE__ */ jsx("group", { position: trajectoryMarker.position, children: /* @__PURE__ */ jsx(Sphere2, { args: [0.03], children: /* @__PURE__ */ jsx("meshBasicMaterial", { color: [trajectoryMarker.color.r / 255, trajectoryMarker.color.g / 255, trajectoryMarker.color.b / 255] }) }) }, trajectoryMarker.id)),
     /* @__PURE__ */ jsx("primitive", { object: camera })
   ] });
 };
@@ -146418,6 +146422,8 @@ const SimulationSettings = () => {
   const setTimeDilation = useSimulator((state) => state.setTimeDilation);
   const showPaths = useSimulator((state) => state.showPaths);
   const togglePaths = useSimulator((state) => state.togglePaths);
+  const showTrails = useSimulator((state) => state.showTrails);
+  const toggleTrails = useSimulator((state) => state.toggleTrails);
   const showCoordinates = useSimulator((state) => state.showCoordinates);
   const toggleCoordinates = useSimulator((state) => state.toggleCoordinates);
   const showWorkArea = useSimulator((state) => state.showWorkArea);
@@ -146462,6 +146468,10 @@ const SimulationSettings = () => {
       /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 py-0.5", children: [
         /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showPaths, onChange: togglePaths }),
         "Paths"
+      ] }),
+      /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 py-0.5", children: [
+        /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showTrails, onChange: toggleTrails }),
+        "LED trails"
       ] }),
       /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 py-0.5", children: [
         /* @__PURE__ */ jsx("input", { type: "checkbox", checked: showWorkArea, onChange: toggleWorkArea }),
