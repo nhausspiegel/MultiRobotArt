@@ -1,3 +1,6 @@
 /node_modules
 .idea
 mra-control/package-lock.json
+
+# Brainstorming mockups (superpowers visual companion)
+.superpowers/
