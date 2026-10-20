@@ -14,8 +14,8 @@ print("You will need {} crazyflies".format(n_robots))
 print("Which crazyflies (by ID) will you use?")
 
 cfs = []
-for i in range(n_robots):
-    cf = input("crazyflie #{}: ".format(i + 1))
+for name in starting_positions['names']:
+    cf = input("Crazyflie ID for {}: ".format(name))
     cfs.append(cf)
 
     

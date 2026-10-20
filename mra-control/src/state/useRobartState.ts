@@ -261,7 +261,8 @@ export type MRAGeneralActions = {
 };
 
 // New projects start with one group holding one drone
-const firstDrone: RobotState = {id: uuid(), name: 'CF 1', type: 'crazyflie', startingPosition: [0, 0, 0]};
+// "Drone", not "CF": the setup script asks which Crazyflie (cf3, cf11…) flies each drone, and "CF 1" read like cf1
+const firstDrone: RobotState = {id: uuid(), name: 'Drone 1', type: 'crazyflie', startingPosition: [0, 0, 0]};
 const firstGroup: TimelineGroupState = {...newGroup('Group 1', {}), robots: {[firstDrone.id]: firstDrone}};
 
 const defaultRobartState: MRAState = {
@@ -527,12 +528,12 @@ export const useRobartState = create<MRAState & MRAActions>()(
 							}
 						}
 						let number = 1;
-						while (robots.some((robot) => robot.name === `CF ${number}`)) number++;
+						while (robots.some((robot) => robot.name === `Drone ${number}`)) number++;
 
 						set((state) => {
 							state.robots[id] = {
 								id,
-								name: `CF ${number}`,
+								name: `Drone ${number}`,
 								type: 'crazyflie',
 								startingPosition,
 							};

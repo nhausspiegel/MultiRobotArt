@@ -120,13 +120,18 @@ export const exportToROS = async (projectState: MRAState, fileName: string) => {
     const loggersFile = new Blob([crazyflieLoggers], {type: 'text/plain'});
     const readmeFile = new Blob([readmeText], {type: 'text/plain'});
 
-	// Starting positions yaml
+	// Starting positions yaml, and the drones' names in the same order for the setup script's questions. JSON strings are
+	// YAML strings too, so any name reads back as written.
 	var startingPositions = 'positions:\n';
 	for (const robot in projectState.robots) {
 		var pos = [0, 0, 0];
 		if (projectState.robots[robot] != undefined)
 			pos = projectState.robots[robot].startingPosition;
 		startingPositions += `    - [${pos[0]}, ${pos[1]}, ${pos[2]}]\n`;
+	}
+	startingPositions += 'names:\n';
+	for (const robot in projectState.robots) {
+		startingPositions += `    - ${JSON.stringify(projectState.robots[robot]?.name ?? '')}\n`;
 	}
 
 	const startingPosFile = new Blob([startingPositions], {type: 'text/plain'});
