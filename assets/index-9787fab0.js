@@ -121866,7 +121866,7 @@ function Crazyflie({ robotId, renderBoundingBox }) {
     return /* @__PURE__ */ jsx(Text$1, { fontSize: 1, children: "Loading..." });
   }
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    showText || showCoordinates ? /* @__PURE__ */ jsx(Text$1, { quaternion: camera.quaternion.clone(), position: [0, 0, 1], fontSize: 0.25, children: `${(robot == null ? void 0 : robot.name) ?? "Deleted robot"}, Position: (${simRobot.pos.x.toFixed(1)}, ${simRobot.pos.y.toFixed(1)}, ${simRobot.pos.z.toFixed(1)})` }) : null,
+    showText || showCoordinates ? /* @__PURE__ */ jsx(Text$1, { quaternion: camera.quaternion.clone(), position: [0, 0, 0.85], fontSize: 0.25, children: `${(robot == null ? void 0 : robot.name) ?? "Deleted robot"}, Position: (${simRobot.pos.x.toFixed(1)}, ${simRobot.pos.y.toFixed(1)}, ${simRobot.pos.z.toFixed(1)})` }) : null,
     simRobot && /* @__PURE__ */ jsxs("mesh", { position: [0, 0, -simRobot.pos.z + 1e-3], children: [
       /* @__PURE__ */ jsx("circleGeometry", { args: [0.12, 32] }),
       /* @__PURE__ */ jsx("meshBasicMaterial", { color: groupColor, transparent: true, opacity: 0.6 })
