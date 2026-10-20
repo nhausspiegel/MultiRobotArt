@@ -1,5 +1,3 @@
-import {faEye, faEyeSlash} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import clsx from 'clsx';
 import React, {type DragEvent, useState} from 'react';
 
@@ -23,6 +21,25 @@ const acceptRobotDrop = (onRobot: (robotId: string) => void) => ({
 		onRobot(robotId);
 	},
 });
+
+// Lucide's eye and eye-off icons (ISC license)
+const EyeIcon = ({closed}: {closed: boolean}) => (
+	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="h-[13px] w-[13px]">
+		{closed ? (
+			<>
+				<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+				<path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+				<path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+				<line x1="2" x2="22" y1="2" y2="22" />
+			</>
+		) : (
+			<>
+				<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+				<circle cx="12" cy="12" r="3" />
+			</>
+		)}
+	</svg>
+);
 
 const RobotTag = ({robotId, color}: {robotId: string; color: string}) => {
 	const name = useRobartState((state) => state.robots[robotId]?.name);
@@ -61,13 +78,13 @@ export const TimelineGroupLabel = ({group}: {group: TimelineGroupState}) => {
 		<button
 			aria-label={isAllDrones ? (hidden ? 'Show all groups' : 'Hide all groups') : (hidden ? 'Show in simulation' : 'Hide from simulation')}
 			title={isAllDrones ? (hidden ? 'Show all groups' : 'Hide all groups') : (hidden ? 'Show in simulation' : 'Hide from simulation')}
-			className="w-4 shrink-0 text-xs text-gray-600 hover:text-black"
+			className="flex w-4 shrink-0 items-center justify-center text-black"
 			onClick={() => {
 				const groupIds = isAllDrones ? Object.keys(useRobartState.getState().timelineState.groups).filter((id) => id !== allDronesGroupId) : [group.id];
 				setGroupsHidden(groupIds, !hidden);
 			}}
 		>
-			<FontAwesomeIcon icon={hidden ? faEyeSlash : faEye} />
+			<EyeIcon closed={hidden} />
 		</button>
 	);
 
