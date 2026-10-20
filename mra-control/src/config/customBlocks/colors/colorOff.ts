@@ -44,7 +44,7 @@ export const blockColorOff: RobartBlockDefinition = {
 
 
 	javascriptGenerator: (block, _js) => {
-		return 'simulator.setColor(groupState, 0, 0, 0)\n';
+		return 'simulator.turnLEDOff(groupState)\n';
 	},
 };
 

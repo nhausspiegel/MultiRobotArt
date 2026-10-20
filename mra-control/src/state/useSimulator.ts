@@ -273,7 +273,8 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 				}
 
 				robots[robotId] = robot;
-				if (moved && markerFrequency !== 0 && time % markerFrequency < deltaT) {
+				// An LED that's off leaves no trail; one set to black leaves black dots
+				if (moved && robot.color !== SIM.ledOff && markerFrequency !== 0 && time % markerFrequency < deltaT) {
 					if (trajectoryMarkers === currentMarkers) trajectoryMarkers = currentMarkers.slice();
 					trajectoryMarkers.push({ position: new THREE.Vector3().copy(robot.pos), color: robot.color, id: robotId + time });
 				}

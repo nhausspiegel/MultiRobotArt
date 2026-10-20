@@ -44,6 +44,11 @@ export const goToXyzSpeed = (groupState: SimulatorGroupState, x: number, y: numb
 // (There is actually a cost to switching LEDs: 0.1 s.)
 export const setColor = (groupState: SimulatorGroupState, r = 0, g = 0, b = 0) => hover(groupState, 0.1, new Color(r, g, b));
 
+// Off is black on the drone as well, but unlike setColor(0, 0, 0) it leaves no trail. The simulator tells it apart by
+// this object.
+export const ledOff = new Color(0, 0, 0);
+export const turnLEDOff = (groupState: SimulatorGroupState) => hover(groupState, 0.1, ledOff);
+
 // The robots hold where they are for the duration, changing color at the start if one is given
 export const hover = (groupState: SimulatorGroupState, duration: number, color?: Color): [number, Map<string, Trajectory>] => {
 	const trajectories = new Map<string, Trajectory>();

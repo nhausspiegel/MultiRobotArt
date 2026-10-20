@@ -61,4 +61,17 @@ useRobartState.setState({
 useSimulator.getState().measureShowLength();
 const item = useRobartState.getState().timelineState.groups.g1.items.i1;
 assert.ok(Math.abs(item.duration - 1) < 1e-6, `item ${item.duration} s`);
+
+// A drone whose LED is off leaves no trail; one set to black still leaves black dots
+const trailDots = (javaScript: string) => {
+	useRobartState.setState({
+		blocks: {b1: {id: 'b1', name: 'Trail', xml: '', python: '', javaScript, duration: 1.1}},
+		timelineState: {scale: 1, groups: {g1: {id: 'g1', name: 'G', robots: {r1: robot}, items: {i1: {id: 'i1', groupId: 'g1', blockId: 'b1', isTrajectory: false, startTime: 0, duration: 1.1}}, duration: 120}}},
+	} as never);
+	play(1 / 60, 1);
+	return useSimulator.getState().trajectoryMarkers.length;
+};
+const move = 'simulator.goToXyzDuration(groupState, 1, 0, 1, 1)';
+assert.equal(trailDots(`simulator.turnLEDOff(groupState)\n${move}`), 0);
+assert.ok(trailDots(`simulator.setColor(groupState, 0, 0, 0)\n${move}`) > 0);
 console.log('sim timing ok');
