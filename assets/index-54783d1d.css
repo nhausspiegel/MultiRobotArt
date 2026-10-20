@@ -2363,6 +2363,9 @@ input:checked + .toggle-bg {
   padding-top: 1.25rem;
   padding-bottom: 1.25rem;
 }
+.pb-3 {
+  padding-bottom: 0.75rem;
+}
 .pl-0 {
   padding-left: 0px;
 }

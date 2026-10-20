@@ -147732,7 +147732,7 @@ const Timeline = () => {
       unsubscribe();
     };
   }, []);
-  return /* @__PURE__ */ jsx("div", { className: "flex h-full w-full flex-col gap-2 rounded bg-blue-100", children: /* @__PURE__ */ jsxs("div", { className: "overflow-y-auto pt-2", children: [
+  return /* @__PURE__ */ jsx("div", { className: "flex h-full w-full flex-col gap-2 rounded bg-blue-100", children: /* @__PURE__ */ jsxs("div", { className: "overflow-y-auto pb-3 pt-2", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex flex-shrink-0 gap-2", children: [
       /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2", children: [
         /* @__PURE__ */ jsx("div", { className: "flex w-52 gap-1", style: { height: rulerHeight }, children: /* @__PURE__ */ jsx(TimelineSimulationButtons, {}) }),
