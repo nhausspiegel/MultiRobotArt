@@ -82061,10 +82061,11 @@ const useRobartState = create$2()(
               state.timelineState.groups[toGroupId].items[itemId] = item;
             });
           },
-          toggleGroupCollapsed: (groupId) => {
+          setAllGroupsCollapsed: (collapsed) => {
             set((state) => {
-              const group = state.timelineState.groups[groupId];
-              group.collapsed = !group.collapsed;
+              Object.values(state.timelineState.groups).forEach((group) => {
+                group.collapsed = collapsed;
+              });
             });
           },
           setBoundingBoxSize: (size) => {
@@ -82221,6 +82222,8 @@ const useRobartState = create$2()(
           },
           addGroup: (groupName) => {
             const group = newGroup(groupName, get().timelineState.groups);
+            if (Object.values(get().timelineState.groups).every((other) => other.collapsed))
+              group.collapsed = true;
             set((state) => {
               state.timelineState.groups[group.id] = group;
             });
@@ -91088,6 +91091,11 @@ var faTrashCan = {
   iconName: "trash-can",
   icon: [448, 512, [61460, "trash-alt"], "f2ed", "M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z"]
 };
+var faAnglesDown = {
+  prefix: "fas",
+  iconName: "angles-down",
+  icon: [384, 512, ["angle-double-down"], "f103", "M214.6 470.6c-12.5 12.5-32.8 12.5-45.3 0l-160-160c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 402.7 329.4 265.4c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3l-160 160zm160-352l-160 160c-12.5 12.5-32.8 12.5-45.3 0l-160-160c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 210.7 329.4 73.4c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3z"]
+};
 var faPause = {
   prefix: "fas",
   iconName: "pause",
@@ -91109,6 +91117,11 @@ var faTrash = {
   iconName: "trash",
   icon: [448, 512, [], "f1f8", "M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"]
 };
+var faAnglesUp = {
+  prefix: "fas",
+  iconName: "angles-up",
+  icon: [384, 512, ["angle-double-up"], "f102", "M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 109.3 329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160zm160 352l-160-160c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 329.4 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3z"]
+};
 var faGear = {
   prefix: "fas",
   iconName: "gear",
@@ -91129,11 +91142,6 @@ var faPlay = {
   iconName: "play",
   icon: [384, 512, [9654], "f04b", "M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"]
 };
-var faChevronDown = {
-  prefix: "fas",
-  iconName: "chevron-down",
-  icon: [448, 512, [], "f078", "M201.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 338.7 54.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"]
-};
 var faCopy = {
   prefix: "fas",
   iconName: "copy",
@@ -91143,11 +91151,6 @@ var faPlus = {
   prefix: "fas",
   iconName: "plus",
   icon: [448, 512, [10133, 61543, "add"], "2b", "M240 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H176V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H384c17.7 0 32-14.3 32-32s-14.3-32-32-32H240V80z"]
-};
-var faChevronRight = {
-  prefix: "fas",
-  iconName: "chevron-right",
-  icon: [320, 512, [9002], "f054", "M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"]
 };
 var faCirclePlus = {
   prefix: "fas",
@@ -147457,29 +147460,14 @@ const TimelineGroupLabel = ({ group }) => {
   const removeGroup = useRobartState((state) => state.removeGroup);
   const setRobotGroup = useRobartState((state) => state.setRobotGroup);
   const createRobot = useRobartState((state) => state.createRobot);
-  const toggleCollapsed = useRobartState((state) => state.toggleGroupCollapsed);
   const [confirmRemoveOpen, setConfirmRemoveOpen] = reactExports.useState(false);
-  const collapseButton = /* @__PURE__ */ jsx(
-    "button",
-    {
-      "aria-label": group.collapsed ? `Expand ${group.name}` : `Collapse ${group.name}`,
-      className: "w-4 shrink-0 text-xs text-gray-600 hover:text-black",
-      onClick: () => {
-        toggleCollapsed(group.id);
-      },
-      children: /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: group.collapsed ? faChevronRight : faChevronDown })
-    }
-  );
   if (group.id === allDronesGroupId) {
-    return /* @__PURE__ */ jsxs("div", { className: clsx("flex w-52 items-center gap-1 rounded bg-green-400 px-2", group.collapsed ? "h-7" : "h-16"), children: [
-      collapseButton,
-      /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name })
-    ] });
+    return /* @__PURE__ */ jsx("div", { className: clsx("flex w-52 items-center gap-1 rounded bg-green-400 px-2", group.collapsed ? "h-7" : "h-16"), children: /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name }) });
   }
   const color = group.color ?? noGroupColor;
   const robotIds = Object.keys(group.robots);
   if (group.collapsed) {
-    return /* @__PURE__ */ jsxs(
+    return /* @__PURE__ */ jsx(
       "div",
       {
         className: "flex h-7 w-52 items-center gap-1 rounded bg-white px-2",
@@ -147487,10 +147475,7 @@ const TimelineGroupLabel = ({ group }) => {
         ...acceptRobotDrop((robotId) => {
           setRobotGroup(robotId, group.id);
         }),
-        children: [
-          collapseButton,
-          /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name })
-        ]
+        children: /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name })
       }
     );
   }
@@ -147504,7 +147489,6 @@ const TimelineGroupLabel = ({ group }) => {
       }),
       children: [
         /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1", children: [
-          collapseButton,
           /* @__PURE__ */ jsx("div", { className: "min-w-0 flex-1 truncate", children: /* @__PURE__ */ jsx(
             RenamableText,
             {
@@ -147610,6 +147594,8 @@ const Timeline = () => {
   const timelineState = useRobartState((state) => state.timelineState);
   const groups = Object.values(timelineState.groups);
   const isEmpty = useRobartState((state) => lastItemEnd(state) === 0);
+  const allCollapsed = useRobartState((state) => Object.values(state.timelineState.groups).every((group) => group.collapsed));
+  const setAllGroupsCollapsed = useRobartState((state) => state.setAllGroupsCollapsed);
   const setTimelineScale = useRobartState((state) => state.setTimelineScale);
   const scrollerRef = reactExports.useRef(null);
   const zoomAnchor = reactExports.useRef();
@@ -147693,7 +147679,21 @@ const Timeline = () => {
       /* @__PURE__ */ jsxs("div", { className: "ml-2 flex h-full flex-col gap-2", children: [
         /* @__PURE__ */ jsx("div", { className: "flex w-52 gap-1", style: { height: rulerHeight }, children: /* @__PURE__ */ jsx(TimelineSimulationButtons, {}) }),
         groups.map((group) => /* @__PURE__ */ jsx(TimelineGroupLabel, { group }, group.id)),
-        /* @__PURE__ */ jsx("button", { className: "h-8 w-52 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200", onClick: addNewGroup, children: "+ New group" })
+        /* @__PURE__ */ jsxs("div", { className: "flex w-52 items-center", children: [
+          /* @__PURE__ */ jsx("button", { className: "h-8 flex-1 rounded px-2 text-left font-bold text-blue-900 hover:bg-blue-200", onClick: addNewGroup, children: "+ New group" }),
+          /* @__PURE__ */ jsx(
+            "button",
+            {
+              "aria-label": allCollapsed ? "Expand all groups" : "Collapse all groups",
+              title: allCollapsed ? "Expand all groups" : "Collapse all groups",
+              className: "h-8 w-8 rounded text-blue-900 hover:bg-blue-200",
+              onClick: () => {
+                setAllGroupsCollapsed(!allCollapsed);
+              },
+              children: /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: allCollapsed ? faAnglesDown : faAnglesUp })
+            }
+          )
+        ] })
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "relative w-full min-w-0 self-start", children: [
         /* @__PURE__ */ jsxs("div", { ref: scrollerRef, onScroll: updateLabelRange, className: "relative flex h-full w-full touch-pan-x touch-pan-y flex-col gap-2 overflow-x-auto", style: { paddingTop: lanesTop }, children: [
