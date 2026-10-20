@@ -72,6 +72,8 @@ export type SimulatorState = {
    */
 	timedWarnings: TimedWarning[];
 	showPaths: boolean;
+	// The dots left during playback in the LED's color (trajectoryMarkers)
+	showTrails: boolean;
 	// Outline of the work area (Settings) in the 3D view
 	showWorkArea: boolean;
 	trajectoryQueue: Queue<string>;
@@ -95,6 +97,7 @@ const defaultSimulatorState: SimulatorState = {
 	plannedPaths: {},
 	timedWarnings: [],
 	showPaths: true,
+	showTrails: true,
 	showWorkArea: false,
 	trajectoryQueue: new Queue<string>(),
 	trajectoryMarkers: [],
@@ -153,6 +156,7 @@ export type SimulatorActions = {
 	setTimeDilation: (timeDilation: number) => void;
 	toggleCoordinates: () => void;
 	togglePaths: () => void;
+	toggleTrails: () => void;
 	toggleWorkArea: () => void;
 	/**
    * Can only be used when simulator is STOPPED mode.
@@ -399,6 +403,9 @@ export const useSimulator = create<SimulatorState & SimulatorActions>()(
 		},
 		togglePaths: () => {
 			set({ showPaths: !get().showPaths });
+		},
+		toggleTrails: () => {
+			set({ showTrails: !get().showTrails });
 		},
 		toggleWorkArea: () => {
 			set({ showWorkArea: !get().showWorkArea });

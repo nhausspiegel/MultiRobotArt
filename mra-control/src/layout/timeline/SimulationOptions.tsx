@@ -35,6 +35,8 @@ export const SimulationSettings = () => {
 	const setTimeDilation = useSimulator((state) => state.setTimeDilation);
 	const showPaths = useSimulator((state) => state.showPaths);
 	const togglePaths = useSimulator((state) => state.togglePaths);
+	const showTrails = useSimulator((state) => state.showTrails);
+	const toggleTrails = useSimulator((state) => state.toggleTrails);
 	const showCoordinates = useSimulator((state) => state.showCoordinates);
 	const toggleCoordinates = useSimulator((state) => state.toggleCoordinates);
 	const showWorkArea = useSimulator((state) => state.showWorkArea);
@@ -78,6 +80,10 @@ export const SimulationSettings = () => {
 					<label className="flex items-center gap-2 py-0.5">
 						<input type="checkbox" checked={showPaths} onChange={togglePaths} />
 						Paths
+					</label>
+					<label className="flex items-center gap-2 py-0.5">
+						<input type="checkbox" checked={showTrails} onChange={toggleTrails} />
+						LED trails
 					</label>
 					<label className="flex items-center gap-2 py-0.5">
 						<input type="checkbox" checked={showWorkArea} onChange={toggleWorkArea} />

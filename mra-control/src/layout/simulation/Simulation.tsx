@@ -147,7 +147,7 @@ export const Simulation = () => {
 						opacity={0.6}
 					/>
 				))}
-			{Object.values(trajectoryMarkers).map((trajectoryMarker) => (
+			{simulatorState.showTrails && trajectoryMarkers.map((trajectoryMarker) => (
 				<group key={trajectoryMarker.id} position={trajectoryMarker.position}>
 					<Sphere args={[0.03]}>
 						<meshBasicMaterial color={[trajectoryMarker.color.r / 255, trajectoryMarker.color.g / 255, trajectoryMarker.color.b / 255]} />
