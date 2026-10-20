@@ -81497,6 +81497,94 @@ const workAreaWarning = (time, name2, position) => ({
   full: `robot ${name2} has violated a workspace constraint at time ${time.toFixed(2)}. Its position was ${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}
 `
 });
+const allDronesGroupId = "groupAllCFs";
+const robotGroup = (groups, robotId) => Object.values(groups).find((group) => group.id !== allDronesGroupId && robotId in group.robots);
+const noGroupColor = "#9ca3af";
+const isGroupHidden = (groups, groupId) => {
+  var _a3;
+  if (groupId !== allDronesGroupId)
+    return Boolean((_a3 = groups[groupId]) == null ? void 0 : _a3.hidden);
+  const others = Object.values(groups).filter((group) => group.id !== allDronesGroupId);
+  return others.length > 0 && others.every((group) => group.hidden);
+};
+const withoutHiddenGroups = (state) => {
+  const hidden = new Set(Object.keys(state.robots).filter((robotId) => {
+    var _a3;
+    return (_a3 = robotGroup(state.timelineState.groups, robotId)) == null ? void 0 : _a3.hidden;
+  }));
+  if (hidden.size === 0)
+    return state;
+  const shown = (byRobot) => Object.fromEntries(Object.entries(byRobot).filter(([robotId]) => !hidden.has(robotId)));
+  const groups = Object.fromEntries(Object.entries(state.timelineState.groups).map(([id2, group]) => [id2, { ...group, robots: shown(group.robots) }]));
+  return { ...state, robots: shown(state.robots), timelineState: { ...state.timelineState, groups } };
+};
+const groupColors = ["#ef4444", "#3b82f6", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"];
+const nextGroupColor = (groups) => {
+  const usedColors = Object.values(groups).map((group) => group.color);
+  return groupColors.find((color) => !usedColors.includes(color)) ?? groupColors[Object.keys(groups).length % groupColors.length];
+};
+const nextGroupName = (groups) => {
+  const highest = Math.max(0, ...Object.values(groups).map((group) => {
+    var _a3;
+    return Number(((_a3 = /^group (\d+)$/i.exec(group.name)) == null ? void 0 : _a3[1]) ?? 0);
+  }));
+  return `Group ${highest + 1}`;
+};
+const newGroup = (name2, groups) => {
+  let baseId = name2.replace(/\W/g, "");
+  if (!/^[A-Za-z_]/.test(baseId))
+    baseId = "group" + baseId;
+  let id2 = baseId;
+  for (let i = 2; id2 in groups; i++)
+    id2 = `${baseId}_${i}`;
+  return { id: id2, name: name2, items: {}, robots: {}, duration: 120, color: nextGroupColor(groups) };
+};
+const migrateGroups = (state) => {
+  const notices = [];
+  const allDrones = state.timelineState.groups[allDronesGroupId] ?? { id: allDronesGroupId, name: "All drones", items: {}, robots: {}, duration: 120 };
+  const groups = {
+    [allDronesGroupId]: { ...allDrones, name: allDrones.name === "All CFs" ? "All drones" : allDrones.name, robots: { ...state.robots } }
+  };
+  const keptIn = /* @__PURE__ */ new Map();
+  Object.values(state.timelineState.groups).forEach((group) => {
+    if (group.id === allDronesGroupId)
+      return;
+    const robots = {};
+    Object.keys(group.robots).forEach((robotId) => {
+      const robot = state.robots[robotId];
+      if (robot === void 0)
+        return;
+      if (keptIn.has(robotId)) {
+        notices.push(`${robot.name} was in several groups: kept in ${keptIn.get(robotId)}, removed from ${group.name}.
+`);
+        return;
+      }
+      keptIn.set(robotId, group.name);
+      robots[robotId] = robot;
+    });
+    if (Object.keys(group.robots).length > 0 && Object.keys(robots).length === 0 && Object.keys(group.items).length === 0)
+      return;
+    groups[group.id] = { ...group, robots };
+  });
+  Object.values(groups).forEach((group) => {
+    if (group.id !== allDronesGroupId && group.color === void 0)
+      group.color = nextGroupColor(groups);
+  });
+  const ungrouped = Object.values(state.robots).filter((robot) => !keptIn.has(robot.id));
+  if (ungrouped.length > 0) {
+    let target2 = Object.values(groups).find((group) => group.id !== allDronesGroupId);
+    if (target2 === void 0) {
+      target2 = newGroup(nextGroupName(groups), groups);
+      groups[target2.id] = target2;
+    }
+    ungrouped.forEach((robot) => {
+      target2.robots[robot.id] = robot;
+      notices.push(`${robot.name} had no group: added to ${target2.name}.
+`);
+    });
+  }
+  return { ...state, timelineState: { ...state.timelineState, groups }, notices };
+};
 const fps = 60;
 const workAreaBox = ({ workAreaOn, workAreaMin, workAreaMax }) => workAreaOn ? new Box3(new Vector3(...workAreaMin), new Vector3(...workAreaMax)).expandByScalar(0.01) : void 0;
 const runCommand = (line, robotId) => new Function("simulator", "groupState", `return (${line})`)(SIM, { robotIDs: [robotId] });
@@ -81810,9 +81898,8 @@ const useSimulator = create$2()(
       return trajectory;
     },
     executeSimulation: (startTime) => {
-      const timeline = useRobartState.getState().timelineState;
+      const { timelineState: timeline, robots: robartRobots } = withoutHiddenGroups(useRobartState.getState());
       const blocks = useRobartState.getState().blocks;
-      const robartRobots = useRobartState.getState().robots;
       if (startTime === 0) {
         set({ time: 0, trajectoryMarkers: [] });
         get().setRobots(robartRobots);
@@ -81858,76 +81945,6 @@ useSimulator.subscribe((state) => {
   };
   frameRequest = requestAnimationFrame(loop);
 });
-const allDronesGroupId = "groupAllCFs";
-const robotGroup = (groups, robotId) => Object.values(groups).find((group) => group.id !== allDronesGroupId && robotId in group.robots);
-const noGroupColor = "#9ca3af";
-const groupColors = ["#ef4444", "#3b82f6", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"];
-const nextGroupColor = (groups) => {
-  const usedColors = Object.values(groups).map((group) => group.color);
-  return groupColors.find((color) => !usedColors.includes(color)) ?? groupColors[Object.keys(groups).length % groupColors.length];
-};
-const nextGroupName = (groups) => {
-  const highest = Math.max(0, ...Object.values(groups).map((group) => {
-    var _a3;
-    return Number(((_a3 = /^group (\d+)$/i.exec(group.name)) == null ? void 0 : _a3[1]) ?? 0);
-  }));
-  return `Group ${highest + 1}`;
-};
-const newGroup = (name2, groups) => {
-  let baseId = name2.replace(/\W/g, "");
-  if (!/^[A-Za-z_]/.test(baseId))
-    baseId = "group" + baseId;
-  let id2 = baseId;
-  for (let i = 2; id2 in groups; i++)
-    id2 = `${baseId}_${i}`;
-  return { id: id2, name: name2, items: {}, robots: {}, duration: 120, color: nextGroupColor(groups) };
-};
-const migrateGroups = (state) => {
-  const notices = [];
-  const allDrones = state.timelineState.groups[allDronesGroupId] ?? { id: allDronesGroupId, name: "All drones", items: {}, robots: {}, duration: 120 };
-  const groups = {
-    [allDronesGroupId]: { ...allDrones, name: allDrones.name === "All CFs" ? "All drones" : allDrones.name, robots: { ...state.robots } }
-  };
-  const keptIn = /* @__PURE__ */ new Map();
-  Object.values(state.timelineState.groups).forEach((group) => {
-    if (group.id === allDronesGroupId)
-      return;
-    const robots = {};
-    Object.keys(group.robots).forEach((robotId) => {
-      const robot = state.robots[robotId];
-      if (robot === void 0)
-        return;
-      if (keptIn.has(robotId)) {
-        notices.push(`${robot.name} was in several groups: kept in ${keptIn.get(robotId)}, removed from ${group.name}.
-`);
-        return;
-      }
-      keptIn.set(robotId, group.name);
-      robots[robotId] = robot;
-    });
-    if (Object.keys(group.robots).length > 0 && Object.keys(robots).length === 0 && Object.keys(group.items).length === 0)
-      return;
-    groups[group.id] = { ...group, robots };
-  });
-  Object.values(groups).forEach((group) => {
-    if (group.id !== allDronesGroupId && group.color === void 0)
-      group.color = nextGroupColor(groups);
-  });
-  const ungrouped = Object.values(state.robots).filter((robot) => !keptIn.has(robot.id));
-  if (ungrouped.length > 0) {
-    let target2 = Object.values(groups).find((group) => group.id !== allDronesGroupId);
-    if (target2 === void 0) {
-      target2 = newGroup(nextGroupName(groups), groups);
-      groups[target2.id] = target2;
-    }
-    ungrouped.forEach((robot) => {
-      target2.robots[robot.id] = robot;
-      notices.push(`${robot.name} had no group: added to ${target2.name}.
-`);
-    });
-  }
-  return { ...state, timelineState: { ...state.timelineState, groups }, notices };
-};
 const blockColors = ["#fbbf24", "#34d399", "#fb7185", "#a78bfa", "#fb923c", "#a3e635", "#f472b6", "#2dd4bf"];
 const blockColor = (block) => block.color ?? blockColors[[...block.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % blockColors.length];
 const nextBlockColor = (blocks) => {
@@ -82018,7 +82035,7 @@ const useRobartState = create$2()(
               boundingBoxSize: get().boundingBoxSize,
               limits: get().limits
             };
-            exportROS(state);
+            exportROS(withoutHiddenGroups(state));
           },
           resetProject: () => {
             set(defaultRobartState);
@@ -82059,6 +82076,13 @@ const useRobartState = create$2()(
               const item = { ...state.timelineState.groups[fromGroupId].items[itemId], groupId: toGroupId, startTime };
               delete state.timelineState.groups[fromGroupId].items[itemId];
               state.timelineState.groups[toGroupId].items[itemId] = item;
+            });
+          },
+          setGroupsHidden: (groupIds, hidden) => {
+            set((state) => {
+              groupIds.forEach((groupId) => {
+                state.timelineState.groups[groupId].hidden = hidden;
+              });
             });
           },
           setAllGroupsCollapsed: (collapsed) => {
@@ -82261,7 +82285,7 @@ useRobartState.subscribe(
   (state) => state.robots,
   (robots) => {
     if (useSimulator.getState().status === "STOPPED")
-      useSimulator.getState().setRobots(robots);
+      useSimulator.getState().setRobots(withoutHiddenGroups({ robots, timelineState: useRobartState.getState().timelineState }).robots);
   }
 );
 /**
@@ -91096,6 +91120,11 @@ var faAnglesDown = {
   iconName: "angles-down",
   icon: [384, 512, ["angle-double-down"], "f103", "M214.6 470.6c-12.5 12.5-32.8 12.5-45.3 0l-160-160c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 402.7 329.4 265.4c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3l-160 160zm160-352l-160 160c-12.5 12.5-32.8 12.5-45.3 0l-160-160c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 210.7 329.4 73.4c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3z"]
 };
+var faEyeSlash = {
+  prefix: "fas",
+  iconName: "eye-slash",
+  icon: [640, 512, [], "f070", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z"]
+};
 var faPause = {
   prefix: "fas",
   iconName: "pause",
@@ -91111,6 +91140,11 @@ var faSquare = {
   prefix: "fas",
   iconName: "square",
   icon: [448, 512, [9632, 9723, 9724, 61590], "f0c8", "M0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96z"]
+};
+var faEye = {
+  prefix: "fas",
+  iconName: "eye",
+  icon: [576, 512, [128065], "f06e", "M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"]
 };
 var faTrash = {
   prefix: "fas",
@@ -146303,7 +146337,6 @@ const boxEdges = (min, max) => {
 const Simulation = () => {
   const marker = reactExports.useRef(null);
   const robots = useSimulator((state) => state.robots);
-  const robartRobots = useRobartState((state) => state.robots);
   const setRobots = useSimulator((state) => state.setRobots);
   const robartState = useRobartState();
   const simulatorState = useSimulator();
@@ -146320,8 +146353,9 @@ const Simulation = () => {
       });
     }
   } else {
-    if (Object.keys(robartRobots).length !== 0) {
-      setRobots(robartRobots);
+    const shownRobots = withoutHiddenGroups(robartState).robots;
+    if (Object.keys(shownRobots).length !== 0) {
+      setRobots(shownRobots);
     }
   }
   const { size, viewport, camera, gl: gl2 } = useThree();
@@ -147073,6 +147107,7 @@ const TimelineGroupBody = ({ group }) => {
   const [hoverX, setHoverX] = reactExports.useState();
   const laneBodyRef = reactExports.useRef(null);
   const hasDrones = Object.keys(group.robots).length > 0;
+  const hidden = isGroupHidden(groups, group.id);
   const isEmptyBlock = (blockId) => {
     var _a3;
     const code = (_a3 = blocks[blockId ?? ""]) == null ? void 0 : _a3.javaScript;
@@ -147124,7 +147159,7 @@ const TimelineGroupBody = ({ group }) => {
   return /* @__PURE__ */ jsxs(
     "div",
     {
-      className: clsx("relative rounded", group.collapsed ? "h-7" : "h-16", hasDrones ? "bg-blue-300" : "bg-gray-300"),
+      className: clsx("relative rounded", group.collapsed ? "h-7" : "h-16", hasDrones ? "bg-blue-300" : "bg-gray-300", hidden && "opacity-50"),
       ref: laneBodyRef,
       "data-lane-id": group.id,
       onDragOver: handleDragOver,
@@ -147460,35 +147495,58 @@ const TimelineGroupLabel = ({ group }) => {
   const removeGroup = useRobartState((state) => state.removeGroup);
   const setRobotGroup = useRobartState((state) => state.setRobotGroup);
   const createRobot = useRobartState((state) => state.createRobot);
+  const setGroupsHidden = useRobartState((state) => state.setGroupsHidden);
+  const hidden = useRobartState((state) => isGroupHidden(state.timelineState.groups, group.id));
   const [confirmRemoveOpen, setConfirmRemoveOpen] = reactExports.useState(false);
-  if (group.id === allDronesGroupId) {
-    return /* @__PURE__ */ jsx("div", { className: clsx("flex w-52 items-center gap-1 rounded bg-green-400 px-2", group.collapsed ? "h-7" : "h-16"), children: /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name }) });
+  const isAllDrones = group.id === allDronesGroupId;
+  const eyeButton = /* @__PURE__ */ jsx(
+    "button",
+    {
+      "aria-label": isAllDrones ? hidden ? "Show all groups" : "Hide all groups" : hidden ? "Show in simulation" : "Hide from simulation",
+      title: isAllDrones ? hidden ? "Show all groups" : "Hide all groups" : hidden ? "Show in simulation" : "Hide from simulation",
+      className: "w-4 shrink-0 text-xs text-gray-600 hover:text-black",
+      onClick: () => {
+        const groupIds = isAllDrones ? Object.keys(useRobartState.getState().timelineState.groups).filter((id2) => id2 !== allDronesGroupId) : [group.id];
+        setGroupsHidden(groupIds, !hidden);
+      },
+      children: /* @__PURE__ */ jsx(FontAwesomeIcon, { icon: hidden ? faEyeSlash : faEye })
+    }
+  );
+  if (isAllDrones) {
+    return /* @__PURE__ */ jsxs("div", { className: clsx("flex w-52 items-center gap-1 rounded bg-green-400 px-2", group.collapsed ? "h-7" : "h-16", hidden && "opacity-50"), children: [
+      eyeButton,
+      /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name })
+    ] });
   }
   const color = group.color ?? noGroupColor;
   const robotIds = Object.keys(group.robots);
   if (group.collapsed) {
-    return /* @__PURE__ */ jsx(
+    return /* @__PURE__ */ jsxs(
       "div",
       {
-        className: "flex h-7 w-52 items-center gap-1 rounded bg-white px-2",
+        className: clsx("flex h-7 w-52 items-center gap-1 rounded bg-white px-2", hidden && "opacity-50"),
         style: { borderLeft: `8px solid ${color}` },
         ...acceptRobotDrop((robotId) => {
           setRobotGroup(robotId, group.id);
         }),
-        children: /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name })
+        children: [
+          eyeButton,
+          /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name })
+        ]
       }
     );
   }
   return /* @__PURE__ */ jsxs(
     "div",
     {
-      className: "flex h-16 w-52 flex-col justify-center gap-1 rounded bg-white px-2",
+      className: clsx("flex h-16 w-52 flex-col justify-center gap-1 rounded bg-white px-2", hidden && "opacity-50"),
       style: { borderLeft: `8px solid ${color}` },
       ...acceptRobotDrop((robotId) => {
         setRobotGroup(robotId, group.id);
       }),
       children: [
         /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1", children: [
+          eyeButton,
           /* @__PURE__ */ jsx("div", { className: "min-w-0 flex-1 truncate", children: /* @__PURE__ */ jsx(
             RenamableText,
             {
