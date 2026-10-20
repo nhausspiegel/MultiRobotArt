@@ -147509,10 +147509,13 @@ const TimelineGroupLabel = ({ group }) => {
     }
   );
   if (isAllDrones) {
-    return /* @__PURE__ */ jsxs("div", { className: clsx("flex w-52 items-center gap-1 rounded bg-green-400 px-2", collapsed ? "h-7" : "h-16", hidden && "opacity-50"), children: [
-      eyeButton,
-      /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name })
-    ] });
+    return (
+      // The same 8px left edge as the other groups' color stripe, in its own green, so the eyes and names line up
+      /* @__PURE__ */ jsxs("div", { className: clsx("flex w-52 items-center gap-1 rounded border-l-8 border-transparent bg-green-400 px-2", collapsed ? "h-7" : "h-16", hidden && "opacity-50"), children: [
+        eyeButton,
+        /* @__PURE__ */ jsx("div", { className: "truncate font-bold", children: group.name })
+      ] })
+    );
   }
   const color = group.color ?? noGroupColor;
   const robotIds = Object.keys(group.robots);

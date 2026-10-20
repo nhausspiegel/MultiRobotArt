@@ -1754,6 +1754,9 @@ input:checked + .toggle-bg {
 .border-l-0 {
   border-left-width: 0px;
 }
+.border-l-8 {
+  border-left-width: 8px;
+}
 .border-r-0 {
   border-right-width: 0px;
 }
